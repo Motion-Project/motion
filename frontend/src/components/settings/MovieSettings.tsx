@@ -13,9 +13,10 @@ export interface MovieSettingsProps {
   config: Record<string, { value: string | number | boolean }>;
   onChange: (param: string, value: string | number | boolean) => void;
   getError?: (param: string) => string | undefined;
+  showPassthrough?: boolean;
 }
 
-export function MovieSettings({ config, onChange, getError }: MovieSettingsProps) {
+export function MovieSettings({ config, onChange, getError, showPassthrough = true }: MovieSettingsProps) {
   const { data: deviceInfo } = useDeviceInfo();
 
   const getValue = (param: string, defaultValue: string | number | boolean = '') => {
@@ -221,12 +222,15 @@ export function MovieSettings({ config, onChange, getError }: MovieSettingsProps
           error={getError?.('movie_max_time')}
         />
 
-        <FormToggle
-          label="Passthrough Mode"
-          value={getValue('movie_passthrough', false) as boolean}
-          onChange={(val) => onChange('movie_passthrough', val)}
-          helpText="Copy codec without re-encoding. Reduces CPU but may cause compatibility issues."
-        />
+        {/* Passthrough mode - only available for NETCAM cameras */}
+        {showPassthrough && (
+          <FormToggle
+            label="Passthrough Mode"
+            value={getValue('movie_passthrough', false) as boolean}
+            onChange={(val) => onChange('movie_passthrough', val)}
+            helpText="Copy codec without re-encoding (NETCAM only). Reduces CPU but may cause compatibility issues."
+          />
+        )}
 
         <div className="border-t border-surface-elevated pt-4">
           <h4 className="font-medium mb-2 text-sm">Format Code Reference</h4>

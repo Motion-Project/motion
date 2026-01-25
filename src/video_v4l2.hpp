@@ -62,6 +62,7 @@ class cls_v4l2cam {
         ~cls_v4l2cam();
         int next(ctx_image_data *img_data);
         void noimage();
+        vec_v4l2ctrl get_device_ctrls() const { return device_ctrls; }
     private:
         cls_camera *cam;
         cls_convert *convert;

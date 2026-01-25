@@ -132,6 +132,25 @@ export interface TemperatureResponse {
   fahrenheit: number;
 }
 
+// Camera type discriminator
+export type CameraType = 'libcam' | 'v4l2' | 'netcam' | 'unknown';
+
+// V4L2 control structure (matches backend ctx_v4l2ctrl_item)
+export interface V4L2Control {
+  name: string;
+  id: string;
+  type: 'integer' | 'boolean' | 'menu';
+  min: number;
+  max: number;
+  default: number;
+  current: number;
+  step?: number;
+  menuItems?: Array<{ value: number; label: string }>;
+}
+
+// NETCAM connection status
+export type NetcamConnectionStatus = 'connected' | 'reading' | 'not_connected' | 'reconnecting' | 'unknown';
+
 // Per-camera status from /0/api/system/status
 export interface CameraStatus {
   name: string;
@@ -146,7 +165,13 @@ export interface CameraStatus {
   detecting: boolean;
   pause: boolean;
   user_pause: string;
-  supportedControls?: CameraCapabilities;
+  // Type-specific fields
+  camera_type: CameraType;
+  camera_device: string;
+  supportedControls?: CameraCapabilities;  // libcam only
+  v4l2_controls?: V4L2Control[];           // v4l2 only
+  netcam_status?: NetcamConnectionStatus;  // netcam only
+  has_high_stream?: boolean;               // netcam only
 }
 
 // Status section with dynamic camera keys

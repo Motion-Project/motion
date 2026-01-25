@@ -10,7 +10,10 @@ import { useBatchUpdateConfig, useSystemStatus } from '@/api/queries'
 import { validateConfigParam } from '@/lib/validation'
 import { SystemSettings } from '@/components/settings/SystemSettings'
 import { DeviceSettings } from '@/components/settings/DeviceSettings'
+import { CameraSourceSettings } from '@/components/settings/CameraSourceSettings'
 import { LibcameraSettings } from '@/components/settings/LibcameraSettings'
+import { V4L2Settings } from '@/components/settings/V4L2Settings'
+import { NetcamSettings } from '@/components/settings/NetcamSettings'
 import { OverlaySettings } from '@/components/settings/OverlaySettings'
 import { StreamSettings } from '@/components/settings/StreamSettings'
 import { MotionSettings } from '@/components/settings/MotionSettings'
@@ -26,6 +29,7 @@ import { UploadSettings } from '@/components/settings/UploadSettings'
 import { ConfigurationPresets } from '@/components/ConfigurationPresets'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useCameraCapabilities } from '@/hooks/useCameraCapabilities'
+import { useCameraInfo } from '@/hooks/useCameraInfo'
 
 interface ConfigParam {
   value: string | number | boolean
@@ -83,6 +87,9 @@ export function Settings() {
 
   // Fetch camera capabilities for conditional UI rendering (e.g., autofocus controls)
   const { data: capabilities } = useCameraCapabilities(Number(selectedCamera))
+
+  // Fetch camera info for multi-camera type support
+  const cameraInfo = useCameraInfo(Number(selectedCamera))
 
   // Clear changes and errors when camera selection changes
   // This prevents race conditions where settings from one camera could be
@@ -418,27 +425,56 @@ export function Settings() {
             <ConfigurationPresets cameraId={Number(selectedCamera)} readOnly={false} />
           </div>
 
-          {/* 2. Device Settings */}
+          {/* 2. Camera Source */}
+          <CameraSourceSettings
+            cameraId={Number(selectedCamera)}
+            config={activeConfig}
+            onChange={handleChange}
+          />
+
+          {/* 3. Type-Specific Camera Controls */}
+          {cameraInfo.features.hasLibcamControls && (
+            <LibcameraSettings
+              config={activeConfig}
+              onChange={handleChange}
+              getError={getError}
+              capabilities={capabilities}
+              originalConfig={originalConfig}
+            />
+          )}
+
+          {cameraInfo.features.hasV4L2Controls && (
+            <V4L2Settings
+              config={activeConfig}
+              onChange={handleChange}
+              controls={cameraInfo.v4l2Controls}
+              getError={getError}
+            />
+          )}
+
+          {cameraInfo.features.hasNetcamConfig && (
+            <NetcamSettings
+              config={activeConfig}
+              onChange={handleChange}
+              connectionStatus={cameraInfo.netcamStatus}
+              hasDualStream={cameraInfo.features.hasDualStream}
+              getError={getError}
+            />
+          )}
+
+          {/* 4. Device Settings */}
           <DeviceSettings
             config={activeConfig}
             onChange={handleChange}
             getError={getError}
           />
 
-          {/* 3. libcamera Controls */}
-          <LibcameraSettings
-            config={activeConfig}
-            onChange={handleChange}
-            getError={getError}
-            capabilities={capabilities}
-            originalConfig={originalConfig}
-          />
-
-          {/* 4. Movie Settings */}
+          {/* 5. Movie Settings */}
           <MovieSettings
             config={activeConfig}
             onChange={handleChange}
             getError={getError}
+            showPassthrough={cameraInfo.features.supportsPassthrough}
           />
 
           {/* 5. Video Streaming */}

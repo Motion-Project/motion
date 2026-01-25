@@ -677,6 +677,80 @@ void cls_webu_json::status_vars(int indx_cam)
     }
     #endif
 
+    /* Add camera_type field */
+    std::string type_str;
+    switch (cam->camera_type) {
+        case CAMERA_TYPE_LIBCAM: type_str = "libcam"; break;
+        case CAMERA_TYPE_V4L2:   type_str = "v4l2"; break;
+        case CAMERA_TYPE_NETCAM: type_str = "netcam"; break;
+        default:                 type_str = "unknown"; break;
+    }
+    webua->resp_page += ",\"camera_type\":\"" + type_str + "\"";
+
+    /* Add camera_device identifier */
+    std::string device_str = "";
+    if (cam->camera_type == CAMERA_TYPE_V4L2) {
+        device_str = cam->cfg->v4l2_device;
+    } else if (cam->camera_type == CAMERA_TYPE_NETCAM) {
+        device_str = cam->cfg->netcam_url;
+    } else if (cam->camera_type == CAMERA_TYPE_LIBCAM) {
+        device_str = cam->cfg->libcam_device;
+    }
+    webua->resp_page += ",\"camera_device\":\"" + escstr(device_str) + "\"";
+
+    /* Add V4L2 controls array (if V4L2 camera) */
+    #ifdef HAVE_V4L2
+    if (cam->camera_type == CAMERA_TYPE_V4L2 && cam->v4l2cam != nullptr) {
+        vec_v4l2ctrl controls = cam->v4l2cam->get_device_ctrls();
+        webua->resp_page += ",\"v4l2_controls\":[";
+        bool first_ctrl = true;
+        for (const auto& ctrl : controls) {
+            if (ctrl.ctrl_menuitem) continue;  // Skip menu items
+            if (!first_ctrl) webua->resp_page += ",";
+            webua->resp_page += "{";
+            webua->resp_page += "\"name\":\"" + escstr(ctrl.ctrl_name) + "\"";
+            webua->resp_page += ",\"id\":\"" + escstr(ctrl.ctrl_iddesc) + "\"";
+            // Map V4L2 control type to string
+            std::string ctrl_type_str;
+            if (ctrl.ctrl_type == V4L2_CTRL_TYPE_BOOLEAN) {
+                ctrl_type_str = "boolean";
+            } else if (ctrl.ctrl_type == V4L2_CTRL_TYPE_MENU) {
+                ctrl_type_str = "menu";
+            } else {
+                ctrl_type_str = "integer";
+            }
+            webua->resp_page += ",\"type\":\"" + ctrl_type_str + "\"";
+            webua->resp_page += ",\"min\":" + std::to_string(ctrl.ctrl_minimum);
+            webua->resp_page += ",\"max\":" + std::to_string(ctrl.ctrl_maximum);
+            webua->resp_page += ",\"default\":" + std::to_string(ctrl.ctrl_default);
+            webua->resp_page += ",\"current\":" + std::to_string(ctrl.ctrl_currval);
+            webua->resp_page += "}";
+            first_ctrl = false;
+        }
+        webua->resp_page += "]";
+    }
+    #endif
+
+    /* Add NETCAM status and high stream indicator (if NETCAM) */
+    if (cam->camera_type == CAMERA_TYPE_NETCAM && cam->netcam != nullptr) {
+        std::string netcam_status_str;
+        switch (cam->netcam->status) {
+            case NETCAM_CONNECTED:      netcam_status_str = "connected"; break;
+            case NETCAM_READINGIMAGE:   netcam_status_str = "reading"; break;
+            case NETCAM_NOTCONNECTED:   netcam_status_str = "not_connected"; break;
+            case NETCAM_RECONNECTING:   netcam_status_str = "reconnecting"; break;
+            default:                    netcam_status_str = "unknown"; break;
+        }
+        webua->resp_page += ",\"netcam_status\":\"" + netcam_status_str + "\"";
+
+        // Check if high resolution stream is configured
+        if (cam->netcam_high != nullptr) {
+            webua->resp_page += ",\"has_high_stream\":true";
+        } else {
+            webua->resp_page += ",\"has_high_stream\":false";
+        }
+    }
+
     webua->resp_page += "}";
 }
 
