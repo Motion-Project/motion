@@ -6,6 +6,7 @@ import { QuickSettings } from '@/components/QuickSettings'
 import { FullscreenButton } from '@/components/FullscreenButton'
 import { SettingsButton } from '@/components/SettingsButton'
 import { SnapshotButton } from '@/components/SnapshotButton'
+import { CameraSwitcher } from '@/components/CameraSwitcher'
 import { useCameras, useCameraStatus } from '@/api/queries'
 import { apiGet } from '@/api/client'
 import { updateSessionCsrf } from '@/api/session'
@@ -77,11 +78,14 @@ export function Dashboard() {
     setSheetOpen(false)
   }
 
-  // Get camera name for sheet title
-  const selectedCamera = cameras?.find((c) => c.id === selectedCameraId)
-  const sheetTitle = selectedCamera
-    ? `Quick Settings - ${selectedCamera.name}`
-    : 'Quick Settings'
+  // Camera switcher for bottom sheet header (only shown with multiple cameras)
+  const cameraSwitcher = cameras && cameras.length > 1 ? (
+    <CameraSwitcher
+      cameras={cameras}
+      selectedId={selectedCameraId}
+      onSelect={setSelectedCameraId}
+    />
+  ) : null
 
   // Build config for selected camera (merge camera-specific with defaults)
   const configForCamera = useMemo(() => {
@@ -196,7 +200,8 @@ export function Dashboard() {
         <BottomSheet
           isOpen={sheetOpen}
           onClose={closeQuickSettings}
-          title={sheetTitle}
+          title="Quick Settings"
+          headerRight={cameraSwitcher}
         >
           {selectedCameraId && (
             <QuickSettings
@@ -273,7 +278,8 @@ export function Dashboard() {
       <BottomSheet
         isOpen={sheetOpen}
         onClose={closeQuickSettings}
-        title={sheetTitle}
+        title="Quick Settings"
+        headerRight={cameraSwitcher}
       >
         {selectedCameraId && (
           <QuickSettings
