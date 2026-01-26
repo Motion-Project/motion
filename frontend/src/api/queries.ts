@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiDelete, apiPatch } from './client';
+import { apiGet, apiDelete, apiPatch, apiPost } from './client';
 import { updateSessionCsrf } from './session';
 import type {
   MotionConfig,
@@ -12,6 +12,10 @@ import type {
   DeleteFolderFilesResponse,
   TemperatureResponse,
   SystemStatus,
+  PlatformInfo,
+  DetectedCamerasResponse,
+  AddCameraRequest,
+  TestNetcamRequest,
 } from './types';
 
 // Query keys for cache management
@@ -25,6 +29,8 @@ export const queryKeys = {
   temperature: ['temperature'] as const,
   systemStatus: ['systemStatus'] as const,
   cameraStatus: ['cameraStatus'] as const,
+  platformInfo: ['platformInfo'] as const,
+  detectedCameras: ['detectedCameras'] as const,
 };
 
 // Fetch full Motion config (includes cameras list)
@@ -252,6 +258,68 @@ export function useDeleteMovie() {
     onSuccess: (_, { camId }) => {
       // Invalidate movies cache to refetch fresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.movies(camId) });
+    },
+  });
+}
+
+
+// Camera Detection - Get platform information
+export function usePlatformInfo() {
+  return useQuery({
+    queryKey: queryKeys.platformInfo,
+    queryFn: () => apiGet<PlatformInfo>("/0/api/cameras/platform"),
+    staleTime: Infinity, // Platform info doesn't change during runtime
+  });
+}
+
+// Camera Detection - Get detected cameras
+export function useDetectedCameras() {
+  return useQuery({
+    queryKey: queryKeys.detectedCameras,
+    queryFn: () => apiGet<DetectedCamerasResponse>("/0/api/cameras/detected"),
+    staleTime: 30000, // Cache for 30 seconds
+  });
+}
+
+// Camera Detection - Add detected camera
+export function useAddCamera() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (camera: AddCameraRequest) => {
+      return apiPost<{ status: string; message: string }>("/0/api/cameras", camera);
+    },
+    onSuccess: () => {
+      // Invalidate config and cameras cache to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: queryKeys.config(0) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cameras });
+      queryClient.invalidateQueries({ queryKey: queryKeys.detectedCameras });
+    },
+  });
+}
+
+// Camera Detection - Delete camera
+export function useDeleteCamera() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ camId }: { camId: number }) => {
+      return apiDelete<{ status: string; message: string }>(`/${camId}/api/cameras`);
+    },
+    onSuccess: () => {
+      // Invalidate config and cameras cache to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: queryKeys.config(0) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cameras });
+      queryClient.invalidateQueries({ queryKey: queryKeys.detectedCameras });
+    },
+  });
+}
+
+// Camera Detection - Test network camera connection
+export function useTestNetcam() {
+  return useMutation({
+    mutationFn: async (request: TestNetcamRequest) => {
+      return apiPost<{ status: string; message: string }>("/0/api/cameras/test", request);
     },
   });
 }

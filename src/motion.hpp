@@ -109,6 +109,7 @@ class cls_algsec;
 class cls_alg;
 class cls_config;
 class cls_config_profile;
+class cls_cam_detect;
 class cls_dbse;
 class cls_draw;
 class cls_log;
@@ -211,6 +212,7 @@ class cls_motapp {
         cls_allcam          *allcam;
         cls_schedule        *schedule;
         cls_thumbnail       *thumbnail;
+        cls_cam_detect      *cam_detect;
 
         pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
         pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/

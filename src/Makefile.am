@@ -29,6 +29,7 @@ bin_PROGRAMS = motion motion-setup
 motion_SOURCES = \
 	alg.hpp            alg.cpp \
 	alg_sec.hpp        alg_sec.cpp \
+	cam_detect.hpp     cam_detect.cpp \
 	conf.hpp           conf.cpp \
 	conf_file.hpp      conf_file.cpp \
 	conf_profile.hpp   conf_profile.cpp \

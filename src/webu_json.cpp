@@ -30,6 +30,7 @@
 #include "camera.hpp"
 #include "conf.hpp"
 #include "conf_profile.hpp"
+#include "cam_detect.hpp"
 #include "logger.hpp"
 #include "webu.hpp"
 #include "webu_ans.hpp"
@@ -3758,6 +3759,220 @@ void cls_webu_json::api_camera_ptz()
         _("PTZ %s executed for camera %d"), action.c_str(), cam->cfg->device_id);
 
     webua->resp_page = "{\"status\":\"ok\",\"action\":\"" + action + "\"}";
+}
+
+/*
+ * Camera detection API: Get platform information
+ * GET /0/api/cameras/platform
+ * Returns platform details (Pi model, capabilities)
+ */
+void cls_webu_json::api_cameras_platform()
+{
+    webua->resp_type = WEBUI_RESP_JSON;
+
+    auto platform_info = app->cam_detect->get_platform_info();
+
+    webua->resp_page = "{";
+    webua->resp_page += "\"is_raspberry_pi\":";
+    webua->resp_page += platform_info.is_raspberry_pi ? "true" : "false";
+    webua->resp_page += ",\"pi_model\":\"" + escstr(platform_info.pi_model) + "\"";
+    webua->resp_page += ",\"has_libcamera\":";
+    webua->resp_page += platform_info.has_libcamera ? "true" : "false";
+    webua->resp_page += ",\"has_v4l2\":";
+    webua->resp_page += platform_info.has_v4l2 ? "true" : "false";
+    webua->resp_page += "}";
+}
+
+/*
+ * Camera detection API: Get detected cameras
+ * GET /0/api/cameras/detected
+ * Returns list of unconfigured cameras
+ */
+void cls_webu_json::api_cameras_detected()
+{
+    webua->resp_type = WEBUI_RESP_JSON;
+
+    auto cameras = app->cam_detect->detect_cameras();
+
+    webua->resp_page = "{\"cameras\":[";
+
+    bool first = true;
+    for (const auto &cam : cameras) {
+        /* Only return unconfigured cameras */
+        if (cam.already_configured) {
+            continue;
+        }
+
+        if (!first) {
+            webua->resp_page += ",";
+        }
+        first = false;
+
+        webua->resp_page += "{";
+        webua->resp_page += "\"type\":\"";
+        if (cam.type == CAM_DETECT_LIBCAM) {
+            webua->resp_page += "libcam";
+        } else if (cam.type == CAM_DETECT_V4L2) {
+            webua->resp_page += "v4l2";
+        } else {
+            webua->resp_page += "netcam";
+        }
+        webua->resp_page += "\"";
+        webua->resp_page += ",\"device_id\":\"" + escstr(cam.device_id) + "\"";
+        webua->resp_page += ",\"device_path\":\"" + escstr(cam.device_path) + "\"";
+        webua->resp_page += ",\"device_name\":\"" + escstr(cam.device_name) + "\"";
+        webua->resp_page += ",\"sensor_model\":\"" + escstr(cam.sensor_model) + "\"";
+        webua->resp_page += ",\"default_width\":" + std::to_string(cam.default_width);
+        webua->resp_page += ",\"default_height\":" + std::to_string(cam.default_height);
+        webua->resp_page += ",\"default_fps\":" + std::to_string(cam.default_fps);
+
+        /* Add available resolutions */
+        webua->resp_page += ",\"resolutions\":[";
+        for (size_t i = 0; i < cam.resolutions.size(); i++) {
+            if (i > 0) {
+                webua->resp_page += ",";
+            }
+            webua->resp_page += "[" + std::to_string(cam.resolutions[i].first);
+            webua->resp_page += "," + std::to_string(cam.resolutions[i].second) + "]";
+        }
+        webua->resp_page += "]";
+
+        webua->resp_page += "}";
+    }
+
+    webua->resp_page += "]}";
+}
+
+/*
+ * Camera detection API: Add camera from detection
+ * POST /0/api/cameras
+ * Adds a detected camera to the configuration
+ */
+void cls_webu_json::api_cameras_add()
+{
+    webua->resp_type = WEBUI_RESP_JSON;
+
+    if (!validate_csrf()) {
+        return;
+    }
+
+    /* Parse JSON body */
+    JsonParser parser;
+    if (!parser.parse(webua->raw_body)) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
+            _("JSON parse error: %s"), parser.getError().c_str());
+        webua->resp_page = "{\"status\":\"error\",\"message\":\"Invalid JSON\"}";
+        return;
+    }
+
+    /* Get camera details from JSON */
+    std::string type = parser.getString("type", "");
+    std::string device_id = parser.getString("device_id", "");
+    std::string device_path = parser.getString("device_path", "");
+    std::string device_name = parser.getString("device_name", "");
+    std::string sensor_model = parser.getString("sensor_model", "");
+    int width = parser.getInt("width", 0);
+    int height = parser.getInt("height", 0);
+    int fps = parser.getInt("fps", 0);
+
+    if (type.empty() || device_path.empty()) {
+        webua->resp_page = "{\"status\":\"error\",\"message\":\"Missing required fields\"}";
+        return;
+    }
+
+    /* Create detected camera struct */
+    ctx_detected_cam detected;
+    if (type == "libcam") {
+        detected.type = CAM_DETECT_LIBCAM;
+    } else if (type == "v4l2") {
+        detected.type = CAM_DETECT_V4L2;
+    } else if (type == "netcam") {
+        detected.type = CAM_DETECT_NETCAM;
+    } else {
+        webua->resp_page = "{\"status\":\"error\",\"message\":\"Invalid camera type\"}";
+        return;
+    }
+
+    detected.device_id = device_id;
+    detected.device_path = device_path;
+    detected.device_name = device_name;
+    detected.sensor_model = sensor_model;
+    detected.default_width = width;
+    detected.default_height = height;
+    detected.default_fps = fps;
+
+    /* Add camera to configuration */
+    pthread_mutex_lock(&app->mutex_post);
+    app->conf_src->camera_add_from_detection(detected);
+    pthread_mutex_unlock(&app->mutex_post);
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+        "Camera added via API: %s [%s]", device_name.c_str(), device_path.c_str());
+
+    webua->resp_page = "{\"status\":\"ok\",\"message\":\"Camera added successfully\"}";
+}
+
+/*
+ * Camera detection API: Delete camera
+ * DELETE /{camId}/api/cameras
+ * Removes a camera from the configuration
+ */
+void cls_webu_json::api_cameras_delete()
+{
+    webua->resp_type = WEBUI_RESP_JSON;
+
+    if (!validate_csrf()) {
+        return;
+    }
+
+    if (webua->camindx < 0 || webua->camindx >= app->cam_cnt) {
+        webua->resp_page = "{\"status\":\"error\",\"message\":\"Invalid camera ID\"}";
+        return;
+    }
+
+    pthread_mutex_lock(&app->mutex_post);
+    app->cam_delete = webua->device_id;
+    pthread_mutex_unlock(&app->mutex_post);
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+        "Camera delete requested via API: camera %d", webua->device_id);
+
+    webua->resp_page = "{\"status\":\"ok\",\"message\":\"Camera will be removed\"}";
+}
+
+/*
+ * Camera detection API: Test network camera connection
+ * POST /0/api/cameras/test
+ * Tests if a network camera URL is accessible
+ */
+void cls_webu_json::api_cameras_test_netcam()
+{
+    webua->resp_type = WEBUI_RESP_JSON;
+
+    /* Parse JSON body */
+    JsonParser parser;
+    if (!parser.parse(webua->raw_body)) {
+        webua->resp_page = "{\"status\":\"error\",\"message\":\"Invalid JSON\"}";
+        return;
+    }
+
+    std::string url = parser.getString("url", "");
+    std::string user = parser.getString("user", "");
+    std::string pass = parser.getString("pass", "");
+    int timeout = parser.getInt("timeout", 5);
+
+    if (url.empty()) {
+        webua->resp_page = "{\"status\":\"error\",\"message\":\"URL is required\"}";
+        return;
+    }
+
+    bool success = app->cam_detect->test_netcam(url, user, pass, timeout);
+
+    if (success) {
+        webua->resp_page = "{\"status\":\"ok\",\"message\":\"Connection successful\"}";
+    } else {
+        webua->resp_page = "{\"status\":\"error\",\"message\":\"Connection failed\"}";
+    }
 }
 
 void cls_webu_json::main()

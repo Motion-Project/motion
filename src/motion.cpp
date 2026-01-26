@@ -33,6 +33,7 @@
 #include "allcam.hpp"
 #include "schedule.hpp"
 #include "camera.hpp"
+#include "cam_detect.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
 #include "webu.hpp"
@@ -557,6 +558,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     allcam = new cls_allcam(this);
     schedule = new cls_schedule(this);
     thumbnail = new cls_thumbnail(this);
+    cam_detect = new cls_cam_detect(this);
 
     if ((cam_cnt > 0) || (snd_cnt > 0)) {
         for (indx=0; indx<cam_cnt; indx++) {
@@ -591,6 +593,7 @@ void cls_motapp::deinit()
     mydelete(allcam)
     mydelete(schedule)
     mydelete(thumbnail)
+    mydelete(cam_detect)
     mydelete(conf_src);
     mydelete(cfg);
 

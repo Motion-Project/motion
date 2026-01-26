@@ -331,6 +331,7 @@
             bool&                    snd_show       = parm_snd.snd_show;
 
             void camera_add(std::string fname, bool srcdir);
+            void camera_add_from_detection(const ctx_detected_cam &detected);
             void sound_add(std::string fname, bool srcdir);
             void camera_filenm();
             void sound_filenm();

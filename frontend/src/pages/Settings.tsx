@@ -10,6 +10,7 @@ import { useBatchUpdateConfig, useSystemStatus } from '@/api/queries'
 import { validateConfigParam } from '@/lib/validation'
 import { SystemSettings } from '@/components/settings/SystemSettings'
 import { DeviceSettings } from '@/components/settings/DeviceSettings'
+import { CameraManagement } from '@/components/settings/CameraManagement'
 import { CameraSourceSettings } from '@/components/settings/CameraSourceSettings'
 import { LibcameraSettings } from '@/components/settings/LibcameraSettings'
 import { V4L2Settings } from '@/components/settings/V4L2Settings'
@@ -399,6 +400,16 @@ export function Settings() {
             </p>
           </div>
           <SystemSettings config={activeConfig} onChange={handleChange} getError={getError} originalConfig={originalConfig} systemStatus={systemStatus} />
+
+          {/* Camera Management - Global only */}
+          <FormSection
+            title="Camera Management"
+            description="Add, remove, and configure cameras"
+            collapsible
+            defaultOpen={true}
+          >
+            <CameraManagement />
+          </FormSection>
 
           {/* UI Preferences - Global only */}
           <PreferencesSettings />

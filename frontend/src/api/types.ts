@@ -11,6 +11,48 @@ export interface Camera {
   all_ypct_en?: number;
 }
 
+// Camera detection types
+export interface DetectedCamera {
+  type: CameraType;
+  device_id: string;
+  device_path: string;
+  device_name: string;
+  sensor_model?: string;
+  default_width: number;
+  default_height: number;
+  default_fps: number;
+  resolutions: [number, number][];
+}
+
+export interface PlatformInfo {
+  is_raspberry_pi: boolean;
+  pi_model: string;
+  has_libcamera: boolean;
+  has_v4l2: boolean;
+}
+
+export interface DetectedCamerasResponse {
+  cameras: DetectedCamera[];
+}
+
+export interface AddCameraRequest {
+  type: CameraType;
+  device_id: string;
+  device_path: string;
+  device_name: string;
+  sensor_model?: string;
+  width: number;
+  height: number;
+  fps: number;
+}
+
+export interface TestNetcamRequest {
+  url: string;
+  user?: string;
+  pass?: string;
+  timeout?: number;
+}
+
 // Cameras list response from /0/config
 export interface CamerasResponse {
   count: number;

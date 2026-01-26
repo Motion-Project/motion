@@ -39,6 +39,7 @@
 #include "camera.hpp"
 #include "sound.hpp"
 #include "conf.hpp"
+#include "cam_detect.hpp"
 #include "parm_registry.hpp"
 #include "conf_file.hpp"
 
@@ -1322,6 +1323,50 @@ void cls_config::camera_add(std::string fname, bool srcdir)
 
     app->cam_list.push_back(cam_cls);
     app->cam_cnt = (int)app->cam_list.size();
+}
+
+/*
+ * Add camera from detection system
+ * Creates a new camera configuration with detected device parameters
+ */
+void cls_config::camera_add_from_detection(const ctx_detected_cam &detected)
+{
+    /* Create camera with empty filename (will be generated) */
+    camera_add("", false);
+
+    /* Get the newly created camera */
+    cls_camera *cam = app->cam_list[app->cam_cnt - 1];
+
+    /* Configure device-specific parameters */
+    if (detected.type == CAM_DETECT_LIBCAM) {
+        cam->conf_src->edit_set("libcam_device", detected.device_path);
+    } else if (detected.type == CAM_DETECT_V4L2) {
+        /* Use persistent device ID if available, otherwise use device path */
+        cam->conf_src->edit_set("v4l2_device", detected.device_id);
+    } else if (detected.type == CAM_DETECT_NETCAM) {
+        cam->conf_src->edit_set("netcam_url", detected.device_path);
+    }
+
+    /* Set common parameters */
+    cam->conf_src->edit_set("device_name", detected.device_name);
+    cam->conf_src->edit_set("width", std::to_string(detected.default_width));
+    cam->conf_src->edit_set("height", std::to_string(detected.default_height));
+    cam->conf_src->edit_set("framerate", std::to_string(detected.default_fps));
+
+    /* Copy updated configuration to runtime config */
+    cam->cfg->parms_copy(cam->conf_src);
+
+    /* Write configuration file */
+    cam->conf_src->parms_write();
+
+    /* Request camera start */
+    pthread_mutex_lock(&app->mutex_camlst);
+    cam->handler_stop = false;
+    pthread_mutex_unlock(&app->mutex_camlst);
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,
+        "Camera added from detection: %s [%s]",
+        detected.device_name.c_str(), detected.device_path.c_str());
 }
 
 /* Create default configuration file name*/

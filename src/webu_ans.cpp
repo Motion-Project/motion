@@ -1095,6 +1095,13 @@ void cls_webu_ans::answer_delete()
         /* CSRF validation is done inside api_profiles_delete() */
         webu_json->api_profiles_delete();
         mhd_send();
+    } else if (uri_cmd1 == "api" && uri_cmd2 == "cameras" && uri_cmd3.empty()) {
+        /* DELETE /{camId}/api/cameras - remove camera */
+        if (webu_json == nullptr) {
+            webu_json = new cls_webu_json(this);
+        }
+        webu_json->api_cameras_delete();
+        mhd_send();
     } else {
         /* DELETE not allowed for other endpoints */
         resp_type = WEBUI_RESP_TEXT;
@@ -1196,7 +1203,16 @@ void cls_webu_ans::answer_get()
             webu_json->api_system_status();
             mhd_send();
         } else if (uri_cmd2 == "cameras") {
-            webu_json->api_cameras();
+            if (uri_cmd3 == "platform") {
+                /* GET /0/api/cameras/platform */
+                webu_json->api_cameras_platform();
+            } else if (uri_cmd3 == "detected") {
+                /* GET /0/api/cameras/detected */
+                webu_json->api_cameras_detected();
+            } else {
+                /* GET /0/api/cameras */
+                webu_json->api_cameras();
+            }
             mhd_send();
         } else if (uri_cmd2 == "config") {
             webu_json->api_config();
@@ -1507,6 +1523,32 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
             } else {
                 bad_request();
             }
+            mhd_send();
+            retcd = MHD_YES;
+        } else if (uri_cmd1 == "api" && uri_cmd2 == "cameras" && uri_cmd3 == "test") {
+            /* POST /0/api/cameras/test - test netcam connection */
+            if (*upload_data_size > 0) {
+                raw_body.append(upload_data, *upload_data_size);
+                *upload_data_size = 0;
+                return MHD_YES;
+            }
+            if (webu_json == nullptr) {
+                webu_json = new cls_webu_json(this);
+            }
+            webu_json->api_cameras_test_netcam();
+            mhd_send();
+            retcd = MHD_YES;
+        } else if (uri_cmd1 == "api" && uri_cmd2 == "cameras" && uri_cmd3.empty()) {
+            /* POST /0/api/cameras - add detected camera */
+            if (*upload_data_size > 0) {
+                raw_body.append(upload_data, *upload_data_size);
+                *upload_data_size = 0;
+                return MHD_YES;
+            }
+            if (webu_json == nullptr) {
+                webu_json = new cls_webu_json(this);
+            }
+            webu_json->api_cameras_add();
             mhd_send();
             retcd = MHD_YES;
         } else {
