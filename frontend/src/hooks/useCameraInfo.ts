@@ -69,7 +69,7 @@ export function useCameraInfo(cameraId: number): CameraInfo {
     }
 
     // Get camera status from response
-    const camKey = `cam${cameraId}`;
+    const camKey = `cam${cameraId}` as `cam${number}`;
     const cam = status.status[camKey];
 
     // If camera not found, return unknown state

@@ -4,8 +4,6 @@ import type { CameraType } from '@/api/types';
 
 export interface CameraSourceSettingsProps {
   cameraId: number;
-  config: Record<string, { value: string | number | boolean }>;
-  onChange: (param: string, value: string | number | boolean) => void;
 }
 
 /**
@@ -15,10 +13,8 @@ export interface CameraSourceSettingsProps {
  * Shows a badge indicating the camera backend (libcam/v4l2/netcam/unknown).
  *
  * @param cameraId - Camera ID
- * @param config - Camera configuration
- * @param onChange - Configuration change handler
  */
-export function CameraSourceSettings({ cameraId, config, onChange }: CameraSourceSettingsProps) {
+export function CameraSourceSettings({ cameraId }: CameraSourceSettingsProps) {
   const { cameraType, cameraDevice, isConnected } = useCameraInfo(cameraId);
 
   return (

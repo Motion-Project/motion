@@ -702,8 +702,8 @@ void cls_webu_json::status_vars(int indx_cam)
 
     /* Add V4L2 controls array (if V4L2 camera) */
     #ifdef HAVE_V4L2
-    if (cam->camera_type == CAMERA_TYPE_V4L2 && cam->v4l2cam != nullptr) {
-        vec_v4l2ctrl controls = cam->v4l2cam->get_device_ctrls();
+    if (cam->camera_type == CAMERA_TYPE_V4L2 && cam->has_v4l2()) {
+        vec_v4l2ctrl controls = cam->get_v4l2_controls();
         webua->resp_page += ",\"v4l2_controls\":[";
         bool first_ctrl = true;
         for (const auto& ctrl : controls) {
@@ -734,7 +734,7 @@ void cls_webu_json::status_vars(int indx_cam)
     #endif
 
     /* Add NETCAM status and high stream indicator (if NETCAM) */
-    if (cam->camera_type == CAMERA_TYPE_NETCAM && cam->netcam != nullptr) {
+    if (cam->camera_type == CAMERA_TYPE_NETCAM && cam->has_netcam()) {
         std::string netcam_status_str;
         switch (cam->netcam->status) {
             case NETCAM_CONNECTED:      netcam_status_str = "connected"; break;
@@ -746,7 +746,7 @@ void cls_webu_json::status_vars(int indx_cam)
         webua->resp_page += ",\"netcam_status\":\"" + netcam_status_str + "\"";
 
         // Check if high resolution stream is configured
-        if (cam->netcam_high != nullptr) {
+        if (cam->has_netcam_high()) {
             webua->resp_page += ",\"has_high_stream\":true";
         } else {
             webua->resp_page += ",\"has_high_stream\":false";

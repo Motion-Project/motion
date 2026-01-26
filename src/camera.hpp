@@ -32,6 +32,12 @@
 #include <vector>
 #include <string>
 
+/* Forward declarations for camera type implementations */
+#ifdef HAVE_V4L2
+    struct ctx_v4l2ctrl_item;
+    typedef std::vector<ctx_v4l2ctrl_item> vec_v4l2ctrl;
+#endif
+
 enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
     CAMERA_TYPE_V4L2,
@@ -241,6 +247,14 @@ class cls_camera {
         std::map<std::string, bool> get_libcam_capabilities();
         std::vector<std::string> get_libcam_ignored_controls();
         void clear_libcam_ignored_controls();
+
+        /* V4L2 accessors for web API */
+        bool has_v4l2() const;
+        vec_v4l2ctrl get_v4l2_controls();
+
+        /* NETCAM accessors for web API */
+        bool has_netcam() const;
+        bool has_netcam_high() const;
 
     private:
         cls_movie       *movie_norm;

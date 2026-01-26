@@ -428,8 +428,6 @@ export function Settings() {
           {/* 2. Camera Source */}
           <CameraSourceSettings
             cameraId={Number(selectedCamera)}
-            config={activeConfig}
-            onChange={handleChange}
           />
 
           {/* 3. Type-Specific Camera Controls */}
