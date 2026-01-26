@@ -10,7 +10,7 @@ interface AddCameraWizardProps {
 
 type WizardStep = 'select' | 'configure' | 'test' | 'complete';
 
-export default function AddCameraWizard({ onClose, detectedCameras, platformInfo }: AddCameraWizardProps) {
+export default function AddCameraWizard({ onClose, detectedCameras }: AddCameraWizardProps) {
   const [step, setStep] = useState<WizardStep>('select');
   const [selectedCamera, setSelectedCamera] = useState<DetectedCamera | null>(null);
   const [isManualNetcam, setIsManualNetcam] = useState(false);

@@ -10,12 +10,14 @@ export default function DetectedCameraCard({ camera, onAdd }: DetectedCameraCard
     libcam: 'Pi Camera (libcamera)',
     v4l2: 'USB Camera (V4L2)',
     netcam: 'Network Camera',
+    unknown: 'Unknown Camera',
   }[camera.type];
 
   const typeIcon = {
     libcam: '🎥',
     v4l2: '📹',
     netcam: '🌐',
+    unknown: '❓',
   }[camera.type];
 
   return (

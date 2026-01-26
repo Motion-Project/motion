@@ -287,7 +287,7 @@ export function useAddCamera() {
 
   return useMutation({
     mutationFn: async (camera: AddCameraRequest) => {
-      return apiPost<{ status: string; message: string }>("/0/api/cameras", camera);
+      return apiPost<{ status: string; message: string }>("/0/api/cameras", camera as unknown as Record<string, unknown>);
     },
     onSuccess: () => {
       // Invalidate config and cameras cache to refetch fresh data
@@ -319,7 +319,7 @@ export function useDeleteCamera() {
 export function useTestNetcam() {
   return useMutation({
     mutationFn: async (request: TestNetcamRequest) => {
-      return apiPost<{ status: string; message: string }>("/0/api/cameras/test", request);
+      return apiPost<{ status: string; message: string }>("/0/api/cameras/test", request as unknown as Record<string, unknown>);
     },
   });
 }
