@@ -7,6 +7,7 @@ AC_CONFIG_HEADERS([config.hpp])
 AC_CONFIG_SRCDIR([src/motion.cpp])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
+AC_LANG([C++])
 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19])
@@ -103,6 +104,56 @@ AS_IF([test "${ZLIB}" != "yes" ], [
 CPPFLAGS="$HOLD_CPPFLAGS"
 
 ##############################################################################
+###  Check libxcrypt - Required.  Needed for bcrypt password hashing
+##############################################################################
+AS_IF([pkgconf libxcrypt ], [
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libxcrypt`
+    TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libxcrypt`
+  ],[
+    dnl libxcrypt not found via pkgconf, try system library
+    TEMP_LIBS="$TEMP_LIBS -lcrypt"
+  ]
+)
+HOLD_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $TEMP_CPPFLAGS"
+AC_CHECK_HEADERS(crypt.h,[XCRYPT="yes"],[XCRYPT="no"])
+AC_MSG_CHECKING(libxcrypt libraries)
+AC_MSG_RESULT($XCRYPT)
+AS_IF([test "${XCRYPT}" != "yes" ], [
+    AC_MSG_ERROR([Required package libxcrypt not found, please check motion_guide.html and install necessary dependencies])
+  ]
+)
+CPPFLAGS="$HOLD_CPPFLAGS"
+
+##############################################################################
+###  Check for systemd - Optional.  Needed for watchdog integration
+##############################################################################
+AC_ARG_WITH([systemd],
+  AS_HELP_STRING([--with-systemd],[Build with systemd watchdog support]),
+  [SYSTEMD=$withval],
+  [SYSTEMD="yes"]
+)
+SYSTEMD_VER=""
+AS_IF([test "${SYSTEMD}" = "no"], [
+    AC_MSG_CHECKING(for systemd)
+    AC_MSG_RESULT(skipped)
+  ],[
+    AC_MSG_CHECKING(for systemd)
+    AS_IF([pkgconf libsystemd], [
+        SYSTEMD_VER="("`pkgconf --modversion libsystemd`")"
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libsystemd`
+        TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libsystemd`
+        AC_DEFINE([HAVE_SYSTEMD], [1], [Define to 1 if you have systemd support])
+        SYSTEMD="yes"
+      ],[
+        SYSTEMD="no"
+      ]
+    )
+    AC_MSG_RESULT([$SYSTEMD])
+  ]
+)
+
+##############################################################################
 ###  Check setting/getting thread names
 ##############################################################################
 AC_CHECK_HEADERS(pthread_np.h,[PTHREAD_NP="yes"],[PTHREAD_NP="no"])
@@ -132,32 +183,6 @@ AC_LINK_IFELSE(
     AC_MSG_RESULT([no])
   ]
 )
-
-##############################################################################
-###  Check XSI strerror_r.
-##############################################################################
-AC_MSG_CHECKING([for XSI strerror_r])
-HOLD_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS -Werror"
-AC_LINK_IFELSE(
-  [AC_LANG_SOURCE([[
-    #include <string.h>
-    #include <errno.h>
-    int main(int argc, char** argv) {
-      char buf[1024];
-      int ret = strerror_r(ENOMEM, buf, sizeof(buf));
-      return ret;
-    }]])
-  ],[
-    AC_DEFINE([XSI_STRERROR_R], [1], [Define if you have XSI strerror_r function.])
-    XSI_STRERROR="yes"
-    AC_MSG_RESULT([yes])
-  ],[
-    XSI_STRERROR="no"
-    AC_MSG_RESULT([no])
-  ]
-)
-CPPFLAGS="$HOLD_CPPFLAGS"
 
 ###############################################################################
 ###  V4L2 Video System - Optional
@@ -648,6 +673,65 @@ AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
     ])
   ])
 
+##############################################################################
+###  Security Hardening Flags
+##############################################################################
+AC_ARG_ENABLE([hardening],
+    AS_HELP_STRING([--disable-hardening],
+    [Disable compiler security hardening flags]),
+    [HARDENING=$enableval],
+    [HARDENING=yes])
+
+AS_IF([test "${HARDENING}" = "yes"], [
+    # Stack protection
+    AX_CHECK_COMPILE_FLAG([-fstack-protector-strong], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS -fstack-protector-strong"
+    ], [
+        AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+            TEMP_CPPFLAGS="$TEMP_CPPFLAGS -fstack-protector"
+        ])
+    ])
+
+    # Stack clash protection (GCC 8+, Clang 11+)
+    AX_CHECK_COMPILE_FLAG([-fstack-clash-protection], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS -fstack-clash-protection"
+    ])
+
+    # FORTIFY_SOURCE (requires optimization -O1 or higher)
+    # Check if optimization is enabled before adding FORTIFY_SOURCE
+    AS_IF([echo "$TEMP_CPPFLAGS" | grep -qE '\-O[[1-9]]'], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2"
+    ], [
+        AC_MSG_WARN([FORTIFY_SOURCE requires optimization (-O1 or higher), skipping])
+    ])
+
+    # Position Independent Executable
+    AX_CHECK_COMPILE_FLAG([-fPIE], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS -fPIE"
+        AX_CHECK_LINK_FLAG([-pie], [
+            TEMP_LDFLAGS="$TEMP_LDFLAGS -pie"
+        ])
+    ])
+
+    # Format string protection (treat as error)
+    AX_CHECK_COMPILE_FLAG([-Wformat -Werror=format-security], [
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS -Wformat -Werror=format-security"
+    ])
+
+    # Linker hardening
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [
+        TEMP_LDFLAGS="$TEMP_LDFLAGS -Wl,-z,relro"
+    ])
+    AX_CHECK_LINK_FLAG([-Wl,-z,now], [
+        TEMP_LDFLAGS="$TEMP_LDFLAGS -Wl,-z,now"
+    ])
+    AX_CHECK_LINK_FLAG([-Wl,-z,noexecstack], [
+        TEMP_LDFLAGS="$TEMP_LDFLAGS -Wl,-z,noexecstack"
+    ])
+
+    AC_MSG_NOTICE([Security hardening flags enabled])
+])
+
 CPPFLAGS="$CPPFLAGS $TEMP_CPPFLAGS"
 LIBS="$LIBS $TEMP_LIBS"
 LDFLAGS="$TEMP_LDFLAGS"
@@ -686,7 +770,7 @@ echo "OS                    : $host_os"
 echo "pthread_np            : $PTHREAD_NP"
 echo "pthread_setname_np    : $PTHREAD_SETNAME_NP"
 echo "pthread_getname_np    : $PTHREAD_GETNAME_NP"
-echo "XSI error             : $XSI_STRERROR"
+echo "systemd               : $SYSTEMD$SYSTEMD_VER"
 echo "V4L2                  : $V4L2"
 echo "webp                  : $WEBP$WEBP_VER"
 echo "libcamera             : $LIBCAM$LIBCAM_VER"

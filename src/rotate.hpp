@@ -15,6 +15,16 @@
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+
+/*
+ * rotate.hpp - Image Rotation and Transformation Interface
+ *
+ * Header file defining rotation and flipping operations for image
+ * orientation adjustment, including 90/180/270 degree rotations and
+ * horizontal/vertical flipping.
+ *
+ */
+
 #ifndef _INCLUDE_ROTATE_HPP_
 #define _INCLUDE_ROTATE_HPP_
 

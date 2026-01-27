@@ -3425,7 +3425,6 @@ msgstr "MHD を開始できません"
 msgid "Started webcontrol on port %d"
 msgstr "ポート %d で Web コントロールを開始しました"
 
-#: src/webu_html.cpp
 #, c-format
 msgid "Invalid user html file: %s"
 msgstr "無効なユーザー HTML ファイル: %s"

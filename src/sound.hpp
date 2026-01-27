@@ -16,6 +16,15 @@
  *
  */
 
+/*
+ * sound.hpp - Audio Capture Interface Definitions
+ *
+ * Header file defining the sound capture class for audio recording
+ * from microphones and audio devices using ALSA, supporting synchronized
+ * audio-video capture and audio-triggered events.
+ *
+ */
+
 #ifndef _INCLUDE_SOUND_HPP_
 #define _INCLUDE_SOUND_HPP_
 

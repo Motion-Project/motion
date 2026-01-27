@@ -7,7 +7,6 @@ src/alg_sec.cpp
 src/jpegutils.cpp
 src/netcam.cpp
 src/video_loopback.cpp
-src/webu_post.cpp
 src/conf.cpp
 src/libcam.cpp
 src/picture.cpp
@@ -23,4 +22,3 @@ src/sound.cpp
 src/webu_file.cpp
 src/motion.cpp
 src/util.cpp
-src/webu_html.cpp

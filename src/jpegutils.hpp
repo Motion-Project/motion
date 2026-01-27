@@ -14,9 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
- *
-*/
+ */
 
+/*
+ * jpegutils.hpp - JPEG Utilities Interface
+ *
+ * Header file defining JPEG encoding and decoding functions using
+ * libjpeg, providing compression, decompression, and quality control
+ * for image capture and streaming operations.
+ *
+ */
 
 #ifndef _INCLUDE_JPEGUTILS_HPP_
 #define _INCLUDE_JPEGUTILS_HPP_

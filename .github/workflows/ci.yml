@@ -24,7 +24,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  frontend:
+    name: Frontend Build & Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Verify build artifacts
+        run: |
+          test -f ../data/webui/index.html || { echo "index.html not found"; exit 1; }
+          test -d ../data/webui/assets || { echo "assets directory not found"; exit 1; }
+          echo "✅ Frontend build artifacts verified"
+
+  backend:
+    name: Backend Build (${{ matrix.cxx }}, ${{ matrix.libc }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -50,7 +84,7 @@ jobs:
         if: matrix.libc == 'glibc'
         run: |
           sudo apt-get update
-          sudo apt-get install -y autopoint pkgconf gettext libcamera-dev libopencv-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev libmicrohttpd-dev libmariadb-dev libasound2-dev libpulse-dev libfftw3-dev
+          sudo apt-get install -y autoconf automake libtool autopoint autoconf-archive pkgconf gettext libcamera-dev libopencv-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev libwebp-dev libmicrohttpd-dev libmariadb-dev libasound2-dev libpulse-dev libfftw3-dev
 
       - name: Set up Alpine
         if: matrix.libc == 'musl'
@@ -62,14 +96,18 @@ jobs:
             clang
             file
             autoconf
+            autoconf-archive
             automake
-            gettext-dev
             libtool
+            bash
+            gettext-dev
             libzip-dev
             jpeg-dev
             v4l-utils-libs
             libcamera-dev
             opencv-dev
+            openexr-dev
+            imath-dev
             ffmpeg-dev
             libmicrohttpd-dev
             sqlite-dev
@@ -84,7 +122,9 @@ jobs:
       - name: Configure build
         run: |
           autoreconf -fiv
-          ./configure CC=${{ matrix.cc }} CXX=${{ matrix.cxx }}
+          # Pass LIBS directly to configure for Alpine OpenEXR/Imath transitive dependency issue
+          # OpenCV's imgcodecs requires OpenEXR (Imf) and Imath but pkg-config doesn't pull them in
+          CONFIG_SHELL=/bin/bash ./configure CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} ${{ matrix.libc == 'musl' && 'LIBS="-lOpenEXR -lImath"' || '' }}
 
       - name: Build target
         run: |

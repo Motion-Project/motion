@@ -15,4 +15,3 @@ else
 fi
 #printf "$BASE_VERSION"
 printf "$BASE_VERSION"-"$GIT_COMMIT"
-

@@ -16,6 +16,15 @@
  *
  */
 
+/*
+ * draw.cpp - Image Overlay and Annotation
+ *
+ * This module provides drawing functions for overlaying text, timestamps,
+ * motion boxes, and privacy masks on video frames, supporting various
+ * formats and colors for image annotation.
+ *
+ */
+
 #include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
@@ -1225,7 +1234,7 @@ void cls_draw::init_scale()
         if (cam->text_scale <= 0) {
             cam->text_scale = 1;
         }
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
 
@@ -1234,7 +1243,7 @@ void cls_draw::init_scale()
         if (cam->text_scale <= 0) {
             cam->text_scale = 1;
         }
-        MOTPLS_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
             ,_("Invalid text scale.  Adjusted to %d"), cam->text_scale);
     }
 

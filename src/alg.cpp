@@ -15,6 +15,16 @@
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+
+/*
+ * alg.cpp - Core Motion Detection Algorithm
+ *
+ * This module implements the primary motion detection algorithm using frame
+ * differencing, threshold analysis, and smart masking to identify motion
+ * events while filtering noise and avoiding false positives.
+ *
+ */
+
 #include "motion.hpp"
 #include "util.hpp"
 #include "conf.hpp"
@@ -885,7 +895,7 @@ void cls_alg::lightswitch()
 {
     if (cam->cfg->lightswitch_percent >= 1) {
         if (cam->current_image->diffs > (cam->imgs.motionsize * cam->cfg->lightswitch_percent / 100)) {
-            MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Lightswitch detected"));
             if (cam->frame_skip < cam->cfg->lightswitch_frames) {
                 cam->frame_skip = cam->cfg->lightswitch_frames;
             }

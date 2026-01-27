@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * webu_post.cpp - HTTP POST Request Handler
+ *
+ * This module processes HTTP POST requests for configuration updates,
+ * camera commands, and profile operations, parsing JSON request bodies
+ * and coordinating with webu_json for API endpoint handling.
+ *
+ */
 
 #include "motion.hpp"
 #include "util.hpp"
@@ -26,7 +35,7 @@
 #include "logger.hpp"
 #include "webu.hpp"
 #include "webu_ans.hpp"
-#include "webu_html.hpp"
+#include "webu_json.hpp"
 #include "webu_post.hpp"
 
 /**************Callback functions for MHD **********************/
@@ -56,7 +65,7 @@ void cls_webu_post::cam_add()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "camera_add") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera add action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera add action disabled");
                 return;
             } else {
                 break;
@@ -64,7 +73,7 @@ void cls_webu_post::cam_add()
         }
     }
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Adding camera.");
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Adding camera.");
 
     maxcnt = 100;
 
@@ -77,11 +86,11 @@ void cls_webu_post::cam_add()
 
     if (indx == maxcnt) {
         app->cam_add = false;
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error adding camera.  Timed out");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error adding camera.  Timed out");
         return;
     }
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "New camera added.");
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "New camera added.");
 
 }
 
@@ -93,7 +102,7 @@ void cls_webu_post::cam_delete()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "camera_delete") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera delete action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Camera delete action disabled");
                 return;
             } else {
                 break;
@@ -101,7 +110,7 @@ void cls_webu_post::cam_delete()
         }
     }
 
-    MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Deleting camera.");
 
     app->cam_delete = webua->camindx;
 
@@ -112,7 +121,7 @@ void cls_webu_post::cam_delete()
         indx++;
     }
     if (indx == maxcnt) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
         app->cam_delete = -1;
         return;
     }
@@ -137,19 +146,19 @@ void cls_webu_post::parse_cmd()
             webua->device_id = atoi(post_info[indx].key_val);
         }
 
-        MOTPLS_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"key: %s  value: %s "
+        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,"key: %s  value: %s "
             , post_info[indx].key_nm
             , post_info[indx].key_val
         );
     }
 
     if (post_cmd == "") {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             , "Invalid post request.  No command");
         return;
     }
     if (webua->device_id == -1) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
             , "Invalid post request.  No camera id provided");
         return;
     }
@@ -162,7 +171,7 @@ void cls_webu_post::parse_cmd()
             }
         }
         if (webua->camindx == -1) {
-            MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                 , "Invalid request.  Device id %d not found"
                 , webua->device_id);
             webua->device_id = -1;
@@ -179,7 +188,7 @@ void cls_webu_post::action_eventend()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "event") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event end action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Event end action disabled");
                 return;
             } else {
                 break;
@@ -205,7 +214,7 @@ void cls_webu_post::action_eventstart()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "event") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Event start action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Event start action disabled");
                 return;
             } else {
                 break;
@@ -232,7 +241,7 @@ void cls_webu_post::action_snapshot()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "snapshot") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Snapshot action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Snapshot action disabled");
                 return;
             } else {
                 break;
@@ -258,7 +267,7 @@ void cls_webu_post::action_pause_on()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "pause") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
                 break;
@@ -283,7 +292,7 @@ void cls_webu_post::action_pause_off()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "pause") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
                 break;
@@ -308,7 +317,7 @@ void cls_webu_post::action_pause_schedule()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "pause") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Pause action disabled");
                 return;
             } else {
                 break;
@@ -334,7 +343,7 @@ void cls_webu_post::action_restart()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "restart") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Restart action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Restart action disabled");
                 return;
             } else {
                 break;
@@ -343,13 +352,13 @@ void cls_webu_post::action_restart()
     }
 
     if (webua->device_id == 0) {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<app->cam_cnt; indx++) {
             app->cam_list[indx]->handler_stop = false;
             app->cam_list[indx]->restart = true;
         }
     } else {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Restarting camera %d")
             , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->handler_stop = false;
@@ -365,7 +374,7 @@ void cls_webu_post::action_stop()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "stop") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Stop action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Stop action disabled");
                 return;
             } else {
                 break;
@@ -375,7 +384,7 @@ void cls_webu_post::action_stop()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Stopping cam %d")
                 , app->cam_list[indx]->cfg->device_id);
             app->cam_list[indx]->restart = false;
@@ -384,7 +393,7 @@ void cls_webu_post::action_stop()
             app->cam_list[indx]->handler_stop = true;
         }
     } else {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Stopping cam %d")
             , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->restart = false;
@@ -405,7 +414,7 @@ void cls_webu_post::action_user()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "action_user") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "User action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "User action disabled");
                 return;
             } else {
                 break;
@@ -424,14 +433,14 @@ void cls_webu_post::action_user()
             }
             for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
                 if (isalnum(tmp.at((uint)indx2)) == false) {
-                    MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                         , _("Invalid character included in action user \"%c\"")
                         , tmp.at((uint)indx2));
                     return;
                 }
             }
             snprintf(cam->action_user, 40, "%s", tmp.c_str());
-            MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 , _("Executing user action on cam %d")
                 , cam->cfg->device_id);
             util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
@@ -446,7 +455,7 @@ void cls_webu_post::action_user()
         }
         for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
             if (isalnum(tmp.at((uint)indx2)) == false) {
-                MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                     , _("Invalid character included in action user \"%c\"")
                     , tmp.at((uint)indx2));
                 return;
@@ -454,7 +463,7 @@ void cls_webu_post::action_user()
         }
         snprintf(cam->action_user, 40, "%s", tmp.c_str());
 
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("Executing user action on cam %d")
             , cam->cfg->device_id);
         util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
@@ -470,7 +479,7 @@ void cls_webu_post::write_config()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "config_write") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config write action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config write action disabled");
                 return;
             } else {
                 break;
@@ -540,7 +549,7 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
             (parm_ct == PARM_CAT_15)) {
             return;
         }
-        MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config edit set. %s:%s"
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config edit set. %s:%s"
             ,parm_nm.c_str(), parm_vl.c_str());
         app->cam_list[webua->camindx]->conf_src->edit_set(
             parm_nm, parm_vl);
@@ -607,7 +616,7 @@ void cls_webu_post::config()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "config") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save action disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save action disabled");
                 return;
             } else {
                 break;
@@ -622,14 +631,6 @@ void cls_webu_post::config()
             mystrne(post_info[indx].key_nm, "camid")) {
 
             tmpname = post_info[indx].key_nm;
-            indx2=0;
-            while (config_parms_depr[indx2].parm_name != "") {
-                if (config_parms_depr[indx2].parm_name == tmpname) {
-                    tmpname = config_parms_depr[indx2].newname;
-                    break;
-                }
-                indx2++;
-            }
 
             /* Ignore any requests for parms above webcontrol_parms level. */
             indx2=0;
@@ -655,28 +656,28 @@ void cls_webu_post::config()
         if (restart_list[indx].restart == true) {
             if (restart_list[indx].comp_type == "log") {
                 motlog->restart = true;
-                MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for log");
             } else if (restart_list[indx].comp_type == "webu") {
                 app->webu->restart = true;
-                MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for webcontrol");
             } else if (restart_list[indx].comp_type == "dbse") {
                 app->dbse->restart = true;
-                MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for database");
             } else if (restart_list[indx].comp_type == "cam") {
                 app->cam_list[restart_list[indx].comp_indx]->restart = true;
-                MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for camera %d"
                     , app->cam_list[restart_list[indx].comp_indx]->cfg->device_id);
             } else if (restart_list[indx].comp_type == "snd") {
                 app->snd_list[restart_list[indx].comp_indx]->restart = true;
-                MOTPLS_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for sound %d"
                     , app->cam_list[restart_list[indx].comp_indx]->cfg->device_id);
             } else {
-                MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "Bad programming");
+                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Bad programming");
             }
         }
     }
@@ -696,7 +697,7 @@ void cls_webu_post::ptz()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "ptz") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTPLS_LOG(INF, TYPE_ALL, NO_ERRNO, "PTZ actions disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "PTZ actions disabled");
                 return;
             } else {
                 break;
@@ -761,12 +762,12 @@ void cls_webu_post::process_actions()
         action_snapshot();
 
     } else if (post_cmd == "pause") {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("pause action deprecated.  Use pause_on"));
         action_pause_on();
 
     } else if (post_cmd == "unpause") {
-        MOTPLS_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
             , _("unpause action deprecated.  Use pause_off"));
         action_pause_off();
 
@@ -810,7 +811,7 @@ void cls_webu_post::process_actions()
         ptz();
 
     } else {
-        MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO
             , _("Invalid action requested: command: >%s< camindx : >%d< ")
             , post_cmd.c_str(), webua->camindx);
     }
@@ -862,7 +863,7 @@ void cls_webu_post::iterate_post_new(const char *key
     post_info[post_sz-1].key_sz = datasz;
 
     if (retcd < 0) {
-        MOTPLS_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error processing post data"));
+        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error processing post data"));
     }
 }
 
@@ -889,6 +890,9 @@ mhdrslt cls_webu_post::processor_init()
     post_processor = MHD_create_post_processor (webua->connection
         , WEBUI_POST_BFRSZ, webup_iterate_post, (void *)this);
     if (post_processor == NULL) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
+            _("Failed to create POST processor for %s"),
+            webua->url.c_str());
         return MHD_NO;
     }
     return MHD_YES;
@@ -902,13 +906,51 @@ mhdrslt cls_webu_post::processor_start(const char *upload_data, size_t *upload_d
         retcd = MHD_post_process (post_processor, upload_data, *upload_data_size);
         *upload_data_size = 0;
     } else {
+        /* CSRF validation for URL-encoded POST:
+         * 1. Check if csrf_token was provided in POST data
+         * 2. If provided, validate it (supports session or global tokens)
+         * 3. If not provided, allow for backward compatibility (IoT devices/scripts)
+         *
+         * Security note: To enforce CSRF for URL-encoded POST, users can:
+         * - Add csrf_token parameter to their POST requests
+         * - Use JSON API instead (has mandatory CSRF)
+         */
+        std::string csrf_token_received = "";
+
+        /* Check if csrf_token was included in POST data */
+        for (int indx = 0; indx < post_sz; indx++) {
+            if (mystreq(post_info[indx].key_nm, "csrf_token")) {
+                csrf_token_received = post_info[indx].key_val;
+                break;
+            }
+        }
+
+        /* If CSRF token was provided, validate it */
+        if (!csrf_token_received.empty()) {
+            if (!webu->csrf_validate_request(csrf_token_received, webua->session_token)) {
+                MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,
+                    _("CSRF token validation failed from %s"), webua->clientip.c_str());
+                webua->resp_page = "{\"status\":\"error\",\"message\":\"CSRF validation failed\"}";
+                webua->resp_type = WEBUI_RESP_JSON;
+                webua->mhd_send();
+                return MHD_YES;
+            }
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,
+                _("CSRF token validated for URL-encoded POST from %s"), webua->clientip.c_str());
+        } else {
+            /* No CSRF token - allow for backward compatibility */
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,
+                _("URL-encoded POST without CSRF token from %s (backward compatibility mode)"),
+                webua->clientip.c_str());
+        }
+
         pthread_mutex_lock(&app->mutex_post);
             process_actions();
         pthread_mutex_unlock(&app->mutex_post);
-        /* Send updated page back to user */
-        webu_html = new cls_webu_html(webua);
-        webu_html->main();
-        delete webu_html;
+        /* Return JSON response for action result */
+        webua->resp_type = WEBUI_RESP_JSON;
+        webua->resp_page = "{\"status\":\"ok\"}";
+        webua->mhd_send();
         retcd = MHD_YES;
     }
     return retcd;

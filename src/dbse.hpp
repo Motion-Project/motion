@@ -16,6 +16,15 @@
  *
  */
 
+/*
+ * dbse.hpp - Database Interface Definitions
+ *
+ * Header file defining database connection and logging interfaces for
+ * SQLite, MySQL, and PostgreSQL support, enabling event and file
+ * tracking in external databases.
+ *
+ */
+
 #ifndef _INCLUDE_DBSE_HPP_
 #define _INCLUDE_DBSE_HPP_
 
@@ -155,8 +164,8 @@ class cls_dbse {
         void item_default();
         void item_assign(std::string col_nm, std::string col_val);
 
-        void sql_motpls(std::string &sql);
-        void sql_motpls(std::string &sql, std::string col_p1, std::string col_p2);
+        void sql_motion(std::string &sql);
+        void sql_motion(std::string &sql, std::string col_p1, std::string col_p2);
 };
 
 #endif /* _INCLUDE_DBSE_HPP_ */

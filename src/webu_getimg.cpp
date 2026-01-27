@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * webu_getimg.cpp - Single Frame Image Request Handler
+ *
+ * This module handles HTTP requests for single JPEG frame snapshots
+ * from cameras, providing current, previous, and motion-detected frame
+ * images on demand for the web interface.
+ *
+ */
 
 #include "motion.hpp"
 #include "util.hpp"

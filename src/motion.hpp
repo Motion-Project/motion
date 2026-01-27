@@ -14,11 +14,19 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
- *
-*/
+ */
 
-#ifndef _INCLUDE_MOTIONPLUS_HPP_
-#define _INCLUDE_MOTIONPLUS_HPP_
+/*
+ * motion.hpp - Main Application Header
+ *
+ * Primary header file containing global definitions, structures, and
+ * includes for the Motion application, defining core data types and
+ * constants used throughout the system.
+ *
+ */
+
+#ifndef _INCLUDE_MOTION_HPP_
+#define _INCLUDE_MOTION_HPP_
 
 #include "config.hpp"
 
@@ -62,6 +70,10 @@
     #include <pthread_np.h>
 #endif
 
+#ifdef HAVE_SYSTEMD
+    #include <systemd/sd-daemon.h>
+#endif
+
 #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wconversion"
     extern "C" {
@@ -96,6 +108,8 @@ class cls_sound;
 class cls_algsec;
 class cls_alg;
 class cls_config;
+class cls_config_profile;
+class cls_cam_detect;
 class cls_dbse;
 class cls_draw;
 class cls_log;
@@ -109,19 +123,18 @@ class cls_libcam;
 class cls_webu;
 class cls_webu_ans;
 class cls_webu_file;
-class cls_webu_html;
 class cls_webu_json;
 class cls_webu_mpegts;
-class cls_webu_post;
 class cls_webu_common;
 class cls_webu_stream;
+class cls_thumbnail;
 
-enum MOTPLS_SIGNAL {
-    MOTPLS_SIGNAL_NONE,
-    MOTPLS_SIGNAL_ALARM,
-    MOTPLS_SIGNAL_USR1,
-    MOTPLS_SIGNAL_SIGHUP,
-    MOTPLS_SIGNAL_SIGTERM
+enum MOTION_SIGNAL {
+    MOTION_SIGNAL_NONE,
+    MOTION_SIGNAL_ALARM,
+    MOTION_SIGNAL_USR1,
+    MOTION_SIGNAL_SIGHUP,
+    MOTION_SIGNAL_SIGTERM
 };
 
 enum DEVICE_STATUS {
@@ -195,8 +208,11 @@ class cls_motapp {
         cls_config          *cfg;
         cls_webu            *webu;
         cls_dbse            *dbse;
+        cls_config_profile  *profiles;
         cls_allcam          *allcam;
         cls_schedule        *schedule;
+        cls_thumbnail       *thumbnail;
+        cls_cam_detect      *cam_detect;
 
         pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */
         pthread_mutex_t     mutex_post;         /* mutex to allow for processing of post actions*/
@@ -219,4 +235,4 @@ class cls_motapp {
         void watchdog(uint camindx);
 };
 
-#endif /* _INCLUDE_MOTIONPLUS_HPP_ */
+#endif /* _INCLUDE_MOTION_HPP_ */

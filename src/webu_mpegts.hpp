@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * webu_mpegts.hpp - MPEG-TS Streaming Interface
+ *
+ * Header file defining the MPEG Transport Stream class for H.264 video
+ * streaming over HTTP, providing lower-latency streams compared to MJPEG
+ * for compatible browsers and applications.
+ *
+ */
 
 #ifndef _INCLUDE_WEBU_MPEGTS_HPP_
 #define _INCLUDE_WEBU_MPEGTS_HPP_
@@ -23,7 +32,11 @@
         public:
             cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus);
             ~cls_webu_mpegts();
-            int avio_buf(myuint *buf, int buf_size);
+            #ifdef FF_API_AVIO_WRITE_NONCONST
+            int avio_buf(uint8_t *buf, int buf_size);
+            #else
+            int avio_buf(const uint8_t *buf, int buf_size);
+            #endif
             ssize_t response(char *buf, size_t max);
             mhdrslt main();
 

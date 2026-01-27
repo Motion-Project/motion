@@ -14,18 +14,29 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * camera.hpp - Camera Class Definitions
  *
-*/
+ * Header file defining the camera class structure and interfaces for
+ * camera thread management, image capture, and motion detection processing
+ * across different camera types (V4L2, libcamera, netcam).
+ *
+ */
 
 #ifndef _INCLUDE_CAMERA_HPP_
 #define _INCLUDE_CAMERA_HPP_
 
-#define IMAGE_MOTION     1
-#define IMAGE_TRIGGER    2
-#define IMAGE_SAVE       4
-#define IMAGE_SAVED      8
-#define IMAGE_PRECAP    16
-#define IMAGE_POSTCAP   32
+#include <map>
+#include <vector>
+#include <string>
+
+/* Forward declarations for camera type implementations */
+#ifdef HAVE_V4L2
+    struct ctx_v4l2ctrl_item;
+    typedef std::vector<ctx_v4l2ctrl_item> vec_v4l2ctrl;
+#endif
 
 enum CAMERA_TYPE {
     CAMERA_TYPE_UNKNOWN,
@@ -66,7 +77,12 @@ struct ctx_image_data {
     struct timespec     monots;         /* Montonic clock for timing */
     int                 shot;           /* Sub second timestamp count */
     unsigned long       cent_dist;      /* Movement center to img center distance * Note: Dist is calculated distX*distX + distY*distY */
-    unsigned int        flags;          /* See IMAGE_* defines */
+    bool                trigger;
+    bool                motion;
+    bool                precap;
+    bool                postcap;
+    bool                save_pic;
+    bool                save_movie;
     ctx_coord           location;       /* coordinates for center and size of last motion detection*/
     int                 total_labels;
 };
@@ -169,6 +185,7 @@ class cls_camera {
         bool    detecting_motion;
         int     event_curr_nbr;
         int     event_prev_nbr;
+        int     movie_nbr;
         int     threshold;
         int     lastrate;
         int     frame_skip;
@@ -185,6 +202,7 @@ class cls_camera {
         int     pipe;
         int     mpipe;
         bool    pause;
+        bool    picture_pause;
         std::string user_pause;
         int     missing_frame_counter;
 
@@ -194,15 +212,49 @@ class cls_camera {
         int         info_sdev_max;
         uint64_t    info_sdev_tot;
         std::vector<std::vector<ctx_schedule_data>> schedule;
+        std::vector<std::vector<ctx_schedule_data>> picture_schedule;
         ctx_cleandir    *cleandir;
 
         bool    action_snapshot;    /* Make a snapshot */
         bool    event_stop;  /* Boolean for whether to stop a event */
         bool    event_user;  /* Boolean for whether to user triggered an event */
 
+        int                     picture_event_count;    /* pictures saved in current event */
+        struct timespec         picture_last_ts;        /* timestamp of last picture saved */
+
         enum DEVICE_STATUS      device_status;
         enum CAMERA_TYPE        camera_type;
         struct timespec         connectionlosttime;
+
+        /* Hot-reload libcam brightness/contrast/gain/AWB controls */
+        void set_libcam_brightness(float value);
+        void set_libcam_contrast(float value);
+        void set_libcam_gain(float value);
+        void set_libcam_awb_enable(bool value);
+        void set_libcam_awb_mode(int value);
+        void set_libcam_awb_locked(bool value);
+        void set_libcam_colour_temp(int value);
+        void set_libcam_colour_gains(float red, float blue);
+        void set_libcam_af_mode(int value);
+        void set_libcam_lens_position(float value);
+        void set_libcam_af_range(int value);
+        void set_libcam_af_speed(int value);
+        void trigger_libcam_af_scan();
+        void cancel_libcam_af_scan();
+
+        /* Libcam capability discovery accessors */
+        bool has_libcam() const;
+        std::map<std::string, bool> get_libcam_capabilities();
+        std::vector<std::string> get_libcam_ignored_controls();
+        void clear_libcam_ignored_controls();
+
+        /* V4L2 accessors for web API */
+        bool has_v4l2() const;
+        vec_v4l2ctrl get_v4l2_controls();
+
+        /* NETCAM accessors for web API */
+        bool has_netcam() const;
+        bool has_netcam_high() const;
 
     private:
         cls_movie       *movie_norm;
@@ -212,7 +264,6 @@ class cls_camera {
         cls_v4l2cam     *v4l2cam;
         cls_libcam      *libcam;
 
-        pthread_t       thread_id;
         int             track_posx;
         int             track_posy;
         int             threshold_maximum;
@@ -254,6 +305,7 @@ class cls_camera {
         void init_cam_start();
         void init_ref();
         void init_schedule();
+        void init_picture_schedule();
         void init_cleandir_runtime();
         void init_cleandir_default();
         void init_cleandir();
@@ -274,6 +326,7 @@ class cls_camera {
         void timelapse();
         void loopback();
         void check_schedule();
+        void check_picture_schedule();
         void frametiming();
 };
 

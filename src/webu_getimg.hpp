@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * webu_getimg.hpp - Single Frame Image Interface
+ *
+ * Header file defining functions for serving single JPEG frame snapshots
+ * from cameras via HTTP, providing current, previous, and motion-detected
+ * frame images on demand.
+ *
+ */
 
 #ifndef _INCLUDE_WEBU_GETIMG_HPP_
 #define _INCLUDE_WEBU_GETIMG_HPP_

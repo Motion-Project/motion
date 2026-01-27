@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * webu_stream.hpp - MJPEG Streaming Interface
+ *
+ * Header file defining the MJPEG streaming class for delivering real-time
+ * video streams over HTTP using multipart content responses for live
+ * camera feeds in web browsers.
+ *
+ */
 
 #ifndef _INCLUDE_WEBU_STREAM_HPP_
 #define _INCLUDE_WEBU_STREAM_HPP_
@@ -28,7 +37,7 @@
             size_t  resp_used;      /* The amount of the response page used */
             u_char  *resp_image;    /* Response image to provide to user */
 
-            mhdrslt main();
+            void main();
             ssize_t mjpeg_response (char *buf, size_t max);
             bool check_finish();
             void delay();
@@ -53,7 +62,6 @@
             mhdrslt stream_static();
             mhdrslt stream_mjpeg();
 
-            bool valid_request();
             void all_cnct();
             void jpg_cnct();
             void ts_cnct();

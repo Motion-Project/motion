@@ -3412,7 +3412,6 @@ msgstr "Det gick inte att starta MHD"
 msgid "Started webcontrol on port %d"
 msgstr "Startade webcontrol på port %d"
 
-#: src/webu_html.cpp
 #, c-format
 msgid "Invalid user html file: %s"
 msgstr "Ogiltig användar-html-fil: %s"

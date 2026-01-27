@@ -1,5 +1,76 @@
-The following is a brief overview of the building and installing instructions for Debian / Ubuntu.
+Motion Installation Guide
+=========================
 
+PLATFORM REQUIREMENTS
+---------------------
+Motion 5.0 requires Raspberry Pi 4 or newer (64-bit only).
+Raspberry Pi 3 and older are NOT supported.
+
+RASPBERRY PI INSTALLATION (Recommended)
+---------------------------------------
+For Raspberry Pi 4/5, use the automated installation script:
+
+    # Clone the repository
+    git clone https://github.com/Motion-Project/motion.git
+    cd motion
+
+    # Run the automated installer (interactive)
+    sudo scripts/install.sh
+
+    # Access the web UI
+    http://<pi-ip>:8080/
+
+The installer will prompt for admin and viewer passwords during setup.
+
+UNATTENDED INSTALLATION
+-----------------------
+For automated deployments (e.g., provisioning scripts, Ansible):
+
+    sudo scripts/install.sh --unattended \
+        --admin-pass "your-admin-password" \
+        --viewer-pass "your-viewer-password"
+
+Additional options:
+    --viewer-user USER   Set viewer username (default: viewer)
+    --skip-service       Skip systemd service setup
+    --help               Show all options
+
+MANUAL INSTALLATION (Step by Step)
+----------------------------------
+If you prefer to run each step manually:
+
+    # 1. Install dependencies
+    sudo scripts/pi-setup.sh
+
+    # 2. Build Motion
+    scripts/pi-build.sh
+
+    # 3. Install system-wide
+    sudo make install
+
+    # 4. Configure authentication (required)
+    sudo motion-setup
+
+    # 5. Set up systemd service
+    sudo scripts/setup-motion-service.sh
+
+    # 6. Start the service
+    sudo systemctl enable motion
+    sudo systemctl start motion
+
+    # Access the web UI
+    http://<pi-ip>:8080/
+
+The setup script installs:
+- Build tools (autoconf, automake, g++, etc.)
+- Camera support (libcamera for Pi camera modules)
+- Video encoding (FFmpeg)
+- Web server (libmicrohttpd)
+- Database (SQLite3)
+- Node.js (for frontend development/rebuilds)
+
+DEBIAN / UBUNTU INSTALLATION
+----------------------------
 For full instructions on how to build and install Motion, see the motion_build.html that is
 distributed with this source code.
 
@@ -7,16 +78,36 @@ The packages and library names change frequently and vary across base operating 
 Adjust the following lines as required by the base operating system.
 
 Install basic build packages:
-    sudo apt install autoconf automake autopoint build-essential pkgconf libtool libzip-dev
-          libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev
-          libwebp-dev gettext libmicrohttpd-dev libmariadb-dev libasound2-dev libfftw3-dev
+    sudo apt install autoconf automake autopoint build-essential pkgconf libtool libzip-dev \
+        libjpeg-dev git libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev \
+        libwebp-dev gettext libmicrohttpd-dev libsqlite3-dev
+
+For bcrypt password hashing support (required for authentication):
+    sudo apt install libcrypt-dev
+
+For frontend development (optional):
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    sudo apt install nodejs
 
 Once required packages are installed, execute:
     autoreconf -fiv
     ./configure
     make
-    make install
+    sudo make install
 
-Sample custom configuration options:
+AUTHENTICATION SETUP
+--------------------
+After installation, configure authentication credentials:
+
+    sudo motion-setup
+
+This creates admin and viewer accounts with bcrypt-hashed passwords.
+See README.md for password reset and manual configuration options.
+
+CONFIGURE OPTIONS
+-----------------
     --prefix               :  Specify the install location for the motion package
     --with-ffmpeg=[dir]    :  Specify the location in which ffmpeg/libav is installed.
+    --with-libcam          :  Enable libcamera support (required for Pi 5)
+    --with-sqlite3         :  Enable SQLite3 database support
+    --without-v4l2         :  Disable V4L2 support (Pi 5 only uses libcamera)

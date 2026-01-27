@@ -14,8 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * jpegutils.cpp - JPEG Encoding and Decoding Utilities
  *
-*/
+ * This module provides JPEG image encoding and decoding using libjpeg,
+ * handling compression, decompression, quality settings, and format
+ * conversion for image capture and streaming.
+ *
+ */
 
 #include "motion.hpp"
 #include "util.hpp"
@@ -411,7 +419,7 @@ static void add_huff_table(j_decompress_ptr dinfo, JHUFF_TBL **htblptr, const UI
         nsymbols += bits[len];
 
     if (nsymbols < 1 || nsymbols > 256) {
-        MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, _("%s: Given jpeg buffer was too small"));
     }
 
     memcpy((*htblptr)->huffval, val, (uint)nsymbols * sizeof(UINT8));
@@ -585,7 +593,7 @@ static void jpgutl_buffer_src(j_decompress_ptr cinfo, u_char *buffer, long buffe
     cinfo->src->skip_input_data = jpgutl_skip_data;
     cinfo->src->resync_to_restart = jpeg_resync_to_restart;    /* Use default method */
     cinfo->src->term_source = jpgutl_term_source;
-    cinfo->src->bytes_in_buffer = (ulong)buffer_len;
+    cinfo->src->bytes_in_buffer = (unsigned long)buffer_len;
     cinfo->src->next_input_byte = (JOCTET *) buffer;
 
 
@@ -613,7 +621,7 @@ static void jpgutl_error_exit(j_common_ptr cinfo)
      */
     (*cinfo->err->format_message) (cinfo, buffer);
 
-    MOTPLS_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", buffer);
+    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", buffer);
 
     /* Return control to the setjmp point. */
     longjmp (myerr->setjmp_buffer, 1);
@@ -642,7 +650,7 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0) ) {
         myerr->warning_seen++ ;
         (*cinfo->err->format_message) (cinfo, buffer);
-            MOTPLS_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
     }
 
 }
@@ -785,13 +793,13 @@ int jpgutl_decode_jpeg (u_char *jpeg_data_in, int jpeg_data_len,
     jpeg_start_decompress (&dinfo);
 
     if ((dinfo.output_width == 0) || (dinfo.output_height == 0)) {
-        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO,_("Invalid JPEG image dimensions"));
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO,_("Invalid JPEG image dimensions"));
         jpeg_destroy_decompress(&dinfo);
         return -1;
     }
 
     if ((dinfo.output_width != width) || (dinfo.output_height != height)) {
-        MOTPLS_LOG(WRN, TYPE_VIDEO, NO_ERRNO
+        MOTION_LOG(WRN, TYPE_VIDEO, NO_ERRNO
             ,_("JPEG image size %dx%d, JPEG was %dx%d")
             ,width, height, dinfo.output_width, dinfo.output_height);
         jpeg_destroy_decompress(&dinfo);

@@ -14,7 +14,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
-*/
+ */
+
+/*
+ * video_v4l2.hpp - Video4Linux2 Interface Definitions
+ *
+ * Header file defining V4L2 camera capture structures and functions
+ * for USB webcams and V4L2-compatible devices, including device controls
+ * and buffer management.
+ *
+ */
 
 #ifndef _INCLUDE_VIDEO_V4L2_HPP_
 #define _INCLUDE_VIDEO_V4L2_HPP_
@@ -53,6 +62,7 @@ class cls_v4l2cam {
         ~cls_v4l2cam();
         int next(ctx_image_data *img_data);
         void noimage();
+        vec_v4l2ctrl get_device_ctrls() const { return device_ctrls; }
     private:
         cls_camera *cam;
         cls_convert *convert;

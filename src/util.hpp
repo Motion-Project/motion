@@ -14,25 +14,26 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Motion.  If not, see <https://www.gnu.org/licenses/>.
  *
+ */
+
+/*
+ * util.hpp - Common Utilities and FFmpeg Compatibility
  *
-*/
+ * Header file defining utility functions, FFmpeg API compatibility macros,
+ * and common helper functions for string manipulation, time handling,
+ * and cross-platform operations.
+ *
+ */
 
 #ifndef _INCLUDE_UTIL_HPP_
 #define _INCLUDE_UTIL_HPP_
 
 #define MYFFVER (LIBAVFORMAT_VERSION_MAJOR * 1000)+LIBAVFORMAT_VERSION_MINOR
 
-#if (LIBAVCODEC_VERSION_MAJOR >= 59)
-    typedef const AVCodec myAVCodec; /* Version independent definition for AVCodec*/
-#else
-    typedef AVCodec myAVCodec; /* Version independent definition for AVCodec*/
-#endif
-
-#if (MYFFVER <= 60016)
-    typedef uint8_t myuint;         /* Version independent uint */
-#else
-    typedef const uint8_t myuint;   /* Version independent uint */
-#endif
+/* Modern FFmpeg (6.0+) - Pi 5 with 64-bit OS uses current FFmpeg APIs */
+typedef const AVCodec myAVCodec;
+typedef const uint8_t myuint;
+#define MY_PROFILE_H264_HIGH   AV_PROFILE_H264_HIGH
 
 
 #ifdef HAVE_GETTEXT
@@ -79,6 +80,7 @@ struct ctx_params {
     void mystrftime(cls_camera *cam, std::string &rslt
         , std::string usrfmt, std::string fname);
     void mystrftime(cls_sound *snd, std::string &dst, std::string fmt);
+    std::string util_sanitize_shell_chars(const std::string &input);
     void util_exec_command(cls_camera *cam, const char *command, const char *filename);
     void util_exec_command(cls_sound *snd, std::string cmd);
     void util_exec_command(cls_camera *cam, std::string cmd);
@@ -94,6 +96,7 @@ struct ctx_params {
     int mystrcne(const char* var1, const char* var2);
     int mystreq(const char* var1, const char* var2);
     int mystrne(const char* var1, const char* var2);
+    void mylower(std::string &parm);
     void myltrim(std::string &parm);
     void myrtrim(std::string &parm);
     void mytrim(std::string &parm);
