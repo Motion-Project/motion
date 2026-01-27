@@ -30,6 +30,8 @@
 
 #include "parm_structs.hpp"
 
+    struct ctx_detected_cam;  /* Forward declaration from cam_detect.hpp */
+
     /* Categories for he edits and display on web interface*/
     enum PARM_CAT{
         PARM_CAT_00     /* system */

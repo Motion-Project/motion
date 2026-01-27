@@ -3871,9 +3871,9 @@ void cls_webu_json::api_cameras_add()
     std::string device_path = parser.getString("device_path", "");
     std::string device_name = parser.getString("device_name", "");
     std::string sensor_model = parser.getString("sensor_model", "");
-    int width = parser.getInt("width", 0);
-    int height = parser.getInt("height", 0);
-    int fps = parser.getInt("fps", 0);
+    int width = static_cast<int>(parser.getNumber("width", 0));
+    int height = static_cast<int>(parser.getNumber("height", 0));
+    int fps = static_cast<int>(parser.getNumber("fps", 0));
 
     if (type.empty() || device_path.empty()) {
         webua->resp_page = "{\"status\":\"error\",\"message\":\"Missing required fields\"}";
@@ -3959,7 +3959,7 @@ void cls_webu_json::api_cameras_test_netcam()
     std::string url = parser.getString("url", "");
     std::string user = parser.getString("user", "");
     std::string pass = parser.getString("pass", "");
-    int timeout = parser.getInt("timeout", 5);
+    int timeout = static_cast<int>(parser.getNumber("timeout", 5));
 
     if (url.empty()) {
         webua->resp_page = "{\"status\":\"error\",\"message\":\"URL is required\"}";

@@ -27,6 +27,8 @@
 
 #ifndef _INCLUDE_WEBU_ANS_HPP_
 #define _INCLUDE_WEBU_ANS_HPP_
+    class cls_webu_post;
+
     class cls_webu_ans {
         public:
             cls_webu_ans(cls_motapp *p_motapp, const char *uri);
@@ -65,6 +67,7 @@
             void mhd_send();
             void bad_request();
             bool valid_request();
+            bool is_form_urlencoded();
             enum WEBUI_METHOD get_method() const { return cnct_method; }
             void failauth_log(bool userid_fail, const std::string &username = "");
 
@@ -74,6 +77,7 @@
         private:
             cls_webu_file   *webu_file;
             cls_webu_json   *webu_json;
+            cls_webu_post   *webu_post;
             cls_webu_stream *webu_stream;
 
             int             mhd_first;      /* Boolean for whether it is the first connection*/

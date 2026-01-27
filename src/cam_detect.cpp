@@ -27,6 +27,7 @@
 
 #include "motion.hpp"
 #include "cam_detect.hpp"
+#include "camera.hpp"
 #include "logger.hpp"
 #include "conf.hpp"
 #include <fstream>

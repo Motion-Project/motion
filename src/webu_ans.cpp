@@ -36,6 +36,7 @@
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
 #include "webu_json.hpp"
+#include "webu_post.hpp"
 #include "webu_file.hpp"
 #include "video_v4l2.hpp"
 
@@ -1039,6 +1040,19 @@ bool cls_webu_ans::valid_request()
     return true;
 }
 
+/* Check if request has form-urlencoded content type */
+bool cls_webu_ans::is_form_urlencoded()
+{
+    const char* content_type = MHD_lookup_connection_value(
+        connection, MHD_HEADER_KIND, "Content-Type");
+
+    if (content_type == nullptr) {
+        return false;
+    }
+
+    return (strstr(content_type, "application/x-www-form-urlencoded") != nullptr);
+}
+
 /* Answer the DELETE request from the user */
 void cls_webu_ans::answer_delete()
 {
@@ -1352,6 +1366,12 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
                 /* Camera action endpoints handled via JSON POST */
                 raw_body.clear();
                 retcd = MHD_YES;
+            } else if (is_form_urlencoded() && (uri_cmd1.empty() || device_id >= 0)) {
+                /* URL-encoded POST to root - initialize POST processor */
+                if (webu_post == nullptr) {
+                    webu_post = new cls_webu_post(this);
+                }
+                retcd = webu_post->processor_init();
             } else {
                 /* Unknown POST endpoint */
                 bad_request();
@@ -1551,6 +1571,11 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
             webu_json->api_cameras_add();
             mhd_send();
             retcd = MHD_YES;
+        } else if (is_form_urlencoded() && webu_post != nullptr) {
+            /* URL-encoded POST - process form data */
+            /* Note: processor_start() handles CSRF validation and calls
+             * process_actions() internally, then sends response */
+            retcd = webu_post->processor_start(upload_data, upload_data_size);
         } else {
             /* Unknown POST endpoint - reject */
             bad_request();
@@ -1752,6 +1777,7 @@ cls_webu_ans::cls_webu_ans(cls_motapp *p_app, const char *uri)
     cam       = nullptr;
     webu_file = nullptr;
     webu_json = nullptr;
+    webu_post = nullptr;
     webu_stream = nullptr;
 
     url.assign(uri);
@@ -1767,6 +1793,7 @@ cls_webu_ans::~cls_webu_ans()
 
     mydelete(webu_file);
     mydelete(webu_json);
+    mydelete(webu_post);
     mydelete(webu_stream);
 
     myfree(auth_user);
