@@ -4360,15 +4360,24 @@ void cls_config::parms_copy(cls_config *src)
 {
     int indx;
     std::string parm_nm, parm_val;
+    std::list<std::string> lst_val;
+    std::list<std::string>::iterator  it_a;
 
     indx = 0;
     while (config_parms[indx].parm_name != "") {
-        parm_nm =config_parms[indx].parm_name;
-        src->edit_get(parm_nm, parm_val, config_parms[indx].parm_cat);
-        edit_set(parm_nm, parm_val);
+        parm_nm = config_parms[indx].parm_name;
+        if (parm_nm == "snd_alerts") {
+            snd_alerts.clear();
+            src->edit_get(parm_nm, lst_val, config_parms[indx].parm_cat);
+            for (it_a=lst_val.begin(); it_a!=lst_val.end(); it_a++) {
+                edit_set(parm_nm, it_a->c_str());
+            }
+        } else {
+            src->edit_get(parm_nm, parm_val, config_parms[indx].parm_cat);
+            edit_set(parm_nm, parm_val);
+        }
         indx++;
     }
-
 }
 
 void cls_config::parms_copy(cls_config *src, PARM_CAT p_cat)
