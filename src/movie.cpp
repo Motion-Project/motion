@@ -114,6 +114,9 @@ void cls_movie::free_context()
     }
 
     if (oc != nullptr) {
+        if (oc->pb != nullptr) {
+            avio_close(oc->pb);
+        }
         avformat_free_context(oc);
         oc = nullptr;
     }
