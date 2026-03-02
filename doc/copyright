@@ -1,24 +1,12 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: motion
 Source:  https://motion-project.github.io/
-License: GPL-2+
+License: GPL-3+
 
 Files: *
-Copyright: 1999-2021 motion authors; see CREDITS for details
-License: GPL-2+
+Copyright: 1999-2026 motion authors; see CREDITS for details
+License: GPL-3+
 
-Files: netcam_wget.*
-Copyright: 1995-2002 Free Software Foundation, Inc.
-License: GPL-2+
-
-Files: mmx.h
-Copyright: 1997-2001 H. Dietz and R. Fisher
-License: GPL-2+
-
-Files: debian/*
-Copyright: 2000-2014 motion Debian packagers; see debian/changelog for details
-License: GPL-2+
-
-License: GPL-2+
+License: GPL-3+
  On Debian systems, the complete text of the GNU General Public
- License can be found in the file /usr/share/common-licenses/GPL-2'.
+ License can be found in the file /usr/share/common-licenses/GPL-3'.

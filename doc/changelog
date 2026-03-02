@@ -1,3 +1,12 @@
+Summary of changes for version 5.0.0 are below
+    * Restructure and rewrite into C++
+    * Require FFmpeg libraries
+    * Add libcamera functionality
+    * Remove outdated functionality
+    * See official release notes for extensive list of other changes
+Summary of changes for version 4.7.1 are below
+    * Revision for new versions of FFMPEG
+    * Fix compiler warnings on calloc
 Summary of changes for version 4.7.0 are below
     * Documentation updates
     * Remove outdated MMAL camera source.

@@ -38,6 +38,7 @@ dist_libweb_DATA = \
 dist_man_MANS = man/motion.1
 
 dist_doc_DATA = \
+	doc/CREDITS \
 	doc/motion_guide.html \
 	doc/motion_stylesheet.css \
 	doc/motion_build.html \
