@@ -834,6 +834,9 @@ void cls_webu_post::iterate_post_append(int indx
     }
 
     post_info[indx].key_sz += datasz;
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+        , "Index: %d Key: >%s< val: >%s< "
+        , indx, post_info[indx].key_nm, post_info[indx].key_val);
 }
 
 /*Create new entry in the post info structure */
@@ -860,6 +863,12 @@ void cls_webu_post::iterate_post_new(const char *key
     }
 
     post_info[post_sz-1].key_sz = datasz;
+
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+        , "Indx: %d Key: >%s< val: >%s< "
+        , post_sz-1
+        , post_info[post_sz-1].key_nm
+        , post_info[post_sz-1].key_val);
 
     if (retcd < 0) {
         MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error processing post data"));
