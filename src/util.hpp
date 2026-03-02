@@ -30,10 +30,14 @@
 
 #if (MYFFVER <= 60016)
     typedef uint8_t myuint;         /* Version independent uint */
-    #define MY_PROFILE_H264_HIGH   FF_PROFILE_H264_HIGH
+    #define MY_PROFILE_H264_HIGH        FF_PROFILE_H264_HIGH
+    #define MY_PROFILE_H264_MAIN        FF_PROFILE_H264_MAIN
+    #define MY_PROFILE_H264_BASELINE    FF_PROFILE_H264_BASELINE
 #else
     typedef const uint8_t myuint;   /* Version independent uint */
-    #define MY_PROFILE_H264_HIGH   AV_PROFILE_H264_HIGH
+    #define MY_PROFILE_H264_HIGH        AV_PROFILE_H264_HIGH
+    #define MY_PROFILE_H264_MAIN        AV_PROFILE_H264_MAIN
+    #define MY_PROFILE_H264_BASELINE    AV_PROFILE_H264_BASELINE
 #endif
 
 

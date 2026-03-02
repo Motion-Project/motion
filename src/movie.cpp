@@ -305,7 +305,7 @@ int cls_movie::set_quality()
                 // magic number
                 quality = 4000;
             }
-            ctx_codec->profile = MY_PROFILE_H264_HIGH;
+            ctx_codec->profile = MY_PROFILE_H264_MAIN;
             ctx_codec->bit_rate = quality;
             av_dict_set(&opts, "preset", "ultrafast", 0);
             av_dict_set(&opts, "tune", "zerolatency", 0);
