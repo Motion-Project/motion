@@ -435,8 +435,9 @@ mhdrslt cls_webu_mpegts::main()
         }
     }
 
+    MHD_add_response_header(response, "Cache-Control", "no-store,no-cache,must-revalidate,max-age=0");
     MHD_add_response_header(response, "Content-Transfer-Encoding", "BINARY");
-    MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+    MHD_add_response_header(response, "Content-Type", "video/mp2t");
 
     retcd = MHD_queue_response (webua->connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
