@@ -116,6 +116,7 @@ void cls_movie::free_context()
     if (oc != nullptr) {
         if (oc->pb != nullptr) {
             avio_close(oc->pb);
+            oc->pb = nullptr;
         }
         avformat_free_context(oc);
         oc = nullptr;
@@ -644,6 +645,7 @@ int cls_movie::set_outputfile()
         if (tlapse == TIMELAPSE_APPEND) {
             av_write_trailer(oc);
             avio_close(oc->pb);
+            oc->pb = nullptr;
         }
 
     }
@@ -1264,6 +1266,7 @@ void cls_movie::stop()
                 if (!(oc->oformat->flags & AVFMT_NOFILE)) {
                     if (tlapse != TIMELAPSE_APPEND) {
                         avio_close(oc->pb);
+                        oc->pb = nullptr;
                     }
                 }
             }
