@@ -327,8 +327,8 @@
         </ul>
         Sample commands
         <ul>
-          <li><code>curl -s -o -X POST {IP}:{port0} --data "camid={camid}" --data "command=eventstart"  1>/dev/null</code></li>
-          <li><code>curl -s -o -X POST {IP}:{port0} --data "camid={camid}" --data "command=config" --data "framerate=12"  1>/dev/null</code></li>
+          <li><code>curl -s -o -X POST {IP}:{port0} --data-urlencode "camid={camid}" --data-urlencode "command=eventstart"  1>/dev/null</code></li>
+          <li><code>curl -s -o -X POST {IP}:{port0} --data-urlencode "camid={camid}" --data-urlencode "command=config" --data-urlencode "framerate=12"  1>/dev/null</code></li>
         </ul>
       </ul>
 
