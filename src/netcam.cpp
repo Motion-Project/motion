@@ -782,30 +782,102 @@ int cls_netcam::decode_packet()
 
 void cls_netcam::hwdecoders()
 {
+    AVBufferRef *hw_test_ctx = nullptr;
+    int indx;
+
     /* High Res pass through does not decode images into frames*/
-    if (high_resolution && passthrough) {
+    if ((high_resolution && passthrough) || (first_image == false) ||
+        (decoder_nm != "DEFAULT")) {
         return;
     }
-    if ((hw_type == AV_HWDEVICE_TYPE_NONE) && (first_image)) {
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:HW Devices:")
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Testing for hardware decoders")
             , cameratype.c_str());
-        while((hw_type = av_hwdevice_iterate_types(hw_type)) != AV_HWDEVICE_TYPE_NONE){
-            if ((hw_type == AV_HWDEVICE_TYPE_VAAPI) ||
-                (hw_type == AV_HWDEVICE_TYPE_CUDA)  ||
-                (hw_type == AV_HWDEVICE_TYPE_DRM)) {
-                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: %s(available)")
-                    , cameratype.c_str()
-                    , av_hwdevice_get_type_name(hw_type));
+
+    /* Use VAAPI if available*/
+    if (av_hwdevice_find_type_by_name("vaapi") == AV_HWDEVICE_TYPE_NONE) {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:vaapi hardware decoding is not available")
+            , cameratype.c_str());
+    } else {
+        if (av_hwdevice_ctx_create(&hw_device_ctx
+                , AV_HWDEVICE_TYPE_VAAPI, NULL, NULL, 0) == 0) {
+            decoder_nm = "VAAPI";
+        } else {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s:vaapi hardware decoding is not available")
+                , cameratype.c_str());
+        }
+        if (hw_test_ctx   != nullptr) {
+            av_buffer_unref(&hw_device_ctx);
+            hw_test_ctx   = nullptr;
+        }
+    }
+
+    /* If still default, use CUDA if available*/
+    if (decoder_nm == "DEFAULT") {
+        if (av_hwdevice_find_type_by_name("cuda") == AV_HWDEVICE_TYPE_NONE) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s:cuda hardware decoding is not available")
+                , cameratype.c_str());
+        } else {
+            if (av_hwdevice_ctx_create(&hw_device_ctx
+                    , AV_HWDEVICE_TYPE_CUDA, NULL, NULL, 0) == 0) {
+                decoder_nm = "CUDA";
             } else {
                 MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
-                    ,_("%s: %s(not implemented)")
-                    , cameratype.c_str()
-                    , av_hwdevice_get_type_name(hw_type));
+                    ,_("%s:cuda hardware decoding is not available")
+                    , cameratype.c_str());
+            }
+            if (hw_test_ctx   != nullptr) {
+                av_buffer_unref(&hw_device_ctx);
+                hw_test_ctx   = nullptr;
             }
         }
     }
+
+    /* If still default, use DRM if available*/
+    if (decoder_nm == "DEFAULT") {
+        if (av_hwdevice_find_type_by_name("drm") == AV_HWDEVICE_TYPE_NONE) {
+            MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                ,_("%s:drm hardware decoding is not available")
+                , cameratype.c_str());
+        } else {
+            if (av_hwdevice_ctx_create(&hw_device_ctx
+                    , AV_HWDEVICE_TYPE_DRM, NULL, NULL, 0) == 0) {
+                decoder_nm = "DRM";
+            } else {
+                MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+                    ,_("%s:drm hardware decoding is not available")
+                    , cameratype.c_str());
+            }
+            if (hw_test_ctx   != nullptr) {
+                av_buffer_unref(&hw_device_ctx);
+                hw_test_ctx   = nullptr;
+            }
+        }
+    }
+
+    /* If still default, use Software*/
+    if (decoder_nm == "DEFAULT") {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:No hardware decoders available.  Using software decoding")
+            , cameratype.c_str());
+        decoder_nm = "SW";
+    } else {
+        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+            ,_("%s:Using %s hardware decoder.")
+            , cameratype.c_str(), decoder_nm.c_str());
+    }
+
+    /* Update parms_array and config line*/
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "decoder") {
+            params->params_array[indx].param_value = decoder_nm;
+            break;
+        }
+    }
+    util_parms_update(params, cfg_params);
     return;
 }
 
@@ -835,19 +907,19 @@ void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
             ,_("%s:Decoder %s did not work.")
             ,cameratype.c_str(), decoder_nm.c_str());
         MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
-            ,_("%s:Ignoring and removing the user requested decoder %s")
+            ,_("%s:Ignoring requested decoder %s")
             ,cameratype.c_str(), decoder_nm.c_str());
 
         for (indx=0;indx<params->params_cnt;indx++) {
             if (params->params_array[indx].param_name == "decoder") {
-                params->params_array[indx].param_value = "NULL";
+                params->params_array[indx].param_value = "SW";
                 break;
             }
         }
 
         util_parms_update(params, cfg_params);
-
-        decoder_nm = "NULL";
+        hw_type = AV_HWDEVICE_TYPE_NONE;
+        decoder_nm = "SW";
     }
 }
 
@@ -1054,7 +1126,7 @@ int cls_netcam::init_swdecoder()
     MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
         ,_("%s:Initializing decoder"),cameratype.c_str());
 
-    if (decoder_nm != "NULL") {
+    if (decoder_nm != "SW") {
         decoder = avcodec_find_decoder_by_name(
             decoder_nm.c_str());
         if (decoder == nullptr) {
@@ -1123,18 +1195,15 @@ int cls_netcam::open_codec()
 
     if (decoder_nm == "vaapi") {
         if (init_vaapi() < 0) {
-            decoder_error(retcd, "hwvaapi_init");
-            return -1;
+            init_swdecoder();
         }
     } else if (decoder_nm == "cuda"){
-        if (init_cuda() <0 ) {
-            decoder_error(retcd, "hwcuda_init");
-            return -1;
+        if (init_cuda() < 0 ) {
+            init_swdecoder();
         }
     } else if (decoder_nm == "drm"){
         if (init_drm() < 0) {;
-            decoder_error(retcd, "hwdrm_init");
-            return -1;
+            init_swdecoder();
         }
     } else {
         init_swdecoder();
@@ -1694,7 +1763,7 @@ void cls_netcam::set_parms ()
         , cameratype.c_str(), camera_name.c_str());
 
     status = NETCAM_NOTCONNECTED;
-    util_parms_add_default(params,"decoder","NULL");
+    util_parms_add_default(params,"decoder","DEFAULT");
     img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
     img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
     img_latest =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
@@ -1881,15 +1950,14 @@ int cls_netcam::open_context()
         retcd = open_codec();
     mythreadname_set(nullptr, 0, threadname.c_str());
     if ((retcd < 0) || (interrupted) || (handler_stop) ) {
-        av_strerror(retcd, errstr, sizeof(errstr));
         if (status == NETCAM_NOTCONNECTED) {
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Unable to open codec context:%s")
-                ,cameratype.c_str(), errstr);
+                ,_("%s:Unable to open codec context")
+                ,cameratype.c_str());
         } else {
             MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-                ,_("%s:Connected and unable to open codec context:%s")
-                ,cameratype.c_str(), errstr);
+                ,_("%s:Connected and unable to open codec context")
+                ,cameratype.c_str());
         }
         context_close();
         return -1;
