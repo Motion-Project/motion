@@ -230,7 +230,7 @@ void cls_schedule::cleandir_cam(cls_camera *p_cam)
         if (p_cam->cleandir->action == "delete") {
             cleandir_run(p_cam);
         } else {
-            util_exec_command(p_cam, p_cam->cleandir->script);
+            util_exec_command(p_cam, p_cam->cleandir->script, "");
             /* The dbse_clean function will eliminate any entries for deleted files*/
         }
         if (p_cam->cleandir->freq == "hourly") {

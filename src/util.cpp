@@ -476,7 +476,7 @@ void mystrftime_base(cls_camera *cam
 
 /* Old method for temporary use only. */
 void mystrftime(cls_camera *cam, char *s, size_t mx_sz
-    , const char *usrfmt, const char *fname)
+    , const char *usrcmd, const char *fname)
 {
     std::string rslt, tmpnm;
     (void)mx_sz;
@@ -485,14 +485,14 @@ void mystrftime(cls_camera *cam, char *s, size_t mx_sz
     } else {
         tmpnm.assign(fname);
     }
-    mystrftime_base(cam, rslt, usrfmt, tmpnm);
+    mystrftime_base(cam, rslt, usrcmd, tmpnm);
     sprintf(s, "%s",rslt.c_str());
 }
 
 void mystrftime(cls_camera *cam, std::string &rslt
-    , std::string usrfmt, std::string fname)
+    , std::string usrcmd, std::string fname)
 {
-    mystrftime_base(cam, rslt, usrfmt, fname);
+    mystrftime_base(cam, rslt, usrcmd, fname);
 }
 
 void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
@@ -666,66 +666,104 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 
 }
 
-void util_exec_command(cls_camera *cam, const char *command, const char *filename)
+void util_exec_command(cls_camera *cam, std::string usrcmd, std::string fname)
 {
-    char stamp[PATH_MAX];
-    int pid;
+    std::string rslt, cmd_full, cmd_nm, tmp_parm;
+    std::vector<std::string> parms;
+    int pid, indx;
+    size_t pos;
 
-    mystrftime(cam, stamp, sizeof(stamp), command, filename);
+    mystrftime(cam, rslt, usrcmd, fname);
+    mytrim(rslt);
+
+    /* Parse the full command*/
+    if (rslt[0] == '"') {
+        pos = rslt.find('"', 1);
+        cmd_full = rslt.substr(1, pos-1);
+        pos++;
+    } else if (rslt[0] == '\'') {
+        pos = rslt.find('\'', 1);
+        cmd_full = rslt.substr(1, pos-1);
+        pos++;
+    } else {
+        pos = rslt.find(" ", 0);
+        cmd_full = rslt.substr(0, pos);
+    }
+    mytrim(cmd_full);
+
+    /* Parse out the parameters */
+    if (pos == std::string::npos) {
+        tmp_parm = "";
+    } else {
+        tmp_parm = rslt.substr(pos+1);
+    }
+    mytrim(tmp_parm);
+
+    /* Parse out the command name to execute */
+    pos = cmd_full.find_last_of("/");
+    if (pos == std::string::npos) {
+        cmd_nm = cmd_full;
+    } else {
+        cmd_nm = cmd_full.substr(pos+1);
+    }
+    mytrim(cmd_nm);
+
+    /* The vector is being used for ease of programming
+       and is likely not the most efficient way to get the
+       values into the const char * array for execv
+    */
+    /* Parse the individual parameters into the vector*/
+    parms.push_back(cmd_nm);
+    while (tmp_parm != "") {
+        if (tmp_parm[0] == '"') {
+            pos = tmp_parm.find('"', 1)+1;
+        } else if (tmp_parm[0] == '\'') {
+            pos = tmp_parm.find('\'', 1)+1;
+        } else {
+            pos = tmp_parm.find(" ", 0);
+        }
+        parms.push_back(tmp_parm.substr(0, pos));
+        if (pos == std::string::npos) {
+            tmp_parm = "";
+        } else {
+            tmp_parm.erase(0, pos+1);
+        }
+        mytrim(tmp_parm);
+    }
+
+    /* Put the vector into an array that can be processed by execv*/
+    const char **parmv = new const char* [parms.size()+1];
+    for (indx = 0;indx<parms.size(); indx++) {
+        parmv[indx] = parms[indx].c_str();
+    }
+    parmv[indx]=nullptr;
 
     pid = fork();
     if (!pid) {
         /* Detach from parent */
         setsid();
-
-        execl("/bin/sh", "sh", "-c", stamp, " &",(char*)NULL);
-
-        /* if above function succeeds the program never reach here */
+        execv (cmd_full.c_str(), (char **)parmv);
+        /* if above function succeeds the program never reaches here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"), stamp);
+            ,_("Unable to start external command >%s<"), rslt.c_str());
 
         exit(1);
     }
 
     if (pid == 0) {
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"), stamp);
+            ,_("Unable to start external command >%s<"), rslt.c_str());
     } else {
         MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-            ,_("Executing external command '%s'"), stamp);
+            ,_("Executing external command >%s<"), rslt.c_str());
     }
+
 }
 
-void util_exec_command(cls_camera *cam, std::string cmd)
+/* Legacy format with chars */
+void util_exec_command(cls_camera *cam, const char *c_usrcmd, const char *c_fname)
 {
-    std::string dst;
-    int pid;
-
-    mystrftime(cam, dst, cmd, "");
-
-    pid = fork();
-    if (!pid) {
-        /* Detach from parent */
-        setsid();
-
-        execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
-
-        /* if above function succeeds the program never reach here */
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"),dst.c_str());
-
-        exit(1);
-    }
-
-    if (pid > 0) {
-        waitpid(pid, NULL, 0);
-    } else {
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"), dst.c_str());
-    }
-
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-        ,_("Executing external command '%s'"), dst.c_str());
+    util_exec_command(cam,std::string(c_usrcmd), std::string(c_fname));
 }
 
 void util_exec_command(cls_sound *snd, std::string cmd)
@@ -742,7 +780,7 @@ void util_exec_command(cls_sound *snd, std::string cmd)
 
         execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
 
-        /* if above function succeeds the program never reach here */
+        /* if above function succeeds the program never reaches here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
             ,_("Unable to start external command '%s'"),dst.c_str());
 
