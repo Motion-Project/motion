@@ -55,7 +55,8 @@
         PARM_LEVEL_ALWAYS      = 0
         ,PARM_LEVEL_LIMITED    = 1
         ,PARM_LEVEL_ADVANCED   = 2
-        ,PARM_LEVEL_RESTRICTED = 3
+        ,PARM_LEVEL_SCRIPTS    = 3
+        ,PARM_LEVEL_RESTRICTED = 4
         ,PARM_LEVEL_NEVER      = 99
     };
 

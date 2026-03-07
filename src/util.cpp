@@ -666,15 +666,13 @@ AVPacket *mypacket_alloc(AVPacket *pkt)
 
 }
 
-void util_exec_command(cls_camera *cam, std::string usrcmd, std::string fname)
+void util_exec_base(cls_motapp *p_app, std::string rslt)
 {
-    std::string rslt, cmd_full, cmd_nm, tmp_parm;
+    std::string cmd_full, cmd_nm, cmd_tmp, parm_tmp, parm_log;
     std::vector<std::string> parms;
     int pid, indx;
     size_t pos;
 
-    mystrftime(cam, rslt, usrcmd, fname);
-    mytrim(rslt);
 
     /* Parse the full command*/
     if (rslt[0] == '"') {
@@ -693,11 +691,11 @@ void util_exec_command(cls_camera *cam, std::string usrcmd, std::string fname)
 
     /* Parse out the parameters */
     if (pos == std::string::npos) {
-        tmp_parm = "";
+        parm_tmp = "";
     } else {
-        tmp_parm = rslt.substr(pos+1);
+        parm_tmp = rslt.substr(pos+1);
     }
-    mytrim(tmp_parm);
+    mytrim(parm_tmp);
 
     /* Parse out the command name to execute */
     pos = cmd_full.find_last_of("/");
@@ -707,6 +705,25 @@ void util_exec_command(cls_camera *cam, std::string usrcmd, std::string fname)
         cmd_nm = cmd_full.substr(pos+1);
     }
     mytrim(cmd_nm);
+    parm_log = parm_tmp;
+
+    /* If webcontrol is opened up to allow changing of the
+      scripts, then limit the location of file being executed
+      to the scripts subdirectory
+    */
+    if (p_app->cfg->webcontrol_parms >= PARM_LEVEL_SCRIPTS) {
+        cmd_tmp = p_app->cfg->conf_filename.substr(0
+            , p_app->cfg->conf_filename.find_last_of("/"));
+        cmd_tmp += "/scripts/" + cmd_nm;
+        if (cmd_tmp != cmd_full) {
+            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+                ,_("Adjusting the path provided since webcontrol is open"));
+        }
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,"Original >%s<",cmd_full.c_str());
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,"New >%s<",cmd_tmp.c_str());
+        cmd_full = cmd_tmp;
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,"Adjusted >%s<",cmd_full.c_str());
+    }
 
     /* The vector is being used for ease of programming
        and is likely not the most efficient way to get the
@@ -714,21 +731,21 @@ void util_exec_command(cls_camera *cam, std::string usrcmd, std::string fname)
     */
     /* Parse the individual parameters into the vector*/
     parms.push_back(cmd_nm);
-    while (tmp_parm != "") {
-        if (tmp_parm[0] == '"') {
-            pos = tmp_parm.find('"', 1)+1;
-        } else if (tmp_parm[0] == '\'') {
-            pos = tmp_parm.find('\'', 1)+1;
+    while (parm_tmp != "") {
+        if (parm_tmp[0] == '"') {
+            pos = parm_tmp.find('"', 1)+1;
+        } else if (parm_tmp[0] == '\'') {
+            pos = parm_tmp.find('\'', 1)+1;
         } else {
-            pos = tmp_parm.find(" ", 0);
+            pos = parm_tmp.find(" ", 0);
         }
-        parms.push_back(tmp_parm.substr(0, pos));
+        parms.push_back(parm_tmp.substr(0, pos));
         if (pos == std::string::npos) {
-            tmp_parm = "";
+            parm_tmp = "";
         } else {
-            tmp_parm.erase(0, pos+1);
+            parm_tmp.erase(0, pos+1);
         }
-        mytrim(tmp_parm);
+        mytrim(parm_tmp);
     }
 
     /* Put the vector into an array that can be processed by execv*/
@@ -742,60 +759,59 @@ void util_exec_command(cls_camera *cam, std::string usrcmd, std::string fname)
     if (!pid) {
         /* Detach from parent */
         setsid();
-        execv (cmd_full.c_str(), (char **)parmv);
+        execv(cmd_full.c_str(), (char **)parmv);
         /* if above function succeeds the program never reaches here */
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command >%s<"), rslt.c_str());
+            ,_("Unable to start external command >%s %s<")
+            , cmd_full.c_str(), parm_log.c_str());
 
         exit(1);
     }
 
     if (pid == 0) {
         MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command >%s<"), rslt.c_str());
+            ,_("Unable to start external command >%s %s<")
+            , cmd_full.c_str(), parm_log.c_str());
     } else {
         MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-            ,_("Executing external command >%s<"), rslt.c_str());
+            ,_("Executing external command >%s %s<")
+            , cmd_full.c_str(), parm_log.c_str());
     }
 
+}
+
+void util_exec_command(cls_camera *cam, std::string usrcmd, std::string fname)
+{
+    std::string rslt;
+    mystrftime(cam, rslt, usrcmd, fname);
+    mytrim(rslt);
+    util_exec_base(cam->app, rslt);
 }
 
 /* Legacy format with chars */
 void util_exec_command(cls_camera *cam, const char *c_usrcmd, const char *c_fname)
 {
-    util_exec_command(cam,std::string(c_usrcmd), std::string(c_fname));
+    std::string usrcmd, fname;
+
+    if (c_usrcmd == nullptr) {
+        usrcmd = "";
+    } else {
+        usrcmd = std::string(c_usrcmd);
+    }
+    if (c_fname == nullptr){
+        fname = "";
+    } else {
+        fname = std::string(c_fname);
+    }
+    util_exec_command(cam, usrcmd, fname);
 }
 
-void util_exec_command(cls_sound *snd, std::string cmd)
+void util_exec_command(cls_sound *snd, std::string usrcmd)
 {
-    std::string dst;
-    int pid;
-
-    mystrftime(snd, dst, cmd);
-
-    pid = fork();
-    if (!pid) {
-        /* Detach from parent */
-        setsid();
-
-        execl("/bin/sh", "sh", "-c", dst.c_str(), " &",(char*)NULL);
-
-        /* if above function succeeds the program never reaches here */
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"),dst.c_str());
-
-        exit(1);
-    }
-
-    if (pid > 0) {
-        waitpid(pid, NULL, 0);
-    } else {
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
-            ,_("Unable to start external command '%s'"), dst.c_str());
-    }
-
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
-        ,_("Executing external command '%s'"), dst.c_str());
+    std::string rslt;
+    mystrftime(snd, rslt, usrcmd);
+    mytrim(rslt);
+    util_exec_base(snd->app, rslt);
 }
 
 /*********************************************/

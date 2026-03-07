@@ -114,7 +114,7 @@ class cls_sound {
         ~cls_sound();
 
         enum DEVICE_STATUS      device_status;
-
+        cls_motapp      *app;
         cls_config      *conf_src;
         cls_config      *cfg;
         std::string     device_name;
@@ -131,7 +131,6 @@ class cls_sound {
         void            handler_shutdown();
 
     private:
-        cls_motapp      *app;
         int             watchdog;
 
         void cleanup();

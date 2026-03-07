@@ -416,7 +416,16 @@ mhdrslt cls_webu_ans::failauth_check()
             if (app->cfg->webcontrol_lock_script != "") {
                 tmp = app->cfg->webcontrol_lock_script + " " +
                     std::to_string(it->userid_fail_nbr) + " " +  clientip;
-                util_exec_command(cam, tmp.c_str(), NULL);
+                /* Since we are not logged in yet, the cam is still nullptr.  */
+                if ((app->cam_cnt == 0) && (app->snd_cnt == 0)) {
+                    /* Should not be possible.  Config should have already done this */
+                    app->conf_src->camera_add("", false);
+                    util_exec_command(app->cam_list[0], tmp.c_str(), nullptr);
+                } else if (app->cam_cnt > 0) {
+                    util_exec_command(app->cam_list[0], tmp.c_str(), nullptr);
+                } else {
+                    util_exec_command(app->snd_list[0], tmp.c_str());
+                }
             }
             return MHD_NO;
         } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=

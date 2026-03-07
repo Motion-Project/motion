@@ -109,18 +109,18 @@ ctx_parm config_parms[] = {
     {"pre_capture",               PARM_TYP_INT,    PARM_CAT_07, PARM_LEVEL_LIMITED },
     {"post_capture",              PARM_TYP_INT,    PARM_CAT_07, PARM_LEVEL_LIMITED },
 
-    {"on_event_start",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_event_end",              PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_picture_save",           PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_area_detected",          PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_motion_detected",        PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_movie_start",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_movie_end",              PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_camera_lost",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_camera_found",           PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_secondary_detect",       PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_action_user",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
-    {"on_sound_alert",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_RESTRICTED },
+    {"on_event_start",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_event_end",              PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_picture_save",           PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_area_detected",          PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_motion_detected",        PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_movie_start",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_movie_end",              PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_camera_lost",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_camera_found",           PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_secondary_detect",       PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_action_user",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
+    {"on_sound_alert",            PARM_TYP_STRING, PARM_CAT_08, PARM_LEVEL_SCRIPTS },
 
     {"picture_output",            PARM_TYP_LIST,   PARM_CAT_09, PARM_LEVEL_LIMITED },
     {"picture_output_motion",     PARM_TYP_LIST,   PARM_CAT_09, PARM_LEVEL_LIMITED },
@@ -167,10 +167,10 @@ ctx_parm config_parms[] = {
     {"webcontrol_key",            PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
     {"webcontrol_headers",        PARM_TYP_PARAMS, PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_html",           PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_ADVANCED },
-    {"webcontrol_actions",        PARM_TYP_PARAMS, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
+    {"webcontrol_actions",        PARM_TYP_PARAMS, PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_lock_minutes",   PARM_TYP_INT,    PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_lock_attempts",  PARM_TYP_INT,    PARM_CAT_13, PARM_LEVEL_ADVANCED },
-    {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
+    {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_SCRIPTS },
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, PARM_LEVEL_LIMITED },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, PARM_LEVEL_LIMITED },
@@ -200,13 +200,13 @@ ctx_parm config_parms[] = {
 
     {"ptz_auto_track",            PARM_TYP_BOOL,   PARM_CAT_17, PARM_LEVEL_LIMITED },
     {"ptz_wait",                  PARM_TYP_INT,    PARM_CAT_17, PARM_LEVEL_LIMITED },
-    {"ptz_move_track",            PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
-    {"ptz_pan_left",              PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
-    {"ptz_pan_right",             PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
-    {"ptz_tilt_up",               PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
-    {"ptz_tilt_down",             PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
-    {"ptz_zoom_in",               PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
-    {"ptz_zoom_out",              PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_RESTRICTED },
+    {"ptz_move_track",            PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_SCRIPTS },
+    {"ptz_pan_left",              PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_SCRIPTS },
+    {"ptz_pan_right",             PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_SCRIPTS },
+    {"ptz_tilt_up",               PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_SCRIPTS },
+    {"ptz_tilt_down",             PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_SCRIPTS },
+    {"ptz_zoom_in",               PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_SCRIPTS },
+    {"ptz_zoom_out",              PARM_TYP_STRING, PARM_CAT_17, PARM_LEVEL_SCRIPTS },
 
     {"snd_device",                PARM_TYP_STRING, PARM_CAT_18, PARM_LEVEL_ADVANCED },
     {"snd_params",                PARM_TYP_PARAMS, PARM_CAT_18, PARM_LEVEL_ADVANCED },
@@ -2378,10 +2378,10 @@ void cls_config::edit_webcontrol_parms(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_parms = 2;
+        webcontrol_parms = PARM_LEVEL_ADVANCED;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 3)) {
+        if ((parm_in < PARM_LEVEL_ALWAYS) || (parm_in > PARM_LEVEL_RESTRICTED)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_parms %d"),parm_in);
         } else {
             webcontrol_parms = parm_in;
@@ -2390,7 +2390,7 @@ void cls_config::edit_webcontrol_parms(std::string &parm, enum PARM_ACT pact)
         parm = std::to_string(webcontrol_parms);
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"0\",\"1\",\"2\",\"3\"";
+        parm = parm +  "\"0\",\"1\",\"2\",\"3\",\"4\"";
         parm = parm + "]";
     }
     return;
