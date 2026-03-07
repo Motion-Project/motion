@@ -3683,8 +3683,8 @@ std::string cls_config::cat_desc(enum PARM_CAT pcat, bool shrt) {
 void cls_config::usage(void)
 {
     printf("Motion version %s\n",PACKAGE_VERSION);
-    printf("Copyright 2016-2026 Motion-Project maintainers\n");
-    printf("Copyright 2000-2015 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen\n");
+    printf("Copyright 2014-2026 Motion-Project maintainers\n");
+    printf("Copyright 2000-2014 Jeroen Vreeken/Folkert van Heusden/Kenneth Lavrsen\n");
     printf("\nusage:\tmotion [options]\n");
     printf("\n\n");
     printf("Possible options:\n\n");
