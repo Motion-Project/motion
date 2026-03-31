@@ -1193,6 +1193,7 @@ int cls_v4l2cam::next(ctx_image_data *img_data)
 cls_v4l2cam::cls_v4l2cam(cls_camera *p_cam)
 {
     cam = p_cam;
+    reconnect_count = 0;
     #ifdef HAVE_V4L2
         cam->watchdog = cam->cfg->watchdog_tmo * 3;
         start_cam();
