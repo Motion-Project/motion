@@ -84,11 +84,6 @@ ctx_parm config_parms[] = {
     {"emulate_motion",            PARM_TYP_BOOL,   PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"threshold",                 PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"threshold_maximum",         PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
-    {"threshold_sdevx",           PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
-    {"threshold_sdevy",           PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
-    {"threshold_sdevxy",          PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
-    {"threshold_ratio",           PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
-    {"threshold_ratio_change",    PARM_TYP_INT,    PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"threshold_tune",            PARM_TYP_BOOL,   PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"secondary_method",          PARM_TYP_LIST,   PARM_CAT_05, PARM_LEVEL_LIMITED },
     {"secondary_params",          PARM_TYP_PARAMS, PARM_CAT_05, PARM_LEVEL_LIMITED },
@@ -1046,101 +1041,6 @@ void cls_config::edit_threshold_maximum(std::string &parm, enum PARM_ACT pact)
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_maximum",_("threshold_maximum"));
-}
-
-void cls_config::edit_threshold_sdevx(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        threshold_sdevx = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevx %d"),parm_in);
-        } else {
-            threshold_sdevx = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(threshold_sdevx);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_sdevx",_("threshold_sdevx"));
-}
-
-void cls_config::edit_threshold_sdevy(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        threshold_sdevy = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevy %d"),parm_in);
-        } else {
-            threshold_sdevy = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(threshold_sdevy);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_sdevy",_("threshold_sdevy"));
-}
-
-void cls_config::edit_threshold_sdevxy(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        threshold_sdevxy = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_sdevxy %d"),parm_in);
-        } else {
-            threshold_sdevxy = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(threshold_sdevxy);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_sdevxy",_("threshold_sdevxy"));
-}
-
-void cls_config::edit_threshold_ratio(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        threshold_ratio = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 100) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_ratio %d"),parm_in);
-        } else {
-            threshold_ratio = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(threshold_ratio);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_ratio",_("threshold_ratio"));
-}
-
-void cls_config::edit_threshold_ratio_change(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        threshold_ratio_change = 64;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 255) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_ratio_change %d"),parm_in);
-        } else {
-            threshold_ratio_change = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(threshold_ratio_change);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_ratio_change",_("threshold_ratio_change"));
 }
 
 void cls_config::edit_threshold_tune(std::string &parm, enum PARM_ACT pact)
@@ -3068,11 +2968,6 @@ void cls_config::edit_cat05(std::string parm_nm, std::string &parm_val, enum PAR
     if (parm_nm == "emulate_motion") {                 edit_emulate_motion(parm_val, pact);
     } else if (parm_nm == "threshold") {               edit_threshold(parm_val, pact);
     } else if (parm_nm == "threshold_maximum") {       edit_threshold_maximum(parm_val, pact);
-    } else if (parm_nm == "threshold_sdevx") {         edit_threshold_sdevx(parm_val, pact);
-    } else if (parm_nm == "threshold_sdevy") {         edit_threshold_sdevy(parm_val, pact);
-    } else if (parm_nm == "threshold_sdevxy") {        edit_threshold_sdevxy(parm_val, pact);
-    } else if (parm_nm == "threshold_ratio") {         edit_threshold_ratio(parm_val, pact);
-    } else if (parm_nm == "threshold_ratio_change") {  edit_threshold_ratio_change(parm_val, pact);
     } else if (parm_nm == "threshold_tune") {          edit_threshold_tune(parm_val, pact);
     } else if (parm_nm == "secondary_method") {        edit_secondary_method(parm_val, pact);
     } else if (parm_nm == "secondary_params") {        edit_secondary_params(parm_val, pact);

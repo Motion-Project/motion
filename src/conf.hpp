@@ -147,11 +147,6 @@
             bool            emulate_motion;
             int             threshold;
             int             threshold_maximum;
-            int             threshold_sdevx;
-            int             threshold_sdevy;
-            int             threshold_sdevxy;
-            int             threshold_ratio;
-            int             threshold_ratio_change;
             bool            threshold_tune;
             std::string     secondary_method;
             std::string     secondary_params;
@@ -397,11 +392,6 @@
             void edit_emulate_motion(std::string &parm, enum PARM_ACT pact);
             void edit_threshold(std::string &parm, enum PARM_ACT pact);
             void edit_threshold_maximum(std::string &parm, enum PARM_ACT pact);
-            void edit_threshold_ratio(std::string &parm, enum PARM_ACT pact);
-            void edit_threshold_ratio_change(std::string &parm, enum PARM_ACT pact);
-            void edit_threshold_sdevx(std::string &parm, enum PARM_ACT pact);
-            void edit_threshold_sdevxy(std::string &parm, enum PARM_ACT pact);
-            void edit_threshold_sdevy(std::string &parm, enum PARM_ACT pact);
             void edit_threshold_tune(std::string &parm, enum PARM_ACT pact);
             void edit_secondary_method(std::string &parm, enum PARM_ACT pact);
             void edit_secondary_params(std::string &parm, enum PARM_ACT pact);

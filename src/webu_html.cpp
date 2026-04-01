@@ -1289,9 +1289,6 @@ void cls_webu_html::script_movies_page()
         "      html_tab +=\"    <td align='left'><b>Date</b></td>\";\n"
         "      html_tab +=\"    <td align='left'><b>time</b></td>\";\n"
         "      html_tab +=\"    <td align='left'><b>diff_avg</b></td>\";\n"
-        "      html_tab +=\"    <td align='left'><b>sdev_min</b></td>\";\n"
-        "      html_tab +=\"    <td align='left'><b>sdev_max</b></td>\";\n"
-        "      html_tab +=\"    <td align='left'><b>sdev_avg</b></td>\";\n"
         "      html_tab +=\"    <td align='left'><b></b></td>\";\n"
         "      html_tab +=\"  </tr>\";\n\n"
 
@@ -1301,9 +1298,6 @@ void cls_webu_html::script_movies_page()
         "        fdate = pMovies['movies'][gIndxCam][indx]['date'];\n\n"
         "        ftime = pMovies['movies'][gIndxCam][indx]['time'];\n\n"
         "        fdavg = pMovies['movies'][gIndxCam][indx]['diff_avg'];\n\n"
-        "        fsmin = pMovies['movies'][gIndxCam][indx]['sdev_min'];\n\n"
-        "        fsmax = pMovies['movies'][gIndxCam][indx]['sdev_max'];\n\n"
-        "        fsavg = pMovies['movies'][gIndxCam][indx]['sdev_avg'];\n\n"
 
         "        html_tab +=\"<tr>\";\n"
         "        html_tab +=\"  <td align='left'><a href='\"\n"

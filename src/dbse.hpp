@@ -65,9 +65,6 @@ struct ctx_file_item {
     std::string file_tmc;   /*File time 12h format*/
     std::string file_tml;   /*File time 24h format*/
     int         diff_avg;   /*Average diffs for motion frames */
-    int         sdev_min;   /*std dev min */
-    int         sdev_max;   /*std dev max */
-    int         sdev_avg;   /*std dev average */
 };
 typedef std::vector<ctx_file_item> vec_files;
 

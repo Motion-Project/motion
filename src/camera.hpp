@@ -42,9 +42,6 @@ struct ctx_coord {
     int maxx;
     int miny;
     int maxy;
-    int stddev_x;
-    int stddev_y;
-    int stddev_xy;
 };
 
 struct ctx_image_data {
@@ -52,7 +49,6 @@ struct ctx_image_data {
     u_char       *image_high;
     int                 diffs;
     int                 diffs_raw;
-    int                 diffs_ratio;
     int64_t             idnbr_norm;
     int64_t             idnbr_high;
     struct timespec     imgts;          /* Realtime for display */
@@ -189,9 +185,6 @@ class cls_camera {
 
         uint64_t    info_diff_tot;
         uint64_t    info_diff_cnt;
-        int         info_sdev_min;
-        int         info_sdev_max;
-        uint64_t    info_sdev_tot;
         std::vector<std::vector<ctx_schedule_data>> schedule;
         ctx_cleandir    *cleandir;
 

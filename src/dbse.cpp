@@ -53,9 +53,6 @@ void cls_dbse::cols_vec_create()
     cols_vec_add("file_tmc","text");
     cols_vec_add("file_tml","text");
     cols_vec_add("diff_avg","int");
-    cols_vec_add("sdev_min","int");
-    cols_vec_add("sdev_max","int");
-    cols_vec_add("sdev_avg","int");
 }
 
 void cls_dbse::item_default()
@@ -72,9 +69,6 @@ void cls_dbse::item_default()
     file_item.file_tmc = "null";
     file_item.file_tml = "null";
     file_item.diff_avg  = 0;
-    file_item.sdev_min  = 0;
-    file_item.sdev_max  = 0;
-    file_item.sdev_avg  = 0;
 
 }
 
@@ -108,12 +102,6 @@ void cls_dbse::item_assign(std::string col_nm, std::string col_val)
         file_item.file_tml = col_val;
     } else if (col_nm == "diff_avg") {
         file_item.diff_avg = mtoi(col_val);
-    } else if (col_nm == "sdev_min") {
-        file_item.sdev_min = mtoi(col_val);
-    } else if (col_nm == "sdev_max") {
-        file_item.sdev_max = mtoi(col_val);
-    } else if (col_nm == "sdev_avg") {
-        file_item.sdev_avg = mtoi(col_val);
     }
 }
 
@@ -1103,7 +1091,7 @@ void cls_dbse::filelist_add(cls_camera *cam, timespec *ts1, std::string ftyp
     char tmc[12];
     char tml[12];
 
-    uint64_t diff_avg, sdev_avg;
+    uint64_t diff_avg;
     struct tm timestamp_tm;
 
     if (dbse_open() == false) {
@@ -1127,17 +1115,12 @@ void cls_dbse::filelist_add(cls_camera *cam, timespec *ts1, std::string ftyp
     } else {
         diff_avg =0;
     }
-    if (cam->info_diff_cnt != 0) {
-        sdev_avg = (cam->info_sdev_tot / cam->info_diff_cnt);
-    } else {
-        sdev_avg =0;
-    }
 
     sqlquery =  "insert into motion ";
     sqlquery += " (device_id, file_nm, file_typ, file_dir";
     sqlquery += " , full_nm, file_sz, file_dtl";
-    sqlquery += " , file_tmc, file_tml, diff_avg";
-    sqlquery += " , sdev_min, sdev_max, sdev_avg)";
+    sqlquery += " , file_tmc, file_tml, diff_avg)";
+
     sqlquery += " values ("+std::to_string(cam->cfg->device_id);
     sqlquery += " ,'" + filenm + "'";
     sqlquery += " ,'" + ftyp + "'";
@@ -1148,9 +1131,6 @@ void cls_dbse::filelist_add(cls_camera *cam, timespec *ts1, std::string ftyp
     sqlquery += " ,'" + std::string(tmc)+ "'";
     sqlquery += " ,'" + std::string(tml)+ "'";
     sqlquery += " ,"  + std::to_string(diff_avg);
-    sqlquery += " ,"  + std::to_string(cam->info_sdev_min);
-    sqlquery += " ,"  + std::to_string(cam->info_sdev_max);
-    sqlquery += " ,"  + std::to_string(sdev_avg);
     sqlquery += ")";
 
     exec_sql(sqlquery);

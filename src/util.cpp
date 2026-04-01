@@ -429,22 +429,6 @@ void mystrftime_base(cls_camera *cam
                     user_fmt.append(tst);
                 }
                 indx += (strlen("{ver}")-1);
-            } else if (fmt.substr(indx,strlen("{sdevx}")) == "{sdevx}") {
-                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_x);
-                user_fmt.append(tmp);
-                indx += (strlen("{sdevx}")-1);
-            } else if (fmt.substr(indx,strlen("{sdevy}")) == "{sdevy}") {
-                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_y);
-                user_fmt.append(tmp);
-                indx += (strlen("{sdevy}")-1);
-            } else if (fmt.substr(indx,strlen("{sdevxy}")) == "{sdevxy}") {
-                sprintf(tmp, "%0*d", wd, cam->current_image->location.stddev_xy);
-                user_fmt.append(tmp);
-                indx += (strlen("{sdevxy}")-1);
-            } else if (fmt.substr(indx,strlen("{ratio}")) == "{ratio}") {
-                sprintf(tmp, "%0*d", wd, cam->current_image->diffs_ratio);
-                user_fmt.append(tmp);
-                indx += (strlen("{ratio}")-1);
             } else if (fmt.substr(indx,strlen("{action_user}")) == "{action_user}") {
                 user_fmt.append(cam->action_user);
                 indx += (strlen("{action_user}")-1);

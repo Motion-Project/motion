@@ -370,15 +370,6 @@ void cls_webu_json::movies_list()
             webua->resp_page += ",\"diff_avg\": \"";
             webua->resp_page += std::to_string(flst[indx2].diff_avg) + "\"";
 
-            webua->resp_page += ",\"sdev_min\": \"";
-            webua->resp_page += std::to_string(flst[indx2].sdev_min) + "\"";
-
-            webua->resp_page += ",\"sdev_max\": \"";
-            webua->resp_page += std::to_string(flst[indx2].sdev_max) + "\"";
-
-            webua->resp_page += ",\"sdev_avg\": \"";
-            webua->resp_page += std::to_string(flst[indx2].sdev_avg) + "\"";
-
             webua->resp_page += "}";
             webua->resp_page += ",";
             indx++;

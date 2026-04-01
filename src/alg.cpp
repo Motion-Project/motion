@@ -623,9 +623,8 @@ void cls_alg::diff_nomask()
 
     int i, curdiff;
     int imgsz = cam->imgs.motionsize;
-    int diffs = 0, diffs_net = 0;
+    int diffs = 0;
     int noise = cam->noise;
-    int lrgchg = cam->cfg->threshold_ratio_change;
 
     memset(out + imgsz, 128, (uint)(imgsz / 2));
     memset(out, 0, (uint)imgsz);
@@ -635,11 +634,6 @@ void cls_alg::diff_nomask()
         if (abs(curdiff) > noise) {
             *out = *new_img;
             diffs++;
-            if (curdiff > lrgchg) {
-                diffs_net++;
-            } else if (curdiff < -lrgchg) {
-                diffs_net--;
-            }
         }
         out++;
         ref++;
@@ -648,12 +642,6 @@ void cls_alg::diff_nomask()
     cam->current_image->diffs_raw = diffs;
     cam->current_image->diffs = diffs;
     cam->imgs.image_motion.imgts = cam->current_image->imgts;
-
-    if (diffs > 0 ) {
-        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
-    } else {
-        cam->current_image->diffs_ratio = 100;
-    }
 
 }
 
@@ -666,9 +654,8 @@ void cls_alg::diff_mask()
 
     int i, curdiff;
     int imgsz = cam->imgs.motionsize;
-    int diffs = 0, diffs_net = 0;
+    int diffs = 0;
     int noise = cam->noise;
-    int lrgchg = cam->cfg->threshold_ratio_change;
 
     memset(out + imgsz, 128, (uint)(imgsz / 2));
     memset(out, 0, (uint)imgsz);
@@ -682,11 +669,6 @@ void cls_alg::diff_mask()
         if (abs(curdiff) > noise) {
             *out = *new_img;
             diffs++;
-            if (curdiff > lrgchg) {
-                diffs_net++;
-            } else if (curdiff < -lrgchg) {
-                diffs_net--;
-            }
         }
 
         out++;
@@ -697,12 +679,6 @@ void cls_alg::diff_mask()
     cam->current_image->diffs_raw = diffs;
     cam->current_image->diffs = diffs;
     cam->imgs.image_motion.imgts = cam->current_image->imgts;
-
-    if (diffs > 0 ) {
-        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
-    } else {
-        cam->current_image->diffs_ratio = 100;
-    }
 
 }
 
@@ -716,10 +692,9 @@ void cls_alg::diff_smart()
 
     int i, curdiff;
     int imgsz = cam->imgs.motionsize;
-    int diffs = 0, diffs_net = 0;
+    int diffs = 0;
     int noise = cam->noise;
     int *mask_buffer = smartmask_buffer;
-    int lrgchg = cam->cfg->threshold_ratio_change;
 
     imgsz = cam->imgs.motionsize;
     memset(out + imgsz, 128, (uint)(imgsz / 2));
@@ -743,11 +718,6 @@ void cls_alg::diff_smart()
         if (abs(curdiff) > noise) {
             *out = *new_img;
             diffs++;
-            if (curdiff > lrgchg) {
-                diffs_net++;
-            } else if (curdiff < -lrgchg) {
-                diffs_net--;
-            }
         }
         out++;
         ref++;
@@ -757,11 +727,6 @@ void cls_alg::diff_smart()
     cam->current_image->diffs = diffs;
     cam->imgs.image_motion.imgts = cam->current_image->imgts;
 
-    if (diffs > 0 ) {
-        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
-    } else {
-        cam->current_image->diffs_ratio = 100;
-    }
 }
 
 void cls_alg::diff_masksmart()
@@ -774,10 +739,9 @@ void cls_alg::diff_masksmart()
 
     int i, curdiff;
     int imgsz = cam->imgs.motionsize;
-    int diffs = 0, diffs_net = 0;
+    int diffs = 0;
     int noise = cam->noise;
     int *mask_buffer = smartmask_buffer;
-    int lrgchg = cam->cfg->threshold_ratio_change;
 
     imgsz= cam->imgs.motionsize;
     memset(out + imgsz, 128, ((uint)imgsz / 2));
@@ -806,11 +770,6 @@ void cls_alg::diff_masksmart()
         if (abs(curdiff) > noise) {
             *out = *new_img;
             diffs++;
-            if (curdiff > lrgchg) {
-                diffs_net++;
-            } else if (curdiff < -lrgchg) {
-                diffs_net--;
-            }
         }
 
         out++;
@@ -822,12 +781,6 @@ void cls_alg::diff_masksmart()
     cam->current_image->diffs_raw = diffs;
     cam->current_image->diffs = diffs;
     cam->imgs.image_motion.imgts = cam->current_image->imgts;
-
-    if (diffs > 0 ) {
-        cam->current_image->diffs_ratio = (abs(diffs_net) * 100) / diffs;
-    } else {
-        cam->current_image->diffs_ratio = 100;
-    }
 
 }
 
@@ -989,85 +942,7 @@ void cls_alg::location_center()
 
 }
 
-/*Calculate distribution and variances of changes*/
-void cls_alg::location_dist_stddev()
-{
-    ctx_images *imgs = &cam->imgs;
-    int width = cam->imgs.width;
-    int height = cam->imgs.height;
-    ctx_coord *cent = &cam->current_image->location;
-    u_char *out = imgs->image_motion.image_norm;
-    int x, y, centc = 0, xdist = 0, ydist = 0;
-    int64_t variance_x, variance_y, variance_xy, distance_mean;
-
-    cent->maxx = 0;
-    cent->maxy = 0;
-    cent->minx = width;
-    cent->miny = height;
-    variance_x = 0;
-    variance_y = 0;
-    distance_mean = 0;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            if (*(out++)) {
-                variance_x += ((x - cent->x) * (x - cent->x));
-                variance_y += ((y - cent->y) * (y - cent->y));
-                distance_mean += (int64_t)sqrt(
-                        ((x - cent->x) * (x - cent->x)) +
-                        ((y - cent->y) * (y - cent->y)));
-
-                if (x > cent->x) {
-                    xdist += x - cent->x;
-                } else if (x < cent->x) {
-                    xdist += cent->x - x;
-                }
-
-                if (y > cent->y) {
-                    ydist += y - cent->y;
-                } else if (y < cent->y) {
-                    ydist += cent->y - y;
-                }
-
-                centc++;
-            }
-        }
-    }
-
-    if (centc) {
-        cent->minx = cent->x - xdist / centc * 3;
-        cent->maxx = cent->x + xdist / centc * 3;
-        cent->miny = cent->y - ydist / centc * 3;
-        cent->maxy = cent->y + ydist / centc * 3;
-        cent->stddev_x = (int)sqrt((variance_x / centc));
-        cent->stddev_y = (int)sqrt((variance_y / centc));
-        distance_mean = (int64_t)(distance_mean / centc);
-    } else {
-        cent->stddev_y = 0;
-        cent->stddev_x = 0;
-        distance_mean = 0;
-    }
-
-    variance_xy = 0;
-    out = imgs->image_motion.image_norm;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            if (*(out++)) {
-                variance_xy += (
-                    ((int64_t)sqrt(((x - cent->x) * (x - cent->x)) +
-                          ((y - cent->y) * (y - cent->y))) - distance_mean) *
-                    ((int64_t)sqrt(((x - cent->x) * (x - cent->x)) +
-                          ((y - cent->y) * (y - cent->y))) - distance_mean));
-            }
-        }
-    }
-    /* Per statistics, divide by n-1 for calc of a standard deviation */
-    if ((centc-1) > 0) {
-        cent->stddev_xy = (int)sqrt((variance_xy / (centc-1)));
-    }
-}
-
-void cls_alg::location_dist_basic()
+void cls_alg::location_dist()
 {
     ctx_images *imgs = &cam->imgs;
     int width = cam->imgs.width;
@@ -1106,9 +981,6 @@ void cls_alg::location_dist_basic()
         cent->maxx = cent->x + xdist / centc * 3;
         cent->miny = cent->y - ydist / centc * 3;
         cent->maxy = cent->y + ydist / centc * 3;
-    } else {
-        cent->stddev_y = 0;
-        cent->stddev_x = 0;
     }
 }
 
@@ -1159,36 +1031,8 @@ void cls_alg::location_minmax()
 void cls_alg::location()
 {
     location_center();
-    if (calc_stddev) {
-        location_dist_stddev();
-    } else {
-        location_dist_basic();
-    }
+    location_dist();
     location_minmax();
-}
-
-/* Apply user or default thresholds on standard deviations*/
-void cls_alg::stddev()
-{
-    if (calc_stddev == false) {
-        return;
-    }
-    if (cam->cfg->threshold_sdevx > 0) {
-        if (cam->current_image->location.stddev_x > cam->cfg->threshold_sdevx) {
-            cam->current_image->diffs = 0;
-            return;
-        }
-    } else if (cam->cfg->threshold_sdevy > 0) {
-        if (cam->current_image->location.stddev_y > cam->cfg->threshold_sdevy) {
-            cam->current_image->diffs = 0;
-            return;
-        }
-    } else if (cam->cfg->threshold_sdevxy > 0) {
-        if (cam->current_image->location.stddev_xy > cam->cfg->threshold_sdevxy) {
-            cam->current_image->diffs = 0;
-            return;
-        }
-    }
 }
 
 void cls_alg::diff()
@@ -1201,7 +1045,6 @@ void cls_alg::diff()
         } else {
             cam->current_image->diffs = 0;
             cam->current_image->diffs_raw = 0;
-            cam->current_image->diffs_ratio = 100;
         }
     }
     lightswitch();
@@ -1213,14 +1056,6 @@ cls_alg::cls_alg(cls_camera *p_cam)
     int i;
 
     cam = p_cam;
-
-    if ((cam->cfg->threshold_sdevx == 0) &&
-        (cam->cfg->threshold_sdevy == 0) &&
-        (cam->cfg->threshold_sdevxy == 0)) {
-        calc_stddev = false;
-    } else {
-        calc_stddev = true;
-    }
 
     smartmask =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);
     smartmask_final =(unsigned char*) mymalloc((uint)cam->imgs.motionsize);

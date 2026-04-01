@@ -196,9 +196,6 @@ void cls_camera::info_reset()
 {
     info_diff_cnt = 0;
     info_diff_tot = 0;
-    info_sdev_min = 99999999;
-    info_sdev_max = 0;
-    info_sdev_tot = 0;
 }
 
 void cls_camera::movie_start()
@@ -1414,7 +1411,6 @@ void cls_camera::detection()
     } else {
         current_image->diffs = 0;
         current_image->diffs_raw = 0;
-        current_image->diffs_ratio = 100;
     }
 }
 
@@ -1438,12 +1434,6 @@ void cls_camera::tuning()
         (current_image->diffs > threshold) &&
         (current_image->diffs < threshold_maximum)) {
         alg->location();
-        alg->stddev();
-
-    }
-
-    if (current_image->diffs_ratio < cfg->threshold_ratio) {
-        current_image->diffs = 0;
     }
 
     if (pause == false) {
@@ -1695,22 +1685,6 @@ void cls_camera::actions()
         current_image->motion = true;
         info_diff_cnt++;
         info_diff_tot += (uint)current_image->diffs;
-        info_sdev_tot += (uint)current_image->location.stddev_xy;
-        if (info_sdev_min > current_image->location.stddev_xy ) {
-            info_sdev_min = current_image->location.stddev_xy;
-        }
-        if (info_sdev_max < current_image->location.stddev_xy ) {
-            info_sdev_max = current_image->location.stddev_xy;
-        }
-        /*
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-        , "dev_x %d dev_y %d dev_xy %d, diff %d ratio %d"
-        , current_image->location.stddev_x
-        , current_image->location.stddev_y
-        , current_image->location.stddev_xy
-        , current_image->diffs
-        , current_image->diffs_ratio);
-        */
     }
 
     if ((cfg->emulate_motion || event_user) && (startup_frames == 0)) {
@@ -2050,9 +2024,6 @@ cls_camera::cls_camera(cls_motapp *p_app)
 
     info_diff_tot = 0;
     info_diff_cnt = 0;
-    info_sdev_min = 0;
-    info_sdev_max = 0;
-    info_sdev_tot = 0;
 
     action_snapshot = false;
     event_stop = false;

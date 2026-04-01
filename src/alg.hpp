@@ -39,7 +39,6 @@
             u_char  *smartmask;
             int     *smartmask_buffer;
             int     diffs_last[THRESHOLD_TUNE_LENGTH];
-            bool    calc_stddev;
 
             int iflood(int x, int y, int width, int height,
                 u_char *out, int *labels, int newvalue, int oldvalue);
@@ -57,8 +56,7 @@
             void diff_standard();
             void lightswitch();
             void location_center();
-            void location_dist_stddev();
-            void location_dist_basic();
+            void location_dist();
             void location_minmax();
 
     };
