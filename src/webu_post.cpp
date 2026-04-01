@@ -658,9 +658,12 @@ void cls_webu_post::config()
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for log");
             } else if (restart_list[indx].comp_type == "webu") {
-                app->webu->restart = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
-                    "Restart request for webcontrol");
+                for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
+                    app->webu_list[indx2]->restart = true;
+                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                        "Restart request for webcontrol on port %d"
+                        ,app->webu_list[indx2]->cfg->webcontrol_port);
+                }
             } else if (restart_list[indx].comp_type == "dbse") {
                 app->dbse->restart = true;
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,

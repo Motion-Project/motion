@@ -35,12 +35,12 @@
 static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *connection)
 {
     (void)connection;
-    cls_motapp      *p_app =(cls_motapp *)cls;
+    cls_webu        *p_webu=(cls_webu *)cls;
     cls_webu_ans    *webua;
 
     mythreadname_set("wc", 0, NULL);
 
-    webua = new cls_webu_ans(p_app, uri);
+    webua = new cls_webu_ans(p_webu, uri);
 
     return webua;
 }
@@ -91,9 +91,9 @@ void cls_webu::mhd_features_basic()
         if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
         } else {
-            if (app->cfg->webcontrol_auth_method == "basic") {
+            if (cfg->webcontrol_auth_method == "basic") {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
-                app->cfg->webcontrol_auth_method = "none";
+                cfg->webcontrol_auth_method = "none";
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
             }
@@ -112,9 +112,9 @@ void cls_webu::mhd_features_digest()
         if (retcd == MHD_YES) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
         } else {
-            if (app->cfg->webcontrol_auth_method == "digest") {
+            if (cfg->webcontrol_auth_method == "digest") {
                 MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
-                app->cfg->webcontrol_auth_method = "none";
+                cfg->webcontrol_auth_method = "none";
             } else {
                 MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
             }
@@ -228,12 +228,12 @@ void cls_webu::mhd_loadfile(std::string fname, std::string &filestr)
 void cls_webu::mhd_checktls()
 {
     if (mhdst->tls_use) {
-        if ((app->cfg->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
+        if ((cfg->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
             mhdst->tls_use = false;
         }
-        if ((app->cfg->webcontrol_key == "") || (mhdst->tls_key == "")) {
+        if ((cfg->webcontrol_key == "") || (mhdst->tls_key == "")) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
                 ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
             mhdst->tls_use = false;
@@ -247,7 +247,7 @@ void cls_webu::mhd_opts_init()
 {
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_URI_LOG_CALLBACK;
     mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = (intptr_t)webu_mhd_init;
-    mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = app;
+    mhdst->mhd_ops[mhdst->mhd_opt_nbr].ptr_value = this;
     mhdst->mhd_opt_nbr++;
 }
 
@@ -264,11 +264,11 @@ void cls_webu::mhd_opts_deinit()
 /* Set the MHD option on acceptable connections */
 void cls_webu::mhd_opts_localhost()
 {
-    if (app->cfg->webcontrol_localhost) {
+    if (cfg->webcontrol_localhost) {
         if (mhdst->ipv6) {
             memset(&mhdst->lpbk_ipv6, 0, sizeof(struct sockaddr_in6));
             mhdst->lpbk_ipv6.sin6_family = AF_INET6;
-            mhdst->lpbk_ipv6.sin6_port = htons((uint16_t)app->cfg->webcontrol_port);
+            mhdst->lpbk_ipv6.sin6_port = htons((uint16_t)cfg->webcontrol_port);
             mhdst->lpbk_ipv6.sin6_addr = in6addr_loopback;
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -279,7 +279,7 @@ void cls_webu::mhd_opts_localhost()
         } else {
             memset(&mhdst->lpbk_ipv4, 0, sizeof(struct sockaddr_in));
             mhdst->lpbk_ipv4.sin_family = AF_INET;
-            mhdst->lpbk_ipv4.sin_port = htons((uint16_t)app->cfg->webcontrol_port);
+            mhdst->lpbk_ipv4.sin_port = htons((uint16_t)cfg->webcontrol_port);
             mhdst->lpbk_ipv4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
             mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_SOCK_ADDR;
@@ -294,7 +294,7 @@ void cls_webu::mhd_opts_localhost()
 /* Set the mhd digest options */
 void cls_webu::mhd_opts_digest()
 {
-    if (app->cfg->webcontrol_auth_method == "digest") {
+    if (cfg->webcontrol_auth_method == "digest") {
 
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].option = MHD_OPTION_DIGEST_AUTH_RANDOM;
         mhdst->mhd_ops[mhdst->mhd_opt_nbr].value = sizeof(wb_digest_rand);
@@ -373,9 +373,9 @@ void cls_webu::init_actions()
     std::string parm_vl;
 
     wb_actions = new ctx_params;
-    util_parms_parse(wb_actions,"webcontrol_actions", app->cfg->webcontrol_actions);
+    util_parms_parse(wb_actions,"webcontrol_actions", cfg->webcontrol_actions);
 
-    if (app->cfg->webcontrol_parms == 0) {
+    if (cfg->webcontrol_parms == 0) {
         parm_vl = "off";
     } else {
         parm_vl = "on";
@@ -395,15 +395,15 @@ void cls_webu::init_actions()
     util_parms_add_default(wb_actions,"action_user",parm_vl);
 }
 
-void cls_webu::start_daemon_port1()
+void cls_webu::start_daemon()
 {
     mhdst = new ctx_mhdstart;
 
     info_tls = "";
-    mhd_loadfile(app->cfg->webcontrol_cert, mhdst->tls_cert);
-    mhd_loadfile(app->cfg->webcontrol_key, mhdst->tls_key);
-    mhdst->ipv6 = app->cfg->webcontrol_ipv6;
-    mhdst->tls_use = app->cfg->webcontrol_tls;
+    mhd_loadfile(cfg->webcontrol_cert, mhdst->tls_cert);
+    mhd_loadfile(cfg->webcontrol_key, mhdst->tls_key);
+    mhdst->ipv6 = cfg->webcontrol_ipv6;
+    mhdst->tls_use = cfg->webcontrol_tls;
 
     mhdst->mhd_ops =(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem) * WEBUI_MHD_OPTS);
     mhd_features();
@@ -412,7 +412,7 @@ void cls_webu::start_daemon_port1()
 
     wb_daemon = MHD_start_daemon (
         mhdst->mhd_flags
-        , (uint16_t)app->cfg->webcontrol_port
+        , (uint16_t)cfg->webcontrol_port
         , NULL, NULL
         , &mhd_answer, app
         , MHD_OPTION_ARRAY, mhdst->mhd_ops
@@ -422,94 +422,38 @@ void cls_webu::start_daemon_port1()
     if (wb_daemon == nullptr) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Unable to start webserver on port %d")
-            ,app->cfg->webcontrol_port);
+            ,cfg->webcontrol_port);
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
             ,_("Validate no other applications/instances are using port %d")
-            ,app->cfg->webcontrol_port);
+            ,cfg->webcontrol_port);
     } else {
         MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-            ,_("Started webcontrol on port %d")
-            ,app->cfg->webcontrol_port);
+            ,_("Started webserver on port %d")
+            ,cfg->webcontrol_port);
     }
     delete mhdst;
     mhdst = nullptr;
 }
 
-void cls_webu::start_daemon_port2()
-{
-    if ((app->cfg->webcontrol_port2 == 0 ) ||
-        (app->cfg->webcontrol_port2 == app->cfg->webcontrol_port)) {
-        return;
-    }
+void cls_webu::startup() {
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-        , _("Starting secondary webcontrol on port %d")
-        , app->cfg->webcontrol_port2);
-
-    mhdst = new ctx_mhdstart;
-
-    mhd_loadfile(app->cfg->webcontrol_cert, mhdst->tls_cert);
-    mhd_loadfile(app->cfg->webcontrol_key, mhdst->tls_key);
-    mhdst->ipv6 = app->cfg->webcontrol_ipv6;
-    mhdst->tls_use = false;
-
-    if (app->cfg->webcontrol_tls) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-            , _("TLS will be disabled on webcontrol port %d")
-            , app->cfg->webcontrol_port2);
-    }
-
-    mhdst->mhd_ops =(struct MHD_OptionItem*)mymalloc(sizeof(struct MHD_OptionItem)*WEBUI_MHD_OPTS);
-    mhd_opts();
-    mhd_flags();
-
-    wb_daemon2 = MHD_start_daemon (
-        mhdst->mhd_flags
-        , (uint16_t)app->cfg->webcontrol_port2
-        , NULL, NULL
-        , &mhd_answer, app
-        , MHD_OPTION_ARRAY, mhdst->mhd_ops
-        , MHD_OPTION_END);
-
-    free(mhdst->mhd_ops);
-    if (wb_daemon2 == nullptr) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Unable to start secondary webserver on port %d")
-            ,app->cfg->webcontrol_port2);
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Validate no other applications/instances are using port %d")
-            ,app->cfg->webcontrol_port2);
-    } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-            ,_("Started webcontrol on port %d")
-            ,app->cfg->webcontrol_port2);
-    }
-
-    delete mhdst;
-    mhdst = nullptr;
-
-}
-
-void cls_webu::startup()
-{
     unsigned int randnbr;
     wb_daemon = nullptr;
-    wb_daemon2 = nullptr;
     finish = false;
     wb_clients.clear();
 
     memset(wb_digest_rand, 0, sizeof(wb_digest_rand));
 
-    if (app->cfg->webcontrol_port == 0 ) {
+    if (cfg->webcontrol_port == 0 ) {
         return;
     }
 
     MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
         , _("Starting webcontrol on port %d")
-        , app->cfg->webcontrol_port);
+        , cfg->webcontrol_port);
 
     wb_headers = new ctx_params;
-    util_parms_parse(wb_headers, "webcontrol_headers", app->cfg->webcontrol_headers);
+    util_parms_parse(wb_headers, "webcontrol_headers", cfg->webcontrol_headers);
 
     init_actions();
 
@@ -517,9 +461,8 @@ void cls_webu::startup()
     randnbr = (unsigned int)(42000000.0 * rand() / (RAND_MAX + 1.0));
     snprintf(wb_digest_rand, sizeof(wb_digest_rand),"%d",randnbr);
 
-    start_daemon_port1();
+    start_daemon();
 
-    start_daemon_port2();
     cnct_cnt = 0;
 
 }
@@ -547,21 +490,16 @@ void cls_webu::shutdown()
         wb_daemon = nullptr;
     }
 
-    if (wb_daemon2 != nullptr) {
-        MHD_stop_daemon (wb_daemon2);
-        wb_daemon2 = nullptr;
-    }
-
     delete wb_actions;
     delete wb_headers;
 
 }
 
-cls_webu::cls_webu(cls_motapp *p_app)
+cls_webu::cls_webu(cls_motapp *p_app,cls_config *p_cfg)
 {
     app = p_app;
+    cfg = p_cfg;
     restart = false;
-    startup();
 }
 
 cls_webu::~cls_webu()

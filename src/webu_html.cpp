@@ -1667,7 +1667,7 @@ void cls_webu_html::user_page()
 void cls_webu_html::main()
 {
     pthread_mutex_lock(&app->mutex_post);
-        if (app->cfg->webcontrol_interface == "user") {
+        if (webu->cfg->webcontrol_interface == "user") {
             user_page();
         } else {
             default_page();

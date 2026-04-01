@@ -130,12 +130,14 @@ void cls_motapp::signal_process()
         reload_all = true;
         /*FALLTHROUGH*/
     case MOTION_SIGNAL_SIGTERM:     /* Quit application */
-        webu->finish = true;
-        webu->restart = false;
-
         dbse->finish = true;
         dbse->restart = false;
         dbse->handler_stop = true;
+
+        for (indx=0; indx<webu_cnt; indx++) {
+            webu_list[indx]->finish = true;
+            webu_list[indx]->restart = false;
+        }
 
         for (indx=0; indx<snd_cnt; indx++) {
             snd_list[indx]->restart = false;
@@ -401,6 +403,7 @@ void cls_motapp::watchdog(uint camindx)
 void cls_motapp::check_restart()
 {
     std::string parm_pid_org, parm_pid_new;
+    int indx1, indx2;
 
     if (motlog->restart == true) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting log"));
@@ -434,14 +437,32 @@ void cls_motapp::check_restart()
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarted database"));
     }
 
-    if (webu->restart == true) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting webcontrol"));
-        webu->shutdown();
-        cfg->parms_copy(conf_src, PARM_CAT_13);
-        webu->startup();
-        webu->restart = false;
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarted webcontrol"));
+    for (indx1=0; indx1<webu_cnt; indx1++) {
+        if (webu_list[indx1]->restart == true) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Restarting webcontrol on port %d")
+                , webu_list[indx1]->cfg->webcontrol_port);
+            webu_list[indx1]->shutdown();
+            if (webu_list[indx1]->cfg == cfg) {
+                cfg->parms_copy(conf_src, PARM_CAT_13);
+                cfg->parms_copy(conf_src, PARM_CAT_14);
+                webu_list[indx1]->cfg = cfg;
+            }
+            for (indx2=0; indx2<cam_cnt; indx2++) {
+                if (cam_list[indx2]->cfg == webu_list[indx1]->cfg) {
+                    cam_list[indx2]->cfg->parms_copy(cam_list[indx2]->conf_src,PARM_CAT_13);
+                    cam_list[indx2]->cfg->parms_copy(cam_list[indx2]->conf_src,PARM_CAT_14);
+                    webu_list[indx1]->cfg = cam_list[indx2]->cfg;
+                }
+            }
+            webu_list[indx1]->startup();
+            webu_list[indx1]->restart = false;
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Restarted webcontrol on port %d")
+                , webu_list[indx1]->cfg->webcontrol_port);
+        }
     }
+
 
 }
 
@@ -476,12 +497,49 @@ bool cls_motapp::check_devices()
         }
     }
 
-    if ((webu->finish == false) &&
-        (webu->wb_daemon != NULL)) {
-        retcd = true;
+    for (indx=0; indx<webu_cnt; indx++) {
+        if ((webu_list[indx]->finish == false) &&
+            (webu_list[indx]->wb_daemon != NULL)) {
+            retcd = true;
+        }
     }
 
     return retcd;
+
+}
+
+void cls_motapp::init_webu()
+{
+    int indx1, indx2;
+    cls_webu *p_webu;
+    bool dup;
+
+    p_webu = nullptr;
+
+    if (cfg->webcontrol_port != 0) {
+        p_webu = new cls_webu(this, cfg);
+        webu_list.push_back(p_webu);
+        webu_cnt = (int)webu_list.size();
+    }
+
+    for (indx1=0; indx1<cam_cnt; indx1++) {
+        dup = false;
+        for (indx2=0; indx2<indx1; indx2++) {
+            if (cam_list[indx1]->cfg->webcontrol_port ==
+                cam_list[indx2]->cfg->webcontrol_port) {
+                dup = true;
+            }
+        }
+        if (dup == false) {
+            p_webu = new cls_webu(this, cam_list[indx1]->cfg);
+            webu_list.push_back(p_webu);
+            webu_cnt = (int)webu_list.size();
+        }
+    }
+
+    for (indx1=0; indx1<webu_cnt; indx1++) {
+        webu_list[indx1]->startup();
+    }
 
 }
 
@@ -501,12 +559,10 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     conf_src = nullptr;
     cfg = nullptr;
     dbse = nullptr;
-    webu = nullptr;
     allcam = nullptr;
     schedule = nullptr;
     cam_list.clear();
     snd_list.clear();
-
 
     pthread_mutex_init(&mutex_camlst, NULL);
     pthread_mutex_init(&mutex_post, NULL);
@@ -537,9 +593,9 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     av_init();
 
     dbse = new cls_dbse(this);
-    webu = new cls_webu(this);
     allcam = new cls_allcam(this);
     schedule = new cls_schedule(this);
+    init_webu();
 
     if ((cam_cnt > 0) || (snd_cnt > 0)) {
         for (indx=0; indx<cam_cnt; indx++) {
@@ -564,7 +620,6 @@ void cls_motapp::deinit()
     av_deinit();
     pid_remove();
 
-    mydelete(webu);
     mydelete(dbse);
     mydelete(allcam)
     mydelete(schedule)
@@ -577,6 +632,10 @@ void cls_motapp::deinit()
 
     for (indx = 0; indx < snd_cnt;indx++) {
         mydelete(snd_list[indx]);
+    }
+
+    for (indx = 0; indx < webu_cnt;indx++) {
+        mydelete(webu_list[indx]);
     }
 
     pthread_mutex_destroy(&mutex_camlst);
@@ -602,6 +661,7 @@ void cls_motapp::camera_add()
 void cls_motapp::camera_delete()
 {
     cls_camera *cam;
+    int     indx, chk_indx;
 
     if (cam_delete < 0) {
         return;
@@ -628,6 +688,57 @@ void cls_motapp::camera_delete()
         return;
     }
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
+
+    /* Determine whether to close a webcontrol port or assign
+    a different config file for any other cameras using same port*/
+    if ((cam->cfg->webcontrol_port != cfg->webcontrol_port) &&
+        (cam->cfg->webcontrol_port != 0)) {
+        /* Determine if a web control is using this config*/
+        chk_indx = -1;
+        for (indx = 0; indx < webu_cnt; indx++) {
+            if (webu_list[indx]->cfg == cam->cfg) {
+                chk_indx = indx;
+            }
+        }
+        if (chk_indx != -1 ) {
+            /*This config IS being used.  Either change web control
+            to use a different cam for the config or shutdown the
+            webcontrol*/
+            chk_indx = -1;
+            for (indx = 0; indx < cam_cnt; indx++) {
+                if ((cam_list[indx]->cfg->webcontrol_port ==
+                    cam->cfg->webcontrol_port) &&
+                    (indx != cam_delete)) {
+                    chk_indx = indx;
+                }
+            }
+            if (chk_indx == -1 ) {
+                /* This was only cam on the web port so shut it down*/
+                for (indx = 0; indx < webu_cnt; indx++) {
+                    if (webu_list[indx]->cfg->webcontrol_port ==
+                        cam->cfg->webcontrol_port) {
+                        chk_indx = indx;
+                    }
+                }
+                webu_list[chk_indx]->shutdown();
+                mydelete(webu_list[chk_indx]);
+                webu_list.erase(webu_list.begin() + chk_indx);
+                webu_cnt--;
+            } else {
+                /* The web port is being used by different cam*/
+                /* assign the config for the different cam to the webu*/
+                /* chk_indx has the index of the different cam*/
+                for (indx = 0; indx < webu_cnt; indx++) {
+                    if (webu_list[indx]->cfg->webcontrol_port ==
+                        cam->cfg->webcontrol_port) {
+                        webu_list[indx]->cfg = cam_list[indx]->cfg;
+                        webu_list[chk_indx]->shutdown();
+                        webu_list[chk_indx]->startup();
+                    }
+                }
+            }
+        }
+    }
 
     pthread_mutex_lock(&mutex_camlst);
         mydelete(cam_list[cam_delete]);

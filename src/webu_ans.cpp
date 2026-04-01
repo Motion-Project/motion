@@ -61,9 +61,9 @@ int cls_webu_ans::check_tls()
     }
 
     file_chk = "";
-    if (app->cfg->webcontrol_cert != "") {
+    if (webu->cfg->webcontrol_cert != "") {
         memset(&file_attrib, 0, sizeof(struct stat));
-        if (stat(app->cfg->webcontrol_cert.c_str(), &file_attrib) == 0) {
+        if (stat(webu->cfg->webcontrol_cert.c_str(), &file_attrib) == 0) {
             strftime(file_time, 50, "%Y%m%d-%H%M%S-"
                 , localtime(&file_attrib.st_mtime));
             file_chk.append(file_time);
@@ -73,9 +73,9 @@ int cls_webu_ans::check_tls()
         }
     }
 
-    if (app->cfg->webcontrol_key != "") {
+    if (webu->cfg->webcontrol_key != "") {
         memset(&file_attrib, 0, sizeof(struct stat));
-        if (stat(app->cfg->webcontrol_key.c_str(), &file_attrib) == 0) {
+        if (stat(webu->cfg->webcontrol_key.c_str(), &file_attrib) == 0) {
             strftime(file_time, 50, "%Y%m%d-%H%M%S-"
                 , localtime(&file_attrib.st_mtime));
             file_chk.append(file_time);
@@ -120,7 +120,7 @@ int cls_webu_ans::parseurl()
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),url.c_str());
 
-    baselen = app->cfg->webcontrol_base_path.length();
+    baselen = webu->cfg->webcontrol_base_path.length();
 
     if (url.length() < baselen) {
         return -1;
@@ -131,7 +131,7 @@ int cls_webu_ans::parseurl()
     }
 
     if (url.substr(0, baselen) !=
-        app->cfg->webcontrol_base_path) {
+        webu->cfg->webcontrol_base_path) {
         return -1;
     }
 
@@ -249,7 +249,7 @@ void cls_webu_ans::clientip_get()
     int is_ipv6;
 
     is_ipv6 = false;
-    if (app->cfg->webcontrol_ipv6) {
+    if (webu->cfg->webcontrol_ipv6) {
         is_ipv6 = true;
     }
 
@@ -285,11 +285,11 @@ void cls_webu_ans::hostname_get()
     hdr = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_HOST);
     if (hdr == NULL) {
         hostfull = "//localhost:" +
-            std::to_string(app->cfg->webcontrol_port) +
-            app->cfg->webcontrol_base_path;
+            std::to_string(webu->cfg->webcontrol_port) +
+            webu->cfg->webcontrol_base_path;
     } else {
         hostfull = "//" +  std::string(hdr) +
-            app->cfg->webcontrol_base_path;
+            webu->cfg->webcontrol_base_path;
     }
 
     MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), hostfull.c_str());
@@ -351,7 +351,7 @@ void cls_webu_ans::client_connect()
     it = webu->wb_clients.begin();
     while (it != webu->wb_clients.end()) {
         if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
-            (app->cfg->webcontrol_lock_minutes*60)) {
+            (webu->cfg->webcontrol_lock_minutes*60)) {
             it = webu->wb_clients.erase(it);
         }
         it++;
@@ -406,15 +406,15 @@ mhdrslt cls_webu_ans::failauth_check()
     while (it != webu->wb_clients.end()) {
         if ((it->clientip == clientip) &&
             ((tm_cnct.tv_sec - it->conn_time.tv_sec) <
-             (app->cfg->webcontrol_lock_minutes*60)) &&
+             (webu->cfg->webcontrol_lock_minutes*60)) &&
             (it->authenticated == false) &&
-            (it->conn_nbr > app->cfg->webcontrol_lock_attempts)) {
+            (it->conn_nbr > webu->cfg->webcontrol_lock_attempts)) {
             MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
                 , "Ignoring connection from: %s"
                 , clientip.c_str());
             it->conn_time = tm_cnct;
-            if (app->cfg->webcontrol_lock_script != "") {
-                tmp = app->cfg->webcontrol_lock_script + " " +
+            if (webu->cfg->webcontrol_lock_script != "") {
+                tmp = webu->cfg->webcontrol_lock_script + " " +
                     std::to_string(it->userid_fail_nbr) + " " +  clientip;
                 /* Since we are not logged in yet, the cam is still nullptr.  */
                 if ((app->cam_cnt == 0) && (app->snd_cnt == 0)) {
@@ -429,7 +429,7 @@ mhdrslt cls_webu_ans::failauth_check()
             }
             return MHD_NO;
         } else if ((tm_cnct.tv_sec - it->conn_time.tv_sec) >=
-            (app->cfg->webcontrol_lock_minutes*60)) {
+            (webu->cfg->webcontrol_lock_minutes*60)) {
             it = webu->wb_clients.erase(it);
         } else {
             it++;
@@ -575,19 +575,19 @@ void cls_webu_ans::mhd_auth_parse()
     myfree(auth_user);
     myfree(auth_pass);
 
-    auth_len = (int)app->cfg->webcontrol_authentication.length();
-    col_pos =(char*) strstr(app->cfg->webcontrol_authentication.c_str() ,":");
+    auth_len = (int)webu->cfg->webcontrol_authentication.length();
+    col_pos =(char*) strstr(webu->cfg->webcontrol_authentication.c_str() ,":");
     if (col_pos == NULL) {
         auth_user = (char*)mymalloc((uint)(auth_len+1));
         auth_pass = (char*)mymalloc(2);
         snprintf(auth_user, (uint)auth_len + 1, "%s"
-            ,app->cfg->webcontrol_authentication.c_str());
+            ,webu->cfg->webcontrol_authentication.c_str());
         snprintf(auth_pass, 2, "%s","");
     } else {
         auth_user = (char*)mymalloc((uint)auth_len - strlen(col_pos) + 1);
         auth_pass =(char*)mymalloc(strlen(col_pos));
         snprintf(auth_user, (uint)auth_len - strlen(col_pos) + 1, "%s"
-            ,app->cfg->webcontrol_authentication.c_str());
+            ,webu->cfg->webcontrol_authentication.c_str());
         snprintf(auth_pass, strlen(col_pos), "%s", col_pos + 1);
     }
 }
@@ -604,9 +604,9 @@ mhdrslt cls_webu_ans::mhd_auth()
 
     snprintf(auth_realm, WEBUI_LEN_PARM, "%s","Motion");
 
-    if (app->cfg->webcontrol_authentication == "") {
+    if (webu->cfg->webcontrol_authentication == "") {
         authenticated = true;
-        if (app->cfg->webcontrol_auth_method != "none") {
+        if (webu->cfg->webcontrol_auth_method != "none") {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
         }
         return MHD_YES;
@@ -616,9 +616,9 @@ mhdrslt cls_webu_ans::mhd_auth()
         mhd_auth_parse();
     }
 
-    if (app->cfg->webcontrol_auth_method == "basic") {
+    if (webu->cfg->webcontrol_auth_method == "basic") {
         return mhd_basic();
-    } else if (app->cfg->webcontrol_auth_method == "digest") {
+    } else if (webu->cfg->webcontrol_auth_method == "digest") {
         return mhd_digest();
     }
 
@@ -822,6 +822,31 @@ void cls_webu_ans::answer_get()
     }
 }
 
+/* Validate camera requested is available to be shown on the port*/
+bool cls_webu_ans::camport_check()
+{
+    int indx;
+
+    if (webu->cfg->webcontrol_port == webu->app->cfg->webcontrol_port) {
+        /* All cameras can be seen on the webcontrol port specified
+        in the motion.conf file as the main application*/
+        return true;
+    } else {
+        for (indx=0; indx<app->cam_cnt; indx++) {
+            if (app->cam_list[indx]->cfg->device_id == device_id) {
+                if (app->cam_list[indx]->cfg->webcontrol_port ==
+                    webu->cfg->webcontrol_port) {
+                    return true;
+                }
+            }
+        }
+    }
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        , _("Camera device %d is not available on port %d")
+        , device_id, webu->cfg->webcontrol_port);
+    return false;
+}
+
 /* Answer the connection request for the webcontrol*/
 mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
     , const char *method, const char *upload_data, size_t *upload_data_size)
@@ -846,7 +871,6 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
         }
     }
 
-
     if (check_tls() != 0) {
         return MHD_NO;
     }
@@ -867,6 +891,11 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
     }
 
     client_connect();
+
+    if (camport_check() == false) {
+        bad_request();
+        return MHD_YES;
+    }
 
     if (mhd_first) {
         mhd_first = false;
@@ -990,10 +1019,10 @@ void cls_webu_ans::deinit_counter()
     }
 }
 
-cls_webu_ans::cls_webu_ans(cls_motapp *p_app, const char *uri)
+cls_webu_ans::cls_webu_ans(cls_webu *p_webu, const char *uri)
 {
-    app = p_app;
-    webu = p_app->webu;
+    webu = p_webu;
+    app = webu->app;
 
     char *tmplang;
 

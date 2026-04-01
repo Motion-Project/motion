@@ -268,8 +268,48 @@
 
       <h3><a name="webcontrol_pages"></a>Webcontrol pages</h3>
       <ul>
+        <li>The Motion webcontrol and live stream feeds are available by specifying
+        the <code>webcontrol_port</code> along with other
+        webcontrol / stream parameters in the motion.conf and camera.conf
+        files.
+        <p></p>
+        Motion allows for running multiple ports at the same
+        time to suit the needs of the user.  By default, Motion will specify
+        just a single port in the <code>motion.conf</code> file and that will
+        provide control and access to all the cameras on that port.  Users
+        can control which configuration parameters can be updated or changed
+        using the <code>webcontrol_parms</code> configuration option and also
+        change which actions are permitted using the
+        <code>webcontrol_actions</code> configuration option.
+        <p></p>
+        If the user wishes to have different options for each camera then
+        a different <code>webcontrol_port</code> can be specified in the
+        <code>camera.conf</code> files.  If the same port is specified in
+        multiple <code>camera.conf</code> files then all of the cameras
+        with the same port will be available on that port.  Additionally,
+        the other webcontrol and stream parameters can also be specified and
+        applied so that different limits on changes to parameters or actions
+        would apply.
+        <p></p>
+        The following example illustrates having all the cameras available
+        and being able to be controlled on port 8080 but on port 8081
+        the user would only be able to view the parameters and perform
+        actions since the webcontrol_parms was set to zero.  </li>
+        <code>motion.conf</code>
+          <ul>
+          <li><code>webcontrol_port 8080</code></li>
+          <li><code>webcontrol_parms 3</code></li>
+          </ul>
+        <code>camera1.conf</code>
+          <ul>
+          <li><code>webcontrol_port 8081</code></li>
+          <li><code>webcontrol_parms 0</code></li>
+          </ul>
+        <p></p>
+        The following illustrates the availble streams
+        and feeds provided by Motion.
+        <p></p>
         <li><code>{IP}:{port0}/</code> Home html page with streams for all cameras</li>
-
         The following JSON pages are available via the webcontrol.
         <ul>
           <li><code>{IP}:{port0}/0/config.json</code> JSON object with the configuration information for all cameras</li>

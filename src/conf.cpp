@@ -154,7 +154,6 @@ ctx_parm config_parms[] = {
     {"video_pipe_motion",         PARM_TYP_STRING, PARM_CAT_12, PARM_LEVEL_LIMITED },
 
     {"webcontrol_port",           PARM_TYP_INT,    PARM_CAT_13, PARM_LEVEL_ADVANCED },
-    {"webcontrol_port2",          PARM_TYP_INT,    PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_base_path",      PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_ipv6",           PARM_TYP_BOOL,   PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_localhost",      PARM_TYP_BOOL,   PARM_CAT_13, PARM_LEVEL_ADVANCED },
@@ -2302,25 +2301,6 @@ void cls_config::edit_webcontrol_port(std::string &parm, enum PARM_ACT pact)
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_port",_("webcontrol_port"));
 }
 
-void cls_config::edit_webcontrol_port2(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        webcontrol_port2 = 0;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 65535)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_port2 %d"),parm_in);
-        } else {
-            webcontrol_port2 = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(webcontrol_port2);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_port2",_("webcontrol_port2"));
-}
-
 void cls_config::edit_webcontrol_base_path(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -3354,7 +3334,6 @@ void cls_config::edit_cat12(std::string parm_nm, std::string &parm_val, enum PAR
 void cls_config::edit_cat13(std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "webcontrol_port") {                    edit_webcontrol_port(parm_val, pact);
-    } else if (parm_nm == "webcontrol_port2") {            edit_webcontrol_port2(parm_val, pact);
     } else if (parm_nm == "webcontrol_base_path") {        edit_webcontrol_base_path(parm_val, pact);
     } else if (parm_nm == "webcontrol_ipv6") {             edit_webcontrol_ipv6(parm_val, pact);
     } else if (parm_nm == "webcontrol_localhost") {        edit_webcontrol_localhost(parm_val, pact);

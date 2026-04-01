@@ -20,7 +20,7 @@
 #define _INCLUDE_WEBU_ANS_HPP_
     class cls_webu_ans {
         public:
-            cls_webu_ans(cls_motapp *p_motapp, const char *uri);
+            cls_webu_ans(cls_webu *p_webu, const char *uri);
             ~cls_webu_ans();
 
             cls_motapp      *app;
@@ -90,6 +90,7 @@
             void deinit_counter();
             void answer_get();
             void gzip_deflate();
+            bool camport_check();
 
     };
 

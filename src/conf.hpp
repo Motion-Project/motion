@@ -223,7 +223,6 @@
 
             /* Webcontrol configuration parameters */
             int             webcontrol_port;
-            int             webcontrol_port2;
             std::string     webcontrol_base_path;
             bool            webcontrol_ipv6;
             bool            webcontrol_localhost;
@@ -482,7 +481,6 @@
             void edit_webcontrol_lock_script(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_parms(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_port(std::string &parm, enum PARM_ACT pact);
-            void edit_webcontrol_port2(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_tls(std::string &parm, enum PARM_ACT pact);
 
             void edit_stream_grey(std::string &parm, enum PARM_ACT pact);

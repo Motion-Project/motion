@@ -441,30 +441,29 @@
           <tbody>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_port2" >webcontrol_port2</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_ipv6" >webcontrol_ipv6</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_headers" >webcontrol_headers</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_html" >webcontrol_html</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_base_path" >webcontrol_base_path</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
             </tr>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_script" >webcontrol_lock_script</a> </td>
             </tr>
             </tbody>
@@ -2353,21 +2352,20 @@
 
       <h3><a name="OptDetail_Webcontrol"></a>Web Control</a> </h3>
       <p></p>
-      These options must be placed in the Motion.conf file and not in a camera config files.
+      These options may be placed in the motion.conf or camera.conf files.
+      When the same port is specified in multiple camera.conf files, then
+      all the cameras specified will be available.  Note that if other
+      webcontrol parameters differ between camera files, Motion will only
+      select one of those sets to use for that port.  For example, if
+      camera1.conf and camera2.conf both specify webcontrol_port 8081 but
+      camera1.conf and camera2.conf have different webcontrol_authentication
+      parameters, then Motion will only use EITHER the one in camera1.conf
+      OR the one in camera2.conf.  Which one it uses is random.
       <ul>
         <h3><a name="webcontrol_port"></a> webcontrol_port </h3>
         <ul>
           <li>Values: 0 to 65535 | Default: 8080</li>
           The port number for the web based interface of Motion.
-        </ul>
-        <p></p>
-
-        <h3><a name="webcontrol_port2"></a> webcontrol_port2 </h3>
-        <ul>
-          <li>Values: 0 to 65535 | Default: 0 (disabled)</li>
-          Second port for the web interface that does not use TLS.  This allows for specifying one port that
-          provides a TLS connection (to be used externally) while this port serves the local lan without getting
-          certificate domain warnings.
         </ul>
         <p></p>
 

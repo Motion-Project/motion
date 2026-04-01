@@ -89,27 +89,27 @@
 
     class cls_webu {
         public:
-            cls_webu(cls_motapp *p_app);
+            cls_webu(cls_motapp *p_app,cls_config *p_cfg);
             ~cls_webu();
+            cls_motapp      *app;
+            cls_config      *cfg;
             bool                        finish;
             ctx_params                  *wb_headers;
             ctx_params                  *wb_actions;
             char                        wb_digest_rand[12];
             struct MHD_Daemon           *wb_daemon;
-            struct MHD_Daemon           *wb_daemon2;
             std::list<ctx_webu_clients> wb_clients;
             std::string                 info_tls;
             int                         cnct_cnt;
             bool                        restart;
+
             void startup();
             void shutdown();
 
         private:
             ctx_mhdstart    *mhdst;
-            cls_motapp      *app;
             void init_actions();
-            void start_daemon_port1();
-            void start_daemon_port2();
+            void start_daemon();
             void mhd_features_basic();
             void mhd_features_digest();
             void mhd_features_ipv6();

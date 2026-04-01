@@ -181,12 +181,14 @@ class cls_motapp {
 
         std::vector<cls_camera*>    cam_list;
         std::vector<cls_sound*>     snd_list;
+        std::vector<cls_webu*>      webu_list;
 
         bool    reload_all;
         bool    cam_add;
         int     cam_delete;
         int     cam_cnt;
         int     snd_cnt;
+        int     webu_cnt;
 
         int     argc;
         char    **argv;
@@ -194,7 +196,6 @@ class cls_motapp {
 
         cls_config          *conf_src;
         cls_config          *cfg;
-        cls_webu            *webu;
         cls_dbse            *dbse;
         cls_allcam          *allcam;
         cls_schedule        *schedule;
@@ -218,6 +219,7 @@ class cls_motapp {
         void av_deinit();
         void ntc();
         void watchdog(uint camindx);
+        void init_webu();
 };
 
 #endif /* _INCLUDE_MOTION_HPP_ */
