@@ -163,39 +163,49 @@ void cls_webu_text::main()
             connection();
         } else if (
             (webua->uri_cmd1 == "detection") &&
-            (webua->uri_cmd2 == "pause")) {
+            (webua->uri_cmd2 == "pause") &&
+            (webua->is_admin == true)) {
             webu_post->action_pause_on();
         } else if (
             (webua->uri_cmd1 == "detection") &&
-            (webua->uri_cmd2 == "start")) {
+            (webua->uri_cmd2 == "start") &&
+            (webua->is_admin == true)) {
             webu_post->action_pause_off();
         } else if (
             (webua->uri_cmd1 == "action") &&
-            (webua->uri_cmd2 == "eventend")) {
+            (webua->uri_cmd2 == "eventend") &&
+            (webua->is_admin == true)) {
             webu_post->action_eventend();
         } else if (
             (webua->uri_cmd1 == "action") &&
-            (webua->uri_cmd2 == "eventstart")) {
+            (webua->uri_cmd2 == "eventstart") &&
+            (webua->is_admin == true)) {
             webu_post->action_eventstart();
         } else if (
             (webua->uri_cmd1 == "action") &&
-            (webua->uri_cmd2 == "snapshot")) {
+            (webua->uri_cmd2 == "snapshot") &&
+            (webua->is_admin == true)) {
             webu_post->action_snapshot();
         } else if (
             (webua->uri_cmd1 == "action") &&
-            (webua->uri_cmd2 == "restart")) {
+            (webua->uri_cmd2 == "restart") &&
+            (webua->is_admin == true)) {
             webu_post->action_restart();
         } else if (
             (webua->uri_cmd1 == "action") &&
             ((webua->uri_cmd2 == "quit") ||
-                (webua->uri_cmd2 == "end"))) {
+             (webua->uri_cmd2 == "end")) &&
+            (webua->is_admin == true)) {
             webu_post->action_stop();
         } else {
             MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO
-                , _("Invalid request: cmd1: >%s< cmd2: >%s< camindx : >%d< ")
+                , _("Invalid request: cmd1: >%s<"
+                    " cmd2: >%s< camindx : >%d< "
+                    " is admin >%s<")
                 , webua->uri_cmd1.c_str()
                 , webua->uri_cmd2.c_str()
-                , webua->camindx);
+                , webua->camindx
+                , (webua->is_admin) ? "Y":"N");
         }
     pthread_mutex_unlock(&app->mutex_post);
     webua->mhd_send();

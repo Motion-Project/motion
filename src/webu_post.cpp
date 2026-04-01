@@ -748,6 +748,12 @@ void cls_webu_post::ptz()
 /* Process the actions from the webcontrol that the user requested */
 void cls_webu_post::process_actions()
 {
+    if (webua->is_admin == false) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , "Actions not permitted for user");
+        return;
+    }
+
     parse_cmd();
 
     if ((post_cmd == "") || (webua->device_id == -1)) {

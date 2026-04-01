@@ -79,8 +79,8 @@
     struct ctx_parm_depr{
         const std::string   parm_name;     /* Name of the deprecated option */
         const std::string   last_version;  /* Last version this option was used in */
-        const std::string   info;          /* Short text on why it was deprecated (removed, replaced with, etc) */
         const std::string   newname;       /* Name of the new parameter */
+        const std::string   info;          /* Short text on why it was deprecated (removed, replaced with, etc) */
     };
 
     extern struct ctx_parm config_parms[];
@@ -229,7 +229,8 @@
             int             webcontrol_parms;
             std::string     webcontrol_interface;
             std::string     webcontrol_auth_method;
-            std::string     webcontrol_authentication;
+            std::string     webcontrol_auth_admin;
+            std::string     webcontrol_auth_user;
             bool            webcontrol_tls;
             std::string     webcontrol_cert;
             std::string     webcontrol_key;
@@ -467,7 +468,8 @@
 
             void edit_webcontrol_actions(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_auth_method(std::string &parm, enum PARM_ACT pact);
-            void edit_webcontrol_authentication(std::string &parm, enum PARM_ACT pact);
+            void edit_webcontrol_auth_admin(std::string &parm, enum PARM_ACT pact);
+            void edit_webcontrol_auth_user(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_base_path(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_cert(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_headers(std::string &parm, enum PARM_ACT pact);

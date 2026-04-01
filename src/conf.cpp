@@ -160,7 +160,8 @@ ctx_parm config_parms[] = {
     {"webcontrol_parms",          PARM_TYP_LIST,   PARM_CAT_13, PARM_LEVEL_NEVER},
     {"webcontrol_interface",      PARM_TYP_LIST,   PARM_CAT_13, PARM_LEVEL_ADVANCED },
     {"webcontrol_auth_method",    PARM_TYP_LIST,   PARM_CAT_13, PARM_LEVEL_RESTRICTED },
-    {"webcontrol_authentication", PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
+    {"webcontrol_auth_admin",     PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
+    {"webcontrol_auth_user",      PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
     {"webcontrol_tls",            PARM_TYP_BOOL,   PARM_CAT_13, PARM_LEVEL_RESTRICTED },
     {"webcontrol_cert",           PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
     {"webcontrol_key",            PARM_TYP_STRING, PARM_CAT_13, PARM_LEVEL_RESTRICTED },
@@ -229,235 +230,39 @@ ctx_parm config_parms[] = {
 
 /* Array of deprecated config options */
 ctx_parm_depr config_parms_depr[] = {
-    {
-    "thread",
-    "3.4.1",
-    "The \"thread\" option has been replaced by the \"camera\"",
-    "camera"
-    },
-    {
-    "ffmpeg_timelapse",
-    "4.0.1",
-    "\"ffmpeg_timelapse\" replaced with \"timelapse_interval\"",
-    "timelapse_interval"
-    },
-    {
-    "ffmpeg_timelapse_mode",
-    "4.0.1",
-    "\"ffmpeg_timelapse_mode\" replaced with \"timelapse_mode\"",
-    "timelapse_mode"
-    },
-    {
-    "brightness",
-    "4.1.1",
-    "\"brightness\" replaced with \"v4l2_params\"",
-    "v4l2_params"
-    },
-    {
-    "contrast",
-    "4.1.1",
-    "\"contrast\" replaced with \"v4l2_params\"",
-    "v4l2_params"
-    },
-    {
-    "saturation",
-    "4.1.1",
-    "\"saturation\" replaced with \"v4l2_params\"",
-    "v4l2_params"
-    },
-    {
-    "hue",
-    "4.1.1",
-    "\"hue\" replaced with \"v4l2_params\"",
-    "v4l2_params"
-    },
-    {
-    "power_line_frequency",
-    "4.1.1",
-    "\"power_line_frequency\" replaced with \"v4l2_params\"",
-    "v4l2_params"
-    },
-    {
-    "text_double",
-    "4.1.1",
-    "\"text_double\" replaced with \"text_scale\"",
-    "text_scale"
-    },
-    {
-    "webcontrol_html_output",
-    "4.1.1",
-    "\"webcontrol_html_output\" replaced with \"webcontrol_interface\"",
-    "webcontrol_interface"
-    },
-    {
-     "lightswitch",
-    "4.1.1",
-    "\"lightswitch\" replaced with \"lightswitch_percent\"",
-    "lightswitch_percent"
-    },
-    {
-    "ffmpeg_output_movies",
-    "4.1.1",
-    "\"ffmpeg_output_movies\" replaced with \"movie_output\"",
-    "movie_output"
-    },
-    {
-    "ffmpeg_output_debug_movies",
-    "4.1.1",
-    "\"ffmpeg_output_debug_movies\" replaced with \"movie_output_motion\"",
-    "movie_output_motion"
-    },
-    {
-    "max_movie_time",
-    "4.1.1",
-    "\"max_movie_time\" replaced with \"movie_max_time\"",
-    "movie_max_time"
-    },
-    {
-    "ffmpeg_bps",
-    "4.1.1",
-    "\"ffmpeg_bps\" replaced with \"movie_bps\"",
-    "movie_bps"
-    },
-    {
-    "ffmpeg_variable_bitrate",
-    "4.1.1",
-    "\"ffmpeg_variable_bitrate\" replaced with \"movie_quality\"",
-    "movie_quality"
-    },
-    {
-    "ffmpeg_video_codec",
-    "4.1.1",
-    "\"ffmpeg_video_codec\" replaced with \"movie_container\"",
-    "movie_container"
-    },
-    {
-    "ffmpeg_passthrough",
-    "4.1.1",
-    "\"ffmpeg_passthrough\" replaced with \"movie_passthrough\"",
-    "movie_passthrough"
-    },
-    {
-    "use_extpipe",
-    "4.1.1",
-    "\"use_extpipe\" replaced with \"movie_extpipe_use\"",
-    "movie_extpipe_use"
-    },
-    {
-    "extpipe",
-    "4.1.1",
-    "\"extpipe\" replaced with \"movie_extpipe\"",
-    "movie_extpipe"
-    },
-    {
-    "output_pictures",
-    "4.1.1",
-    "\"output_pictures\" replaced with \"picture_output\"",
-    "picture_output"
-    },
-    {
-    "output_debug_pictures",
-    "4.1.1",
-    "\"output_debug_pictures\" replaced with \"picture_output_motion\"",
-    "picture_output_motion"
-    },
-    {
-    "quality",
-    "4.1.1",
-    "\"quality\" replaced with \"picture_quality\"",
-    "picture_quality"
-    },
-    {
-    "exif_text",
-    "4.1.1",
-    "\"exif_text\" replaced with \"picture_exif\"",
-    "picture_exif"
-    },
-    {
-    "motion_video_pipe",
-    "4.1.1",
-    "\"motion_video_pipe\" replaced with \"video_pipe_motion\"",
-    "video_pipe_motion"
-    },
-    {
-    "ipv6_enabled",
-    "4.1.1",
-    "\"ipv6_enabled\" replaced with \"webcontrol_ipv6\"",
-    "webcontrol_ipv6"
-    },
-    {
-    "rtsp_uses_tcp",
-    "4.1.1",
-    "\"rtsp_uses_tcp\" replaced with \"netcam_use_tcp\"",
-    "netcam_use_tcp"
-    },
-    {
-    "switchfilter",
-    "4.1.1",
-    "\"switchfilter\" replaced with \"roundrobin_switchfilter\"",
-    "roundrobin_switchfilter"
-    },
-    {
-    "logfile",
-    "4.1.1",
-    "\"logfile\" replaced with \"log_file\"",
-    "log_file"
-    },
-    {
-    "process_id_file",
-    "4.1.1",
-    "\"process_id_file\" replaced with \"pid_file\"",
-    "pid_file"
-    },
-    {
-    "movie_codec",
-    "5.0.0",
-    "\"movie_codec\" replaced with \"movie_container\"",
-    "movie_container"
-    },
-    {
-    "camera_id",
-    "5.0.0",
-    "\"camera_id\" replaced with \"device_id\"",
-    "device_id"
-    },
-    {
-    "camera_name",
-    "5.0.0",
-    "\"camera_name\" replaced with \"device_name\"",
-    "device_name"
-    },
-    {
-    "camera_tmo",
-    "5.0.0",
-    "\"camera_tmo\" replaced with \"device_tmo\"",
-    "device_tmo"
-    },
-    {
-    "libcam_name",
-    "5.0.0",
-    "\"libcam_name\" replaced with \"libcam_device\"",
-    "libcam_device"
-    },
-    {
-    "video_device",
-    "5.0.0",
-    "\"video_device\" replaced with \"v4l2_device\"",
-    "v4l2_device"
-    },
-    {
-    "video_params",
-    "5.0.0",
-    "\"video_params\" replaced with \"v4l2_params\"",
-    "v4l2_params"
-    },
-    {
-    "timelapse_codec",
-    "5.0.0",
-    "\"timelapse_codec\" replaced with \"timelapse_container\"",
-    "timelapse_container"
-    },
-    { "","","",""}
+    {"movie_codec","5.0.0","movie_container"
+        ,"\"movie_codec\" replaced with \"movie_container\""}
+    ,{"camera_id","5.0.0","device_id"
+        ,"\"camera_id\" replaced with \"device_id\""}
+    ,{"camera_name","5.0.0","device_name"
+        ,"\"camera_name\" replaced with \"device_name\""}
+    ,{"camera_tmo","5.0.0","device_tmo"
+        ,"\"camera_tmo\" replaced with \"device_tmo\""}
+    ,{"libcam_name","5.0.0","libcam_device"
+        ,"\"libcam_name\" replaced with \"libcam_device\""}
+    ,{"video_device","5.0.0","v4l2_device"
+        ,"\"video_device\" replaced with \"v4l2_device\""}
+    ,{"video_params","5.0.0","v4l2_params"
+        ,"\"video_params\" replaced with \"v4l2_params\""}
+    ,{"timelapse_codec","5.0.0","timelapse_container"
+        ,"\"timelapse_codec\" replaced with \"timelapse_container\""}
+    ,{"stream_port","5.0.0","webcontrol_port"
+        ,"\"stream_port\" replaced with \"webcontrol_port\""}
+    ,{"stream_localhost", "5.0.0","webcontrol_localhost"
+        ,"\"stream_localhost\" replaced with \"webcontrol_localhost\""}
+    ,{"stream_auth_method", "5.0.0","webcontrol_auth_method"
+        ,"\"stream_auth_method\" replaced with \"webcontrol_auth_method\""}
+    ,{"stream_authentication", "5.0.0","webcontrol_auth_user"
+        ,"\"stream_authentication\" replaced with \"webcontrol_auth_user\""}
+    ,{"stream_tls", "5.0.0","webcontrol_tls"
+        ,"\"stream_tls\" replaced with \"webcontrol_tls\""}
+    ,{"stream_header_params", "5.0.0","webcontrol_header_params"
+        ,"\"stream_header_params\" replaced with \"webcontrol_header_params\""}
+    ,{"stream_tls", "5.0.0","webcontrol_tls"
+        ,"\"stream_tls\" replaced with \"webcontrol_tls\""}
+    ,{"webcontrol_authentication", "5.0.0","webcontrol_auth_admin"
+        ,"\"webcontrol_authentication\" replaced with \"webcontrol_auth_admin\""}
+    ,{ "","","",""}
 };
 
 void cls_config::edit_set_bool(bool &parm_dest, std::string &parm_in)
@@ -2423,17 +2228,56 @@ void cls_config::edit_webcontrol_auth_method(std::string &parm, enum PARM_ACT pa
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_auth_method",_("webcontrol_auth_method"));
 }
 
-void cls_config::edit_webcontrol_authentication(std::string &parm, enum PARM_ACT pact)
+void cls_config::edit_webcontrol_auth_admin(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_authentication = "";
+        webcontrol_auth_admin = "";
     } else if (pact == PARM_ACT_SET) {
-        webcontrol_authentication = parm;
+        if (parm == "") {
+            webcontrol_auth_admin = parm;
+        } else if (parm.find(":",0) == std::string::npos) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid webcontrol_auth_admin.  No colon separator found"));
+        } else if (parm.find(":",0) == 0) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid webcontrol_auth_admin.  No username found"));
+        } else if (parm.find(":",0) == parm.length()-1) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid webcontrol_auth_admin.  No password found"));
+        } else {
+            webcontrol_auth_admin = parm;
+        }
     } else if (pact == PARM_ACT_GET) {
-        parm = webcontrol_authentication;
+        parm = webcontrol_auth_admin;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_authentication",_("webcontrol_authentication"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_auth_admin",_("webcontrol_auth_admin"));
+}
+
+void cls_config::edit_webcontrol_auth_user(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        webcontrol_auth_user = "";
+    } else if (pact == PARM_ACT_SET) {
+        if (parm == "") {
+            webcontrol_auth_user = parm;
+        } else if (parm.find(":",0) == std::string::npos) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid webcontrol_auth_user.  No colon separator found"));
+        } else if (parm.find(":",0) == 0) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid webcontrol_auth_user.  No username found"));
+        } else if (parm.find(":",0) == parm.length()-1) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Invalid webcontrol_auth_user.  No password found"));
+        } else {
+            webcontrol_auth_user = parm;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = webcontrol_auth_user;
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_auth_user",_("webcontrol_auth_user"));
 }
 
 void cls_config::edit_webcontrol_tls(std::string &parm, enum PARM_ACT pact)
@@ -3340,7 +3184,8 @@ void cls_config::edit_cat13(std::string parm_nm, std::string &parm_val, enum PAR
     } else if (parm_nm == "webcontrol_parms") {            edit_webcontrol_parms(parm_val, pact);
     } else if (parm_nm == "webcontrol_interface") {        edit_webcontrol_interface(parm_val, pact);
     } else if (parm_nm == "webcontrol_auth_method") {      edit_webcontrol_auth_method(parm_val, pact);
-    } else if (parm_nm == "webcontrol_authentication") {   edit_webcontrol_authentication(parm_val, pact);
+    } else if (parm_nm == "webcontrol_auth_admin") {       edit_webcontrol_auth_admin(parm_val, pact);
+    } else if (parm_nm == "webcontrol_auth_user") {        edit_webcontrol_auth_user(parm_val, pact);
     } else if (parm_nm == "webcontrol_tls") {              edit_webcontrol_tls(parm_val, pact);
     } else if (parm_nm == "webcontrol_cert") {             edit_webcontrol_cert(parm_val, pact);
     } else if (parm_nm == "webcontrol_key") {              edit_webcontrol_key(parm_val, pact);
@@ -3996,7 +3841,8 @@ void cls_config::parms_log_parm(std::string parm_nm, std::string parm_vl)
     if ((parm_nm == "netcam_url") ||
         (parm_nm == "netcam_userpass") ||
         (parm_nm == "netcam_high_url") ||
-        (parm_nm == "webcontrol_authentication") ||
+        (parm_nm == "webcontrol_auth_admin") ||
+        (parm_nm == "webcontrol_auth_user") ||
         (parm_nm == "webcontrol_key") ||
         (parm_nm == "webcontrol_cert") ||
         (parm_nm == "database_user") ||

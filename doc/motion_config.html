@@ -448,22 +448,26 @@
             <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_method" >webcontrol_auth_method</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_authentication" >webcontrol_authentication</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_admin" >webcontrol_auth_admin</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_auth_user" >webcontrol_auth_user</a> </td>
+
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_tls" >webcontrol_tls</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_cert" >webcontrol_cert</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_key" >webcontrol_key</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_headers" >webcontrol_headers</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
+
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_actions" >webcontrol_actions</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_html" >webcontrol_html</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_base_path" >webcontrol_base_path</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_attempts" >webcontrol_lock_attempts</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
+
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_minutes" >webcontrol_lock_minutes</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_lock_script" >webcontrol_lock_script</a> </td>
             </tr>
             </tbody>
@@ -2358,7 +2362,7 @@
       webcontrol parameters differ between camera files, Motion will only
       select one of those sets to use for that port.  For example, if
       camera1.conf and camera2.conf both specify webcontrol_port 8081 but
-      camera1.conf and camera2.conf have different webcontrol_authentication
+      camera1.conf and camera2.conf have different webcontrol_auth_user
       parameters, then Motion will only use EITHER the one in camera1.conf
       OR the one in camera2.conf.  Which one it uses is random.
       <ul>
@@ -2425,10 +2429,20 @@
         </ul>
         <p></p>
 
-        <h3><a name="webcontrol_authentication"></a> webcontrol_authentication </h3>
+        <h3><a name="webcontrol_auth_admin"></a> webcontrol_auth_admin </h3>
         <ul>
           <li> Values: String | Default: Not defined</li>
-          The username and password specified as username:password
+          The admin username and password specified as username:password
+          This user has all the permissions granted by the webcontrol_parms
+          and webcontrol_actions.
+        </ul>
+        <p></p>
+
+        <h3><a name="webcontrol_auth_user"></a> webcontrol_auth_user </h3>
+        <ul>
+          <li> Values: String | Default: Not defined</li>
+          The user username and password specified as username:password.
+          This user has only read/view permissions on the webcontrol
         </ul>
         <p></p>
 

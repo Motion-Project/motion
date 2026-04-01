@@ -470,40 +470,54 @@ mhdrslt cls_webu_ans::mhd_digest_fail(int signal_stale)
 /* Perform digest authentication */
 mhdrslt cls_webu_ans::mhd_digest()
 {
-    /* This function gets called a couple of
-     * times by MHD during the authentication process.
-     */
-    int retcd;
-    char *user;
+    enum MHD_DigestAuthResult retcd;
+    char *username;
+    std::string chkuser;
 
-    /*Get username or prompt for a user/pass */
-    user = MHD_digest_auth_get_username(connection);
-    if (user == NULL) {
+    username = MHD_digest_auth_get_username(connection);
+    if (username == NULL) {
         return mhd_digest_fail(MHD_NO);
     }
+    chkuser = username;
+    MHD_free(username);
 
-    /* Check for valid user name */
-    if (mystrne(user, auth_user)) {
+    if (chkuser == "") {
+        return mhd_digest_fail(retcd);
+    } else if (auth_admin_name == chkuser) {
+        retcd = MHD_digest_auth_check3(connection
+            , auth_realm
+            , auth_admin_name.c_str()
+            , auth_admin_pass.c_str()
+            , 0, 0
+            , MHD_DIGEST_AUTH_MULT_QOP_AUTH
+            , MHD_DIGEST_AUTH_MULT_ALGO3_ANY);
+        is_admin = true;
+    } else if (auth_user_name == chkuser) {
+        retcd = MHD_digest_auth_check3(connection
+            , auth_realm
+            , auth_user_name.c_str()
+            , auth_user_pass.c_str()
+            , 0, 0
+            , MHD_DIGEST_AUTH_MULT_QOP_AUTH
+            , MHD_DIGEST_AUTH_MULT_ALGO3_ANY);
+        is_admin = false;
+    } else {
         failauth_log(true);
-        myfree(user);
         return mhd_digest_fail(MHD_NO);
     }
-    myfree(user);
 
-    /* Check the password as well*/
-    retcd = MHD_digest_auth_check(connection, auth_realm
-        , auth_user, auth_pass, 300);
-
-    if (retcd == MHD_NO) {
+    if (retcd == MHD_DAUTH_OK) {
+        authenticated = true;
+        return MHD_YES;
+    } else if (retcd == MHD_DAUTH_WRONG_USERNAME) {
+        failauth_log(true);
+        return mhd_digest_fail(retcd);
+    } else if (retcd == MHD_DAUTH_RESPONSE_WRONG) {
         failauth_log(false);
-    }
-
-    if ( (retcd == MHD_INVALID_NONCE) || (retcd == MHD_NO) )  {
+        return mhd_digest_fail(retcd);
+    } else {
         return mhd_digest_fail(retcd);
     }
-
-    authenticated = true;
-    return MHD_YES;
 }
 
 /* Create a authorization denied response to user*/
@@ -519,12 +533,12 @@ mhdrslt cls_webu_ans::mhd_basic_fail()
 
     response = MHD_create_response_from_buffer(resp_page.length()
         ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
-
     if (response == NULL) {
         return MHD_NO;
     }
 
-    retcd = MHD_queue_basic_auth_fail_response (connection, auth_realm, response);
+    retcd = MHD_queue_basic_auth_fail_response (connection
+        , auth_realm, response);
 
     MHD_destroy_response(response);
 
@@ -538,57 +552,67 @@ mhdrslt cls_webu_ans::mhd_basic_fail()
 /* Perform Basic Authentication.  */
 mhdrslt cls_webu_ans::mhd_basic()
 {
-    char *user, *pass;
+    struct MHD_BasicAuthInfo *authinfo;
+    std::string chkuser, chkpass;
 
-    pass = NULL;
-    user = NULL;
+    authinfo = MHD_basic_auth_get_username_password3(connection);
+    if (authinfo == NULL) {
+        return mhd_basic_fail();
+    }
+    chkuser = authinfo->username;
+    chkpass = authinfo->password;
+    MHD_free(authinfo);
 
-    user = MHD_basic_auth_get_username_password (connection, &pass);
-    if ((user == NULL) || (pass == NULL)) {
-        myfree(user);
-        myfree(pass);
+    if ((chkuser == "") || (chkpass == "")) {
         return mhd_basic_fail();
     }
 
-    if ((mystrne(user, auth_user)) || (mystrne(pass, auth_pass))) {
-        failauth_log(mystrne(user, auth_user));
-        myfree(user);
-        myfree(pass);
+    if ((chkuser == auth_admin_name) &&
+        (chkpass == auth_admin_pass)) {
+        authenticated = true;
+        is_admin = true;
+        return MHD_YES;
+    } else if ((chkuser == auth_user_name) &&
+         (chkpass == auth_user_pass)) {
+        authenticated = true;
+        is_admin = false;
+        return MHD_YES;
+    } else {
+        if ((chkuser != auth_admin_name) &&
+            (chkuser != auth_user_name)) {
+            failauth_log(true);
+        } else {
+            failauth_log(false);
+        }
         return mhd_basic_fail();
     }
-
-    myfree(user);
-    myfree(pass);
-
-    authenticated = true;
-
-    return MHD_YES;
 
 }
 
 /* Parse apart the user:pass provided*/
 void cls_webu_ans::mhd_auth_parse()
 {
-    int auth_len;
-    char *col_pos;
 
-    myfree(auth_user);
-    myfree(auth_pass);
+    auth_admin_name= "";
+    auth_admin_pass= "";
+    if (webu->cfg->webcontrol_auth_admin != "") {
+        /*The conf module edits on the parameter dictate that
+          parsing will provide a name and password*/
+        auth_admin_name = webu->cfg->webcontrol_auth_admin.substr(
+            0,webu->cfg->webcontrol_auth_admin.find(":",0));
+        auth_admin_pass = webu->cfg->webcontrol_auth_admin.substr(
+            webu->cfg->webcontrol_auth_admin.find(":",0)+1);
+    }
 
-    auth_len = (int)webu->cfg->webcontrol_authentication.length();
-    col_pos =(char*) strstr(webu->cfg->webcontrol_authentication.c_str() ,":");
-    if (col_pos == NULL) {
-        auth_user = (char*)mymalloc((uint)(auth_len+1));
-        auth_pass = (char*)mymalloc(2);
-        snprintf(auth_user, (uint)auth_len + 1, "%s"
-            ,webu->cfg->webcontrol_authentication.c_str());
-        snprintf(auth_pass, 2, "%s","");
-    } else {
-        auth_user = (char*)mymalloc((uint)auth_len - strlen(col_pos) + 1);
-        auth_pass =(char*)mymalloc(strlen(col_pos));
-        snprintf(auth_user, (uint)auth_len - strlen(col_pos) + 1, "%s"
-            ,webu->cfg->webcontrol_authentication.c_str());
-        snprintf(auth_pass, strlen(col_pos), "%s", col_pos + 1);
+    auth_user_name= "";
+    auth_user_pass= "";
+    if (webu->cfg->webcontrol_auth_user != "") {
+        /*The conf module edits on the parameter dictate that
+          parsing will provide a name and password*/
+        auth_user_name = webu->cfg->webcontrol_auth_user.substr(
+            0, webu->cfg->webcontrol_auth_user.find(":",0));
+        auth_user_pass = webu->cfg->webcontrol_auth_user.substr(
+            webu->cfg->webcontrol_auth_user.find(":",0)+1);
     }
 }
 
@@ -604,7 +628,8 @@ mhdrslt cls_webu_ans::mhd_auth()
 
     snprintf(auth_realm, WEBUI_LEN_PARM, "%s","Motion");
 
-    if (webu->cfg->webcontrol_authentication == "") {
+    if ((webu->cfg->webcontrol_auth_admin == "") &&
+        (webu->cfg->webcontrol_auth_user == "")) {
         authenticated = true;
         if (webu->cfg->webcontrol_auth_method != "none") {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
@@ -612,7 +637,7 @@ mhdrslt cls_webu_ans::mhd_auth()
         return MHD_YES;
     }
 
-    if (auth_user == NULL) {
+    if ((auth_admin_name == "") && (auth_user_name == "")) {
         mhd_auth_parse();
     }
 
@@ -1036,9 +1061,12 @@ cls_webu_ans::cls_webu_ans(cls_webu *p_webu, const char *uri)
 
     auth_opaque   = (char*)mymalloc(WEBUI_LEN_PARM);
     auth_realm    = (char*)mymalloc(WEBUI_LEN_PARM);
-    auth_user     = nullptr;                        /* Buffer to hold the user name*/
-    auth_pass     = nullptr;                        /* Buffer to hold the password */
-    authenticated = false;                       /* boolean for whether we are authenticated*/
+    auth_admin_name = "";
+    auth_admin_pass = "";
+    auth_user_name = "";
+    auth_user_pass = "";
+    authenticated = false;                         /* boolean for whether we are authenticated*/
+    is_admin      = false;
 
     resp_page     = "";                          /* The response being constructed */
     req_file      = nullptr;
@@ -1086,8 +1114,6 @@ cls_webu_ans::~cls_webu_ans()
     mydelete(webu_post);
     mydelete(webu_stream);
 
-    myfree(auth_user);
-    myfree(auth_pass);
     myfree(auth_opaque);
     myfree(auth_realm);
     myfree(gzip_resp);

@@ -47,6 +47,7 @@
             std::string     clientip;       /* IP of the connecting client */
             std::string     hostfull;       /* Full http name for host with port number */
             bool            gzip_encode;    /* Bool for whether to gzip response */
+            bool            is_admin;       /* Is the authenticated user a admin*/
 
             void mhd_send();
             void bad_request();
@@ -66,8 +67,10 @@
             int             mhd_first;      /* Boolean for whether it is the first connection*/
             char            *auth_opaque;   /* Opaque string for digest authentication*/
             char            *auth_realm;    /* Realm string for digest authentication*/
-            char            *auth_user;     /* Parsed user from config authentication string*/
-            char            *auth_pass;     /* Parsed password from config authentication string*/
+            std::string     auth_admin_name;    /* Parsed user from config admin string*/
+            std::string     auth_admin_pass;    /* Parsed password from config admin string*/
+            std::string     auth_user_name;     /* Parsed user from config user string*/
+            std::string     auth_user_pass;     /* Parsed password from config user string*/
             bool            authenticated;  /* Boolean for whether authentication has been passed */
             enum WEBUI_METHOD   cnct_method;    /* Connection method.  Get or Post */
             u_char  *gzip_resp;     /* Response in gzip format */
