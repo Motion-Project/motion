@@ -484,60 +484,70 @@ void cls_webu_post::write_config()
 
 void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
 {
-    std::string parm_nm, parm_vl_dflt, parm_vl_dev;
+    std::string parm_nm, parm_vl_cur;
     PARM_CAT    parm_ct;
+    PARM_CHG    parm_ch;
     int indx;
 
     parm_nm = config_parms[indx_parm].parm_name;
     parm_ct = config_parms[indx_parm].parm_cat;
+    parm_ch = config_parms[indx_parm].parm_chg;
 
     if (webua->device_id == 0) {
-        app->conf_src->edit_get(parm_nm, parm_vl_dflt, parm_ct);
-        if (parm_vl == parm_vl_dflt) {
+        app->conf_src->edit_get(parm_nm, parm_vl_cur, parm_ct);
+        if (parm_vl == parm_vl_cur) {
             return;
         }
         if (parm_ct == PARM_CAT_00) {
             app->conf_src->edit_set(parm_nm, parm_vl);
-            config_restart_set("log",0);
+            config_ra_set("log",0, parm_ch);
         } else if (parm_ct == PARM_CAT_13) {
             app->conf_src->edit_set(parm_nm, parm_vl);
-            config_restart_set("webu",0);
+            config_ra_set("webu",0, parm_ch);
         } else if (parm_ct == PARM_CAT_15) {
             app->conf_src->edit_set(parm_nm, parm_vl);
-            config_restart_set("dbse",0);
+            config_ra_set("dbse",0, parm_ch);
         } else {
             app->conf_src->edit_set(parm_nm, parm_vl);
             if (parm_ct == PARM_CAT_14) {
-                app->cfg->edit_set(parm_nm, parm_vl);
+                app->conf_src->edit_set(parm_nm, parm_vl);
                 app->allcam->all_sizes.reset = true;
             }
             for (indx=0;indx<app->cam_cnt;indx++){
-                if (app->cam_list[indx]->handler_running == false) {
-                    app->cfg->edit_set(parm_nm, parm_vl);
-                } else {
-                    app->cam_list[indx]->conf_src->edit_get(
-                        parm_nm, parm_vl_dev, parm_ct);
-                    if (parm_vl_dev == parm_vl_dflt) {
+                app->cam_list[indx]->conf_src->edit_get(
+                    parm_nm, parm_vl_cur, parm_ct);
+                if (parm_vl_cur != parm_vl) {
+                    if (app->cam_list[indx]->handler_running == true) {
                         app->cam_list[indx]->conf_src->edit_set(
                             parm_nm, parm_vl);
-                        config_restart_set("cam",indx);
+                        config_ra_set("cam",indx, parm_ch);
+                    } else {
+                        app->cam_list[indx]->conf_src->edit_set(parm_nm, parm_vl);
                     }
                 }
             }
             for (indx=0;indx<app->snd_cnt;indx++) {
                 app->snd_list[indx]->conf_src->edit_get(
-                    parm_nm, parm_vl_dev, parm_ct);
-                if (parm_vl_dev == parm_vl_dflt) {
-                    app->snd_list[indx]->conf_src->edit_set(
-                        parm_nm, parm_vl);
-                    config_restart_set("snd",indx);
+                    parm_nm, parm_vl_cur, parm_ct);
+                if (parm_vl_cur != parm_vl) {
+                    if (app->snd_list[indx]->handler_running == true) {
+                        app->snd_list[indx]->conf_src->edit_set(
+                            parm_nm, parm_vl);
+                        config_ra_set("snd",indx, parm_ch);
+                    } else {
+                        app->snd_list[indx]->conf_src->edit_set(parm_nm, parm_vl);
+                    }
                 }
             }
         }
-    } else {
+    } else {    /* (webua->device_id != 0) */
         if ((parm_ct == PARM_CAT_00) ||
-            (parm_ct == PARM_CAT_13) ||
             (parm_ct == PARM_CAT_15)) {
+            return;
+        }
+        app->cam_list[webua->camindx]->conf_src->edit_get(
+            parm_nm, parm_vl_cur, parm_ct);
+        if (parm_vl == parm_vl_cur) {
             return;
         }
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config edit set. %s:%s"
@@ -545,56 +555,58 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
         app->cam_list[webua->camindx]->conf_src->edit_set(
             parm_nm, parm_vl);
         if (app->cam_list[webua->camindx]->handler_running == true) {
-            config_restart_set("cam", webua->camindx);
-        } else {
-            app->cam_list[webua->camindx]->cfg->edit_set(
-                parm_nm, parm_vl);
+            config_ra_set("cam", webua->camindx, parm_ch);
         }
     }
-
 }
 
-void cls_webu_post::config_restart_set(std::string p_type, int p_indx)
+void cls_webu_post::config_ra_set(
+    std::string p_type, int p_indx, PARM_CHG p_chg)
 {
     int indx;
 
-    for (indx=0; indx<restart_list.size();indx++) {
-        if ((restart_list[indx].comp_type == p_type) &&
-            (restart_list[indx].comp_indx == p_indx)) {
-            restart_list[indx].restart = true;
+    for (indx=0; indx<ra_list.size();indx++) {
+        if ((ra_list[indx].comp_type == p_type) &&
+            (ra_list[indx].comp_indx == p_indx)) {
+            if (p_chg == PARM_CHG_RESTART) {
+                ra_list[indx].restart = true;
+            } else {
+                ra_list[indx].apply = true;
+            }
             break;
         }
     }
 }
 
-void cls_webu_post::config_restart_reset()
+void cls_webu_post::config_ra_reset()
 {
-    ctx_restart_item itm_res;
+    ctx_ra_item itm_res;
     int indx;
 
-    restart_list.clear();
+    ra_list.clear();
 
     itm_res.restart = false;
+    itm_res.apply = false;
     itm_res.comp_indx = 0;
 
     itm_res.comp_type ="log";
-    restart_list.push_back(itm_res);
+    ra_list.push_back(itm_res);
 
     itm_res.comp_type ="webu";
-    restart_list.push_back(itm_res);
+    ra_list.push_back(itm_res);
 
     itm_res.comp_type ="dbse";
-    restart_list.push_back(itm_res);
+    ra_list.push_back(itm_res);
 
     for (indx = 0; indx<app->cam_cnt; indx++) {
         itm_res.comp_type ="cam";
         itm_res.comp_indx = indx;
-        restart_list.push_back(itm_res);
+        ra_list.push_back(itm_res);
     }
     for (indx = 0; indx<app->snd_cnt; indx++) {
         itm_res.comp_type ="snd";
         itm_res.comp_indx = indx;
-        restart_list.push_back(itm_res);
+        ra_list.push_back(itm_res);
     }
 
 }
@@ -615,7 +627,7 @@ void cls_webu_post::config()
         }
     }
 
-    config_restart_reset();
+    config_ra_reset();
 
     for (indx = 0; indx < post_sz; indx++) {
         if (mystrne(post_info[indx].key_nm, "command") &&
@@ -634,8 +646,8 @@ void cls_webu_post::config()
             /* Ignore any requests for parms above webcontrol_parms level. */
             indx2=0;
             while (config_parms[indx2].parm_name != "") {
-                if ((config_parms[indx2].webui_level > app->conf_src->webcontrol_parms) ||
-                    (config_parms[indx2].webui_level == PARM_LEVEL_NEVER) ) {
+                if ((config_parms[indx2].parm_lvl > app->conf_src->webcontrol_parms) ||
+                    (config_parms[indx2].parm_lvl == PARM_LVL_99) ) {
                     indx2++;
                     continue;
                 }
@@ -651,36 +663,56 @@ void cls_webu_post::config()
         }
     }
 
-    for (indx = 0; indx < restart_list.size(); indx++) {
-        if (restart_list[indx].restart == true) {
-            if (restart_list[indx].comp_type == "log") {
+    for (indx = 0; indx < ra_list.size(); indx++) {
+        if (ra_list[indx].comp_type == "log") {
+            if (ra_list[indx].restart == true) {
                 motlog->restart = true;
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for log");
-            } else if (restart_list[indx].comp_type == "webu") {
+            } else if (ra_list[indx].apply == true) {
+                motlog->conf_chg = true;
+            }
+        } else if (ra_list[indx].comp_type == "webu") {
+            if (ra_list[indx].restart == true) {
                 for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
                     app->webu_list[indx2]->restart = true;
                     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                         "Restart request for webcontrol on port %d"
                         ,app->webu_list[indx2]->cfg->webcontrol_port);
                 }
-            } else if (restart_list[indx].comp_type == "dbse") {
+            } else if (ra_list[indx].apply == true) {
+                for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
+                    app->webu_list[indx2]->conf_chg = true;
+                }
+            }
+        } else if (ra_list[indx].comp_type == "dbse") {
+            if (ra_list[indx].restart == true) {
                 app->dbse->restart = true;
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for database");
-            } else if (restart_list[indx].comp_type == "cam") {
-                app->cam_list[restart_list[indx].comp_indx]->restart = true;
+            } else if (ra_list[indx].apply == true) {
+                app->dbse->conf_chg = true;
+            }
+        } else if (ra_list[indx].comp_type == "cam") {
+            if (ra_list[indx].restart == true) {
+                app->cam_list[ra_list[indx].comp_indx]->restart = true;
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for camera %d"
-                    , app->cam_list[restart_list[indx].comp_indx]->cfg->device_id);
-            } else if (restart_list[indx].comp_type == "snd") {
-                app->snd_list[restart_list[indx].comp_indx]->restart = true;
+                    , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
+            } else if (ra_list[indx].apply == true) {
+                app->cam_list[ra_list[indx].comp_indx]->conf_chg = true;
+            }
+        } else if (ra_list[indx].comp_type == "snd") {
+            if (ra_list[indx].restart == true) {
+                app->snd_list[ra_list[indx].comp_indx]->restart = true;
                 MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
                     "Restart request for sound %d"
-                    , app->cam_list[restart_list[indx].comp_indx]->cfg->device_id);
-            } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Bad programming");
+                    , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
+            } else if (ra_list[indx].apply == true) {
+                app->snd_list[ra_list[indx].comp_indx]->conf_chg = true;
             }
+        } else {
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Bad programming");
         }
     }
 

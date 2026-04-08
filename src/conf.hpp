@@ -51,21 +51,27 @@
         , PARM_TYP_ARRAY
         , PARM_TYP_PARAMS
     };
-    enum PARM_LEVEL{
-        PARM_LEVEL_ALWAYS      = 0
-        ,PARM_LEVEL_LIMITED    = 1
-        ,PARM_LEVEL_ADVANCED   = 2
-        ,PARM_LEVEL_SCRIPTS    = 3
-        ,PARM_LEVEL_RESTRICTED = 4
-        ,PARM_LEVEL_NEVER      = 99
+    enum PARM_LVL{
+        PARM_LVL_00     = 0     /*Webcontrol Always Available Parameters*/
+        ,PARM_LVL_01    = 1     /*Webcontrol Limited Parameters */
+        ,PARM_LVL_02    = 2     /*Webcontrol Advanced Parameters*/
+        ,PARM_LVL_03    = 3     /*Webcontrol Scripts Parameters*/
+        ,PARM_LVL_04    = 4     /*Webcontrol Restricted Parameters*/
+        ,PARM_LVL_99    = 99    /*Webcontrol Never Available Parameters*/
+    };
+    enum PARM_CHG{  /*Method to apply webcontrol changes to parameter*/
+        PARM_CHG_COPY       = 0 /* Copy the new value to cfg to apply new value*/
+        ,PARM_CHG_CODE      = 1 /* A specific procedure is written to apply new values */
+        ,PARM_CHG_RESTART   = 2 /* Restart of the thread is required*/
     };
 
     /** Current parameters in the config file */
     struct ctx_parm {
-        const std::string   parm_name;      /* name for this parameter                  */
-        enum PARM_TYP       parm_type;      /* enum of parm_typ for bool,int or string. */
-        enum PARM_CAT       parm_cat;       /* enum of parm_cat for grouping. */
-        int                 webui_level;    /* Enum to display in webui: 0,1,2,3,99(always to never)*/
+        const std::string   parm_name;  /* name for this parameter                  */
+        enum PARM_TYP       parm_type;  /* enum of parm_typ for bool,int or string. */
+        enum PARM_CAT       parm_cat;   /* enum of parm_cat for grouping. */
+        int                 parm_lvl;   /* Enum of parm_lvl for webui*/
+        enum PARM_CHG       parm_chg;   /* Enum for whether a restart is needed to implement changes*/
     };
 
     enum PARM_ACT{

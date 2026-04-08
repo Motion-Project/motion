@@ -102,7 +102,7 @@
             std::string                 info_tls;
             int                         cnct_cnt;
             bool                        restart;
-
+            bool                        conf_chg;
             void startup();
             void shutdown();
 

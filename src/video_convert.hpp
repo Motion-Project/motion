@@ -16,8 +16,8 @@
  *
 */
 
-#ifndef _INCLUDE_VIDEO_COMMON_HPP_
-#define _INCLUDE_VIDEO_COMMON_HPP_
+#ifndef _INCLUDE_VIDEO_CONVERT_HPP_
+#define _INCLUDE_VIDEO_CONVERT_HPP_
 
 typedef struct {
     int is_abs;
@@ -27,7 +27,7 @@ typedef struct {
 
 class cls_convert {
     public:
-        cls_convert(cls_camera *p_cam, int p_pix, int p_w, int p_h);
+        cls_convert(cls_camera *p_cam, std::string p_pix, int p_w, int p_h);
         ~cls_convert();
         int process(u_char *img_dest, u_char *img_src, int clen);
 
@@ -36,7 +36,7 @@ class cls_convert {
 
         int width;
         int height;
-        int pixfmt_src;
+        std::string pixfmt_src;
         u_char  *common_buffer;
 
 
@@ -58,4 +58,4 @@ class cls_convert {
 };
 
 
-#endif /* _INCLUDE_VIDEO_COMMON_HPP_ */
+#endif /* _INCLUDE_VIDEO_CONVERT_HPP_ */

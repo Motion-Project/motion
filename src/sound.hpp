@@ -122,6 +122,7 @@ class cls_sound {
         int             threadnr;
         bool            restart;
         bool            finish;
+        bool            conf_chg;
 
         bool            handler_stop;
         bool            handler_running;

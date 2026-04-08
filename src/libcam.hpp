@@ -37,9 +37,11 @@
                 ~cls_libcam();
                 int next(ctx_image_data *img_data);
                 void noimage();
+                void parms_update();
             private:
                 cls_camera  *cam;
                 ctx_params  *params;
+                cls_convert *convert;
 
                 std::unique_ptr<libcamera::CameraManager>          cam_mgr;
                 std::shared_ptr<libcamera::Camera>                 camera;
@@ -48,13 +50,15 @@
                 std::vector<std::unique_ptr<libcamera::Request>>   requests;
 
                 std::queue<libcamera::Request *>   req_queue;
-                libcamera::ControlList             controls;
+                libcamera::ControlList             *camctrls;
                 ctx_imgmap              membuf;
                 bool    started_cam;
                 bool    started_mgr;
                 bool    started_aqr;
                 bool    started_req;
                 int     reconnect_count;
+                bool    set_controls;
+                std::string pixfmt;
                 void log_orientation();
                 void log_controls();
                 void log_draft();
@@ -68,8 +72,9 @@
                 int start_req();
                 int start_capture();
                 void config_orientation();
-                void config_controls();
                 void config_control_item(std::string pname, std::string pvalue);
+                void config_assign_float(int pctrl, std::string pvalue);
+                void config_assign_int(int pctrl, std::string pvalue);
                 void req_complete(libcamera::Request *request);
                 int req_add(libcamera::Request *request);
 

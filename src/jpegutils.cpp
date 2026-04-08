@@ -631,18 +631,15 @@ static void jpgutl_error_exit(j_common_ptr cinfo)
  */
 static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
 {
-    char buffer[JMSG_LENGTH_MAX];
-    /* cinfo->err really points to a jpgutl_error_mgr struct, so coerce pointer. */
     struct jpgutl_error_mgr *myerr = (struct jpgutl_error_mgr *) cinfo->err;
     /*
      *  The JWRN_EXTRANEOUS_DATA is sent a lot without any particular negative effect.
      *  There are some messages above zero but they are just informational and not something
      *  that we are interested in.
     */
-    if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0) ) {
+    if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0)) {
         myerr->warning_seen++ ;
-        (*cinfo->err->format_message) (cinfo, buffer);
-            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, %s", msg_level, buffer);
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, Corrupt JPEG data", msg_level);
     }
 
 }

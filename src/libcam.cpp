@@ -23,6 +23,7 @@
 #include "conf.hpp"
 #include "logger.hpp"
 #include "rotate.hpp"
+#include "video_convert.hpp"
 #include "libcam.hpp"
 
 #ifdef HAVE_LIBCAM
@@ -216,7 +217,7 @@ void cls_libcam::start_params()
 
 int cls_libcam::start_mgr()
 {
-    int retcd;
+    int retcd, indx;
     std::string camid;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
@@ -231,19 +232,36 @@ int cls_libcam::start_mgr()
     started_mgr = true;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
+    if (cam_mgr->cameras().size() == 0) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "No camera devices found");
+        return -1;
+    }
 
+    for (indx=0;indx<cam_mgr->cameras().size();indx++) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "Available libcam_device '%s'."
+            , cam_mgr->cameras()[indx]->id().c_str());
+    }
     if (cam->cfg->libcam_device == "camera0"){
-        if (cam_mgr->cameras().size() == 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "No camera devices found");
-            return -1;
-        }
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "camera0 specified as device.  Using the first device found. %s"
+            , cam_mgr->cameras()[0]->id().c_str());
         camid = cam_mgr->cameras()[0]->id();
     } else {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Invalid libcam_device '%s'.  The only name supported is 'camera0' "
-            ,cam->cfg->libcam_device.c_str());
-        return -1;
+        camid = "";
+        for (indx=0;indx<cam_mgr->cameras().size();indx++) {
+            if (cam->cfg->libcam_device ==
+                cam_mgr->cameras()[indx]->id()) {
+                camid = cam_mgr->cameras()[0]->id();
+            }
+        }
+        if (camid == "") {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Invalid libcam_device '%s'.  See log message for available devices"
+                ,cam->cfg->libcam_device.c_str());
+            return -1;
+        }
     }
     camera = cam_mgr->get(camid);
     camera->acquire();
@@ -254,55 +272,116 @@ int cls_libcam::start_mgr()
     return 0;
 }
 
+void cls_libcam::config_assign_float(int pctrl, std::string pvalue)
+{
+    float f_var, f_min, f_max, f_def;
+
+    auto fdctrl = camera->controls().find(pctrl);
+    if (fdctrl == camera->controls().end()) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Control not found");
+        return;
+    }
+    f_min = fdctrl->second.min().get<float>();
+    f_max = fdctrl->second.max().get<float>();
+    f_def = fdctrl->second.def().get<float>();
+
+    if (pvalue == "default") {
+        camctrls->set(pctrl, f_def);
+    } else {
+        f_var = mtof(pvalue);
+        if ((f_var < f_min) || (f_var >f_max)) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "Invalid %s value %6.4f"
+                ,fdctrl->first->name().c_str(), f_var);
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "%s Default %6.4f and range %6.4f to %6.4f.  "
+                ,fdctrl->first->name().c_str(), f_def, f_min, f_max);
+        } else {
+            camctrls->set(pctrl, f_var);
+        }
+    }
+}
+
+void cls_libcam::config_assign_int(int pctrl, std::string pvalue)
+{
+    int i_var, i_min, i_max, i_def;
+
+    auto fdctrl = camera->controls().find(pctrl);
+    if (fdctrl == camera->controls().end()) {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Control not found");
+        return;
+    }
+
+    i_min = fdctrl->second.min().get<int>();
+    i_max = fdctrl->second.max().get<int>();
+    i_def = fdctrl->second.def().get<int>();
+
+    if (pvalue == "default") {
+        camctrls->set(pctrl, i_def);
+    } else {
+        i_var = mtoi(pvalue);
+        if ((i_var < i_min) || (i_var > i_max)) {
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "Invalid %s value %6.4f"
+                ,fdctrl->first->name().c_str(), i_var);
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
+                "%s Default %6.4f and range %6.4f to %6.4f.  "
+                ,fdctrl->first->name().c_str(), i_def, i_min, i_max);
+        } else {
+            camctrls->set(pctrl, i_var);
+        }
+    }
+}
+
 void cls_libcam::config_control_item(std::string pname, std::string pvalue)
 {
     if (pname == "AeMeteringMode") {
-       controls.set(controls::AeMeteringMode, mtoi(pvalue));
+       config_assign_int(libcamera::controls::AeMeteringMode.id(), pvalue);
     }
     if (pname == "AeConstraintMode") {
-        controls.set(controls::AeConstraintMode, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AeConstraintMode.id(), pvalue);
     }
     if (pname == "AeExposureMode") {
-        controls.set(controls::AeExposureMode, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AeExposureMode.id(), pvalue);
     }
     if (pname == "ExposureValue") {
-        controls.set(controls::ExposureValue, mtof(pvalue));
+        config_assign_float(libcamera::controls::ExposureValue.id(), pvalue);
     }
     if (pname == "ExposureTime") {
-        controls.set(controls::ExposureTime, mtoi(pvalue));
+        config_assign_int(libcamera::controls::ExposureTime.id(), pvalue);
     }
     if (pname == "AnalogueGain") {
-        controls.set(controls::AnalogueGain, mtof(pvalue));
+        config_assign_float(libcamera::controls::AnalogueGain.id(), pvalue);
     }
     if (pname == "Brightness") {
-        controls.set(controls::Brightness, mtof(pvalue));
+        config_assign_float(libcamera::controls::Brightness.id(), pvalue);
     }
     if (pname == "Contrast") {
-        controls.set(controls::Contrast, mtof(pvalue));
+        config_assign_float(libcamera::controls::Contrast.id(), pvalue);
     }
     if (pname == "Lux") {
-        controls.set(controls::Lux, mtof(pvalue));
+        config_assign_float(libcamera::controls::Lux.id(), pvalue);
     }
     if (pname == "AwbEnable") {
-        controls.set(controls::AwbEnable, mtob(pvalue));
+        camctrls->set(controls::AwbEnable, mtob(pvalue));
     }
     if (pname == "AwbMode") {
-        controls.set(controls::AwbMode, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AwbMode.id(), pvalue);
     }
     if (pname == "AwbLocked") {
-        controls.set(controls::AwbLocked, mtob(pvalue));
+        camctrls->set(controls::AwbLocked, mtob(pvalue));
     }
     if (pname == "ColourGains") {
         float cg[2];
         cg[0] = mtof(mtok(pvalue,"|"));
         cg[1] = mtof(mtok(pvalue,"|"));
-        controls.set(controls::ColourGains, cg);
+        camctrls->set(controls::ColourGains, cg);
     }
     if (pname == "ColourTemperature") {
-        controls.set(controls::ColourTemperature, mtoi(pvalue));
+        camctrls->set(controls::ColourTemperature, mtoi(pvalue));
     }
     if (pname == "Saturation") {
-        controls.set(controls::Saturation, mtof(pvalue));
+        config_assign_float(libcamera::controls::Saturation.id(), pvalue);
     }
     if (pname == "SensorBlackLevels") {
         int32_t sbl[4];
@@ -310,13 +389,13 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         sbl[1] = mtoi(mtok(pvalue,"|"));
         sbl[2] = mtoi(mtok(pvalue,"|"));
         sbl[3] = mtoi(mtok(pvalue,"|"));
-        controls.set(controls::SensorBlackLevels, sbl);
+        camctrls->set(controls::SensorBlackLevels, sbl);
     }
     if (pname == "Sharpness") {
-        controls.set(controls::Sharpness, mtof(pvalue));
+        config_assign_float(libcamera::controls::Sharpness.id(), pvalue);
     }
     if (pname == "FocusFoM") {
-        controls.set(controls::FocusFoM, mtoi(pvalue));
+        config_assign_int(libcamera::controls::FocusFoM.id(), pvalue);
     }
     if (pname == "ColourCorrectionMatrix") {
         float ccm[9];
@@ -329,7 +408,7 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         ccm[6] = mtof(mtok(pvalue,"|"));
         ccm[7] = mtof(mtok(pvalue,"|"));
         ccm[8] = mtof(mtok(pvalue,"|"));
-        controls.set(controls::ColourCorrectionMatrix, ccm);
+        camctrls->set(controls::ColourCorrectionMatrix, ccm);
     }
     if (pname == "ScalerCrop") {
         Rectangle crop;
@@ -337,37 +416,37 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         crop.y = mtoi(mtok(pvalue,"|"));
         crop.width =(uint)mtoi(mtok(pvalue,"|"));
         crop.height =(uint)mtoi(mtok(pvalue,"|"));
-        controls.set(controls::ScalerCrop, crop);
+        camctrls->set(controls::ScalerCrop, crop);
     }
     if (pname == "DigitalGain") {
-        controls.set(controls::DigitalGain, mtof(pvalue));
+        config_assign_float(libcamera::controls::DigitalGain.id(), pvalue);
     }
     if (pname == "FrameDuration") {
-        controls.set(controls::FrameDuration, mtoi(pvalue));
+        config_assign_int(libcamera::controls::FrameDuration.id(), pvalue);
     }
     if (pname == "FrameDurationLimits") {
         int64_t fdl[2];
         fdl[0] = mtol(mtok(pvalue,"|"));
         fdl[1] = mtol(mtok(pvalue,"|"));
-        controls.set(controls::FrameDurationLimits, fdl);
+        camctrls->set(controls::FrameDurationLimits, fdl);
     }
     if (pname == "SensorTemperature") {
-        controls.set(controls::SensorTemperature, mtof(pvalue));
+        config_assign_float(libcamera::controls::SensorTemperature.id(), pvalue);
     }
     if (pname == "SensorTimestamp") {
-        controls.set(controls::SensorTimestamp, mtoi(pvalue));
+        config_assign_int(libcamera::controls::SensorTimestamp.id(), pvalue);
     }
     if (pname == "AfMode") {
-        controls.set(controls::AfMode, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfMode.id(), pvalue);
     }
     if (pname == "AfRange") {
-        controls.set(controls::AfRange, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfRange.id(), pvalue);
     }
     if (pname == "AfSpeed") {
-        controls.set(controls::AfSpeed, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfSpeed.id(), pvalue);
     }
     if (pname == "AfMetering") {
-        controls.set(controls::AfMetering, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfMetering.id(), pvalue);
     }
     if (pname == "AfWindows") {
         Rectangle afwin[1];
@@ -375,75 +454,51 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         afwin[0].y = mtoi(mtok(pvalue,"|"));
         afwin[0].width = (uint)mtoi(mtok(pvalue,"|"));
         afwin[0].height = (uint)mtoi(mtok(pvalue,"|"));
-        controls.set(controls::AfWindows, afwin);
+        camctrls->set(controls::AfWindows, afwin);
     }
     if (pname == "AfTrigger") {
-        controls.set(controls::AfTrigger, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfTrigger.id(), pvalue);
     }
     if (pname == "AfPause") {
-        controls.set(controls::AfPause, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfPause.id(), pvalue);
     }
     if (pname == "LensPosition") {
-        controls.set(controls::LensPosition, mtof(pvalue));
+        config_assign_float(libcamera::controls::LensPosition.id(), pvalue);
     }
     if (pname == "AfState") {
-        controls.set(controls::AfState, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfState.id(), pvalue);
     }
     if (pname == "AfPauseState") {
-        controls.set(controls::AfPauseState, mtoi(pvalue));
+        config_assign_int(libcamera::controls::AfPauseState.id(), pvalue);
     }
 
     /* DRAFT*/
     if (pname == "AePrecaptureTrigger") {
-        controls.set(controls::draft::AePrecaptureTrigger, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::AePrecaptureTrigger.id(), pvalue);
     }
     if (pname == "NoiseReductionMode") {
-        controls.set(controls::draft::NoiseReductionMode, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::NoiseReductionMode.id(), pvalue);
     }
     if (pname == "ColorCorrectionAberrationMode") {
-        controls.set(controls::draft::ColorCorrectionAberrationMode, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::ColorCorrectionAberrationMode.id(), pvalue);
     }
     if (pname == "AwbState") {
-        controls.set(controls::draft::AwbState, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::AwbState.id(), pvalue);
     }
     if (pname == "SensorRollingShutterSkew") {
-        controls.set(controls::draft::SensorRollingShutterSkew, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::SensorRollingShutterSkew.id(), pvalue);
     }
     if (pname == "LensShadingMapMode") {
-        controls.set(controls::draft::LensShadingMapMode, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::LensShadingMapMode.id(), pvalue);
     }
     if (pname == "PipelineDepth") {
-        controls.set(controls::draft::PipelineDepth, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::PipelineDepth.id(), pvalue);
     }
     if (pname == "MaxLatency") {
-        controls.set(controls::draft::MaxLatency, mtoi(pvalue));
+        config_assign_int(libcamera::controls::draft::MaxLatency.id(), pvalue);
     }
     if (pname == "TestPatternMode") {
-        controls.set(controls::draft::TestPatternMode, mtoi(pvalue));
-    }
-
-}
-
-void cls_libcam::config_controls()
-{
-    int retcd, indx;
-
-    for (indx=0;indx<params->params_cnt;indx++) {
-        config_control_item(
-            params->params_array[indx].param_name
-            ,params->params_array[indx].param_value);
-    }
-
-    retcd = config->validate();
-    if (retcd == CameraConfiguration::Adjusted) {
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
-            , "Configuration controls adjusted.");
-    } else if (retcd == CameraConfiguration::Valid) {
-         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            , "Configuration controls valid");
-    } else if (retcd == CameraConfiguration::Invalid) {
-         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Configuration controls error");
+        config_assign_int(libcamera::controls::draft::TestPatternMode.id(), pvalue);
     }
 
 }
@@ -521,14 +576,25 @@ void cls_libcam:: config_orientation()
 
 int cls_libcam::start_config()
 {
-    int retcd;
+    int retcd, indx;
+    char tmp4cc[5];
+    std::string pfmt;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     config = camera->generateConfiguration({ StreamRole::Viewfinder });
 
-    config->at(0).pixelFormat = PixelFormat::fromString("YUV420");
+    pfmt = "YU12";
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == "pixelformat") {
+            pixfmt = params->params_array[indx].param_value;
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                , "Using user specified pixelformat %s."
+                , pfmt.c_str());
+        }
 
+    }
+    config->at(0).pixelFormat = PixelFormat::fromString(pfmt);
     config->at(0).size.width = (uint)cam->cfg->width;
     config->at(0).size.height = (uint)cam->cfg->height;
     config->at(0).bufferCount = 1;
@@ -536,11 +602,10 @@ int cls_libcam::start_config()
 
     retcd = config->validate();
     if (retcd == CameraConfiguration::Adjusted) {
-        if (config->at(0).pixelFormat != PixelFormat::fromString("YUV420")) {
+        if (config->at(0).pixelFormat != PixelFormat::fromString(pixfmt)) {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Pixel format was adjusted to %s."
                 , config->at(0).pixelFormat.toString().c_str());
-            return -1;
         } else {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Configuration adjusted.");
@@ -553,6 +618,12 @@ int cls_libcam::start_config()
             , "Error setting configuration");
         return -1;
     }
+    sprintf(tmp4cc,"%c%c%c%c"
+        , config->at(0).pixelFormat.fourcc() >> 0
+        , config->at(0).pixelFormat.fourcc() >> 8
+        , config->at(0).pixelFormat.fourcc() >> 16
+        , config->at(0).pixelFormat.fourcc() >> 24);
+    pixfmt = tmp4cc;
 
     if ((config->at(0).size.width != (uint)cam->cfg->width) ||
         (config->at(0).size.height != (uint)cam->cfg->height)) {
@@ -561,6 +632,10 @@ int cls_libcam::start_config()
             , cam->cfg->width, cam->cfg->height
             , config->at(0).size.width, config->at(0).size.height);
     }
+
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+        , "Image size %d x %d"
+        , config->at(0).size.width, config->at(0).size.height);
 
     cam->imgs.width = (int)config->at(0).size.width;
     cam->imgs.height = (int)config->at(0).size.height;
@@ -572,8 +647,6 @@ int cls_libcam::start_config()
     log_draft();
 
     config_orientation();
-    config_controls();
-
     camera->configure(config.get());
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
@@ -583,14 +656,25 @@ int cls_libcam::start_config()
 
 int cls_libcam::req_add(Request *request)
 {
-    int retcd;
+    int retcd, indx;
+
+    if (set_controls) {
+        camctrls = &request->controls();
+        for (indx=0;indx<params->params_cnt;indx++) {
+            config_control_item(
+                params->params_array[indx].param_name
+                ,params->params_array[indx].param_value);
+        }
+        set_controls = false;
+    }
+
     retcd = camera->queueRequest(request);
     return retcd;
 }
 
 int cls_libcam::start_req()
 {
-    int retcd, bytes, indx, width;
+    int retcd, bytes, indx;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
@@ -628,29 +712,14 @@ int cls_libcam::start_req()
     const FrameBuffer::Plane &plane0 = buffer->planes()[0];
 
     bytes = 0;
-    for (indx=0; indx<(int)buffer->planes().size(); indx++){
+    for (indx=0; indx<(int)buffer->planes().size(); indx++) {
         bytes += buffer->planes()[(uint)indx].length;
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Plane %d of %d length %d"
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Buffer plane %d of %d length %d"
             , indx, buffer->planes().size()
             , buffer->planes()[(uint)indx].length);
     }
 
-    if (bytes > cam->imgs.size_norm) {
-        width = ((int)buffer->planes()[0].length / cam->imgs.height);
-        if (((int)buffer->planes()[0].length != (width * cam->imgs.height)) ||
-            (bytes > ((width * cam->imgs.height * 3)/2))) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "Error setting image size.  Plane 0 length %d, total bytes %d"
-                , buffer->planes()[0].length, bytes);
-        }
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            , "Image size adjusted from %d x %d to %d x %d"
-            , cam->imgs.width,cam->imgs.height
-            , width,cam->imgs.height);
-        cam->imgs.width = width;
-        cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
-        cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
-    }
+    convert = new cls_convert(cam, pixfmt, cam->imgs.width, cam->imgs.height);
 
     membuf.buf = (uint8_t *)mmap(NULL, (uint)bytes, PROT_READ
         , MAP_SHARED, plane0.fd.get(), 0);
@@ -665,17 +734,25 @@ int cls_libcam::start_req()
 
 int cls_libcam::start_capture()
 {
-    int retcd;
+    int retcd, indx;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
-    retcd = camera->start(&this->controls);
+    camctrls = new libcamera::ControlList();
+    for (indx=0;indx<params->params_cnt;indx++) {
+        config_control_item(
+            params->params_array[indx].param_name
+            ,params->params_array[indx].param_value);
+    }
+
+    retcd = camera->start(camctrls);
     if (retcd) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Failed to start capture.");
+        mydelete(camctrls);
         return -1;
     }
-    controls.clear();
+    mydelete(camctrls);
 
     for (std::unique_ptr<Request> &request : requests) {
         retcd = req_add(request.get());
@@ -707,6 +784,7 @@ int cls_libcam::libcam_start()
     started_mgr = false;
     started_aqr = false;
     started_req = false;
+    set_controls = true;
 
     start_params();
 
@@ -752,21 +830,71 @@ void cls_libcam::libcam_stop()
         frmbuf.reset();
     }
 
-    controls.clear();
-
     if (started_aqr){
         camera->release();
         camera.reset();
     }
+
     if (started_mgr) {
         cam_mgr->stop();
         cam_mgr.reset();
     }
+
+    started_cam = false;
+    started_mgr = false;
+    started_aqr = false;
+    started_req = false;
+
     cam->device_status = STATUS_CLOSED;
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
 }
 
 #endif
+
+void cls_libcam::parms_update()
+{
+    #ifdef HAVE_LIBCAM
+        ctx_params  *prm_s;
+        int indx, indx2;
+        bool tst;
+
+        prm_s = new ctx_params;
+        prm_s->params_cnt = 0;
+        util_parms_parse(prm_s, "libcam_params", cam->conf_src->libcam_params);
+
+        /*
+        Determine if any of the changed parameters are ones that require restarting camera.
+        */
+        tst = false;
+        for (indx=0;indx<prm_s->params_cnt;indx++) {
+            if ((prm_s->params_array[indx].param_name == "pixelformat")) {
+                for (indx2=0;indx2<params->params_cnt;indx2++) {
+                    if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
+                        (prm_s->params_array[indx].param_value != params->params_array[indx2].param_value)) {
+                        MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                            , _("Restarting camera. Parameter %s changed %s to %s")
+                            , prm_s->params_array[indx].param_name.c_str()
+                            , params->params_array[indx2].param_value.c_str()
+                            , prm_s->params_array[indx].param_value.c_str());
+                        tst = true;
+                    }
+                }
+            }
+        }
+
+        if (tst == true) {
+            mydelete(prm_s);
+            cam->restart = true;
+            return;
+        }
+
+        /* Delete exising params and change pointer to new parameters */
+        mydelete(params);
+        params = prm_s;
+        set_controls = true;    /* Trigger update on next req_add*/
+
+    #endif
+}
 
 void cls_libcam::noimage()
 {
@@ -807,7 +935,7 @@ void cls_libcam::noimage()
 int cls_libcam::next(ctx_image_data *img_data)
 {
     #ifdef HAVE_LIBCAM
-        int indx;
+        int indx, retcd;
 
         if (started_cam == false) {
             return CAPTURE_FAILURE;
@@ -825,7 +953,12 @@ int cls_libcam::next(ctx_image_data *img_data)
         if (req_queue.empty() == false) {
             Request *request = this->req_queue.front();
 
-            memcpy(img_data->image_norm, membuf.buf, (uint)membuf.bufsz);
+            retcd = convert->process(
+                img_data->image_norm
+                , membuf.buf, membuf.bufsz);
+            if (retcd != 0) {
+                return CAPTURE_FAILURE;
+            }
 
             this->req_queue.pop();
             request->reuse(Request::ReuseBuffers);
@@ -848,6 +981,7 @@ int cls_libcam::next(ctx_image_data *img_data)
 cls_libcam::cls_libcam(cls_camera *p_cam)
 {
     cam = p_cam;
+    convert = nullptr;
     #ifdef HAVE_LIBCAM
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         params = nullptr;
@@ -870,6 +1004,7 @@ cls_libcam::~cls_libcam()
     #ifdef HAVE_LIBCAM
         libcam_stop();
     #endif
+    mydelete(convert);
     cam->device_status = STATUS_CLOSED;
 }
 

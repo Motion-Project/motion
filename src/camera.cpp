@@ -1154,6 +1154,7 @@ void cls_camera::init()
     }
 
     cfg->parms_copy(conf_src);
+    conf_chg = false;
 
     mythreadname_set("cl",cfg->device_id, cfg->device_name.c_str());
 
@@ -1864,6 +1865,54 @@ void cls_camera::check_schedule()
     */
 }
 
+/* Apply any changes to the configuration parameters set by webcontrol*/
+void cls_camera::check_config()
+{
+    std::string parm_nm, parm_vl_cur, parm_vl_src;
+    PARM_CAT    parm_ct;
+    PARM_CHG    parm_ch;
+    int indx;
+
+    if ((restart == true) || (handler_stop == true) || (conf_chg == false)) {
+        return;
+    }
+
+    indx=0;
+    while (config_parms[indx].parm_name != "") {
+        parm_nm = config_parms[indx].parm_name;
+        parm_ct = config_parms[indx].parm_cat;
+        parm_ch = config_parms[indx].parm_chg;
+        conf_src->edit_get(parm_nm, parm_vl_src, parm_ct);
+        cfg->edit_get(parm_nm, parm_vl_cur, parm_ct);
+        if (parm_vl_cur != parm_vl_src) {
+            if (parm_ch == PARM_CHG_COPY) {
+                cfg->edit_set(parm_nm, parm_vl_src);
+                MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                    , _("%s:%s applied")
+                    , parm_nm.c_str(), parm_vl_src.c_str());
+            } else if (parm_ch == PARM_CHG_CODE) {
+                if ((parm_nm == "v4l2_params")  &&
+                    (camera_type == CAMERA_TYPE_V4L2)) {
+                    v4l2cam->parms_update();
+                } else if ((parm_nm == "libcam_params")  &&
+                    (camera_type == CAMERA_TYPE_LIBCAM)) {
+                    libcam->parms_update();
+                } else {
+                    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                        , _("Programming error for changes to parameter %s")
+                        ,parm_nm.c_str());
+                }
+                cfg->edit_set(parm_nm, parm_vl_src);
+                MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                    , _("%s:%s applied")
+                    , parm_nm.c_str(), parm_vl_src.c_str());
+            }
+        }
+        indx++;
+    }
+    conf_chg = false;
+}
+
 /* sleep the loop to get framerate requested */
 void cls_camera::frametiming()
 {
@@ -1908,6 +1957,7 @@ void cls_camera::handler()
         timelapse();
         loopback();
         check_schedule();
+        check_config();
         frametiming();
     }
 
@@ -2036,6 +2086,7 @@ cls_camera::cls_camera(cls_motapp *p_app)
     handler_stop = true;
     restart = false;
     finish = false;
+    conf_chg = false;
     watchdog = 90;
     passflag = false;
     pthread_mutex_init(&stream.mutex, NULL);

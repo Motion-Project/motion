@@ -158,6 +158,7 @@ class cls_camera {
 
         bool    restart;
         bool    finish;
+        bool    conf_chg;
         int     threadnr;
         int     noise;
         bool    detecting_motion;
@@ -265,6 +266,7 @@ class cls_camera {
         void timelapse();
         void loopback();
         void check_schedule();
+        void check_config();
         void frametiming();
 };
 

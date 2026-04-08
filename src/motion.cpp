@@ -524,10 +524,14 @@ void cls_motapp::init_webu()
 
     for (indx1=0; indx1<cam_cnt; indx1++) {
         dup = false;
-        for (indx2=0; indx2<indx1; indx2++) {
-            if (cam_list[indx1]->cfg->webcontrol_port ==
-                cam_list[indx2]->cfg->webcontrol_port) {
-                dup = true;
+        if (cam_list[indx1]->cfg->webcontrol_port == cfg->webcontrol_port){
+            dup = true;
+        } else {
+            for (indx2=0; indx2<indx1; indx2++) {
+                if (cam_list[indx1]->cfg->webcontrol_port ==
+                    cam_list[indx2]->cfg->webcontrol_port) {
+                    dup = true;
+                }
             }
         }
         if (dup == false) {

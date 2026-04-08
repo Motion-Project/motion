@@ -52,6 +52,7 @@ class cls_v4l2cam {
         cls_v4l2cam(cls_camera *p_cam);
         ~cls_v4l2cam();
         int next(ctx_image_data *img_data);
+        void parms_update();
         void noimage();
     private:
         cls_camera *cam;

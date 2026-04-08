@@ -90,6 +90,7 @@ class cls_dbse {
         void filelist_get(std::string sql, vec_files &p_flst);
         bool restart;
         bool finish;
+        bool conf_chg;
         void shutdown();
         void startup();
 

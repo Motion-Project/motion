@@ -457,7 +457,6 @@ mhdrslt cls_webu_ans::mhd_digest_fail(int signal_stale)
     if (response == NULL) {
         return MHD_NO;
     }
-
     retcd = MHD_queue_auth_fail_response(connection, auth_realm
         ,auth_opaque, response
         ,(signal_stale == MHD_INVALID_NONCE) ? MHD_YES : MHD_NO);
@@ -482,7 +481,7 @@ mhdrslt cls_webu_ans::mhd_digest()
     MHD_free(username);
 
     if (chkuser == "") {
-        return mhd_digest_fail(retcd);
+        return mhd_digest_fail(MHD_NO);
     } else if (auth_admin_name == chkuser) {
         retcd = MHD_digest_auth_check3(connection
             , auth_realm
@@ -511,12 +510,16 @@ mhdrslt cls_webu_ans::mhd_digest()
         return MHD_YES;
     } else if (retcd == MHD_DAUTH_WRONG_USERNAME) {
         failauth_log(true);
-        return mhd_digest_fail(retcd);
+        return mhd_digest_fail(MHD_NO);
     } else if (retcd == MHD_DAUTH_RESPONSE_WRONG) {
         failauth_log(false);
-        return mhd_digest_fail(retcd);
+        return mhd_digest_fail(MHD_NO);
+    } else if ((retcd == MHD_DAUTH_NONCE_STALE) ||
+        (retcd == MHD_DAUTH_NONCE_OTHER_COND) ||
+        (retcd == MHD_DAUTH_NONCE_WRONG)) {
+        return mhd_digest_fail(MHD_INVALID_NONCE);
     } else {
-        return mhd_digest_fail(retcd);
+        return mhd_digest_fail(MHD_NO);
     }
 }
 
@@ -1066,7 +1069,7 @@ cls_webu_ans::cls_webu_ans(cls_webu *p_webu, const char *uri)
     auth_user_name = "";
     auth_user_pass = "";
     authenticated = false;                         /* boolean for whether we are authenticated*/
-    is_admin      = false;
+    is_admin      = true;
 
     resp_page     = "";                          /* The response being constructed */
     req_file      = nullptr;

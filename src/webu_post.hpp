@@ -18,10 +18,11 @@
 
 #ifndef _INCLUDE_WEBU_POST_HPP_
 #define _INCLUDE_WEBU_POST_HPP_
-    struct ctx_restart_item {
+    struct ctx_ra_item {
         std::string comp_type;
-        bool        restart;
         int         comp_indx;
+        bool        restart;
+        bool        apply;
     };
 
     class cls_webu_post {
@@ -50,7 +51,7 @@
             int             post_sz;        /* The number of entries in the post info */
             ctx_key         *post_info;     /* Structure of the entries provided from the post data */
             struct MHD_PostProcessor    *post_processor; /* Processor for handling Post method connections */
-            std::vector<ctx_restart_item>    restart_list;
+            std::vector<ctx_ra_item>    ra_list;   /* Restart or Apply configuration changes vector*/
 
             void cam_add();
             void cam_delete();
@@ -62,8 +63,8 @@
             void action_user();
             void write_config();
             void config_set(int indx_parm, std::string parm_val);
-            void config_restart_set(std::string p_type, int p_indx);
-            void config_restart_reset();
+            void config_ra_set(std::string p_type, int p_indx, PARM_CHG p_chg);
+            void config_ra_reset();
             void config();
             void ptz();
 

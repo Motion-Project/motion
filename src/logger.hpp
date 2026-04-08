@@ -71,6 +71,7 @@
             void shutdown();
             void startup();
             bool restart;
+            bool conf_chg;
             std::vector<ctx_log_item> log_vec;
         private:
             cls_motapp          *app;

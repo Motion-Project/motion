@@ -520,83 +520,36 @@ void cls_convert::greytoyuv420p(u_char *img_dst, u_char *img_src)
 /* Convert captured image to the standard pixel format*/
 int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
 {
-    #ifdef HAVE_V4L2
-        /*The FALLTHROUGH is a special comment required by compiler. */
-        switch (pixfmt_src) {
-        case V4L2_PIX_FMT_RGB24:
-            rgb24toyuv420p(img_dst, img_src);
-            return 0;
-
-        case V4L2_PIX_FMT_UYVY:
-            uyvyto420p(img_dst, img_src);
-            return 0;
-
-        case V4L2_PIX_FMT_YUYV:
-            yuv422to420p(img_dst, img_src);
-            return 0;
-
-        case V4L2_PIX_FMT_YUV422P:
-            yuv422pto420p(img_dst, img_src);
-            return 0;
-
-        case V4L2_PIX_FMT_YUV420:
-            memcpy(img_dst, img_src, (uint)clen);
-            return 0;
-
-        case V4L2_PIX_FMT_PJPG:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_JPEG:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_MJPEG:
-            return mjpegtoyuv420p(img_dst, img_src, clen);
-
-        case V4L2_PIX_FMT_SBGGR16:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SGBRG8:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SGRBG8:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SBGGR8:    /* bayer */
-            bayer2rgb24(common_buffer, img_src);
-            rgb24toyuv420p(img_dst, common_buffer);
-            return 0;
-
-        case V4L2_PIX_FMT_SRGGB8: /*New Pi Camera format*/
-            bayer2rgb24(common_buffer, img_src);
-            rgb24toyuv420p(img_dst, common_buffer);
-            return 0;
-
-        case V4L2_PIX_FMT_SPCA561:
-            /*FALLTHROUGH*/
-        case V4L2_PIX_FMT_SN9C10X:
-            sonix_decompress(img_dst, img_src);
-            bayer2rgb24(common_buffer, img_dst);
-            rgb24toyuv420p(img_dst, common_buffer);
-            return 0;
-
-        case V4L2_PIX_FMT_Y12:
-            y10torgb24(common_buffer, img_src, 2);
-            rgb24toyuv420p(img_dst, common_buffer);
-            return 0;
-        case V4L2_PIX_FMT_Y10:
-            y10torgb24(common_buffer, img_src, 4);
-            rgb24toyuv420p(img_dst, common_buffer);
-            return 0;
-        case V4L2_PIX_FMT_GREY:
-            greytoyuv420p(img_dst, img_src);
-            return 0;
-        }
-    #else
-        (void)img_dst;
-        (void)img_src;
-        (void)clen;
-    #endif
-    return -1;
-
+    if (pixfmt_src == "RGB3") {         rgb24toyuv420p(img_dst, img_src);
+    } else if (pixfmt_src == "UYVY") {  uyvyto420p(img_dst, img_src);
+    } else if (pixfmt_src == "YUYV"){   yuv422to420p(img_dst, img_src);
+    } else if (pixfmt_src == "422P") {  yuv422pto420p(img_dst, img_src);
+    } else if (pixfmt_src == "YU12") {  memcpy(img_dst, img_src, (uint)clen);
+    } else if (pixfmt_src == "GREY") {  greytoyuv420p(img_dst, img_src);
+    } else if ((pixfmt_src == "PJPG") || (pixfmt_src =="JPEG") ||
+        (pixfmt_src =="MJPG")) {
+        return mjpegtoyuv420p(img_dst, img_src, clen);
+    } else if ((pixfmt_src == "BYR2") || (pixfmt_src == "GBRG") ||
+        (pixfmt_src == "GRBG") || (pixfmt_src == "BA81") || (pixfmt_src == "RGGB")) {
+        bayer2rgb24(common_buffer, img_src);
+        rgb24toyuv420p(img_dst, common_buffer);
+    } else if ((pixfmt_src == "S561") || (pixfmt_src == "S910")) {
+        sonix_decompress(img_dst, img_src);
+        bayer2rgb24(common_buffer, img_dst);
+        rgb24toyuv420p(img_dst, common_buffer);
+    } else if (pixfmt_src == "Y12 ") {
+        y10torgb24(common_buffer, img_src, 2);
+        rgb24toyuv420p(img_dst, common_buffer);
+    } else if (pixfmt_src == "Y10 ") {
+        y10torgb24(common_buffer, img_src, 4);
+        rgb24toyuv420p(img_dst, common_buffer);
+    } else {
+        return -1;
+    }
+    return 0;
 }
 
-
-cls_convert::cls_convert(cls_camera *p_cam, int p_pix, int p_w, int p_h)
+cls_convert::cls_convert(cls_camera *p_cam, std::string p_pix, int p_w, int p_h)
 {
     cam = p_cam;
     width = p_w;
