@@ -506,8 +506,8 @@ void cls_allcam::init_params()
         p_cam->all_loc.scale = p_cam->cfg->stream_preview_scale;
 
         util_parms_parse(params
-            , "stream_preview_params"
-            , p_cam->cfg->stream_preview_params);
+            , "stream_allcam_params"
+            , p_cam->cfg->stream_allcam_params);
 
         for (indx1=0;indx1<params->params_cnt;indx1++) {
             itm = &params->params_array[indx1];
@@ -561,7 +561,7 @@ void cls_allcam::init_validate()
             (p_cam->all_loc.row == -1)) {
             cfg_valid = false;
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "No stream_preview_params for cam %d"
+                , "No stream_allcam_params for cam %d"
                 , p_cam->cfg->device_id);
         } else {
             for (indx1=0; indx1<active_cnt; indx1++) {
@@ -570,7 +570,7 @@ void cls_allcam::init_validate()
                     (p_cam->all_loc.row == p_cam1->all_loc.row) &&
                     (indx != indx1)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        , "Duplicate stream_preview_params "
+                        , "Duplicate stream_allcam_params "
                         " cam %d, cam %d row %d col %d"
                         , p_cam->cfg->device_id
                         , p_cam1->cfg->device_id
@@ -582,14 +582,14 @@ void cls_allcam::init_validate()
         }
         if (p_cam->all_loc.row == 0) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_params row cam %d, row %d"
+                , "Invalid stream_allcam_params row cam %d, row %d"
                 , p_cam->cfg->device_id
                 , p_cam->all_loc.row);
             cfg_valid = false;
         }
         if (p_cam->all_loc.col == 0) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_params col cam %d, col %d"
+                , "Invalid stream_allcam_params col cam %d, col %d"
                 , p_cam->cfg->device_id
                 , p_cam->all_loc.col);
             cfg_valid = false;
@@ -606,7 +606,7 @@ void cls_allcam::init_validate()
         }
         if (chk == false) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_preview_params combination. "
+                , "Invalid stream_allcam_params combination. "
                 " Missing row %d", row);
             cfg_valid = false;
         }
@@ -620,7 +620,7 @@ void cls_allcam::init_validate()
                         col_chk = col;
                     } else {
                         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                            , "Invalid stream_preview_params combination. "
+                            , "Invalid stream_allcam_params combination. "
                             " Missing row %d column %d", row, col_chk+1);
                         cfg_valid = false;
                     }
@@ -660,7 +660,7 @@ void cls_allcam::init_cams()
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx];
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-            ,"stream_preview_params values. Device %d row %d col %d"
+            ,"stream_allcam_params values. Device %d row %d col %d"
             , p_cam->cfg->device_id
             , p_cam->all_loc.row
             , p_cam->all_loc.col);

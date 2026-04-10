@@ -158,7 +158,7 @@ ctx_parm config_parms[] = {
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_preview_params",     PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
+    {"stream_allcam_params",     PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
@@ -244,6 +244,8 @@ ctx_parm_depr config_parms_depr[] = {
         ,"\"stream_header_params\" replaced with \"webcontrol_header_params\""}
     ,{"stream_tls", "5.0.0","webcontrol_tls"
         ,"\"stream_tls\" replaced with \"webcontrol_tls\""}
+    ,{"stream_preview_params", "5.0.0","stream_allcam_params"
+        ,"\"stream_preview_params\" replaced with \"stream_allcam_params\""}
     ,{"webcontrol_authentication", "5.0.0","webcontrol_auth_admin"
         ,"\"webcontrol_authentication\" replaced with \"webcontrol_auth_admin\""}
     ,{ "","","",""}
@@ -2330,17 +2332,17 @@ void cls_config::edit_stream_preview_newline(std::string &parm, enum PARM_ACT pa
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_newline",_("stream_preview_newline"));
  }
 
-void cls_config::edit_stream_preview_params(std::string &parm, enum PARM_ACT pact)
+void cls_config::edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        stream_preview_params = "";
+        stream_allcam_params = "";
     } else if (pact == PARM_ACT_SET) {
-        stream_preview_params = parm;
+        stream_allcam_params = parm;
     } else if (pact == PARM_ACT_GET) {
-        parm = stream_preview_params;
+        parm = stream_allcam_params;
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_params",_("stream_preview_params"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_allcam_params",_("stream_allcam_params"));
 }
 
 void cls_config::edit_stream_preview_method(std::string &parm, enum PARM_ACT pact)
@@ -3087,7 +3089,7 @@ void cls_config::edit_cat14(std::string parm_nm, std::string &parm_val, enum PAR
 {
     if (parm_nm == "stream_preview_scale") {               edit_stream_preview_scale(parm_val, pact);
     } else if (parm_nm == "stream_preview_newline") {      edit_stream_preview_newline(parm_val, pact);
-    } else if (parm_nm == "stream_preview_params") {     edit_stream_preview_params(parm_val, pact);
+    } else if (parm_nm == "stream_allcam_params") {     edit_stream_allcam_params(parm_val, pact);
     } else if (parm_nm == "stream_preview_method") {       edit_stream_preview_method(parm_val, pact);
     } else if (parm_nm == "stream_preview_ptz") {          edit_stream_preview_ptz(parm_val, pact);
     } else if (parm_nm == "stream_quality") {              edit_stream_quality(parm_val, pact);

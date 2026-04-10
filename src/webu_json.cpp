@@ -68,8 +68,8 @@ void cls_webu_json::parms_item_detail(cls_config *conf, std::string pNm)
         util_parms_parse(params, pNm, conf->webcontrol_actions);
     } else if (pNm == "webcontrol_headers") {
         util_parms_parse(params, pNm, conf->webcontrol_headers);
-    } else if (pNm == "stream_preview_params") {
-        util_parms_parse(params, pNm, conf->stream_preview_params);
+    } else if (pNm == "stream_allcam_params") {
+        util_parms_parse(params, pNm, conf->stream_allcam_params);
     } else if (pNm == "snd_params") {
         util_parms_parse(params, pNm, conf->snd_params);
     }
