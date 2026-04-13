@@ -86,6 +86,7 @@
             public:
                 cls_libcam(cls_camera *p_cam);
                 ~cls_libcam();
+                void parms_update();
                 int next(ctx_image_data *img_data);
                 void noimage();
             private:

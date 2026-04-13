@@ -813,6 +813,7 @@ int cls_libcam::libcam_start()
 
 void cls_libcam::libcam_stop()
 {
+    mydelete(convert);
     mydelete(params);
 
     if (started_aqr) {
@@ -981,9 +982,9 @@ int cls_libcam::next(ctx_image_data *img_data)
 cls_libcam::cls_libcam(cls_camera *p_cam)
 {
     cam = p_cam;
-    convert = nullptr;
     #ifdef HAVE_LIBCAM
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
+        convert = nullptr;
         params = nullptr;
         reconnect_count = 0;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
@@ -1004,7 +1005,7 @@ cls_libcam::~cls_libcam()
     #ifdef HAVE_LIBCAM
         libcam_stop();
     #endif
-    mydelete(convert);
+
     cam->device_status = STATUS_CLOSED;
 }
 
