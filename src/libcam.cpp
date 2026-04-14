@@ -222,7 +222,6 @@ int cls_libcam::start_mgr()
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
-    cam_mgr = std::make_unique<CameraManager>();
     retcd = cam_mgr->start();
     if (retcd != 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -707,8 +706,6 @@ int cls_libcam::start_req()
         return -1;
     }
 
-    started_req = true;
-
     const FrameBuffer::Plane &plane0 = buffer->planes()[0];
 
     bytes = 0;
@@ -726,6 +723,8 @@ int cls_libcam::start_req()
     membuf.bufsz = bytes;
 
     requests.push_back(std::move(request));
+
+    started_req = true;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
@@ -828,17 +827,14 @@ void cls_libcam::libcam_stop()
         requests.clear();
 
         frmbuf->free(config->at(0).stream());
-        frmbuf.reset();
     }
 
     if (started_aqr){
         camera->release();
-        camera.reset();
     }
 
     if (started_mgr) {
         cam_mgr->stop();
-        cam_mgr.reset();
     }
 
     started_cam = false;
@@ -988,6 +984,7 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
         params = nullptr;
         reconnect_count = 0;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
+        cam_mgr = std::make_unique<CameraManager>();
         if (libcam_start() < 0) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
             libcam_stop();
