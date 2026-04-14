@@ -36,7 +36,6 @@ motion_SOURCES = \
 	libcam.hpp         libcam.cpp \
 	logger.hpp         logger.cpp \
 	motion.hpp         motion.cpp \
-	allcam.hpp         allcam.cpp \
 	schedule.hpp       schedule.cpp \
 	camera.hpp         camera.cpp \
 	movie.hpp          movie.cpp \
@@ -49,6 +48,7 @@ motion_SOURCES = \
 	video_convert.hpp  video_convert.cpp \
 	video_loopback.hpp video_loopback.cpp \
 	webu.hpp           webu.cpp \
+	webu_allcam.hpp    webu_allcam.cpp \
 	webu_ans.hpp       webu_ans.cpp \
 	webu_file.hpp      webu_file.cpp \
 	webu_html.hpp      webu_html.cpp \

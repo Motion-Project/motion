@@ -20,12 +20,12 @@
 #include "util.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
-#include "allcam.hpp"
 #include "schedule.hpp"
 #include "camera.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
 #include "webu.hpp"
+#include "webu_allcam.hpp"
 #include "video_v4l2.hpp"
 #include "movie.hpp"
 #include "netcam.hpp"
@@ -455,6 +455,7 @@ void cls_motapp::check_restart()
                     webu_list[indx1]->cfg = cam_list[indx2]->cfg;
                 }
             }
+            webu_list[indx1]->webuindx = indx1;
             webu_list[indx1]->startup();
             webu_list[indx1]->restart = false;
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -516,6 +517,8 @@ void cls_motapp::init_webu()
 
     p_webu = nullptr;
 
+    webu_list.clear();
+
     if (cfg->webcontrol_port != 0) {
         p_webu = new cls_webu(this, cfg);
         webu_list.push_back(p_webu);
@@ -542,6 +545,7 @@ void cls_motapp::init_webu()
     }
 
     for (indx1=0; indx1<webu_cnt; indx1++) {
+        webu_list[indx1]->webuindx = indx1;
         webu_list[indx1]->startup();
     }
 
@@ -563,7 +567,6 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     conf_src = nullptr;
     cfg = nullptr;
     dbse = nullptr;
-    allcam = nullptr;
     schedule = nullptr;
     cam_list.clear();
     snd_list.clear();
@@ -597,7 +600,6 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     av_init();
 
     dbse = new cls_dbse(this);
-    allcam = new cls_allcam(this);
     schedule = new cls_schedule(this);
     init_webu();
 
@@ -624,28 +626,35 @@ void cls_motapp::deinit()
     av_deinit();
     pid_remove();
 
-    mydelete(dbse);
-    mydelete(allcam)
-    mydelete(schedule)
-    mydelete(conf_src);
-    mydelete(cfg);
-
     for (indx = 0; indx < cam_cnt;indx++) {
+        cam_list[indx]->handler_shutdown();
         mydelete(cam_list[indx]);
     }
 
     for (indx = 0; indx < snd_cnt;indx++) {
+        snd_list[indx]->handler_shutdown();
         mydelete(snd_list[indx]);
     }
 
     for (indx = 0; indx < webu_cnt;indx++) {
+        webu_list[indx]->shutdown();
         mydelete(webu_list[indx]);
     }
+
+    dbse->shutdown();
+    mydelete(dbse);
+
+    schedule->handler_shutdown();
+    mydelete(schedule)
+
+    mydelete(conf_src);
+    mydelete(cfg);
 
     pthread_mutex_destroy(&mutex_camlst);
     pthread_mutex_destroy(&mutex_post);
 
 }
+
 /* Check for whether to add a new cam */
 void cls_motapp::camera_add()
 {
@@ -664,8 +673,9 @@ void cls_motapp::camera_add()
 /* Check for whether to delete a new cam */
 void cls_motapp::camera_delete()
 {
-    cls_camera *cam;
-    int     indx, chk_indx;
+    cls_camera  *cam;
+    cls_webu    *webu;
+    int indx, indx2, chk_indx;
 
     if (cam_delete < 0) {
         return;
@@ -692,54 +702,39 @@ void cls_motapp::camera_delete()
         return;
     }
     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
-
-    /* Determine whether to close a webcontrol port or assign
-    a different config file for any other cameras using same port*/
-    if ((cam->cfg->webcontrol_port != cfg->webcontrol_port) &&
-        (cam->cfg->webcontrol_port != 0)) {
-        /* Determine if a web control is using this config*/
-        chk_indx = -1;
-        for (indx = 0; indx < webu_cnt; indx++) {
-            if (webu_list[indx]->cfg == cam->cfg) {
-                chk_indx = indx;
-            }
-        }
-        if (chk_indx != -1 ) {
-            /*This config IS being used.  Either change web control
-            to use a different cam for the config or shutdown the
-            webcontrol*/
+    /* Reverse sequence so we can remove elements*/
+    for (indx = webu_cnt-1; indx >=0; indx--) {
+        webu = webu_list[indx];
+        if ((cam->cfg->webcontrol_port == webu->cfg->webcontrol_port) ||
+            (webu->cfg == cfg)) {
             chk_indx = -1;
-            for (indx = 0; indx < cam_cnt; indx++) {
-                if ((cam_list[indx]->cfg->webcontrol_port ==
-                    cam->cfg->webcontrol_port) &&
-                    (indx != cam_delete)) {
-                    chk_indx = indx;
+            for (indx2 = 0; indx2 < webu->cam_cnt; indx2++) {
+                if (webu->cam_list[indx2] == cam) {
+                    chk_indx = indx2;
                 }
             }
-            if (chk_indx == -1 ) {
-                /* This was only cam on the web port so shut it down*/
-                for (indx = 0; indx < webu_cnt; indx++) {
-                    if (webu_list[indx]->cfg->webcontrol_port ==
-                        cam->cfg->webcontrol_port) {
-                        chk_indx = indx;
-                    }
-                }
-                webu_list[chk_indx]->shutdown();
-                mydelete(webu_list[chk_indx]);
-                webu_list.erase(webu_list.begin() + chk_indx);
+            if (chk_indx != -1) {
+                pthread_mutex_lock(&webu->mutex_camlst);
+                    mydelete(webu->cam_list[chk_indx]);
+                    webu->cam_list.erase(cam_list.begin() + chk_indx);
+                    webu->cam_cnt--;
+                pthread_mutex_unlock(&webu->mutex_camlst);
+            }
+            if (webu->cam_cnt == 0) {
+                webu->shutdown();
+                mydelete(webu);
+                webu_list.erase(webu_list.begin() + indx);
                 webu_cnt--;
             } else {
-                /* The web port is being used by different cam*/
-                /* assign the config for the different cam to the webu*/
-                /* chk_indx has the index of the different cam*/
-                for (indx = 0; indx < webu_cnt; indx++) {
-                    if (webu_list[indx]->cfg->webcontrol_port ==
-                        cam->cfg->webcontrol_port) {
-                        webu_list[indx]->cfg = cam_list[indx]->cfg;
-                        webu_list[chk_indx]->shutdown();
-                        webu_list[chk_indx]->startup();
-                    }
+                if (webu->cfg == cam->cfg) {
+                    /*The cfg used was is the cam being deleted so we need
+                    to pick a different cfg for webcontrol.  Just use the
+                    first camera at index 0.*/
+                    webu->cfg = webu->cam_list[0]->cfg;
+                    webu->shutdown();
+                    webu->startup();
                 }
+                webu->allcam->reset = true;
             }
         }
     }
@@ -751,7 +746,6 @@ void cls_motapp::camera_delete()
     pthread_mutex_unlock(&mutex_camlst);
 
     cam_delete = -1;
-    allcam->all_sizes.reset = true;
 
 }
 

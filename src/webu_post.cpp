@@ -19,12 +19,12 @@
 #include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
-#include "allcam.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "webu.hpp"
+#include "webu_allcam.hpp"
 #include "webu_ans.hpp"
 #include "webu_html.hpp"
 #include "webu_post.hpp"
@@ -511,7 +511,6 @@ void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
             app->conf_src->edit_set(parm_nm, parm_vl);
             if (parm_ct == PARM_CAT_14) {
                 app->conf_src->edit_set(parm_nm, parm_vl);
-                app->allcam->all_sizes.reset = true;
             }
             for (indx=0;indx<app->cam_cnt;indx++){
                 app->cam_list[indx]->conf_src->edit_get(

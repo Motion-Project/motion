@@ -19,11 +19,11 @@
 #include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
-#include "allcam.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "picture.hpp"
 #include "webu.hpp"
+#include "webu_allcam.hpp"
 #include "webu_ans.hpp"
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
@@ -183,28 +183,28 @@ int cls_webu_mpegts::getimg()
         pthread_mutex_unlock(&webua->cam->stream.mutex);
     } else {
         if (webua->cnct_type == WEBUI_CNCT_TS_FULL) {
-            strm = &webua->app->allcam->stream.norm;
+            strm = &webua->webu->allcam->stream.norm;
         } else if (webua->cnct_type == WEBUI_CNCT_TS_SUB) {
-            strm = &webua->app->allcam->stream.sub;
+            strm = &webua->webu->allcam->stream.sub;
         } else if (webua->cnct_type == WEBUI_CNCT_TS_MOTION) {
-            strm = &webua->app->allcam->stream.motion;
+            strm = &webua->webu->allcam->stream.motion;
         } else if (webua->cnct_type == WEBUI_CNCT_TS_SOURCE) {
-            strm = &webua->app->allcam->stream.source;
+            strm = &webua->webu->allcam->stream.source;
         } else if (webua->cnct_type == WEBUI_CNCT_TS_SECONDARY) {
-            strm = &webua->app->allcam->stream.secondary;
+            strm = &webua->webu->allcam->stream.secondary;
         } else {
             return 0;
         }
-        img_sz = app->allcam->all_sizes.dst_sz;
+        img_sz = webu->allcam->info.dst_sz;
         img_data = (unsigned char*) mymalloc((uint)img_sz);
-        pthread_mutex_lock(&webua->app->allcam->stream.mutex);
+        pthread_mutex_lock(&webua->webu->allcam->stream.mutex);
             if (strm->img_data == nullptr) {
                 memset(img_data, 0x00, (uint)img_sz);
             } else {
                 memcpy(img_data, strm->img_data, (uint)img_sz);
                 strm->consumed = true;
             }
-        pthread_mutex_unlock(&webua->app->allcam->stream.mutex);
+        pthread_mutex_unlock(&webua->webu->allcam->stream.mutex);
 
     }
 
@@ -250,8 +250,8 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
 
     if (ctx_codec != nullptr) {
         if ((webua->device_id == 0) &&
-            ((webua->app->allcam->all_sizes.dst_h != ctx_codec->height ) ||
-             (webua->app->allcam->all_sizes.dst_w != ctx_codec->width))) {
+            ((webua->webu->allcam->info.dst_h != ctx_codec->height ) ||
+             (webua->webu->allcam->info.dst_w != ctx_codec->width))) {
             return -1;
         }
     }
@@ -328,8 +328,8 @@ int cls_webu_mpegts::open_mpegts()
         if (webus->all_ready() == false) {
             return -1;
         }
-        img_w = app->allcam->all_sizes.dst_w;
-        img_h = app->allcam->all_sizes.dst_h;
+        img_w = webu->allcam->info.dst_w;
+        img_h = webu->allcam->info.dst_h;
     }
 
     ctx_codec = avcodec_alloc_context3(codec);

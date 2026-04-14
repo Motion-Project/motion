@@ -28,6 +28,7 @@ class cls_schedule {
         bool            handler_running;
         pthread_t       handler_thread;
         void            handler();
+        void            handler_shutdown();
 
         bool    restart;
         bool    finish;
@@ -38,7 +39,6 @@ class cls_schedule {
         int watchdog;
 
         void handler_startup();
-        void handler_shutdown();
         void timing();
         void cleandir_cam(cls_camera *p_cam);
         void cleandir_run(cls_camera *p_cam);

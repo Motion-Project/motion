@@ -2093,9 +2093,6 @@ cls_camera::cls_camera(cls_motapp *p_app)
     device_status = STATUS_CLOSED;
     memset(&imgs, 0, sizeof(ctx_images));
     memset(&stream, 0, sizeof(ctx_stream));
-    memset(&all_loc, 0, sizeof(ctx_all_loc));
-    memset(&all_sizes, 0, sizeof(ctx_all_sizes));
-    all_sizes.reset = true;
 }
 
 cls_camera::~cls_camera()

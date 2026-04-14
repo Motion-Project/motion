@@ -131,30 +131,6 @@ enum DEVICE_STATUS {
     STATUS_OPENED    /* Successfully started the device */
 };
 
-struct ctx_all_loc {
-    int     row;
-    int     col;
-    int     offset_row;
-    int     offset_col;
-    int     offset_user_row;
-    int     offset_user_col;
-    int     scale;
-    int     xpct_st;    /*Starting x location of image on percentage basis*/
-    int     xpct_en;    /*Ending x location of image on percentage basis*/
-    int     ypct_st;    /*Starting y location of image on percentage basis*/
-    int     ypct_en;    /*Ending y location of image on percentage basis*/
-};
-
-struct ctx_all_sizes {
-    int     src_w;
-    int     src_h;
-    int     src_sz;
-    int     dst_w;
-    int     dst_h;
-    int     dst_sz;
-    bool    reset;
-};
-
 struct ctx_stream_data {
     u_char  *jpg_data;  /* Image compressed as JPG */
     int     jpg_sz;     /* The number of bytes for jpg */
@@ -197,7 +173,6 @@ class cls_motapp {
         cls_config          *conf_src;
         cls_config          *cfg;
         cls_dbse            *dbse;
-        cls_allcam          *allcam;
         cls_schedule        *schedule;
 
         pthread_mutex_t     mutex_camlst;       /* Lock the list of cams while adding/removing */

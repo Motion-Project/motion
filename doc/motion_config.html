@@ -2536,11 +2536,20 @@
         <h3><a name="stream_allcam_params"></a> stream_allcam_params</h3>
         <ul>
          <li> Values: String | Default: Not Defined</li>
-          Comma separated parameters for the video streams and consolidated image.
+          Comma separated parameters for the consolidated image video streams.
           The consolidated image puts together a single image of all the cameras currently
-          running. Format is parm1=value1,parm2=value2 etc.
+          running on the webcontrol_port. Format is parm1=value1,parm2=value2 etc.
           <p></p>
           <div>
+            <i><h4>Muliple webcontrol ports</h4></i>
+            <ul>
+              Since consolidated cameras streams may be available on multiple ports,
+              parameter names can be customized to provide different values per port.
+              Simply append the applicable port number to the parameter name.  For example,
+              the parameter values of <code>row=2;row8082=3</code> would indicate that the
+              default row would be 2 and for the consolidated stream provided
+              on <code>webcontrol_port 8082</code> the row would be 3
+            </ul>
             <i><h4>row</h4></i>
             <ul>
               <li> Values: positive integers | Default: Not Defined </li>
@@ -2589,6 +2598,14 @@
               up (negative values) or down(positive values) from that center position.
               <p></p>
               This parameter is in pixels.
+            </ul>
+            <p></p>
+          </div>
+          <div>
+            <i><h4>scale</h4></i>
+            <ul>
+              <li> Values: Integers | Default: 100 </li>
+              The percentage to scale the image.  Numbers greater than 100 are permitted.
             </ul>
             <p></p>
           </div>

@@ -19,10 +19,10 @@
 #include "motion.hpp"
 #include "util.hpp"
 #include "camera.hpp"
-#include "allcam.hpp"
 #include "conf.hpp"
 #include "logger.hpp"
 #include "webu.hpp"
+#include "webu_allcam.hpp"
 #include "webu_ans.hpp"
 #include "webu_html.hpp"
 #include "webu_stream.hpp"
@@ -855,6 +855,10 @@ bool cls_webu_ans::camport_check()
 {
     int indx;
 
+    if (device_id == 0){
+        return true;
+    }
+
     if (webu->cfg->webcontrol_port == webu->app->cfg->webcontrol_port) {
         /* All cameras can be seen on the webcontrol port specified
         in the motion.conf file as the main application*/
@@ -1020,30 +1024,30 @@ void cls_webu_ans::deinit_counter()
         pthread_mutex_unlock(&p_cam->stream.mutex);
     }
     if (device_id == 0) {
-        pthread_mutex_lock(&app->allcam->stream.mutex);
+        pthread_mutex_lock(&webu->allcam->stream.mutex);
             if ((cnct_type == WEBUI_CNCT_JPG_FULL) ||
                 (cnct_type == WEBUI_CNCT_TS_FULL)) {
-                strm = &app->allcam->stream.norm;
+                strm = &webu->allcam->stream.norm;
             } else if ( (cnct_type == WEBUI_CNCT_JPG_SUB) ||
                         (cnct_type == WEBUI_CNCT_TS_SUB)) {
-                strm = &app->allcam->stream.sub;
+                strm = &webu->allcam->stream.sub;
             } else if ( (cnct_type == WEBUI_CNCT_JPG_MOTION) ||
                         (cnct_type == WEBUI_CNCT_TS_MOTION )) {
-                strm = &app->allcam->stream.motion;
+                strm = &webu->allcam->stream.motion;
             } else if ( (cnct_type == WEBUI_CNCT_JPG_SOURCE) ||
                         (cnct_type == WEBUI_CNCT_TS_SOURCE)) {
-                strm = &app->allcam->stream.source;
+                strm = &webu->allcam->stream.source;
             } else if ( (cnct_type == WEBUI_CNCT_JPG_SECONDARY) ||
                         (cnct_type == WEBUI_CNCT_TS_SECONDARY)) {
-                strm = &app->allcam->stream.secondary;
+                strm = &webu->allcam->stream.secondary;
             } else {
-                strm = &app->allcam->stream.norm;
+                strm = &webu->allcam->stream.norm;
             }
 
             if (strm->all_cnct > 0) {
                 strm->all_cnct--;
             }
-        pthread_mutex_unlock(&app->allcam->stream.mutex);
+        pthread_mutex_unlock(&webu->allcam->stream.mutex);
     }
 }
 

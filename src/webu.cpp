@@ -22,6 +22,7 @@
 #include "conf.hpp"
 #include "logger.hpp"
 #include "webu.hpp"
+#include "webu_allcam.hpp"
 #include "webu_ans.hpp"
 #include "webu_html.hpp"
 #include "webu_json.hpp"
@@ -38,7 +39,7 @@ static void *webu_mhd_init(void *cls, const char *uri, struct MHD_Connection *co
     cls_webu        *p_webu=(cls_webu *)cls;
     cls_webu_ans    *webua;
 
-    mythreadname_set("wc", 0, NULL);
+    mythreadname_set("wc", p_webu->webuindx, NULL);
 
     webua = new cls_webu_ans(p_webu, uri);
 
@@ -438,6 +439,7 @@ void cls_webu::start_daemon()
 void cls_webu::startup() {
 
     unsigned int randnbr;
+    int indx;
     wb_daemon = nullptr;
     finish = false;
     wb_clients.clear();
@@ -448,10 +450,12 @@ void cls_webu::startup() {
         return;
     }
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-        , _("Starting webcontrol on port %d")
-        , cfg->webcontrol_port);
+    portnbr = cfg->webcontrol_port;
 
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        , _("Starting webcontrol on port %d"),portnbr);
+
+    allcam = new cls_allcam(this, webuindx);
     wb_headers = new ctx_params;
     util_parms_parse(wb_headers, "webcontrol_headers", cfg->webcontrol_headers);
 
@@ -465,15 +469,30 @@ void cls_webu::startup() {
 
     cnct_cnt = 0;
 
+    cam_cnt = 0;
+    for (indx=0;indx<app->cam_cnt;indx++) {
+        if ((app->cam_list[indx]->cfg->webcontrol_port == cfg->webcontrol_port) ||
+            (cfg == app->cfg)) {
+            cam_list.push_back(app->cam_list[indx]);
+            cam_cnt++;
+        }
+    }
+
 }
 
 void cls_webu::shutdown()
 {
     int chkcnt;
 
-    finish = true;
+    if (shutdown_in_progress) {
+        return;
+    }
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Closing webcontrol"));
+    finish = true;
+    shutdown_in_progress = true;
+
+    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        , _("Closing webcontrol on port %d"), portnbr);
 
     chkcnt = 0;
     while ((chkcnt < 1000) && (cnct_cnt >0)) {
@@ -482,7 +501,8 @@ void cls_webu::shutdown()
     }
 
     if (chkcnt>=1000){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Excessive wait closing webcontrol"));
+        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            , _("Excessive wait closing webcontrol on port %d"),portnbr);
     }
 
     if (wb_daemon != nullptr) {
@@ -490,19 +510,23 @@ void cls_webu::shutdown()
         wb_daemon = nullptr;
     }
 
-    delete wb_actions;
-    delete wb_headers;
-
+    mydelete(wb_actions);
+    mydelete(wb_headers);
+    mydelete(allcam);
 }
 
-cls_webu::cls_webu(cls_motapp *p_app,cls_config *p_cfg)
+cls_webu::cls_webu(cls_motapp *p_app, cls_config *p_cfg)
 {
     app = p_app;
     cfg = p_cfg;
     restart = false;
+    allcam = nullptr;
+    shutdown_in_progress = false;
+    pthread_mutex_init(&mutex_camlst, NULL);
 }
 
 cls_webu::~cls_webu()
 {
     shutdown();
+    pthread_mutex_destroy(&mutex_camlst);
 }

@@ -144,8 +144,6 @@ class cls_camera {
         cls_rotate      *rotate;
         cls_netcam      *netcam;
         cls_netcam      *netcam_high;
-        ctx_all_loc     all_loc;
-        ctx_all_sizes   all_sizes;
         cls_draw        *draw;
         cls_picture     *picture;
 
@@ -159,6 +157,7 @@ class cls_camera {
         bool    restart;
         bool    finish;
         bool    conf_chg;
+        bool    allcam_reset;
         int     threadnr;
         int     noise;
         bool    detecting_motion;

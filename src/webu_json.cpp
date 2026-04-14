@@ -22,6 +22,7 @@
 #include "conf.hpp"
 #include "logger.hpp"
 #include "webu.hpp"
+#include "webu_allcam.hpp"
 #include "webu_ans.hpp"
 #include "webu_json.hpp"
 #include "dbse.hpp"
@@ -229,27 +230,29 @@ void cls_webu_json::parms_all()
 
     webua->resp_page += "{";
     webua->resp_page += "\"default\": ";
-    parms_one(app->cfg);
+    parms_one(webu->cfg);
 
-    for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
+    for (indx_cam=0; indx_cam<webu->cam_cnt; indx_cam++) {
         webua->resp_page += ",\"cam" +
-            std::to_string(app->cam_list[indx_cam]->cfg->device_id) + "\": ";
-        parms_one(app->cam_list[indx_cam]->cfg);
+            std::to_string(webu->cam_list[indx_cam]->cfg->device_id) + "\": ";
+        parms_one(webu->cam_list[indx_cam]->cfg);
     }
     webua->resp_page += "}";
 }
 
 void cls_webu_json::cameras_list()
 {
-    int indx_cam;
+    int indx_cam, indx, chk;
     std::string response;
     std::string strid;
     cls_camera     *cam;
 
-    webua->resp_page += "{\"count\" : " + std::to_string(app->cam_cnt);
 
-    for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
-        cam = app->cam_list[indx_cam];
+
+    webua->resp_page += "{\"count\" : " + std::to_string(webu->cam_cnt);
+
+    for (indx_cam=0; indx_cam<webu->cam_cnt; indx_cam++) {
+        cam = webu->cam_list[indx_cam];
         strid =std::to_string(cam->cfg->device_id);
         webua->resp_page += ",\"" + std::to_string(indx_cam) + "\":";
         if (cam->cfg->device_name == "") {
@@ -257,11 +260,31 @@ void cls_webu_json::cameras_list()
         } else {
             webua->resp_page += "{\"name\": \"" + escstr(cam->cfg->device_name) + "\"";
         }
+        chk = -1;
+        for (indx=0;indx<webu->allcam->active_cnt;indx++) {
+            if (webu->allcam->active_cam[indx].cam == cam) {
+                chk = indx;
+            }
+        }
         webua->resp_page += ",\"id\": " + strid;
-        webua->resp_page += ",\"all_xpct_st\": " + std::to_string(cam->all_loc.xpct_st);
-        webua->resp_page += ",\"all_xpct_en\": " + std::to_string(cam->all_loc.xpct_en);
-        webua->resp_page += ",\"all_ypct_st\": " + std::to_string(cam->all_loc.ypct_st);
-        webua->resp_page += ",\"all_ypct_en\": " + std::to_string(cam->all_loc.ypct_en);
+        if (chk == -1) {
+            webua->resp_page += ",\"all_xpct_st\": 0";
+            webua->resp_page += ",\"all_xpct_en\": 0";
+            webua->resp_page += ",\"all_ypct_st\": 0";
+            webua->resp_page += ",\"all_ypct_en\": 0";
+        } else {
+            webua->resp_page += ",\"all_xpct_st\": ";
+            webua->resp_page += std::to_string(webu->allcam->active_cam[chk].xpct_st);
+
+            webua->resp_page += ",\"all_xpct_en\": ";
+            webua->resp_page += std::to_string(webu->allcam->active_cam[chk].xpct_en);
+
+            webua->resp_page += ",\"all_ypct_st\": ";
+            webua->resp_page += std::to_string(webu->allcam->active_cam[chk].ypct_st);
+
+            webua->resp_page += ",\"all_ypct_en\": ";
+            webua->resp_page += std::to_string(webu->allcam->active_cam[chk].ypct_en);
+        }
         webua->resp_page += ",\"url\": \"" + webua->hostfull + "/" + strid + "/\"} ";
     }
     webua->resp_page += "}";
@@ -389,10 +412,10 @@ void cls_webu_json::movies()
 
     webua->resp_page += "{\"movies\" : ";
     if (webua->cam == NULL) {
-        webua->resp_page += "{\"count\" :" + std::to_string(app->cam_cnt);
+        webua->resp_page += "{\"count\" :" + std::to_string(webu->cam_cnt);
 
-        for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
-            webua->cam = app->cam_list[indx_cam];
+        for (indx_cam=0; indx_cam<webu->cam_cnt; indx_cam++) {
+            webua->cam = webu->cam_list[indx_cam];
             webua->resp_page += ",\""+ std::to_string(indx_cam) + "\":";
             movies_list();
         }
@@ -400,8 +423,8 @@ void cls_webu_json::movies()
         webua->cam = NULL;
     } else {
         indx_req = -1;
-        for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
-            if (webua->cam->cfg->device_id == app->cam_list[indx_cam]->cfg->device_id){
+        for (indx_cam=0; indx_cam<webu->cam_cnt; indx_cam++) {
+            if (webua->cam->cfg->device_id == webu->cam_list[indx_cam]->cfg->device_id){
                 indx_req = indx_cam;
             }
         }
@@ -420,7 +443,7 @@ void cls_webu_json::status_vars(int indx_cam)
     struct timespec curr_ts;
     cls_camera *cam;
 
-    cam = app->cam_list[indx_cam];
+    cam = webu->cam_list[indx_cam];
 
     webua->resp_page += "{";
 
@@ -477,10 +500,10 @@ void cls_webu_json::status()
     webua->resp_page += "{\"version\" : \"" VERSION "\"";
     webua->resp_page += ",\"status\" : ";
 
-    webua->resp_page += "{\"count\" : " + std::to_string(app->cam_cnt);
-        for (indx_cam=0; indx_cam<app->cam_cnt; indx_cam++) {
+    webua->resp_page += "{\"count\" : " + std::to_string(webu->cam_cnt);
+        for (indx_cam=0; indx_cam<webu->cam_cnt; indx_cam++) {
             webua->resp_page += ",\"cam" +
-                std::to_string(app->cam_list[indx_cam]->cfg->device_id) + "\": ";
+                std::to_string(webu->cam_list[indx_cam]->cfg->device_id) + "\": ";
             status_vars(indx_cam);
         }
     webua->resp_page += "}";

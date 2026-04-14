@@ -93,7 +93,11 @@
             ~cls_webu();
             cls_motapp      *app;
             cls_config      *cfg;
+            cls_allcam      *allcam;
+            std::vector<cls_camera*>    cam_list;
+            int                         cam_cnt;
             bool                        finish;
+            bool                        shutdown_in_progress;
             ctx_params                  *wb_headers;
             ctx_params                  *wb_actions;
             char                        wb_digest_rand[12];
@@ -103,6 +107,9 @@
             int                         cnct_cnt;
             bool                        restart;
             bool                        conf_chg;
+            pthread_mutex_t             mutex_camlst;       /* Lock the list of cams while adding/removing */
+            int                         webuindx;
+            int                         portnbr;
             void startup();
             void shutdown();
 
