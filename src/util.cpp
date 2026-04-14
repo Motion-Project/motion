@@ -695,7 +695,7 @@ void util_exec_base(cls_motapp *p_app, std::string rslt)
       scripts, then limit the location of file being executed
       to the scripts subdirectory
     */
-    if (p_app->cfg->webcontrol_parms >= PARM_LVL_03) {
+    if (p_app->cfg->webcontrol_access >= PARM_LVL_03) {
         cmd_tmp = p_app->cfg->conf_filename.substr(0
             , p_app->cfg->conf_filename.find_last_of("/"));
         cmd_tmp += "/scripts/" + cmd_nm;

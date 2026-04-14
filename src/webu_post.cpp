@@ -642,10 +642,10 @@ void cls_webu_post::config()
                 indx2++;
             }
 
-            /* Ignore any requests for parms above webcontrol_parms level. */
+            /* Ignore any requests for parms above webcontrol_access level. */
             indx2=0;
             while (config_parms[indx2].parm_name != "") {
-                if ((config_parms[indx2].parm_lvl > app->conf_src->webcontrol_parms) ||
+                if ((config_parms[indx2].parm_lvl > app->conf_src->webcontrol_access) ||
                     (config_parms[indx2].parm_lvl == PARM_LVL_99) ) {
                     indx2++;
                     continue;

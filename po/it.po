@@ -753,11 +753,11 @@ msgstr "host locale di controllo web"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid webcontrol_parms %d"
+msgid "Invalid webcontrol_access %d"
 msgstr "Parametri webcontrol %d non validi"
 
 #: src/conf.cpp
-msgid "webcontrol_parms"
+msgid "webcontrol_access"
 msgstr "webcontrol parms"
 
 #: src/conf.cpp

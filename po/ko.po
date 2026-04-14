@@ -750,11 +750,11 @@ msgstr "웹 컨트롤 로컬 호스트"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid webcontrol_parms %d"
+msgid "Invalid webcontrol_access %d"
 msgstr "잘못된 웹 컨트롤 매개변수 %d"
 
 #: src/conf.cpp
-msgid "webcontrol_parms"
+msgid "webcontrol_access"
 msgstr "웹 컨트롤 매개변수"
 
 #: src/conf.cpp

@@ -376,7 +376,7 @@ void cls_webu::init_actions()
     wb_actions = new ctx_params;
     util_parms_parse(wb_actions,"webcontrol_actions", cfg->webcontrol_actions);
 
-    if (cfg->webcontrol_parms == 0) {
+    if (cfg->webcontrol_access == 0) {
         parm_vl = "off";
     } else {
         parm_vl = "on";

@@ -754,11 +754,11 @@ msgstr "webcontrol localhost"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid webcontrol_parms %d"
+msgid "Invalid webcontrol_access %d"
 msgstr "Ungültige Webcontrol-Parameter %d"
 
 #: src/conf.cpp
-msgid "webcontrol_parms"
+msgid "webcontrol_access"
 msgstr "Webcontrol-Parameter"
 
 #: src/conf.cpp

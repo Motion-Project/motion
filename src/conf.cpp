@@ -141,7 +141,7 @@ ctx_parm config_parms[] = {
     {"webcontrol_base_path",      PARM_TYP_STRING, PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_ipv6",           PARM_TYP_BOOL,   PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_localhost",      PARM_TYP_BOOL,   PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
-    {"webcontrol_parms",          PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_99, PARM_CHG_RESTART},
+    {"webcontrol_access",          PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_99, PARM_CHG_RESTART},
     {"webcontrol_interface",      PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_auth_method",    PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_04, PARM_CHG_RESTART },
     {"webcontrol_auth_admin",     PARM_TYP_STRING, PARM_CAT_13, PARM_LVL_04, PARM_CHG_RESTART },
@@ -248,6 +248,8 @@ ctx_parm_depr config_parms_depr[] = {
         ,"\"stream_preview_params\" replaced with \"stream_allcam_params\""}
     ,{"webcontrol_authentication", "5.0.0","webcontrol_auth_admin"
         ,"\"webcontrol_authentication\" replaced with \"webcontrol_auth_admin\""}
+    ,{"webcontrol_parms", "5.0.0","webcontrol_access"
+        ,"\"webcontrol_parms\" replaced with \"webcontrol_access\""}
     ,{ "","","",""}
 };
 
@@ -2050,27 +2052,27 @@ void cls_config::edit_webcontrol_localhost(std::string &parm, enum PARM_ACT pact
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_localhost",_("webcontrol_localhost"));
 }
 
-void cls_config::edit_webcontrol_parms(std::string &parm, enum PARM_ACT pact)
+void cls_config::edit_webcontrol_access(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_parms = PARM_LVL_02;
+        webcontrol_access = PARM_LVL_02;
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < PARM_LVL_00) || (parm_in > PARM_LVL_04)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_parms %d"),parm_in);
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_access %d"),parm_in);
         } else {
-            webcontrol_parms = parm_in;
+            webcontrol_access = parm_in;
         }
     } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(webcontrol_parms);
+        parm = std::to_string(webcontrol_access);
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
         parm = parm +  "\"0\",\"1\",\"2\",\"3\",\"4\"";
         parm = parm + "]";
     }
     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_parms",_("webcontrol_parms"));
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_access",_("webcontrol_access"));
 }
 
 void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact)
@@ -3067,7 +3069,7 @@ void cls_config::edit_cat13(std::string parm_nm, std::string &parm_val, enum PAR
     } else if (parm_nm == "webcontrol_base_path") {        edit_webcontrol_base_path(parm_val, pact);
     } else if (parm_nm == "webcontrol_ipv6") {             edit_webcontrol_ipv6(parm_val, pact);
     } else if (parm_nm == "webcontrol_localhost") {        edit_webcontrol_localhost(parm_val, pact);
-    } else if (parm_nm == "webcontrol_parms") {            edit_webcontrol_parms(parm_val, pact);
+    } else if (parm_nm == "webcontrol_access") {            edit_webcontrol_access(parm_val, pact);
     } else if (parm_nm == "webcontrol_interface") {        edit_webcontrol_interface(parm_val, pact);
     } else if (parm_nm == "webcontrol_auth_method") {      edit_webcontrol_auth_method(parm_val, pact);
     } else if (parm_nm == "webcontrol_auth_admin") {       edit_webcontrol_auth_admin(parm_val, pact);

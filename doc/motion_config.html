@@ -433,7 +433,7 @@
               <td bgcolor="#edf4f9" ><a href="#webcontrol_port" >webcontrol_port</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_ipv6" >webcontrol_ipv6</a> </td>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_localhost" >webcontrol_localhost</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#webcontrol_parms" >webcontrol_parms</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#webcontrol_access" >webcontrol_access</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#webcontrol_interface" >webcontrol_interface</a> </td>
@@ -1995,7 +1995,7 @@
       <h3><a name="OptDetail_Scripts"></a> Script Execution </h3>
       <p></p>
       The following applies to all scripts being executed by Motion.
-      If <a href="#webcontrol_parms">webcontrol_parms</a> is
+      If <a href="#webcontrol_access">webcontrol_access</a> is
       set to a value greater than or equal 3(i.e. the webcontrol allows changes
       to scripts), then the program/script must be saved in a subdirectory from
       the motion.conf file called 'scripts'.  For example, if the
@@ -2356,7 +2356,7 @@
         </ul>
         <p></p>
 
-        <h3><a name="webcontrol_parms"></a> webcontrol_parms </h3>
+        <h3><a name="webcontrol_access"></a> webcontrol_access </h3>
         <ul>
           <li> Values: 0 - 3 | Default: 2 </li>
           Set the type of parameters that can be accessed via the webcontrol page.
@@ -2367,7 +2367,7 @@
               typically require Motion to be restarted to become effective.</li>
             <li> 3: Restricted - User IDs, passwords and "on_" commands.</li>
           </ul>
-          webcontrol_parms is not shown or allowed to be revised from the web interface.  This
+          webcontrol_access is not shown or allowed to be revised from the web interface.  This
           allows users to lock out any changes to parameters.  This may be desired if the
           webcontrol port is opened to the internet.
         </ul>
@@ -2395,7 +2395,7 @@
         <ul>
           <li> Values: String | Default: Not defined</li>
           The admin username and password specified as username:password
-          This user has all the permissions granted by the webcontrol_parms
+          This user has all the permissions granted by the webcontrol_access
           and webcontrol_actions.
         </ul>
         <p></p>
@@ -2460,7 +2460,7 @@
           </ul>
           Specify each of these using values of `on` or `off` to permit or deny respectively.  The specification in
           this parameter will override the default that is associated with
-          <a href="#webcontrol_parms">webcontrol_parms</a>.
+          <a href="#webcontrol_access">webcontrol_access</a>.
         </ul>
         <p></p>
 
@@ -2498,7 +2498,7 @@
           Script to execute when a lockout has been triggered.  Two additional parameters are passed to this script
           when executed.  The number of times the userid failed as well as the IP address attempting to log in.
           <p></p>
-          If <a href="#webcontrol_parms">webcontrol_parms</a> is
+          If <a href="#webcontrol_access">webcontrol_access</a> is
           set to a value greater than or equal 3(i.e. the webcontrol allows changes
           to scripts), then the program/script must be saved in a subdirectory from
           the motion.conf file called 'scripts'.  For example, if the
@@ -2803,7 +2803,7 @@
       <h3><a name="OptDetail_Tracking"></a>Tracking</h3>
       <p></p>
       The following applies to all scripts being executed by Motion.
-      If <a href="#webcontrol_parms">webcontrol_parms</a> is
+      If <a href="#webcontrol_access">webcontrol_access</a> is
       set to a value greater than or equal 3(i.e. the webcontrol allows changes
       to scripts), then the program/script must be saved in a subdirectory from
       the motion.conf file called 'scripts'.  For example, if the

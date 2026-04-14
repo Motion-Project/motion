@@ -752,11 +752,11 @@ msgstr "ウェブコントロールのローカルホスト"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid webcontrol_parms %d"
+msgid "Invalid webcontrol_access %d"
 msgstr "無効な Web コントロール パラメータ %d"
 
 #: src/conf.cpp
-msgid "webcontrol_parms"
+msgid "webcontrol_access"
 msgstr "ウェブ制御パラメーター"
 
 #: src/conf.cpp

@@ -471,7 +471,7 @@ msgid "webcontrol_localhost"
 msgstr "webcontrol localhost"
 
 #: src/conf.c
-msgid "webcontrol_parms"
+msgid "webcontrol_access"
 msgstr "webcontrol parms"
 
 #: src/conf.c

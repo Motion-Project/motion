@@ -85,7 +85,7 @@ movie_filename %v-%{movienbr}-%Y%m%d%H%M%S
 ;*************************************************
 webcontrol_port 8080
 webcontrol_localhost on
-webcontrol_parms 2
+webcontrol_access 2
 
 ;*************************************************
 ;*****   Web Stream

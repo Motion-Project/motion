@@ -105,7 +105,7 @@ void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
     parm_val = "";
     parm_list = "";
 
-    if (webu->cfg->webcontrol_parms < PARM_LVL_01) {
+    if (webu->cfg->webcontrol_access < PARM_LVL_01) {
         parm_enable = "false";
     } else {
         parm_enable = "true";
@@ -201,7 +201,7 @@ void cls_webu_json::parms_one(cls_config *conf)
         }
         /* Allow limited parameters to be read only to the web page */
         if ((config_parms[indx_parm].parm_lvl >
-                webu->cfg->webcontrol_parms) &&
+                webu->cfg->webcontrol_access) &&
             (config_parms[indx_parm].parm_lvl > PARM_LVL_01)) {
 
             webua->resp_page +=

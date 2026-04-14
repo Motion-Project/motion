@@ -227,7 +227,7 @@
             std::string     webcontrol_base_path;
             bool            webcontrol_ipv6;
             bool            webcontrol_localhost;
-            int             webcontrol_parms;
+            int             webcontrol_access;
             std::string     webcontrol_interface;
             std::string     webcontrol_auth_method;
             std::string     webcontrol_auth_admin;
@@ -477,7 +477,7 @@
             void edit_webcontrol_lock_attempts(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_lock_minutes(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_lock_script(std::string &parm, enum PARM_ACT pact);
-            void edit_webcontrol_parms(std::string &parm, enum PARM_ACT pact);
+            void edit_webcontrol_access(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_port(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_tls(std::string &parm, enum PARM_ACT pact);
 
