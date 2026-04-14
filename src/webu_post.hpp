@@ -45,7 +45,6 @@
             cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
-            cls_webu_html   *webu_html;
 
             std::string     post_cmd;
             int             post_sz;        /* The number of entries in the post info */
