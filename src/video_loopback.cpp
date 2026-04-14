@@ -73,7 +73,7 @@ static int vlp_open_vidpipe(void)
     int retcd;
 
     if ((dir = opendir(prefix)) == NULL) {
-        MOTION_LOG(CRT, TYPE_VIDEO, SHOW_ERRNO,_("Failed to open '%s'"), prefix);
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("Failed to open '%s'"), prefix);
         return -1;
     }
 

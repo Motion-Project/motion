@@ -761,10 +761,10 @@ void cls_config::edit_width(std::string &parm, enum PARM_ACT pact)
         if ((parm_in < 64) || (parm_in > 9999)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid width %d"),parm_in);
         } else if (parm_in % 8) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("Image width (%d) requested is not modulo 8."), parm_in);
             parm_in = parm_in - (parm_in % 8) + 8;
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("Adjusting width to next higher multiple of 8 (%d)."), parm_in);
             width = parm_in;
         } else {
@@ -787,10 +787,10 @@ void cls_config::edit_height(std::string &parm, enum PARM_ACT pact)
         if ((parm_in < 64) || (parm_in > 9999)) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid height %d"),parm_in);
         } else if (parm_in % 8) {
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("Image height (%d) requested is not modulo 8."), parm_in);
             parm_in = parm_in - (parm_in % 8) + 8;
-            MOTION_LOG(CRT, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
                 ,_("Adjusting height to next higher multiple of 8 (%d)."), parm_in);
             height = parm_in;
         } else {
