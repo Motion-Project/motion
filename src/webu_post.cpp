@@ -954,10 +954,14 @@ mhdrslt cls_webu_post::processor_start(const char *upload_data, size_t *upload_d
         pthread_mutex_lock(&app->mutex_post);
             process_actions();
         pthread_mutex_unlock(&app->mutex_post);
-        /* Send updated page back to user */
-        webu_html = new cls_webu_html(webua);
-        webu_html->main();
-        delete webu_html;
+        webua->resp_page =
+            "<!DOCTYPE html>\n"
+            "<html>\n"
+            "<body>\n"
+            "<p>OK</p>\n"
+            "</body>\n"
+            "</html>\n";
+        webua->mhd_send();
         retcd = MHD_YES;
     }
     return retcd;
