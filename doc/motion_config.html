@@ -2375,11 +2375,14 @@
 
         <h3><a name="webcontrol_interface"></a> webcontrol_interface </h3>
         <ul>
-          <li> Values: `default` or `user` | Default: `default`</li>
+          <li> Values: `default`, `user` or `stream` |
+              Default: `default` for motion.conf file
+              , `stream` for camera configuration files</li>
           The type of webcontrol interface to provide.
           <ul>
             <li>The value of `default` provides a traditional web page interface using html/css.</li>
             <li>The value of `user` means the html will be provided by file specified in webcontrol_html</li>
+            <li>The value of `stream` means the camera stream will be provided</li>
           </ul>
         </ul>
         <p></p>

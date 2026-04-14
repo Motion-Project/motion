@@ -843,10 +843,18 @@ void cls_webu_ans::answer_get()
         webu_text->main();
 
     } else {
-        if (webu_html == nullptr) {
-            webu_html = new cls_webu_html(this);
+        if (webu->cfg->webcontrol_interface == "stream") {
+            if (webu_stream == nullptr) {
+                webu_stream  = new cls_webu_stream(this);
+            }
+            gzip_encode = false;
+            webu_stream->main();
+        } else {
+            if (webu_html == nullptr) {
+                webu_html = new cls_webu_html(this);
+            }
+            webu_html->main();
         }
-        webu_html->main();
     }
 }
 
@@ -930,14 +938,22 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
     }
 
     if (mhd_first) {
-        mhd_first = false;
+
         if (mystreq(method,"POST")) {
+            if (webu->cfg->webcontrol_interface == "stream") {
+                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    ,_("Actions not permitted on webcontrol_interface stream"));
+                bad_request();
+                return MHD_YES;
+            }
             if (webu_post == nullptr) {
                 webu_post = new cls_webu_post(this);
             }
+            mhd_first = false;
             cnct_method = WEBUI_METHOD_POST;
             retcd = webu_post->processor_init();
         } else {
+            mhd_first = false;
             cnct_method = WEBUI_METHOD_GET;
             retcd = MHD_YES;
         }

@@ -141,7 +141,7 @@ ctx_parm config_parms[] = {
     {"webcontrol_base_path",      PARM_TYP_STRING, PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_ipv6",           PARM_TYP_BOOL,   PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_localhost",      PARM_TYP_BOOL,   PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
-    {"webcontrol_access",          PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_99, PARM_CHG_RESTART},
+    {"webcontrol_access",         PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_99, PARM_CHG_RESTART},
     {"webcontrol_interface",      PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_auth_method",    PARM_TYP_LIST,   PARM_CAT_13, PARM_LVL_04, PARM_CHG_RESTART },
     {"webcontrol_auth_admin",     PARM_TYP_STRING, PARM_CAT_13, PARM_LVL_04, PARM_CHG_RESTART },
@@ -2078,9 +2078,13 @@ void cls_config::edit_webcontrol_access(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_interface = "default";
+        if ((this == app->cfg) || (this == app->conf_src)) {
+            webcontrol_interface = "default";
+        } else {
+            webcontrol_interface = "stream";
+        }
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "default") || (parm == "user"))  {
+        if ((parm == "default") || (parm == "user") || (parm == "stream"))  {
             webcontrol_interface = parm;
         } else if (parm == "") {
             webcontrol_interface = "default";
@@ -2091,7 +2095,7 @@ void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact
         parm = webcontrol_interface;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"default\",\"user\"";
+        parm = parm +  "\"default\",\"user\",\"stream\"";
         parm = parm + "]";
     }
     return;
@@ -3069,7 +3073,7 @@ void cls_config::edit_cat13(std::string parm_nm, std::string &parm_val, enum PAR
     } else if (parm_nm == "webcontrol_base_path") {        edit_webcontrol_base_path(parm_val, pact);
     } else if (parm_nm == "webcontrol_ipv6") {             edit_webcontrol_ipv6(parm_val, pact);
     } else if (parm_nm == "webcontrol_localhost") {        edit_webcontrol_localhost(parm_val, pact);
-    } else if (parm_nm == "webcontrol_access") {            edit_webcontrol_access(parm_val, pact);
+    } else if (parm_nm == "webcontrol_access") {           edit_webcontrol_access(parm_val, pact);
     } else if (parm_nm == "webcontrol_interface") {        edit_webcontrol_interface(parm_val, pact);
     } else if (parm_nm == "webcontrol_auth_method") {      edit_webcontrol_auth_method(parm_val, pact);
     } else if (parm_nm == "webcontrol_auth_admin") {       edit_webcontrol_auth_admin(parm_val, pact);
@@ -3524,7 +3528,8 @@ void cls_config::camera_add(std::string fname, bool srcdir)
     indx = 0;
     while (config_parms[indx].parm_name != "") {
         parm_nm =config_parms[indx].parm_name;
-        if (parm_nm != "device_id") {
+        if ((parm_nm != "device_id") &&
+            (parm_nm != "webcontrol_interface")) {
             app->conf_src->edit_get(parm_nm, parm_val, config_parms[indx].parm_cat);
             cam_cls->conf_src->edit_set(parm_nm, parm_val);
         }

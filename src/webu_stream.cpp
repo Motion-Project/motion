@@ -656,15 +656,6 @@ void cls_webu_stream::main()
             static_all_img();
         }
         retcd = stream_static();
-    } else if (webua->uri_cmd1 == "mjpg") {
-        if (webua->device_id > 0) {
-            jpg_cnct();
-            one_buffer();
-        } else {
-            all_cnct();
-            all_buffer();
-        }
-        retcd = stream_mjpeg();
     } else if (webua->uri_cmd1 == "mpegts") {
         if (webua->device_id > 0) {
             ts_cnct();
@@ -678,6 +669,15 @@ void cls_webu_stream::main()
         if (retcd == MHD_NO) {
             mydelete(webu_mpegts);
         }
+    } else {
+        if (webua->device_id > 0) {
+            jpg_cnct();
+            one_buffer();
+        } else {
+            all_cnct();
+            all_buffer();
+        }
+        retcd = stream_mjpeg();
     }
 
     if (retcd == MHD_NO) {
