@@ -469,7 +469,7 @@ mhdrslt cls_webu_ans::mhd_digest_fail(int signal_stale)
 /* Perform digest authentication */
 mhdrslt cls_webu_ans::mhd_digest()
 {
-    enum MHD_DigestAuthResult retcd;
+    int retcd;
     char *username;
     std::string chkuser;
 
@@ -483,44 +483,34 @@ mhdrslt cls_webu_ans::mhd_digest()
     if (chkuser == "") {
         return mhd_digest_fail(MHD_NO);
     } else if (auth_admin_name == chkuser) {
-        retcd = MHD_digest_auth_check3(connection
+        retcd = MHD_digest_auth_check(connection
             , auth_realm
             , auth_admin_name.c_str()
             , auth_admin_pass.c_str()
-            , 0, 0
-            , MHD_DIGEST_AUTH_MULT_QOP_AUTH
-            , MHD_DIGEST_AUTH_MULT_ALGO3_ANY);
+            , 300);
         is_admin = true;
     } else if (auth_user_name == chkuser) {
-        retcd = MHD_digest_auth_check3(connection
+        retcd = MHD_digest_auth_check(connection
             , auth_realm
             , auth_user_name.c_str()
             , auth_user_pass.c_str()
-            , 0, 0
-            , MHD_DIGEST_AUTH_MULT_QOP_AUTH
-            , MHD_DIGEST_AUTH_MULT_ALGO3_ANY);
+            , 300);
         is_admin = false;
     } else {
         failauth_log(true);
         return mhd_digest_fail(MHD_NO);
     }
 
-    if (retcd == MHD_DAUTH_OK) {
-        authenticated = true;
-        return MHD_YES;
-    } else if (retcd == MHD_DAUTH_WRONG_USERNAME) {
-        failauth_log(true);
-        return mhd_digest_fail(MHD_NO);
-    } else if (retcd == MHD_DAUTH_RESPONSE_WRONG) {
+    if (retcd == MHD_NO) {
         failauth_log(false);
-        return mhd_digest_fail(MHD_NO);
-    } else if ((retcd == MHD_DAUTH_NONCE_STALE) ||
-        (retcd == MHD_DAUTH_NONCE_OTHER_COND) ||
-        (retcd == MHD_DAUTH_NONCE_WRONG)) {
-        return mhd_digest_fail(MHD_INVALID_NONCE);
-    } else {
-        return mhd_digest_fail(MHD_NO);
     }
+
+    if ( (retcd == MHD_INVALID_NONCE) || (retcd == MHD_NO) )  {
+        return mhd_digest_fail(retcd);
+    }
+
+    authenticated = true;
+    return MHD_YES;
 }
 
 /* Create a authorization denied response to user*/
@@ -555,20 +545,21 @@ mhdrslt cls_webu_ans::mhd_basic_fail()
 /* Perform Basic Authentication.  */
 mhdrslt cls_webu_ans::mhd_basic()
 {
-    struct MHD_BasicAuthInfo *authinfo;
     std::string chkuser, chkpass;
+    char *user, *pass;
 
-    authinfo = MHD_basic_auth_get_username_password3(connection);
-    if (authinfo == NULL) {
+    user = NULL;
+    pass = NULL;
+    user = MHD_basic_auth_get_username_password (connection, &pass);
+    if ((user == NULL) || (pass == NULL)) {
+        myfree(user);
+        myfree(pass);
         return mhd_basic_fail();
     }
-    chkuser = authinfo->username;
-    chkpass = authinfo->password;
-    MHD_free(authinfo);
-
-    if ((chkuser == "") || (chkpass == "")) {
-        return mhd_basic_fail();
-    }
+    chkuser = user;
+    chkpass = pass;
+    myfree(user);
+    myfree(pass);
 
     if ((chkuser == auth_admin_name) &&
         (chkpass == auth_admin_pass)) {
@@ -589,7 +580,6 @@ mhdrslt cls_webu_ans::mhd_basic()
         }
         return mhd_basic_fail();
     }
-
 }
 
 /* Parse apart the user:pass provided*/
