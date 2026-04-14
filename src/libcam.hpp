@@ -45,7 +45,7 @@
 
                 std::unique_ptr<libcamera::CameraManager>          cam_mgr;
                 std::shared_ptr<libcamera::Camera>                 camera;
-                std::unique_ptr<libcamera::CameraConfiguration>    config;
+                std::unique_ptr<libcamera::CameraConfiguration>    libcam_cfg;
                 std::unique_ptr<libcamera::FrameBufferAllocator>   frmbuf;
                 std::vector<std::unique_ptr<libcamera::Request>>   requests;
 

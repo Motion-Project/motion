@@ -1250,23 +1250,23 @@
           Comma separated list of configuration parameters (aka controls) for the libcamera device.
         </ul>
         <ul>
+          <p></p>
+          <p></p>
           <i><h4>pixelformat</h4></i>
            User requested pixelformat to use.  Default of YU12 is most efficient.  Usually
            this parameter is specified as the fourcc character code.
-
-          <i><h4> Transform(string)</h4></i>
-           (These are libcamera transform and rotate options and may not provide result you anticipate.)
+          <p></p>
+          <i><h4> Orientation(string)</h4></i>
+           (These are libcamera orientation options and may not provide result you anticipate.)
           <div><ul>
-            <li> Identity</h4></i>
-            <li> Rot0</li>
-            <li> HFlip</li>
-            <li> VFlip</li>
-            <li> HVFlip</li>
-            <li> Rot180</li>
-            <li> Transpose(not currently supported by libcamera)</li>
-            <li> Rot270(not currently supported by libcamera)</li>
-            <li> Rot90(not currently supported by libcamera)</li>
-            <li> Rot180Transpose</li>
+            <li> Rotate0</h4></i>
+            <li> Rotate0Mirror</li>
+            <li> Rotate90</h4></i>
+            <li> Rotate90Mirror</li>
+            <li> Rotate180</h4></i>
+            <li> Rotate180Mirror</li>
+            <li> Rotate270</h4></i>
+            <li> Rotate270Mirror</li>
           </ul></div>
 
           <i><h4> AeEnable(bool)</h4></i>

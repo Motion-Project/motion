@@ -511,23 +511,23 @@ void cls_libcam:: config_orientation()
 
         for (indx=0;indx<params->params_cnt;indx++) {
             itm = &params->params_array[indx];
-            if (itm->param_name == "orientation") {
+            if (itm->param_name == "Orientation") {
                 if (itm->param_value == "Rotate0") {
-                    config->orientation = Orientation::Rotate0;
+                    libcam_cfg->orientation = Orientation::Rotate0;
                 } else if (itm->param_value == "Rotate0Mirror") {
-                    config->orientation = Orientation::Rotate0Mirror;
+                    libcam_cfg->orientation = Orientation::Rotate0Mirror;
                 } else if (itm->param_value == "Rotate180") {
-                    config->orientation = Orientation::Rotate180;
+                    libcam_cfg->orientation = Orientation::Rotate180;
                 } else if (itm->param_value == "Rotate180Mirror") {
-                    config->orientation = Orientation::Rotate180Mirror;
+                    libcam_cfg->orientation = Orientation::Rotate180Mirror;
                 } else if (itm->param_value == "Rotate90") {
-                    config->orientation = Orientation::Rotate90;
+                    libcam_cfg->orientation = Orientation::Rotate90;
                 } else if (itm->param_value == "Rotate90Mirror") {
-                    config->orientation = Orientation::Rotate90Mirror;
+                    libcam_cfg->orientation = Orientation::Rotate90Mirror;
                 } else if (itm->param_value == "Rotate270") {
-                    config->orientation = Orientation::Rotate270;
+                    libcam_cfg->orientation = Orientation::Rotate270;
                 } else if (itm->param_value == "Rotate270Mirror") {
-                    config->orientation = Orientation::Rotate270Mirror;
+                    libcam_cfg->orientation = Orientation::Rotate270Mirror;
                 } else {
                     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
                         , "Invalid Orientation option: %s."
@@ -536,23 +536,23 @@ void cls_libcam:: config_orientation()
             }
         }
 
-        retcd = config->validate();
+        retcd = libcam_cfg->validate();
         if (retcd == CameraConfiguration::Adjusted) {
-            if (config->orientation == Orientation::Rotate0) {
+            if (libcam_cfg->orientation == Orientation::Rotate0) {
                 adjdesc = "Rotate0";
-            } else if (config->orientation == Orientation::Rotate0Mirror) {
+            } else if (libcam_cfg->orientation == Orientation::Rotate0Mirror) {
                 adjdesc = "Rotate0Mirror";
-            } else if (config->orientation == Orientation::Rotate90) {
+            } else if (libcam_cfg->orientation == Orientation::Rotate90) {
                 adjdesc = "Rotate90";
-            } else if (config->orientation == Orientation::Rotate90Mirror) {
+            } else if (libcam_cfg->orientation == Orientation::Rotate90Mirror) {
             adjdesc = "Rotate90Mirror";
-            } else if (config->orientation == Orientation::Rotate180) {
+            } else if (libcam_cfg->orientation == Orientation::Rotate180) {
                 adjdesc = "Rotate180";
-            } else if (config->orientation == Orientation::Rotate180Mirror) {
+            } else if (libcam_cfg->orientation == Orientation::Rotate180Mirror) {
                 adjdesc = "Rotate180Mirror";
-            } else if (config->orientation == Orientation::Rotate270) {
+            } else if (libcam_cfg->orientation == Orientation::Rotate270) {
                 adjdesc = "Rotate270";
-            } else if (config->orientation == Orientation::Rotate270Mirror) {
+            } else if (libcam_cfg->orientation == Orientation::Rotate270Mirror) {
                 adjdesc = "Rotate270Mirror";
             } else {
                 adjdesc = "unknown";
@@ -581,30 +581,30 @@ int cls_libcam::start_config()
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
-    config = camera->generateConfiguration({ StreamRole::Viewfinder });
+    libcam_cfg = camera->generateConfiguration({ StreamRole::Viewfinder });
 
     pfmt = "YU12";
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_name == "pixelformat") {
-            pixfmt = params->params_array[indx].param_value;
+            pfmt = params->params_array[indx].param_value;
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Using user specified pixelformat %s."
                 , pfmt.c_str());
         }
 
     }
-    config->at(0).pixelFormat = PixelFormat::fromString(pfmt);
-    config->at(0).size.width = (uint)cam->cfg->width;
-    config->at(0).size.height = (uint)cam->cfg->height;
-    config->at(0).bufferCount = 1;
-    config->at(0).stride = 0;
+    libcam_cfg->at(0).pixelFormat = PixelFormat::fromString(pfmt);
+    libcam_cfg->at(0).size.width = (uint)cam->cfg->width;
+    libcam_cfg->at(0).size.height = (uint)cam->cfg->height;
+    libcam_cfg->at(0).bufferCount = 1;
+    libcam_cfg->at(0).stride = 0;
 
-    retcd = config->validate();
+    retcd = libcam_cfg->validate();
     if (retcd == CameraConfiguration::Adjusted) {
-        if (config->at(0).pixelFormat != PixelFormat::fromString(pixfmt)) {
+        if (libcam_cfg->at(0).pixelFormat != PixelFormat::fromString(pixfmt)) {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Pixel format was adjusted to %s."
-                , config->at(0).pixelFormat.toString().c_str());
+                , libcam_cfg->at(0).pixelFormat.toString().c_str());
         } else {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Configuration adjusted.");
@@ -618,26 +618,26 @@ int cls_libcam::start_config()
         return -1;
     }
     sprintf(tmp4cc,"%c%c%c%c"
-        , config->at(0).pixelFormat.fourcc() >> 0
-        , config->at(0).pixelFormat.fourcc() >> 8
-        , config->at(0).pixelFormat.fourcc() >> 16
-        , config->at(0).pixelFormat.fourcc() >> 24);
+        , libcam_cfg->at(0).pixelFormat.fourcc() >> 0
+        , libcam_cfg->at(0).pixelFormat.fourcc() >> 8
+        , libcam_cfg->at(0).pixelFormat.fourcc() >> 16
+        , libcam_cfg->at(0).pixelFormat.fourcc() >> 24);
     pixfmt = tmp4cc;
 
-    if ((config->at(0).size.width != (uint)cam->cfg->width) ||
-        (config->at(0).size.height != (uint)cam->cfg->height)) {
+    if ((libcam_cfg->at(0).size.width != (uint)cam->cfg->width) ||
+        (libcam_cfg->at(0).size.height != (uint)cam->cfg->height)) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Image size adjusted from %d x %d to %d x %d"
             , cam->cfg->width, cam->cfg->height
-            , config->at(0).size.width, config->at(0).size.height);
+            , libcam_cfg->at(0).size.width, libcam_cfg->at(0).size.height);
     }
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
         , "Image size %d x %d"
-        , config->at(0).size.width, config->at(0).size.height);
+        , libcam_cfg->at(0).size.width, libcam_cfg->at(0).size.height);
 
-    cam->imgs.width = (int)config->at(0).size.width;
-    cam->imgs.height = (int)config->at(0).size.height;
+    cam->imgs.width = (int)libcam_cfg->at(0).size.width;
+    cam->imgs.height = (int)libcam_cfg->at(0).size.height;
     cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
     cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
 
@@ -646,7 +646,7 @@ int cls_libcam::start_config()
     log_draft();
 
     config_orientation();
-    camera->configure(config.get());
+    camera->configure(libcam_cfg.get());
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
 
@@ -680,7 +680,7 @@ int cls_libcam::start_req()
     camera->requestCompleted.connect(this, &cls_libcam::req_complete);
     frmbuf = std::make_unique<FrameBufferAllocator>(camera);
 
-    retcd = frmbuf->allocate(config->at(0).stream());
+    retcd = frmbuf->allocate(libcam_cfg->at(0).stream());
     if (retcd < 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
             , "Buffer allocation error.");
@@ -694,7 +694,7 @@ int cls_libcam::start_req()
         return -1;
     }
 
-    Stream *stream = config->at(0).stream();
+    Stream *stream = libcam_cfg->at(0).stream();
     const std::vector<std::unique_ptr<FrameBuffer>> &buffers =
         frmbuf->buffers(stream);
     const std::unique_ptr<FrameBuffer> &buffer = buffers[0];
@@ -752,6 +752,7 @@ int cls_libcam::start_capture()
         return -1;
     }
     mydelete(camctrls);
+    started_cam = true;
 
     for (std::unique_ptr<Request> &request : requests) {
         retcd = req_add(request.get());
@@ -760,6 +761,7 @@ int cls_libcam::start_capture()
                 , "Failed to queue request.");
             if (started_cam) {
                 camera->stop();
+                started_cam = false;
             }
             return -1;
         }
@@ -803,8 +805,6 @@ int cls_libcam::libcam_start()
     cam->watchdog = cam->cfg->watchdog_tmo;
     SLEEP(1,0);
 
-    started_cam = true;
-
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera started");
 
     return 0;
@@ -812,35 +812,36 @@ int cls_libcam::libcam_start()
 
 void cls_libcam::libcam_stop()
 {
+    int indx;
     mydelete(convert);
     mydelete(params);
 
-    if (started_aqr) {
-        camera->stop();
-    }
-
     if (started_req) {
-        camera->requestCompleted.disconnect(this, &cls_libcam::req_complete);
         while (req_queue.empty() == false) {
             req_queue.pop();
         }
+        camera->requestCompleted.disconnect(this, &cls_libcam::req_complete);
+        frmbuf->free(libcam_cfg->at(0).stream());
+        frmbuf.reset();
+        for (indx=0;indx<requests.size();indx++) {
+            requests[indx].reset();
+        }
         requests.clear();
-
-        frmbuf->free(config->at(0).stream());
+        munmap(membuf.buf, membuf.bufsz);
+        started_req = false;
     }
 
-    if (started_aqr){
+    if (started_cam) {
+        camera->stop();
         camera->release();
+        camera.reset();
+        started_cam = false;
     }
 
     if (started_mgr) {
         cam_mgr->stop();
+        started_mgr = false;
     }
-
-    started_cam = false;
-    started_mgr = false;
-    started_aqr = false;
-    started_req = false;
 
     cam->device_status = STATUS_CLOSED;
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
