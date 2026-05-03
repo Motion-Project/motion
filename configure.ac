@@ -64,9 +64,9 @@ CPPFLAGS="$HOLD_CPPFLAGS"
 ##############################################################################
 ###  Check libmicrohttpd - Required.  Needed for stream/webcontrol
 ##############################################################################
-AS_IF([pkgconf libmicrohttpd ], [
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags libmicrohttpd`
-    TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs libmicrohttpd`
+PKG_CHECK_MODULES([MICROHTTPD], [libmicrohttpd], [
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS $MICROHTTPD_CFLAGS"
+    TEMP_LIBS="$TEMP_LIBS $MICROHTTPD_LIBS"
   ],[
     AC_MSG_ERROR([Required package libmicrohttpd-dev not found, please check motion_guide.html and install necessary dependencies])
   ]
@@ -243,10 +243,10 @@ AS_IF([test "${FFMPEG}" = "no"], [
 
     FFMPEG_DEPS="libavutil libavformat libavcodec libswscale libavdevice"
     AC_MSG_CHECKING(for FFmpeg)
-    AS_IF([pkgconf $FFMPEG_DEPS], [
+    PKG_CHECK_MODULES([FFMPEG], [$FFMPEG_DEPS], [
         FFMPEG_VER="("`pkgconf --modversion libavformat`")"
-        TEMP_CPPFLAGS="$TEMP_CPPFLAGS "`pkgconf --cflags $FFMPEG_DEPS`
-        TEMP_LIBS="$TEMP_LIBS "`pkgconf --libs $FFMPEG_DEPS`
+        TEMP_CPPFLAGS="$TEMP_CPPFLAGS $FFMPEG_CPPFLAGS"
+        TEMP_LIBS="$TEMP_LIBS $FFMPEG_LIBS"
         AC_MSG_RESULT(yes)
       ],[
         AC_MSG_RESULT(no)
