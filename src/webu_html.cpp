@@ -1279,9 +1279,6 @@ void cls_webu_html::script_movies_page()
         "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
         "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
         "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
-        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
-        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
-        "      html_tab +=\"  <colgroup width='2%'></colgroup>\";\n"
 
         "      html_tab +=\"  <tr>\";\n"
         "      html_tab +=\"    <td align='left'><b>Name</b></td>\";\n"
@@ -1302,14 +1299,10 @@ void cls_webu_html::script_movies_page()
         "        html_tab +=\"<tr>\";\n"
         "        html_tab +=\"  <td align='left'><a href='\"\n"
         "        html_tab += uri + fname + \"'>\" + fname + \"</a></td>\";\n"
-
         "        html_tab +=\"  <td align='center'>\"+fsize+\"</td>\";\n"
         "        html_tab +=\"  <td align='center'>\"+fdate+\"</td>\";\n"
         "        html_tab +=\"  <td align='center'>\"+ftime+\"</td>\";\n"
         "        html_tab +=\"  <td align='center'>\"+fdavg+\"</td>\";\n"
-        "        html_tab +=\"  <td align='center'>\"+fsmin+\"</td>\";\n"
-        "        html_tab +=\"  <td align='center'>\"+fsmax+\"</td>\";\n"
-        "        html_tab +=\"  <td align='center'>\"+fsavg+\"</td>\";\n"
 
         "        html_tab +=\"  <td align='center'> </td>\";\n"
         "        html_tab +=\"</tr>\";\n"

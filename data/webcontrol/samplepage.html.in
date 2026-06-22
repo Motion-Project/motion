@@ -1124,18 +1124,12 @@
       html_tab +="  <colgroup width='2%'></colgroup>";
       html_tab +="  <colgroup width='2%'></colgroup>";
       html_tab +="  <colgroup width='2%'></colgroup>";
-      html_tab +="  <colgroup width='2%'></colgroup>";
-      html_tab +="  <colgroup width='2%'></colgroup>";
-      html_tab +="  <colgroup width='2%'></colgroup>";
       html_tab +="  <tr>";
       html_tab +="    <td align='left'><b>Name</b></td>";
       html_tab +="    <td align='left'><b>Size</b></td>";
       html_tab +="    <td align='left'><b>Date</b></td>";
       html_tab +="    <td align='left'><b>time</b></td>";
       html_tab +="    <td align='left'><b>diff_avg</b></td>";
-      html_tab +="    <td align='left'><b>sdev_min</b></td>";
-      html_tab +="    <td align='left'><b>sdev_max</b></td>";
-      html_tab +="    <td align='left'><b>sdev_avg</b></td>";
       html_tab +="    <td align='left'><b></b></td>";
       html_tab +="  </tr>";
 
@@ -1143,16 +1137,8 @@
         fname = pMovies['movies'][gIndxCam][indx]['name'];
         fsize = pMovies['movies'][gIndxCam][indx]['size'];
         fdate = pMovies['movies'][gIndxCam][indx]['date'];
-
         ftime = pMovies['movies'][gIndxCam][indx]['time'];
-
         fdavg = pMovies['movies'][gIndxCam][indx]['diff_avg'];
-
-        fsmin = pMovies['movies'][gIndxCam][indx]['sdev_min'];
-
-        fsmax = pMovies['movies'][gIndxCam][indx]['sdev_max'];
-
-        fsavg = pMovies['movies'][gIndxCam][indx]['sdev_avg'];
 
         html_tab +="<tr>";
         html_tab +="  <td align='left'><a href='"
@@ -1161,9 +1147,6 @@
         html_tab +="  <td align='center'>"+fdate+"</td>";
         html_tab +="  <td align='center'>"+ftime+"</td>";
         html_tab +="  <td align='center'>"+fdavg+"</td>";
-        html_tab +="  <td align='center'>"+fsmin+"</td>";
-        html_tab +="  <td align='center'>"+fsmax+"</td>";
-        html_tab +="  <td align='center'>"+fsavg+"</td>";
         html_tab +="  <td align='center'> </td>";
         html_tab +="</tr>";
       }
