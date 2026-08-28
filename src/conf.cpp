@@ -158,7 +158,7 @@ ctx_parm config_parms[] = {
 
     {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_allcam_params",     PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
+    {"stream_allcam_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
