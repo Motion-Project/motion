@@ -526,8 +526,6 @@ void cls_camera::init_firstimage()
         }
     }
 
-    noise = cfg->noise_level;
-    threshold = cfg->threshold;
     if (cfg->threshold_maximum > cfg->threshold ) {
         threshold_maximum = cfg->threshold_maximum;
     } else {
@@ -1897,6 +1895,47 @@ void cls_camera::check_config()
                 } else if ((parm_nm == "libcam_params")  &&
                     (camera_type == CAMERA_TYPE_LIBCAM)) {
                     libcam->parms_update();
+                } else if (parm_nm == "threshold_maximum") {
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                    /*User may have changed both threshold and maximum
+                      so check against src threshold*/
+                    if (cfg->threshold_maximum > conf_src->threshold) {
+                        threshold_maximum = conf_src->threshold_maximum;
+                    } else {
+                        threshold_maximum = (imgs.height * imgs.width * 3) / 2;
+                    }
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
+                } else if (parm_nm == "threshold") {
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                    threshold = cfg->threshold;
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
+                } else if (parm_nm == "noise_level") {
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                    noise = cfg->noise_level;
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
+                } else if (parm_nm == "text_scale") {
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                    draw->init_scale();
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
+                } else if (parm_nm == "movie_passthrough") {
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                    movie_passthrough = cfg->movie_passthrough;
+                    if ((camera_type != CAMERA_TYPE_NETCAM) &&
+                        (movie_passthrough)) {
+                        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO,_("Pass-through processing disabled."));
+                        movie_passthrough = false;
+                    }
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
+                } else if (parm_nm == "watchdog_tmo") {
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                    watchdog = cfg->watchdog_tmo;
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
                 } else {
                     MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                         , _("Programming error for changes to parameter %s")
@@ -1904,8 +1943,7 @@ void cls_camera::check_config()
                 }
                 cfg->edit_set(parm_nm, parm_vl_src);
                 MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
-                    , _("%s:%s applied")
-                    , parm_nm.c_str(), parm_vl_src.c_str());
+                    , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
             }
         }
         indx++;

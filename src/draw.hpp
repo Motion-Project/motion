@@ -32,6 +32,7 @@
             void smartmask();
             void fixed_mask();
             void largest_label();
+            void init_scale();
 
         private:
             cls_camera *cam;
@@ -42,7 +43,6 @@
                 , int startx,  int starty,  int width
                 , const char *text, int len, int factor);
             void init_chars(void);
-            void init_scale();
             void location(ctx_coord *cent
                 , ctx_images *imgs, int width, u_char *new_var);
             void red_location(ctx_coord *cent
