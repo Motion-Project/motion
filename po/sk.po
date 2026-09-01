@@ -515,42 +515,6 @@ msgid "webcontrol_lock_max_ips"
 msgstr "zámok webcontrol, max. ips"
 
 #: src/conf.c
-msgid "stream_port"
-msgstr "port prúdu"
-
-#: src/conf.c
-msgid "stream_localhost"
-msgstr "stream localhost"
-
-#: src/conf.c
-msgid "stream_auth_method"
-msgstr "metóda autorizácie toku"
-
-#: src/conf.c
-msgid "stream_authentication"
-msgstr "autentifikácia prúdom"
-
-#: src/conf.c
-msgid "stream_tls"
-msgstr "stream tls"
-
-#: src/conf.c
-msgid "stream_header_params"
-msgstr "parametre hlavičky streamu"
-
-#: src/conf.c
-msgid "stream_preview_scale"
-msgstr "mierka ukážky prúdu"
-
-#: src/conf.c
-msgid "stream_preview_newline"
-msgstr "ukážka prúdu Newline"
-
-#: src/conf.c
-msgid "stream_preview_method"
-msgstr "metóda ukážky prúdu"
-
-#: src/conf.c
 msgid "stream_quality"
 msgstr "kvalita prúdu"
 
@@ -565,10 +529,6 @@ msgstr "prúdový pohyb"
 #: src/conf.c
 msgid "stream_maxrate"
 msgstr "maximálny tok"
-
-#: src/conf.c
-msgid "stream_limit"
-msgstr "limit prúdu"
 
 #: src/conf.c
 msgid "database_type"

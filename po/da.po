@@ -823,32 +823,6 @@ msgstr "webcontrol låseforsøg"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_scale %d"
-msgstr "Ugyldig skala for forhåndsvisning af stream %d"
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr "skala for forhåndsvisning af stream"
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr "stream preview newline"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_preview_method %s"
-msgstr "Ugyldig metode til forhåndsvisning af stream %s"
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr "stream forhåndsvisningsmetode"
-
-#: src/conf.cpp
-msgid "stream_preview_ptz"
-msgstr "stream preview ptz"
-
-#: src/conf.cpp
-#, c-format
 msgid "Invalid stream_quality %d"
 msgstr "Ugyldig streamkvalitet %d"
 
@@ -872,24 +846,6 @@ msgstr "Ugyldig strømmaksrate %d"
 #: src/conf.cpp
 msgid "stream_maxrate"
 msgstr "stream maxrate"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_time %d"
-msgstr "Ugyldig stream-scanningstid %d"
-
-#: src/conf.cpp
-msgid "stream_scan_time"
-msgstr "stream scanningstid"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_scale %d"
-msgstr "Ugyldig strømscanningsskala %d"
-
-#: src/conf.cpp
-msgid "stream_scan_scale"
-msgstr "stream scan skala"
 
 #: src/conf.cpp
 #, c-format

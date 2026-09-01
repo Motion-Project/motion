@@ -24,7 +24,6 @@
 #include "webu.hpp"
 #include "webu_allcam.hpp"
 #include "webu_ans.hpp"
-#include "webu_html.hpp"
 #include "webu_stream.hpp"
 #include "webu_mpegts.hpp"
 #include "webu_json.hpp"
@@ -209,7 +208,8 @@ void cls_webu_ans::parms_edit()
         url = "";
     }
 
-    if (uri_cmd0.length() > 0) {
+    device_id = 0;
+    if (uri_cmd1 != "") {
         is_nbr = true;
         for (indx=0; indx < (int)uri_cmd0.length(); indx++) {
             if ((uri_cmd0[(uint)indx] > '9') || (uri_cmd0[(uint)indx] < '0')) {
@@ -219,8 +219,6 @@ void cls_webu_ans::parms_edit()
         if (is_nbr) {
             device_id = atoi(uri_cmd0.c_str());
         }
-    } else if (uri_cmd0 == "") {
-        device_id = 0;
     }
 
     for (indx=0; indx<app->cam_cnt; indx++) {
@@ -784,7 +782,7 @@ bool cls_webu_ans::valid_request()
         }
         if ((device_id > 0) && (cam == NULL)) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("Invalid camera specified: %s"), url.c_str());
+                , _("Invalid camera device specified: %s"), url.c_str());
             pthread_mutex_unlock(&app->mutex_camlst);
             return false;
         }
@@ -804,8 +802,10 @@ void cls_webu_ans::answer_get()
         return;
     }
 
-    if ((uri_cmd1 == "mjpg") || (uri_cmd1 == "mpegts") ||
-        (uri_cmd1 == "static")) {
+    if ((uri_cmd1 == "mjpg") ||
+        (uri_cmd1 == "mpegts") ||
+        (uri_cmd1 == "static") ||
+        (webu->cfg->webcontrol_interface == "stream")) {
         if (webu_stream == nullptr) {
             webu_stream  = new cls_webu_stream(this);
         }
@@ -816,7 +816,6 @@ void cls_webu_ans::answer_get()
         if (webu_file == nullptr) {
             webu_file = new cls_webu_file(this);
         }
-        gzip_encode = false;
         webu_file->main();
 
     } else if ((uri_cmd1 == "config.json") || (uri_cmd1 == "log") ||
@@ -833,18 +832,10 @@ void cls_webu_ans::answer_get()
         webu_text->main();
 
     } else {
-        if (webu->cfg->webcontrol_interface == "stream") {
-            if (webu_stream == nullptr) {
-                webu_stream  = new cls_webu_stream(this);
-            }
-            gzip_encode = false;
-            webu_stream->main();
-        } else {
-            if (webu_html == nullptr) {
-                webu_html = new cls_webu_html(this);
-            }
-            webu_html->main();
+        if (webu_file == nullptr) {
+            webu_file = new cls_webu_file(this);
         }
+        webu_file->main();
     }
 }
 
@@ -1103,7 +1094,6 @@ cls_webu_ans::cls_webu_ans(cls_webu *p_webu, const char *uri)
 
     cam       = nullptr;
     webu_file = nullptr;
-    webu_html = nullptr;
     webu_json = nullptr;
     webu_text = nullptr;
     webu_post = nullptr;
@@ -1121,7 +1111,6 @@ cls_webu_ans::~cls_webu_ans()
     deinit_counter();
 
     mydelete(webu_file);
-    mydelete(webu_html);
     mydelete(webu_json);
     mydelete(webu_text);
     mydelete(webu_post);

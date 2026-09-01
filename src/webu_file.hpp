@@ -24,6 +24,8 @@
             ~cls_webu_file();
             void main();
         private:
+            void movies();
+            void user_page();
             cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;

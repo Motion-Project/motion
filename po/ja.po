@@ -825,32 +825,6 @@ msgstr "Web コントロールのロック試行"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_scale %d"
-msgstr "無効なストリーム プレビュー スケール %d"
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr "ストリーム プレビュー スケール"
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr "ストリーム プレビュー改行"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_preview_method %s"
-msgstr "無効なストリーム プレビュー メソッド %s"
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr "ストリーム プレビュー メソッド"
-
-#: src/conf.cpp
-msgid "stream_preview_ptz"
-msgstr "ストリーム プレビュー ptz"
-
-#: src/conf.cpp
-#, c-format
 msgid "Invalid stream_quality %d"
 msgstr "無効なストリーム品質 %d"
 
@@ -874,24 +848,6 @@ msgstr "ストリームの最大レート %d が無効です"
 #: src/conf.cpp
 msgid "stream_maxrate"
 msgstr "ストリーム最大レート"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_time %d"
-msgstr "無効なストリーム スキャン時間 %d"
-
-#: src/conf.cpp
-msgid "stream_scan_time"
-msgstr "ストリームスキャン時間"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_scale %d"
-msgstr "無効なストリーム スキャン スケール %d"
-
-#: src/conf.cpp
-msgid "stream_scan_scale"
-msgstr "ストリーム スキャン スケール"
 
 #: src/conf.cpp
 #, c-format

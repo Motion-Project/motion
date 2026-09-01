@@ -823,32 +823,6 @@ msgstr "webcontrol-vergrendelingspogingen"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_scale %d"
-msgstr "Ongeldige streamvoorbeeldschaal %d"
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr "stream voorbeeld schaal"
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr "stream voorbeeld nieuwe regel"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_preview_method %s"
-msgstr "Ongeldige streamvoorbeeldmethode %s"
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr "stream preview-methode"
-
-#: src/conf.cpp
-msgid "stream_preview_ptz"
-msgstr "streamvoorbeeld ptz"
-
-#: src/conf.cpp
-#, c-format
 msgid "Invalid stream_quality %d"
 msgstr "Ongeldige streamkwaliteit %d"
 
@@ -872,24 +846,6 @@ msgstr "Ongeldige stream maxrate %d"
 #: src/conf.cpp
 msgid "stream_maxrate"
 msgstr "stream maximaal"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_time %d"
-msgstr "Ongeldige stream scantijd %d"
-
-#: src/conf.cpp
-msgid "stream_scan_time"
-msgstr "stream scan tijd"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_scale %d"
-msgstr "Ongeldige schaal voor streamscan %d"
-
-#: src/conf.cpp
-msgid "stream_scan_scale"
-msgstr "stroom scan schaal"
 
 #: src/conf.cpp
 #, c-format

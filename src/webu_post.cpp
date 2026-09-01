@@ -26,7 +26,6 @@
 #include "webu.hpp"
 #include "webu_allcam.hpp"
 #include "webu_ans.hpp"
-#include "webu_html.hpp"
 #include "webu_post.hpp"
 
 /**************Callback functions for MHD **********************/

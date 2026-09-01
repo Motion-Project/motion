@@ -826,32 +826,6 @@ msgstr "tentativi di blocco del controllo web"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_scale %d"
-msgstr "Scala anteprima stream %d non valida"
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr "scala di anteprima del flusso"
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr "anteprima del flusso newline"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_preview_method %s"
-msgstr "Metodo di anteprima dello stream %s non valido"
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr "metodo di anteprima del flusso"
-
-#: src/conf.cpp
-msgid "stream_preview_ptz"
-msgstr "anteprima flusso ptz"
-
-#: src/conf.cpp
-#, c-format
 msgid "Invalid stream_quality %d"
 msgstr "Qualità del flusso non valida %d"
 
@@ -875,24 +849,6 @@ msgstr "Frequenza massima %d stream non valida"
 #: src/conf.cpp
 msgid "stream_maxrate"
 msgstr "flusso massimo"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_time %d"
-msgstr "Tempo di scansione del flusso %d non valido"
-
-#: src/conf.cpp
-msgid "stream_scan_time"
-msgstr "tempo di scansione del flusso"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_scale %d"
-msgstr "Scala di scansione del flusso %d non valida"
-
-#: src/conf.cpp
-msgid "stream_scan_scale"
-msgstr "scala di scansione del flusso"
 
 #: src/conf.cpp
 #, c-format

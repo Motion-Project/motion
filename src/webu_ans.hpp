@@ -58,7 +58,6 @@
 
         private:
             cls_webu_file   *webu_file;
-            cls_webu_html   *webu_html;
             cls_webu_json   *webu_json;
             cls_webu_post   *webu_post;
             cls_webu_text   *webu_text;

@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='UTF-8'>
-<title>MotionSamplePage</title>
+<title>Motion</title>
 <meta name='viewport' content='width=device-width, initial-scale=1'>
   <style>
     * {
@@ -255,7 +255,7 @@
 </head>
 
 <body class='body' onload='initform()'>
-  <div id="divnav_main" class="sidenav">
+  <div id="divnav" class="sidenav">
     <a class='closebtn' onclick='nav_close()'>X</a>
     <div id="divnav_version">
       <!-- Filled in by script -->
@@ -305,24 +305,22 @@
     <div id='div_log' class='cls_log' style='display:none' >
       <textarea id='txta_log' ></textarea>
     </div>
-
   </div>
 
   <script>
     var pData, pMovies, pHostFull;
     var gIndxScan, gIndxCam, gGetImgs, gLogNbr;
-    var pic_url = Array(4);
     var log_timer;
-    var cams_scan_timer, cams_all_timer, cams_one_timer;
+    var scan_timerid;
 
     function nav_open() {
-      document.getElementById('divnav_main').style.width = '10rem';
+      document.getElementById('divnav').style.width = '10rem';
       document.getElementById('divmain').style.marginLeft = '10rem';
       document.getElementById('menu_btn').style.display= 'none';
     }
 
     function nav_close() {
-      document.getElementById('divnav_main').style.width = '0rem';
+      document.getElementById('divnav').style.width = '0rem';
       document.getElementById('divmain').style.marginLeft = '0rem';
       document.getElementById('menu_btn').style.display= 'inline';
     }
@@ -367,11 +365,9 @@
       }
       request.open('POST', pHostFull);
       request.send(formData);
-
     }
 
     function send_action(actval) {
-
       var dsp_cam = document.getElementById('div_cam').style.display;
       if ((dsp_cam == 'none' || dsp_cam == '') && (actval != 'config_write')) {
         return;
@@ -396,12 +392,9 @@
       var request = new XMLHttpRequest();
       request.open('POST', pHostFull);
       request.send(formData);
-
-      return;
     }
 
     function send_reload(actval) {
-
       var formData = new FormData();
       var request = new XMLHttpRequest();
       var xmlhttp = new XMLHttpRequest();
@@ -438,7 +431,6 @@
 
       request.open('POST', pHostFull);
       request.send(formData);
-
     }
 
     function dropchange_cam(camobj) {
@@ -465,7 +457,6 @@
         document.getElementById('cfgpic').src =
           pData['cameras'][gIndxCam]['url'] + "mjpg/stream" ;
       }
-
     }
 
     function config_hideall() {
@@ -473,7 +464,6 @@
       for (var i = 0; i < sect.length; i++) {
         sect.item(i).style.display='none';
       }
-      return;
     }
 
     function config_click(actval) {
@@ -491,7 +481,6 @@
       } else {
         camid = pData['cameras'][gIndxCam]['id'];
       }
-
       return camid;
     }
 
@@ -642,7 +631,6 @@
       }
 
       document.getElementById("divnav_config").innerHTML = html_nav;
-
     }
 
     function assign_config_item(jkey) {
@@ -654,6 +642,10 @@
       html_cfg += jkey + "'>"+jkey+"</label></td>\n";
 
       if (pCfg[jkey]["type"] == "string") {
+        html_cfg += "<td><textarea name='";
+        html_cfg += jkey+"'></textarea></td>";
+
+      } else if (pCfg[jkey]["type"] == "params") {
         html_cfg += "<td><textarea name='";
         html_cfg += jkey+"'></textarea></td>";
 
@@ -681,7 +673,6 @@
       html_cfg += "</tr>\n";
 
       return html_cfg;
-
     }
 
     function assign_config_cat(jcat) {
@@ -715,7 +706,6 @@
       html_cfg += "</table></div>\n";
 
       return html_cfg;
-
     }
 
     function assign_config() {
@@ -735,7 +725,6 @@
       html_cfg += "<div style='clear: both'></div>\n;"
 
       document.getElementById("div_config").innerHTML = html_cfg;
-
     }
 
     function initform() {
@@ -814,7 +803,6 @@
     }
 
     function camera_buttons_ptz() {
-
       var html_preview = "";
       html_preview += "<table style='float: left' >";
       html_preview += "<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\n";
@@ -845,11 +833,9 @@
       html_preview += "<tr><td>&nbsp&nbsp</td><td>&nbsp&nbsp</td></tr>\n";
       html_preview += "</table><p></p>";
       return html_preview;
-
     }
 
     function image_picall() {
-
       document.getElementById('picall').addEventListener('click',function(event){
         bounds=this.getBoundingClientRect();
         var locx,locy,locw, loch,pctx,pcty;
@@ -899,9 +885,7 @@
     }
 
     function cams_timer_stop() {
-      clearInterval(cams_one_timer);
-      clearInterval(cams_all_timer);
-      clearInterval(cams_scan_timer);
+      clearInterval(scan_timerid);
     }
 
     function cams_reset() {
@@ -916,7 +900,6 @@
     }
 
     function cams_all_click() {
-
       var html_preview = "";
       var indx, chk;
       var camid;
@@ -928,91 +911,42 @@
 
       var camcnt = pData['cameras']['count'];
       html_preview += "</table>";
-      chk = 0;
-      for (indx=0; indx<camcnt; indx++) {
-        camid = pData['cameras'][indx].id;
-        if (pData['configuration']['cam'+camid].stream_preview_method.value == 'combined') {
-          chk = 1;
-        }
-      }
-      if (chk == 0) {
-        for (indx=0; indx<camcnt; indx++) {
-          camid = pData['cameras'][indx].id;
-          if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {
-            html_preview += "<a><img id='pic" + indx + "' src="
-            html_preview += pData['cameras'][indx]['url'];
-            html_preview += "static/stream/t" + new Date().getTime();
-            html_preview += " onclick='cams_one_click(" + indx + ")' ";
-            html_preview += " border=0 width=";
-            html_preview += pData['configuration']['cam'+camid].stream_preview_scale.value;
-            html_preview += "%></a>\n";
-            if (pData['configuration']['cam'+camid].stream_preview_newline.value == true) {
-              html_preview += "<br>\n";
-            }
-          } else {
-            html_preview += "<a><img id='pic" + indx + "' src="
-            html_preview += pData['cameras'][indx]['url'];
-            html_preview += "mjpg/stream" ;
-            html_preview += " onclick='cams_one_click(" + indx + ")' ";
-            html_preview += " border=0 width=";
-            html_preview += pData['configuration']['cam'+camid].stream_preview_scale.value;
-            html_preview += "%></a>\n";
-            if (pData['configuration']['cam'+camid].stream_preview_newline.value == true) {
-              html_preview += "<br>\n";
-            }
-          }
-        }
-      } else {
-        html_preview += "<a><img id='picall' src="
-        html_preview += pHostFull;
-        html_preview += "/0/mjpg/stream" ;
-        html_preview += " border=0 width=95";
-        html_preview += "%></a>\n";
-      }
+      html_preview += "<a><img id='picall' src="
+      html_preview += pHostFull;
+      html_preview += "/0/mjpg/stream" ;
+      html_preview += " border=0 width=95";
+      html_preview += "%></a>\n";
       document.getElementById('div_config').style.display='none';
       document.getElementById('div_movies').style.display = 'none';
       cams_reset();
       document.getElementById('div_cam').style.display='block';
       document.getElementById('div_cam').innerHTML = html_preview;
-      if (chk == 0) {
-        cams_all_timer = setInterval(cams_all_fnc, 1000);
-      } else {
-        image_picall();
-      }
-
+      image_picall();
     }
 
     function cams_one_click(index_cam) {
-
       var html_preview = "";
       var camid;
 
       config_hideall();
       cams_timer_stop();
-      gIndxCam = index_cam;
 
+      gIndxCam = index_cam;
       gIndxScan = -1;
 
-      if (gIndxCam == -1 ) {
+      if (index_cam == -1 ) {
         return;
       }
 
       camid = pData['cameras'][index_cam].id;
-      if ((pData['configuration']['cam'+camid].stream_preview_ptz.value == true)) {
+      if ((pData['cameras'][gIndxCam]['ptz'] == true)) {
         html_preview += camera_buttons_ptz();
       }
 
-      if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {
-        html_preview += "<a><img id='pic" + gIndxCam + "' src=";
-        html_preview += pData['cameras'][gIndxCam]['url'];
-        html_preview += "static/stream/t" + new Date().getTime();
-        html_preview += " border=0 width=95%></a>\n";
-      } else {
-        html_preview += "<a><img id='pic" + gIndxCam + "' src=";
-        html_preview += pData['cameras'][gIndxCam]['url'];
-        html_preview += "mjpg/stream" ;
-        html_preview += " border=0 width=95%></a>\n";
-      }
+      html_preview += "<a><img id='pic" + gIndxCam + "' src=";
+      html_preview += pData['cameras'][gIndxCam]['url'];
+      html_preview += "mjpg/stream" ;
+      html_preview += " border=0 width=95%></a>\n";
       document.getElementById('div_config').style.display='none';
       document.getElementById('div_movies').style.display = 'none';
       cams_reset();
@@ -1020,82 +954,40 @@
       document.getElementById('div_cam').innerHTML = html_preview;
 
       image_pantilt();
-
-      cams_one_timer = setInterval(cams_one_fnc, 1000);
-
     }
 
     function cams_scan_click() {
-
       cams_timer_stop();
 
       gIndxCam = -1;
       gIndxScan = 0;
 
-      cams_scan_timer = setInterval(cams_scan_fnc, 5);
-    }
-
-    function cams_one_fnc () {
-      var img = new Image();
-      var camid;
-
-      if (gIndxCam == -1 ) {
-        return;
-      }
-
-      camid = pData['cameras'][gIndxCam]['id'];
-
-      if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {
-        pic_url[0] = pData['cameras'][gIndxCam]['url'] + "static/stream/t" + new Date().getTime();
-        img.src = pic_url[0];
-        document.getElementById('pic'+gIndxCam).src = pic_url[0];
-      }
-    }
-
-     function cams_all_fnc () {
-      var previndx = gGetImgs;
-      gGetImgs++;
-      if (gGetImgs >= pData['cameras']['count']) {
-        gGetImgs = 0;
-      }
-      camid = pData['cameras'][gGetImgs]['id'];
-      if (pData['configuration']['cam'+camid].stream_preview_method.value == 'static') {
-        document.getElementById('pic'+previndx).src =
-          pData['cameras'][previndx]['url'] + "static/stream/t" + new Date().getTime();
-        document.getElementById('pic'+gGetImgs).src =
-          pData['cameras'][gGetImgs]['url'] + "mjpg/stream";
-      }
+      scan_timerid = setInterval(cams_scan_fnc, 5);
     }
 
     function cams_scan_fnc() {
       var html_preview = "";
-      var camid;
-      var camcnt = pData['cameras']['count'];
 
       cams_reset();
-      if(gIndxScan == -1) {
-        clearInterval(cams_scan_timer);
+      if(gIndxScan <= -1) {
+        gIndxScan = -1
+        clearInterval(scan_timerid);
         return;
       }
 
-      if(gIndxScan == (camcnt-1)) {
+      gIndxScan++;
+      if(gIndxScan >= (pData['cameras']['count'])) {
         gIndxScan = 0;
-      } else {
-        gIndxScan++;
       }
 
-      camid = pData['cameras'][gIndxScan]['id'];
-      clearInterval(cams_scan_timer);
-      cams_scan_timer = setInterval(cams_scan_fnc,
-        pData['configuration']['cam'+camid].stream_scan_time.value * 1000
-      );
+      clearInterval(scan_timerid);
+      scan_timerid = setInterval(cams_scan_fnc, 5000);
+
       html_preview += "<a><img id='pic0' src="
       html_preview += pData['cameras'][gIndxScan]['url'];
       html_preview += "mjpg/stream" ;
       html_preview += " onclick='cams_one_click(" + gIndxScan + ")' ";
-      html_preview += " border=0 width=";
-      html_preview += pData['configuration']['cam'+camid].stream_scan_scale.value;
-      html_preview += "%></a>\n";
+      html_preview += " border=0 width=50%></a>\n";
       document.getElementById('div_config').style.display='none';
       document.getElementById('div_movies').style.display='none';
       cams_reset();
@@ -1104,7 +996,6 @@
     };
 
     function movies_page() {
-
       var html_tab = "<div>";
       var indx, movcnt, camid, uri;
       var fname,fsize,fdate;
@@ -1158,7 +1049,6 @@
       cams_reset();
       document.getElementById('div_movies').style.display='block';
       document.getElementById('div_movies').innerHTML = html_tab;
-
     }
 
     function movies_click(index_cam) {

@@ -414,8 +414,10 @@ void cls_allcam::getsizes_offset_user()
 void cls_allcam::getsizes_pct()
 {
     int indx, dst_w, dst_h, dst_scale;
+    ctx_params  *params;
+    ctx_params_item *itm;
 
-    if ((info.src_h ==0) || (info.src_w == 0)) {
+    if ((info.src_h == 0) || (info.src_w == 0)) {
         info.src_w = 320;
         info.src_h = 240;
     }
@@ -431,7 +433,20 @@ void cls_allcam::getsizes_pct()
             (((active_cam[indx].offset_row+active_cam[indx].dst_h) * 100) /info.src_h);
     }
 
-    dst_scale = app->cfg->stream_preview_scale;
+    dst_scale = 100;
+
+    params = new ctx_params;
+    util_parms_parse(params
+        , "stream_allcam_params"
+        , app->cfg->stream_allcam_params);
+    for (indx=0;indx<params->params_cnt; indx++) {
+        itm = &params->params_array[indx];
+        if (itm->param_name == "scale") {
+            dst_scale = mtoi(itm->param_value);
+        }
+    }
+    params->params_array.clear();
+    mydelete(params);
 
     dst_w = ((dst_scale * info.src_w) / 100);
     if ((dst_w % 8) != 0) {
@@ -480,7 +495,7 @@ void cls_allcam::init_params()
         active_cam[indx].col = -1;
         active_cam[indx].offset_user_col = 0;
         active_cam[indx].offset_user_row = 0;
-        active_cam[indx].scale = p_cam->cfg->stream_preview_scale;
+        active_cam[indx].scale = 100;
 
         util_parms_parse(params
             , "stream_allcam_params"

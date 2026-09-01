@@ -827,32 +827,6 @@ msgstr "tentatives de verrouillage de contrôle Web"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_scale %d"
-msgstr "Échelle d'aperçu du flux non valide %d"
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr "échelle d'aperçu du flux"
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr "retour à la ligne de l'aperçu du flux"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_preview_method %s"
-msgstr "Méthode d'aperçu de flux non valide %s"
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr "méthode de prévisualisation de flux"
-
-#: src/conf.cpp
-msgid "stream_preview_ptz"
-msgstr "aperçu du flux ptz"
-
-#: src/conf.cpp
-#, c-format
 msgid "Invalid stream_quality %d"
 msgstr "Qualité de flux non valide %d"
 
@@ -876,24 +850,6 @@ msgstr "Débit maximal de flux non valide %d"
 #: src/conf.cpp
 msgid "stream_maxrate"
 msgstr "débit max du flux"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_time %d"
-msgstr "Heure d'analyse du flux non valide %d"
-
-#: src/conf.cpp
-msgid "stream_scan_time"
-msgstr "durée d'analyse du flux"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_scale %d"
-msgstr "Échelle d'analyse de flux non valide %d"
-
-#: src/conf.cpp
-msgid "stream_scan_scale"
-msgstr "échelle d'analyse de flux"
 
 #: src/conf.cpp
 #, c-format

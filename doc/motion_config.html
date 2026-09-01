@@ -479,21 +479,13 @@
           </colgroup>
           <tbody>
             <tr>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_scale" >stream_preview_scale</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_newline" >stream_preview_newline</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_allcam_params" >stream_allcam_params</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_method" >stream_preview_method</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#stream_preview_ptz" >stream_preview_ptz</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_quality" >stream_quality</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_grey" >stream_grey</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
             </tr>
            <tr>
               <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_scan_time" >stream_scan_time</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#stream_scan_scale" >stream_scan_scale</a> </td>
            </tr>
            </tbody>
         </table>
@@ -2517,25 +2509,6 @@
 
       <h3><a name="OptDetail_Stream"></a> Live Stream</a> </h3>
       <ul>
-        <h3><a name="stream_preview_scale"></a> stream_preview_scale </h3>
-        <ul>
-          <li> Values: Integer | Default: 100</li>
-          The percentage to scale the stream image when it is placed on the webcontrol
-          page or into the combined image when the stream_preview_method is set to combined.
-          <br>Numbers greater than 100 are permitted.
-        </ul>
-        <p></p>
-
-        <h3><a name="stream_preview_newline"></a> stream_preview_newline </h3>
-        <ul>
-          <li> Values: on, off | Default: off</li>
-          Insert a new line indicator prior to the image on the webcontrol web page.
-        <p></p>
-          Note that this parameter is ignored when the stream_preview_method is set to
-          combined.
-        </ul>
-        <p></p>
-
         <h3><a name="stream_allcam_params"></a> stream_allcam_params</h3>
         <ul>
          <li> Values: String | Default: Not Defined</li>
@@ -2638,33 +2611,6 @@
         </ul>
         <p></p>
 
-        <h3><a name="stream_preview_method"></a> stream_preview_method </h3>
-        <ul>
-          <li> Values: `combined`, `mjpg`, `static` | Default: `combined`</li>
-          This option determines the method used for displaying images on the webcontrol page.
-          <ul>
-          <li>`mjpg`<br> The webcontrol page is created with a mjpg stream for each camera.  This method
-          creates a connection to the server for each camera.  Note that if there are many cameras,
-          this method may not show/refresh properly in the browser due to browser settings regarding
-          the maximum number of concurrent connections.</li>
-          <br><li> `static`<br> The webcontrol page loops through all the cameras and refreshes the
-          images using static jpgs.  This method provides a slower refresh rate
-          than the mjpg option but allows for a higher number of cameras to get around the
-          browser concurrent connection limits.</li>
-          <br><li>`combined`<br>The webcontrol page uses a combined single mjpg stream.  The
-          combined single mjpg stream is constructed by Motion from all of the cameras
-          currently running.</li>
-          </ul>
-        </ul>
-        <p></p>
-
-        <h3><a name="stream_preview_ptz"></a> stream_preview_ptz</h3>
-        <ul>
-          <li> Values: on, off | Default: on</li>
-          Include the PTZ buttons on the webcontrol page.
-        </ul>
-        <p></p>
-
         <h3><a name="stream_quality"></a> stream_quality </h3>
         <ul>
           <li> Values: 1 - 100 | Default: 50</li>
@@ -2691,20 +2637,6 @@
           <li> Values: on, off | Default: off</li>
           Limit the frames per second for the webcontrol stream to 1 when there
           is no motion being detected and increase to the stream_maxrate when there is motion.
-        </ul>
-        <p></p>
-
-        <h3><a name="stream_scan_time"></a>stream_scan_time</h3>
-        <ul>
-          <li> Values: Integer | Default: 5</li>
-          Time in seconds to display image when in scan mode.
-        </ul>
-        <p></p>
-
-        <h3><a name="stream_scan_scale"></a>stream_scan_scale</h3>
-        <ul>
-          <li> Values: Integer | Default: 25</li>
-          Percentage scaling factor to apply on the image when in scan mode.
         </ul>
         <p></p>
       </ul>

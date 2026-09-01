@@ -243,17 +243,11 @@
             std::string     webcontrol_lock_script;
 
             /* Live stream configuration parameters */
-            int             stream_preview_scale;
-            bool            stream_preview_newline;
             std::string     stream_allcam_params;
-            std::string     stream_preview_method;
-            bool            stream_preview_ptz;
             int             stream_quality;
             bool            stream_grey;
             bool            stream_motion;
             int             stream_maxrate;
-            int             stream_scan_time;
-            int             stream_scan_scale;
 
             /* Database and SQL configuration parameters */
             std::string     database_type;
@@ -485,13 +479,7 @@
             void edit_stream_maxrate(std::string &parm, enum PARM_ACT pact);
             void edit_stream_motion(std::string &parm, enum PARM_ACT pact);
             void edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_preview_method(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_preview_newline(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_preview_ptz(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_preview_scale(std::string &parm, enum PARM_ACT pact);
             void edit_stream_quality(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_scan_scale(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_scan_time(std::string &parm, enum PARM_ACT pact);
 
             void edit_database_busy_timeout(std::string &parm, enum PARM_ACT pact);
             void edit_database_dbname(std::string &parm, enum PARM_ACT pact);

@@ -35,7 +35,7 @@ static ssize_t webu_file_reader (void *cls, uint64_t pos, char *buf, size_t max)
     return (ssize_t)fread (buf, 1, max, webu_ans->req_file);
 }
 
-void cls_webu_file::main() {
+void cls_webu_file::movies() {
     mhdrslt retcd;
     struct stat statbuf;
     struct MHD_Response *response;
@@ -61,7 +61,6 @@ void cls_webu_file::main() {
             }
         }
     }
-
 
     sql  = " select * from motion ";
     sql += " where device_id = " + std::to_string(webua->cam->cfg->device_id);
@@ -114,6 +113,108 @@ void cls_webu_file::main() {
         MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Error processing file request");
     }
 
+}
+void cls_webu_file::user_page()
+{
+    char response[PATH_MAX];
+    std::string fullname, fname, ext;
+    size_t pos, indx;
+    FILE *fp = NULL;
+
+    webua->resp_page = "";
+    webua->resp_type = WEBUI_RESP_HTML;
+
+    pos = app->cfg->conf_filename.find("/",0);
+    if (pos == std::string::npos) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("Unable to determine base path for: %s")
+            , app->cfg->conf_filename.c_str());
+        return;
+    }
+    fullname = app->cfg->conf_filename.substr(0,
+                app->cfg->conf_filename.find_last_of("/"));
+    fullname += "/webcontrol/";
+
+    if (webua->uri_cmd0 == "") {
+        fname = app->cfg->webcontrol_html;
+    } else {
+        fname = webua->uri_cmd0;
+    }
+
+    pos = fname.find(".", 0);
+    if (pos == std::string::npos) {
+        ext = "";
+    } else {
+        pos = fname.find_last_of(".");
+        ext = fname.substr(pos + 1);
+        fname = fname.substr(0, pos);
+    }
+
+    /*sanitize*/
+    for (indx=0;indx < fname.length(); indx++) {
+        if ((std::isalnum(fname[indx]) == false) &&
+            (fname[indx] != '_') &&
+            (fname[indx] != '-')) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                , _("File names are restricted to -_ and alpha numberic characters: %s")
+                , fname.c_str());
+            return;
+        }
+    }
+
+    mylower(ext);
+    if (ext == "json") {
+        webua->resp_type = WEBUI_RESP_JSON;
+    } else if ((ext == "js") ) {
+        webua->resp_type = WEBUI_RESP_JS;
+    } else if ((ext == "css") ) {
+        webua->resp_type = WEBUI_RESP_CSS;
+    } else if (ext == "html") {
+        webua->resp_type = WEBUI_RESP_HTML;
+    } else {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("Invalid file extension requested: %s")
+            , fname.c_str());
+        return;
+    }
+
+    fullname += fname + "." + ext;
+
+    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+        , _("Retrieving file: %s type/extension: %d/%s")
+        , fullname.c_str(), webua->resp_type, ext.c_str());
+
+    fp = myfopen(fullname.c_str(), "re");
+    if (fp == NULL) {
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            , _("Invalid user requested file: %s")
+            , fullname.c_str());
+        webua->resp_type = WEBUI_RESP_HTML;
+        return;
+    } else {
+        while (fgets(response, PATH_MAX-1, fp)) {
+            webua->resp_page += response;
+        }
+        myfclose(fp);
+    }
+}
+
+void cls_webu_file::main()
+{
+    webua->gzip_encode = false;
+    if (webua->uri_cmd1 == "movies") {
+        movies();
+    } else {
+        pthread_mutex_lock(&app->mutex_post);
+            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "Getting user page");
+            user_page();
+        pthread_mutex_unlock(&app->mutex_post);
+    }
+    if (webua->resp_page == "") {
+        webua->bad_request();
+    } else {
+        webua->mhd_send();
+    }
 }
 
 cls_webu_file::cls_webu_file(cls_webu_ans *p_webua)

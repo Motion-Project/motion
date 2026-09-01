@@ -823,32 +823,6 @@ msgstr "웹 컨트롤 잠금 시도"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_scale %d"
-msgstr "잘못된 스트림 미리보기 배율 %d"
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr "스트림 미리보기 배율"
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr "스트림 미리보기 줄 바꿈"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_preview_method %s"
-msgstr "잘못된 스트림 미리보기 방법 %s"
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr "스트림 미리보기 방법"
-
-#: src/conf.cpp
-msgid "stream_preview_ptz"
-msgstr "스트림 미리보기 ptz"
-
-#: src/conf.cpp
-#, c-format
 msgid "Invalid stream_quality %d"
 msgstr "잘못된 스트림 품질 %d"
 
@@ -872,24 +846,6 @@ msgstr "잘못된 스트림 최대 속도 %d"
 #: src/conf.cpp
 msgid "stream_maxrate"
 msgstr "스트림 최대 속도"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_time %d"
-msgstr "잘못된 스트림 검사 시간 %d"
-
-#: src/conf.cpp
-msgid "stream_scan_time"
-msgstr "스트림 스캔 시간"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_scale %d"
-msgstr "잘못된 스트림 스캔 배율 %d"
-
-#: src/conf.cpp
-msgid "stream_scan_scale"
-msgstr "스트림 스캔 스케일"
 
 #: src/conf.cpp
 #, c-format

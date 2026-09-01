@@ -156,17 +156,11 @@ ctx_parm config_parms[] = {
     {"webcontrol_lock_attempts",  PARM_TYP_INT,    PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, PARM_LVL_03, PARM_CHG_RESTART },
 
-    {"stream_preview_scale",      PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_preview_newline",    PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_allcam_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_preview_method",     PARM_TYP_LIST,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_preview_ptz",        PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_grey",               PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_motion",             PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_maxrate",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_scan_time",          PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_scan_scale",         PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
 
     {"database_type",             PARM_TYP_LIST,   PARM_CAT_15, PARM_LVL_02, PARM_CHG_RESTART },
     {"database_dbname",           PARM_TYP_STRING, PARM_CAT_15, PARM_LVL_02, PARM_CHG_RESTART },
@@ -2084,7 +2078,7 @@ void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact
             webcontrol_interface = "stream";
         }
     } else if (pact == PARM_ACT_SET) {
-        if ((parm == "default") || (parm == "user") || (parm == "stream"))  {
+        if ((parm == "default") || (parm == "stream"))  {
             webcontrol_interface = parm;
         } else if (parm == "") {
             webcontrol_interface = "default";
@@ -2095,7 +2089,7 @@ void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact
         parm = webcontrol_interface;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[";
-        parm = parm +  "\"default\",\"user\",\"stream\"";
+        parm = parm +  "\"default\",\"stream\"";
         parm = parm + "]";
     }
     return;
@@ -2232,7 +2226,7 @@ void cls_config::edit_webcontrol_headers(std::string &parm, enum PARM_ACT pact)
 void cls_config::edit_webcontrol_html(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        webcontrol_html = "";
+        webcontrol_html = "samplepage.html";
     } else if (pact == PARM_ACT_SET) {
         webcontrol_html = parm;
     } else if (pact == PARM_ACT_GET) {
@@ -2306,38 +2300,6 @@ void cls_config::edit_webcontrol_lock_script(std::string &parm, enum PARM_ACT pa
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_script",_("webcontrol_lock_script"));
 }
 
-void cls_config::edit_stream_preview_scale(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        stream_preview_scale = 100;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 1) || (parm_in > 1000)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_preview_scale %d"),parm_in);
-        } else {
-            stream_preview_scale = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(stream_preview_scale);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_scale",_("stream_preview_scale"));
-}
-
-void cls_config::edit_stream_preview_newline(std::string &parm, enum PARM_ACT pact)
- {
-     if (pact == PARM_ACT_DFLT) {
-        stream_preview_newline = false;
-     } else if (pact == PARM_ACT_SET) {
-        edit_set_bool(stream_preview_newline, parm);
-     } else if (pact == PARM_ACT_GET) {
-        edit_get_bool(parm, stream_preview_newline);
-     }
-     return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_newline",_("stream_preview_newline"));
- }
-
 void cls_config::edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -2349,42 +2311,6 @@ void cls_config::edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_allcam_params",_("stream_allcam_params"));
-}
-
-void cls_config::edit_stream_preview_method(std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        stream_preview_method = "combined";
-    } else if (pact == PARM_ACT_SET) {
-        if ((parm == "mjpg") || (parm == "static") || (parm == "combined"))  {
-            stream_preview_method = parm;
-        } else if (parm == "") {
-            stream_preview_method = "combined";
-        } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_preview_method %s"), parm.c_str());
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = stream_preview_method;
-    } else if (pact == PARM_ACT_LIST) {
-        parm = "[";
-        parm = parm +  "\"mjpg\",\"static\"";
-        parm = parm + "]";
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_method",_("stream_preview_method"));
-}
-
-void cls_config::edit_stream_preview_ptz(std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        stream_preview_ptz = true;
-    } else if (pact == PARM_ACT_SET) {
-        edit_set_bool(stream_preview_ptz, parm);
-    } else if (pact == PARM_ACT_GET) {
-        edit_get_bool(parm, stream_preview_ptz);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_preview_ptz",_("stream_preview_ptz"));
 }
 
 void cls_config::edit_stream_quality(std::string &parm, enum PARM_ACT pact)
@@ -2449,44 +2375,6 @@ void cls_config::edit_stream_maxrate(std::string &parm, enum PARM_ACT pact)
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_maxrate",_("stream_maxrate"));
-}
-
-void cls_config::edit_stream_scan_time(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        stream_scan_time = 5;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 1) || (parm_in > 600)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_scan_time %d"),parm_in);
-        } else {
-            stream_scan_time = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(stream_scan_time);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_scan_time",_("stream_scan_time"));
-}
-
-void cls_config::edit_stream_scan_scale(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        stream_scan_scale = 25;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 1) || (parm_in > 1000)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_scan_scale %d"),parm_in);
-        } else {
-            stream_scan_scale = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(stream_scan_scale);
-    }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_scan_scale",_("stream_scan_scale"));
 }
 
 void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
@@ -3093,17 +2981,11 @@ void cls_config::edit_cat13(std::string parm_nm, std::string &parm_val, enum PAR
 
 void cls_config::edit_cat14(std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "stream_preview_scale") {               edit_stream_preview_scale(parm_val, pact);
-    } else if (parm_nm == "stream_preview_newline") {      edit_stream_preview_newline(parm_val, pact);
-    } else if (parm_nm == "stream_allcam_params") {     edit_stream_allcam_params(parm_val, pact);
-    } else if (parm_nm == "stream_preview_method") {       edit_stream_preview_method(parm_val, pact);
-    } else if (parm_nm == "stream_preview_ptz") {          edit_stream_preview_ptz(parm_val, pact);
-    } else if (parm_nm == "stream_quality") {              edit_stream_quality(parm_val, pact);
-    } else if (parm_nm == "stream_grey") {                 edit_stream_grey(parm_val, pact);
-    } else if (parm_nm == "stream_motion") {               edit_stream_motion(parm_val, pact);
-    } else if (parm_nm == "stream_maxrate") {              edit_stream_maxrate(parm_val, pact);
-    } else if (parm_nm == "stream_scan_time") {            edit_stream_scan_time(parm_val, pact);
-    } else if (parm_nm == "stream_scan_scale") {           edit_stream_scan_scale(parm_val, pact);
+    if (parm_nm == "stream_allcam_params") {    edit_stream_allcam_params(parm_val, pact);
+    } else if (parm_nm == "stream_quality") {   edit_stream_quality(parm_val, pact);
+    } else if (parm_nm == "stream_grey") {      edit_stream_grey(parm_val, pact);
+    } else if (parm_nm == "stream_motion") {    edit_stream_motion(parm_val, pact);
+    } else if (parm_nm == "stream_maxrate") {   edit_stream_maxrate(parm_val, pact);
     }
 
 }

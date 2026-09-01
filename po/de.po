@@ -826,32 +826,6 @@ msgstr "Webcontrol-Sperrversuche"
 
 #: src/conf.cpp
 #, c-format
-msgid "Invalid stream_preview_scale %d"
-msgstr "Ungültige Stream-Vorschauskalierung %d"
-
-#: src/conf.cpp
-msgid "stream_preview_scale"
-msgstr "Maßstab der Stream-Vorschau"
-
-#: src/conf.cpp
-msgid "stream_preview_newline"
-msgstr "Stream-Vorschau Newline"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_preview_method %s"
-msgstr "Ungültige Stream-Vorschaumethode %s"
-
-#: src/conf.cpp
-msgid "stream_preview_method"
-msgstr "Stream-Vorschau-Methode"
-
-#: src/conf.cpp
-msgid "stream_preview_ptz"
-msgstr "Vorschau streamen ptz"
-
-#: src/conf.cpp
-#, c-format
 msgid "Invalid stream_quality %d"
 msgstr "Ungültige Streamqualität %d"
 
@@ -875,24 +849,6 @@ msgstr "Ungültige Stream-Maximalrate %d"
 #: src/conf.cpp
 msgid "stream_maxrate"
 msgstr "maximale Rate streamen"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_time %d"
-msgstr "Ungültige Stream-Scan-Zeit %d"
-
-#: src/conf.cpp
-msgid "stream_scan_time"
-msgstr "Stream-Scan-Zeit"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid stream_scan_scale %d"
-msgstr "Ungültiger Stream-Scan-Maßstab %d"
-
-#: src/conf.cpp
-msgid "stream_scan_scale"
-msgstr "Stream-Scan-Skala"
 
 #: src/conf.cpp
 #, c-format
