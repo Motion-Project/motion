@@ -97,11 +97,12 @@ void cls_webu_json::parms_item_detail(cls_config *conf, std::string pNm)
 
 }
 
-void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
+void cls_webu_json::parms_item(cls_config *conf
+    , std::string parm_name, std::string porig
+    , enum PARM_TYP ptyp, enum PARM_CAT pcat, std::string pdesc)
 {
-    std::string parm_orig, parm_val, parm_list, parm_enable;
+    std::string parm_val, parm_list, parm_enable, parm_catstr, parm_typstr;
 
-    parm_orig = "";
     parm_val = "";
     parm_list = "";
 
@@ -111,72 +112,78 @@ void cls_webu_json::parms_item(cls_config *conf, int indx_parm)
         parm_enable = "true";
     }
 
-    conf->edit_get(config_parms[indx_parm].parm_name
-        , parm_orig, config_parms[indx_parm].parm_cat);
+    parm_catstr = std::to_string(pcat);
+    parm_val = escstr(porig);
+    parm_typstr = conf->type_desc(ptyp);
+    conf->edit_list(parm_name, parm_list, pcat);
 
-    parm_val = escstr(parm_orig);
-
-    if (config_parms[indx_parm].parm_type == PARM_TYP_INT) {
+    if ((ptyp == PARM_TYP_INT) || (ptyp == PARM_TYP_FLOAT)) {
+        if (parm_val == ""){
+            parm_val = "0";
+        }
         webua->resp_page +=
-            "\"" + config_parms[indx_parm].parm_name + "\"" +
+            "\"" + parm_name + "\"" +
             ":{" +
             " \"value\":" + parm_val +
             ",\"enabled\":" + parm_enable +
-            ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-            ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
+            ",\"category\":" + parm_catstr +
+            ",\"type\":\"" + parm_typstr + "\"" +
+            ",\"desc\":\"" + pdesc + "\"" +
             "}";
-
-    } else if (config_parms[indx_parm].parm_type == PARM_TYP_BOOL) {
+    } else if (ptyp == PARM_TYP_BOOL) {
         if (parm_val == "on") {
             webua->resp_page +=
-                "\"" + config_parms[indx_parm].parm_name + "\"" +
+                "\"" + parm_name + "\"" +
                 ":{" +
                 " \"value\":true" +
                 ",\"enabled\":" + parm_enable +
-                ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-                ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\""+
+                ",\"category\":" + parm_catstr +
+                ",\"type\":\"" + parm_typstr + "\"" +
+                ",\"desc\":\"" + pdesc + "\"" +
                 "}";
         } else {
             webua->resp_page +=
-                "\"" + config_parms[indx_parm].parm_name + "\"" +
+                "\"" + parm_name + "\"" +
                 ":{" +
                 " \"value\":false" +
                 ",\"enabled\":" + parm_enable +
-                ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-                ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
+                ",\"category\":" + parm_catstr +
+                ",\"type\":\"" + parm_typstr + "\"" +
+                ",\"desc\":\"" + pdesc + "\"" +
                 "}";
         }
-    } else if (config_parms[indx_parm].parm_type == PARM_TYP_LIST) {
-        conf->edit_list(config_parms[indx_parm].parm_name
-            , parm_list, config_parms[indx_parm].parm_cat);
+    } else if ((ptyp == PARM_TYP_LIST) || (ptyp == PARM_TYP_INTLIST)) {
         webua->resp_page +=
-            "\"" + config_parms[indx_parm].parm_name + "\"" +
+            "\"" + parm_name + "\"" +
             ":{" +
             " \"value\": \"" + parm_val + "\"" +
             ",\"enabled\":" + parm_enable +
-            ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-            ",\"type\":\"" + conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
+            ",\"category\":" + parm_catstr +
+            ",\"type\":\"" + parm_typstr + "\"" +
+            ",\"desc\":\"" + pdesc + "\"" +
             ",\"list\":" + parm_list +
             "}";
-    } else if (config_parms[indx_parm].parm_type == PARM_TYP_PARAMS) {
+    } else if (ptyp == PARM_TYP_PARAMS) {
         webua->resp_page +=
-            "\"" + config_parms[indx_parm].parm_name + "\"" +
+            "\"" + parm_name + "\"" +
             ":{" +
             " \"value\":\"" + parm_val + "\"" +
             ",\"enabled\":" + parm_enable +
-            ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-            ",\"type\":\""+ conf->type_desc(config_parms[indx_parm].parm_type) + "\"";
-        parms_item_detail(conf, config_parms[indx_parm].parm_name);
+            ",\"category\":" + parm_catstr +
+            ",\"type\":\"" + parm_typstr + "\"" +
+            ",\"desc\":\"" + pdesc + "\"";
+            parms_item_detail(conf, parm_name);
         webua->resp_page += "}";
     } else {
         webua->resp_page +=
-            "\"" + config_parms[indx_parm].parm_name + "\"" +
+            "\"" + parm_name + "\"" +
             ":{" +
             " \"value\":\"" + parm_val + "\"" +
             ",\"enabled\":" + parm_enable +
-            ",\"category\":" + std::to_string(config_parms[indx_parm].parm_cat) +
-            ",\"type\":\""+ conf->type_desc(config_parms[indx_parm].parm_type) + "\"" +
-            "}";
+            ",\"category\":" + parm_catstr +
+            ",\"type\":\"" + parm_typstr + "\"" +
+            ",\"desc\":\"" + pdesc + "\"" +
+        "}";
     }
 }
 
@@ -184,7 +191,9 @@ void cls_webu_json::parms_one(cls_config *conf)
 {
     int indx_parm;
     bool first;
-    std::string response;
+    std::string response, parm_orig;
+    ctx_params_item *itm;
+    ctx_params *prm;
 
     indx_parm = 0;
     first = true;
@@ -199,9 +208,30 @@ void cls_webu_json::parms_one(cls_config *conf)
         } else {
             webua->resp_page += ",";
         }
-        parms_item(conf, indx_parm);
+        conf->edit_get(config_parms[indx_parm].parm_name
+            , parm_orig, config_parms[indx_parm].parm_cat);
+        parms_item(conf, config_parms[indx_parm].parm_name
+            ,parm_orig,config_parms[indx_parm].parm_type
+            ,config_parms[indx_parm].parm_cat, "");
         indx_parm++;
     }
+
+    prm = conf->params_libcamera;
+    for (indx_parm=0; indx_parm<prm->params_cnt; indx_parm++) {
+        itm = &prm->params_array[indx_parm];
+        if (itm->param_lvl > webu->cfg->webcontrol_access) {
+            continue;
+        }
+        if (first) {
+            first = false;
+            webua->resp_page += "{";
+        } else {
+            webua->resp_page += ",";
+        }
+        parms_item(conf,itm->param_name,itm->param_value
+            ,itm->param_type, itm->param_cat,itm->param_desc);
+    }
+
     if (first == false) {
         webua->resp_page += "}";
     } else {

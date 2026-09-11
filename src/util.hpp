@@ -64,8 +64,18 @@
 #endif
 
 struct ctx_params_item {
-    std::string     param_name;       /* The name or description of the ID as requested by user*/
-    std::string     param_value;      /* The value that the user wants the control set to*/
+    std::string     param_name;     /* The name or description of the ID as requested by user*/
+    std::string     param_value;    /* The value that the user wants the control set to*/
+    std::string     param_default;  /* The default value for the parameter*/
+    enum PARM_SRC   param_source;   /* enum of parm_src for user,system. */
+    enum PARM_TYP   param_type;     /* enum of parm_typ for bool,int or string. */
+    enum PARM_CAT   param_cat;      /* enum of parm_cat for grouping. */
+    int             param_lvl;      /* Enum of parm_lvl for webui*/
+    enum PARM_CHG   param_chg;      /* Enum for whether a restart is needed to implement changes*/
+    int             param_min;      /* Minimum value permitted for the parameter*/
+    int             param_max;      /* Maximum value permitted for the parameter*/
+    std::vector<std::string>   param_lst;      /* list of acceptable values*/
+    std::string     param_desc;     /* Short description*/
 };
 typedef std::vector<ctx_params_item> vec_params;
 struct ctx_params {

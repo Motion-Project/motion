@@ -40,7 +40,6 @@
                 void parms_update();
             private:
                 cls_camera  *cam;
-                ctx_params  *params;
                 cls_convert *convert;
 
                 std::unique_ptr<libcamera::CameraManager>          cam_mgr;
@@ -52,6 +51,7 @@
                 std::queue<libcamera::Request *>   req_queue;
                 libcamera::ControlList             *camctrls;
                 ctx_imgmap              membuf;
+                ctx_params              *params;
                 bool    started_cam;
                 bool    started_mgr;
                 bool    started_aqr;
@@ -59,14 +59,11 @@
                 int     reconnect_count;
                 bool    set_controls;
                 std::string pixfmt;
-                void log_orientation();
                 void log_controls();
-                void log_draft();
 
                 int libcam_start();
                 void libcam_stop();
 
-                void start_params();
                 int start_mgr();
                 int start_config();
                 int start_req();
@@ -77,8 +74,6 @@
                 void config_assign_int(int pctrl, std::string pvalue);
                 void req_complete(libcamera::Request *request);
                 int req_add(libcamera::Request *request);
-
-
         };
     #else
         #define LIBCAMVER 0

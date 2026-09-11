@@ -19,52 +19,7 @@
 
 #ifndef _INCLUDE_CONF_HPP_
 #define _INCLUDE_CONF_HPP_
-
     /* Categories for he edits and display on web interface*/
-    enum PARM_CAT{
-        PARM_CAT_00     /* system */
-        ,PARM_CAT_01    /* camera */
-        ,PARM_CAT_02    /* source */
-        ,PARM_CAT_03    /* image */
-        ,PARM_CAT_04    /* overlay */
-        ,PARM_CAT_05    /* method */
-        ,PARM_CAT_06    /* masks */
-        ,PARM_CAT_07    /* detect */
-        ,PARM_CAT_08    /* scripts */
-        ,PARM_CAT_09    /* picture */
-        ,PARM_CAT_10    /* movies */
-        ,PARM_CAT_11    /* timelapse */
-        ,PARM_CAT_12    /* pipes */
-        ,PARM_CAT_13    /* webcontrol */
-        ,PARM_CAT_14    /* streams */
-        ,PARM_CAT_15    /* database */
-        ,PARM_CAT_16    /* sql */
-        ,PARM_CAT_17    /* tracking */
-        ,PARM_CAT_18    /* sound */
-        ,PARM_CAT_MAX
-    };
-    enum PARM_TYP{
-        PARM_TYP_STRING
-        , PARM_TYP_INT
-        , PARM_TYP_LIST
-        , PARM_TYP_BOOL
-        , PARM_TYP_ARRAY
-        , PARM_TYP_PARAMS
-    };
-    enum PARM_LVL{
-        PARM_LVL_00     = 0     /*Webcontrol Always Available Parameters*/
-        ,PARM_LVL_01    = 1     /*Webcontrol Limited Parameters */
-        ,PARM_LVL_02    = 2     /*Webcontrol Advanced Parameters*/
-        ,PARM_LVL_03    = 3     /*Webcontrol Scripts Parameters*/
-        ,PARM_LVL_04    = 4     /*Webcontrol Restricted Parameters*/
-        ,PARM_LVL_99    = 99    /*Webcontrol Never Available Parameters*/
-    };
-    enum PARM_CHG{  /*Method to apply webcontrol changes to parameter*/
-        PARM_CHG_COPY       = 0 /* Copy the new value to cfg to apply new value*/
-        ,PARM_CHG_CODE      = 1 /* A specific procedure is written to apply new values */
-        ,PARM_CHG_RESTART   = 2 /* Restart of the thread is required*/
-    };
-
     /** Current parameters in the config file */
     struct ctx_parm {
         const std::string   parm_name;  /* name for this parameter                  */
@@ -73,14 +28,6 @@
         int                 parm_lvl;   /* Enum of parm_lvl for webui*/
         enum PARM_CHG       parm_chg;   /* Enum for whether a restart is needed to implement changes*/
     };
-
-    enum PARM_ACT{
-        PARM_ACT_DFLT
-        , PARM_ACT_SET
-        , PARM_ACT_GET
-        , PARM_ACT_LIST
-    };
-
     /** Deprecated parameters in the config file  */
     struct ctx_parm_depr{
         const std::string   parm_name;     /* Name of the deprecated option */
@@ -300,12 +247,16 @@
             void parms_write();
             void parms_copy(cls_config *src);
             void parms_copy(cls_config *src, PARM_CAT p_cat);
+            ctx_params  *params_libcamera;
 
         private:
             cls_motapp *app;
             void cmdline();
             void defaults();
             int get_next_devid();
+            void params_load();
+            void params_load_libcamera();
+
             void config_dir_parm(std::string confdir);
 
             void parms_log_parm(std::string parm_nm, std::string parm_vl);

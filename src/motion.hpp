@@ -129,6 +129,62 @@ enum DEVICE_STATUS {
     STATUS_INIT,     /* First time initialize */
     STATUS_OPENED    /* Successfully started the device */
 };
+    enum PARM_CAT{
+        PARM_CAT_00     /* system */
+        ,PARM_CAT_01    /* camera */
+        ,PARM_CAT_02    /* source */
+        ,PARM_CAT_03    /* image */
+        ,PARM_CAT_04    /* overlay */
+        ,PARM_CAT_05    /* method */
+        ,PARM_CAT_06    /* masks */
+        ,PARM_CAT_07    /* detect */
+        ,PARM_CAT_08    /* scripts */
+        ,PARM_CAT_09    /* picture */
+        ,PARM_CAT_10    /* movies */
+        ,PARM_CAT_11    /* timelapse */
+        ,PARM_CAT_12    /* pipes */
+        ,PARM_CAT_13    /* webcontrol */
+        ,PARM_CAT_14    /* streams */
+        ,PARM_CAT_15    /* database */
+        ,PARM_CAT_16    /* sql */
+        ,PARM_CAT_17    /* tracking */
+        ,PARM_CAT_18    /* sound */
+        ,PARM_CAT_19    /* libcam_params */
+        ,PARM_CAT_MAX
+    };
+    enum PARM_TYP{
+        PARM_TYP_STRING
+        , PARM_TYP_INT
+        , PARM_TYP_LIST
+        , PARM_TYP_INTLIST
+        , PARM_TYP_BOOL
+        , PARM_TYP_FLOAT
+        , PARM_TYP_ARRAY
+        , PARM_TYP_PARAMS
+    };
+    enum PARM_LVL{
+        PARM_LVL_00     = 0     /*Webcontrol Always Available Parameters*/
+        ,PARM_LVL_01    = 1     /*Webcontrol Limited Parameters */
+        ,PARM_LVL_02    = 2     /*Webcontrol Advanced Parameters*/
+        ,PARM_LVL_03    = 3     /*Webcontrol Scripts Parameters*/
+        ,PARM_LVL_04    = 4     /*Webcontrol Restricted Parameters*/
+        ,PARM_LVL_99    = 99    /*Webcontrol Never Available Parameters*/
+    };
+    enum PARM_CHG{  /*Method to apply webcontrol changes to parameter*/
+        PARM_CHG_COPY       = 0 /* Copy the new value to cfg to apply new value*/
+        ,PARM_CHG_CODE      = 1 /* A specific procedure is written to apply new values */
+        ,PARM_CHG_RESTART   = 2 /* Restart of the thread is required*/
+    };
+    enum PARM_ACT{
+        PARM_ACT_DFLT
+        , PARM_ACT_SET
+        , PARM_ACT_GET
+        , PARM_ACT_LIST
+    };
+    enum PARM_SRC{
+        PARM_SRC_USER
+        , PARM_SRC_SYS
+    };
 
 struct ctx_stream_data {
     u_char  *jpg_data;  /* Image compressed as JPG */

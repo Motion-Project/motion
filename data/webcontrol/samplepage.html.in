@@ -349,20 +349,25 @@
 
         }
       };
+
       formData.append('command', 'config');
       formData.append('camid', camid);
+      formData.append('parmcat', category);
 
       for (jkey in pCfg) {
         if (document.getElementsByName(jkey)[0] != null) {
           if (pCfg[jkey].category == category) {
             if (document.getElementsByName(jkey)[0].type == 'checkbox') {
-              formData.append(jkey, document.getElementsByName(jkey)[0].checked);
-            } else {
+               if (pCfg[jkey].value != document.getElementsByName(jkey)[0].checked) {
+                formData.append(jkey, document.getElementsByName(jkey)[0].checked);
+               }
+            } else if (pCfg[jkey].value != document.getElementsByName(jkey)[0].value) {
               formData.append(jkey, document.getElementsByName(jkey)[0].value);
             }
           }
         }
       }
+
       request.open('POST', pHostFull);
       request.send(formData);
     }
@@ -659,6 +664,11 @@
         html_cfg += "type='text' name='";
         html_cfg += jkey+"'></td>";
 
+      } else if (pCfg[jkey]["type"] == "float") {
+        html_cfg += "<td><input class='cls_text_nbr' ";
+        html_cfg += "type='text' name='";
+        html_cfg += jkey+"'></td>";
+
       } else if (pCfg[jkey]["type"] == "list") {
         html_cfg += "<td><select class='cls_drop' ";
         html_cfg += " name='"+jkey+"'  autocomplete='off'>";
@@ -669,6 +679,17 @@
           html_cfg += pCfg[jkey]["list"][indx_lst] + "</option>\n";
         }
         html_cfg += "</select></td>";
+      } else if (pCfg[jkey]["type"] == "intlist") {
+        html_cfg += "<td><select class='cls_drop' ";
+        html_cfg += " name='"+jkey+"'  autocomplete='off'>";
+
+        for (indx_lst=0; indx_lst < pCfg[jkey]["list"].length; indx_lst++) {
+          html_cfg += "<option value='";
+          html_cfg += pCfg[jkey]["list"][indx_lst] + "'>";
+          html_cfg += pCfg[jkey]["list"][indx_lst] + "</option>\n";
+        }
+        html_cfg += "</select></td>";
+
       }
       html_cfg += "</tr>\n";
 

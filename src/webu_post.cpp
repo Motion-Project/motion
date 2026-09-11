@@ -481,79 +481,103 @@ void cls_webu_post::write_config()
 
 }
 
-void cls_webu_post::config_set(int indx_parm, std::string parm_vl)
+void cls_webu_post::config_set(
+    int pindx, int pcatin, std::string pnm, std::string pval)
 {
-    std::string parm_nm, parm_vl_cur;
-    PARM_CAT    parm_ct;
+    std::string pcur, ptmp;
     PARM_CHG    parm_ch;
+    PARM_CAT    pcat;
     int indx;
 
-    parm_nm = config_parms[indx_parm].parm_name;
-    parm_ct = config_parms[indx_parm].parm_cat;
-    parm_ch = config_parms[indx_parm].parm_chg;
+    if (pcatin < 0 || pcatin >= PARM_CAT_MAX){
+        pcat = PARM_CAT_MAX;
+    } else {
+        pcat = (PARM_CAT)pcatin;
+    }
+    parm_ch = config_parms[pindx].parm_chg;
 
-    if (webua->device_id == 0) {
-        app->conf_src->edit_get(parm_nm, parm_vl_cur, parm_ct);
-        if (parm_vl == parm_vl_cur) {
+    if (pcat == PARM_CAT_19) {
+        if (webua->device_id == 0) {
+          MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config category 19 edit set all %s:%s"
+            ,pnm.c_str(), pval.c_str());
+            util_parms_add(app->conf_src->params_libcamera, pnm, pval);
+            app->conf_src->edit_get("libcam_params", pcur, PARM_CAT_02);
+            for (indx=0;indx<app->cam_cnt;indx++) {
+                app->cam_list[indx]->conf_src->edit_get("libcam_params", ptmp, PARM_CAT_02);
+                if (pcur == ptmp) {
+                    util_parms_add(app->cam_list[indx]->conf_src->params_libcamera, pnm, pval);
+                    if (app->cam_list[indx]->handler_running == true) {
+                        config_ra_set("cam",indx, PARM_CHG_CODE);
+                    }
+                }
+            }
+        } else {
+          MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config category 19 edit set. %s:%s"
+            ,pnm.c_str(), pval.c_str());
+            util_parms_add(
+                app->cam_list[webua->camindx]->conf_src->params_libcamera
+                ,pnm, pval);
+            if (app->cam_list[webua->camindx]->handler_running == true) {
+                config_ra_set("cam", webua->camindx,  parm_ch);
+            }
+        }
+    } else if (webua->device_id == 0) {
+        app->conf_src->edit_get(pnm, pcur, pcat);
+        if (pval == pcur) {
             return;
         }
-        if (parm_ct == PARM_CAT_00) {
-            app->conf_src->edit_set(parm_nm, parm_vl);
+        if (pcat == PARM_CAT_00) {
+            app->conf_src->edit_set(pnm, pval);
             config_ra_set("log",0, parm_ch);
-        } else if (parm_ct == PARM_CAT_13) {
-            app->conf_src->edit_set(parm_nm, parm_vl);
+        } else if (pcat == PARM_CAT_13) {
+            app->conf_src->edit_set(pnm, pval);
             config_ra_set("webu",0, parm_ch);
-        } else if (parm_ct == PARM_CAT_15) {
-            app->conf_src->edit_set(parm_nm, parm_vl);
+        } else if (pcat == PARM_CAT_15) {
+            app->conf_src->edit_set(pnm, pval);
             config_ra_set("dbse",0, parm_ch);
         } else {
-            app->conf_src->edit_set(parm_nm, parm_vl);
-            if (parm_ct == PARM_CAT_14) {
-                app->conf_src->edit_set(parm_nm, parm_vl);
+            app->conf_src->edit_set(pnm, pval);
+            if (pcat == PARM_CAT_14) {
+                app->conf_src->edit_set(pnm, pval);
             }
             for (indx=0;indx<app->cam_cnt;indx++){
-                app->cam_list[indx]->conf_src->edit_get(
-                    parm_nm, parm_vl_cur, parm_ct);
-                if (parm_vl_cur != parm_vl) {
+                app->cam_list[indx]->conf_src->edit_get(pnm, pcur, pcat);
+                if (pcur != pval) {
                     if (app->cam_list[indx]->handler_running == true) {
-                        app->cam_list[indx]->conf_src->edit_set(
-                            parm_nm, parm_vl);
+                        app->cam_list[indx]->conf_src->edit_set(pnm, pval);
                         config_ra_set("cam",indx, parm_ch);
                     } else {
-                        app->cam_list[indx]->conf_src->edit_set(parm_nm, parm_vl);
+                        app->cam_list[indx]->conf_src->edit_set(pnm, pval);
                     }
                 }
             }
             for (indx=0;indx<app->snd_cnt;indx++) {
-                app->snd_list[indx]->conf_src->edit_get(
-                    parm_nm, parm_vl_cur, parm_ct);
-                if (parm_vl_cur != parm_vl) {
+                app->snd_list[indx]->conf_src->edit_get(pnm, pcur, pcat);
+                if (pcur != pval) {
                     if (app->snd_list[indx]->handler_running == true) {
-                        app->snd_list[indx]->conf_src->edit_set(
-                            parm_nm, parm_vl);
+                        app->snd_list[indx]->conf_src->edit_set(pnm, pval);
                         config_ra_set("snd",indx, parm_ch);
                     } else {
-                        app->snd_list[indx]->conf_src->edit_set(parm_nm, parm_vl);
+                        app->snd_list[indx]->conf_src->edit_set(pnm, pval);
                     }
                 }
             }
         }
     } else {    /* (webua->device_id != 0) */
-        if ((parm_ct == PARM_CAT_00) ||
-            (parm_ct == PARM_CAT_15)) {
+        if ((pcat == PARM_CAT_00) ||
+            (pcat == PARM_CAT_15)) {
             return;
-        }
-        app->cam_list[webua->camindx]->conf_src->edit_get(
-            parm_nm, parm_vl_cur, parm_ct);
-        if (parm_vl == parm_vl_cur) {
-            return;
-        }
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config edit set. %s:%s"
-            ,parm_nm.c_str(), parm_vl.c_str());
-        app->cam_list[webua->camindx]->conf_src->edit_set(
-            parm_nm, parm_vl);
-        if (app->cam_list[webua->camindx]->handler_running == true) {
-            config_ra_set("cam", webua->camindx, parm_ch);
+        } else {
+            app->cam_list[webua->camindx]->conf_src->edit_get(pnm, pcur, pcat);
+            if (pcur == pval) {
+                return;
+            }
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config edit set. %s:%s"
+                ,pnm.c_str(), pval.c_str());
+            app->cam_list[webua->camindx]->conf_src->edit_set(pnm, pval);
+            if (app->cam_list[webua->camindx]->handler_running == true) {
+                config_ra_set("cam", webua->camindx, PARM_CHG_CODE);
+            }
         }
     }
 }
@@ -612,7 +636,9 @@ void cls_webu_post::config_ra_reset()
 void cls_webu_post::config()
 {
     int indx, indx2;
-    std::string tmpname;
+    int pcat;
+    std::string pnm, pval;
+    ctx_params *prm;
 
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "config") {
@@ -626,41 +652,62 @@ void cls_webu_post::config()
     }
 
     config_ra_reset();
-
+    pcat = -1;
+    pnm = "";
     for (indx = 0; indx < post_sz; indx++) {
+        if (mystreq(post_info[indx].key_nm, "parmcat")) {
+            pcat = mtoi(post_info[indx].key_val);
+        }
         if (mystrne(post_info[indx].key_nm, "command") &&
-            mystrne(post_info[indx].key_nm, "camid")) {
-
-            tmpname = post_info[indx].key_nm;
-            indx2=0;
-            while (config_parms_depr[indx2].parm_name != "") {
-                if (config_parms_depr[indx2].parm_name == tmpname) {
-                    tmpname = config_parms_depr[indx2].newname;
-                    break;
-                }
-                indx2++;
-            }
-
-            /* Ignore any requests for parms above webcontrol_access level. */
-            indx2=0;
-            while (config_parms[indx2].parm_name != "") {
-                if ((config_parms[indx2].parm_lvl > app->conf_src->webcontrol_access) ||
-                    (config_parms[indx2].parm_lvl == PARM_LVL_99) ) {
-                    indx2++;
-                    continue;
-                }
-                if (tmpname == config_parms[indx2].parm_name) {
-                    break;
-                }
-                indx2++;
-            }
-
-            if (config_parms[indx2].parm_name != "") {
-                config_set(indx2, post_info[indx].key_val);
-            }
+            mystrne(post_info[indx].key_nm, "camid") &&
+            mystrne(post_info[indx].key_nm, "parmcat")) {
+            pnm = post_info[indx].key_nm;
+            pval = post_info[indx].key_val;
         }
     }
 
+    indx2=0;
+    while (config_parms_depr[indx2].parm_name != "") {
+        if (config_parms_depr[indx2].parm_name == pnm) {
+            pnm = config_parms_depr[indx2].newname;
+            break;
+        }
+        indx2++;
+    }
+
+    if (pcat == (int)PARM_CAT_19) {
+        if (webua->device_id == 0) {
+            prm = app->conf_src->params_libcamera;
+        } else {
+            prm = app->cam_list[webua->camindx]->conf_src->params_libcamera;
+        }
+        for (indx=0;indx<prm->params_cnt;indx++) {
+            if ((prm->params_array[indx].param_name == pnm) &&
+                (prm->params_array[indx].param_lvl <= app->conf_src->webcontrol_access) &&
+                (prm->params_array[indx].param_lvl != PARM_LVL_99)) {
+                config_set(0, pcat, pnm, pval);
+                }
+
+        }
+    } else {
+        /* Ignore any requests for parms above webcontrol_access level. */
+        indx2=0;
+        while (config_parms[indx2].parm_name != "") {
+            if ((config_parms[indx2].parm_lvl > app->conf_src->webcontrol_access) ||
+                (config_parms[indx2].parm_lvl == PARM_LVL_99) ) {
+                indx2++;
+                continue;
+            }
+            if (config_parms[indx2].parm_name == pnm) {
+                break;
+            }
+            indx2++;
+        }
+        if (config_parms[indx2].parm_name == pnm) {
+            pcat = (int)config_parms[indx2].parm_cat;
+            config_set(indx2, pcat, pnm, pval);
+        }
+    }
     for (indx = 0; indx < ra_list.size(); indx++) {
         if (ra_list[indx].comp_type == "log") {
             if (ra_list[indx].restart == true) {

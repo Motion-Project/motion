@@ -27,7 +27,6 @@
             cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
-            void parms_item(cls_config *conf, int indx_parm);
             void parms_one(cls_config *conf);
             void parms_all();
             void cameras_list();
@@ -39,6 +38,9 @@
             void status();
             void loghistory();
             std::string escstr(std::string invar);
+            void parms_item(cls_config *conf
+                , std::string pnm, std::string pvl
+                , enum PARM_TYP ptyp, enum PARM_CAT pcat, std::string pdesc);
             void parms_item_detail(cls_config *conf, std::string pNm);
     };
 

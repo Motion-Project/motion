@@ -862,6 +862,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_name == parm_nm) {
             params->params_array[indx].param_value.assign(parm_val);
+            params->params_array[indx].param_source = PARM_SRC_USER;
             return;
         }
     }
@@ -870,6 +871,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     params->params_cnt++;
     parm_itm.param_name.assign(parm_nm);
     parm_itm.param_value.assign(parm_val);
+    parm_itm.param_source = PARM_SRC_USER;
     params->params_array.push_back(parm_itm);
 
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
@@ -1104,8 +1106,7 @@ void util_parms_parse(ctx_params *params, std::string parm_desc, std::string con
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
-    params->params_array.clear();
-    params->params_cnt = 0;
+    params->params_cnt = (int)params->params_array.size();
     params->params_desc = parm_desc;
 
     if (confline == "") {
@@ -1132,6 +1133,11 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl
     }
     if (dflt == true) {
         util_parms_add(params, parm_nm, std::to_string(parm_vl));
+        for (indx=0;indx<params->params_cnt;indx++) {
+            if (params->params_array[indx].param_name == parm_nm) {
+                params->params_array[indx].param_source = PARM_SRC_SYS;
+            }
+        }
     }
 }
 
@@ -1149,6 +1155,11 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string
     }
     if (dflt == true) {
         util_parms_add(params, parm_nm, parm_vl);
+        for (indx=0;indx<params->params_cnt;indx++) {
+            if (params->params_array[indx].param_name == parm_nm) {
+                params->params_array[indx].param_source = PARM_SRC_SYS;
+            }
+        }
     }
 }
 
@@ -1162,23 +1173,25 @@ void util_parms_update(ctx_params *params, std::string &confline)
     comma = "";
     parmline = "";
     for (indx=0;indx<params->params_cnt;indx++) {
-        parmline += comma;
-        comma = ",";
-        if (params->params_array[indx].param_name.find(" ") == std::string::npos) {
-            parmline += params->params_array[indx].param_name;
-        } else {
-            parmline += "\"";
-            parmline += params->params_array[indx].param_name;
-            parmline += "\"";
-        }
+        if (params->params_array[indx].param_source == PARM_SRC_USER) {
+            parmline += comma;
+            comma = ",";
+            if (params->params_array[indx].param_name.find(" ") == std::string::npos) {
+                parmline += params->params_array[indx].param_name;
+            } else {
+                parmline += "\"";
+                parmline += params->params_array[indx].param_name;
+                parmline += "\"";
+            }
 
-        parmline += "=";
-        if (params->params_array[indx].param_value.find(" ") == std::string::npos) {
-            parmline += params->params_array[indx].param_value;
-        } else {
-            parmline += "\"";
-            parmline += params->params_array[indx].param_value;
-            parmline += "\"";
+            parmline += "=";
+            if (params->params_array[indx].param_value.find(" ") == std::string::npos) {
+                parmline += params->params_array[indx].param_value;
+            } else {
+                parmline += "\"";
+                parmline += params->params_array[indx].param_value;
+                parmline += "\"";
+            }
         }
     }
     parmline += " ";

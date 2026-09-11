@@ -30,189 +30,34 @@
 
 using namespace libcamera;
 
-void cls_libcam::log_orientation()
-{
-    #if (LIBCAMVER >= 2000)
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Orientation Options:");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate0Mirror");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate180Mirror");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate90Mirror");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270");
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Rotate270Mirror");
-    #else
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
-    #endif
-
-}
-
 void cls_libcam::log_controls()
 {
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeMeteringMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCentreWeighted = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringSpot = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringMatrix = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    MeteringCustom = 3");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeConstraintMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintNormal = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintHighlight = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintShadows = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ConstraintCustom = 3");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AeExposureMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureNormal = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureShort = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureLong = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ExposureCustom = 3");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureValue(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ExposureTime(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AnalogueGain(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Brightness(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Contrast(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Lux(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbEnable(bool)");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbAuto = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIncandescent = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbTungsten = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbFluorescent = 3");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbIndoor = 4");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbDaylight = 5");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCloudy = 6");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbCustom = 7");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbLocked(bool)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourGains(Pipe delimited)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     Red | Blue");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourTemperature(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Saturation(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorBlackLevels(Pipe delimited)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|var3|var4");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  Sharpness(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FocusFoM(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColourCorrectionMatrix(Pipe delimited)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     var1|var2|...|var8|var9");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ScalerCrop(Pipe delimited)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  DigitalGain(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDuration(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  FrameDurationLimits(Pipe delimited)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     min | max");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTemperature(float)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorTimestamp(int)");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeManual = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeAuto = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfModeContinuous = 2");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfRange(0-2)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeNormal = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeMacro = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfRangeFull = 2");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfSpeed(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedNormal = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfSpeedFast = 1");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfMetering(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringAuto = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfMeteringWindows = 1");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfWindows(Pipe delimited)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "     x | y | h | w");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfTrigger(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerStart = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfTriggerCancel = 1");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPause(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseImmediate = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseDeferred = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseResume = 2");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensPosition(float)");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfState(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateIdle = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateScanning = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFocused = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfStateFailed = 3");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AfPauseState(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStateRunning = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePausing = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AfPauseStatePaused = 2");
-
-}
-
-void cls_libcam:: log_draft()
-{
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls Draft:");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AePrecaptureTrigger(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerIdle = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerStart = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AePrecaptureTriggerCancel = 2");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  NoiseReductionMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeOff = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeFast = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeHighQuality = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeMinimal = 3");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    NoiseReductionModeZSL = 4");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  ColorCorrectionAberrationMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationOff = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationFast = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    ColorCorrectionAberrationHighQuality = 2");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  AwbState(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateInactive = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbStateSearching = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbConverged = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    AwbLocked = 3");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  SensorRollingShutterSkew(int)");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  LensShadingMapMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOff = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    LensShadingMapModeOn = 1");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  PipelineDepth(int)");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  MaxLatency(int)");
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "  TestPatternMode(int)");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeOff = 0");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeSolidColor = 1");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBars = 2");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeColorBarsFadeToGray = 3");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModePn9 = 4");
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    TestPatternModeCustom1 = 256");
-
-}
-
-void cls_libcam::start_params()
-{
+    int indx, indx2;
     ctx_params_item *itm;
-    int indx;
 
-    params = new ctx_params;
-    util_parms_parse(params,"libcam_params", cam->cfg->libcam_params);
-
-    for (indx=0;indx<params->params_cnt;indx++) {
+    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
+    for (indx=0;indx<params->params_cnt;indx++){
         itm = &params->params_array[indx];
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "%s : %s"
-            ,itm->param_name.c_str(), itm->param_value.c_str());
+        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO
+            , "  %s (%s)"
+            , itm->param_name.c_str()
+            , cam->cfg->type_desc(itm->param_type).c_str());
+        if (itm->param_lst[0] != "") {
+            if ((itm->param_type == PARM_TYP_INT) &&
+                (itm->param_lst.size() > 1)) {
+                for (indx2=0;indx2<itm->param_lst.size();indx2++) {
+                    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    %d = %s"
+                        ,indx2, itm->param_lst[indx2].c_str());
+                }
+            } else {
+                for (indx2=0;indx2<itm->param_lst.size();indx2++) {
+                    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    %s"
+                        ,itm->param_lst[indx2].c_str());
+                }
+            }
+        }
     }
+
 }
 
 int cls_libcam::start_mgr()
@@ -511,7 +356,8 @@ void cls_libcam:: config_orientation()
 
         for (indx=0;indx<params->params_cnt;indx++) {
             itm = &params->params_array[indx];
-            if (itm->param_name == "Orientation") {
+            if ((itm->param_name == "Orientation") &&
+                (itm->param_source == PARM_SRC_USER)) {
                 if (itm->param_value == "Rotate0") {
                     libcam_cfg->orientation = Orientation::Rotate0;
                 } else if (itm->param_value == "Rotate0Mirror") {
@@ -585,13 +431,13 @@ int cls_libcam::start_config()
 
     pfmt = "YU12";
     for (indx=0;indx<params->params_cnt;indx++) {
-        if (params->params_array[indx].param_name == "pixelformat") {
+        if ((params->params_array[indx].param_name == "pixelformat") &&
+            (params->params_array[indx].param_source == PARM_SRC_USER)) {
             pfmt = params->params_array[indx].param_value;
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Using user specified pixelformat %s."
                 , pfmt.c_str());
         }
-
     }
     libcam_cfg->at(0).pixelFormat = PixelFormat::fromString(pfmt);
     libcam_cfg->at(0).size.width = (uint)cam->cfg->width;
@@ -641,9 +487,7 @@ int cls_libcam::start_config()
     cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
     cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
 
-    log_orientation();
     log_controls();
-    log_draft();
 
     config_orientation();
     camera->configure(libcam_cfg.get());
@@ -660,9 +504,12 @@ int cls_libcam::req_add(Request *request)
     if (set_controls) {
         camctrls = &request->controls();
         for (indx=0;indx<params->params_cnt;indx++) {
-            config_control_item(
-                params->params_array[indx].param_name
-                ,params->params_array[indx].param_value);
+            if (params->params_array[indx].param_source == PARM_SRC_USER) {
+                config_control_item(
+                    params->params_array[indx].param_name
+                    ,params->params_array[indx].param_value);
+
+            }
         }
         set_controls = false;
     }
@@ -739,11 +586,12 @@ int cls_libcam::start_capture()
 
     camctrls = new libcamera::ControlList();
     for (indx=0;indx<params->params_cnt;indx++) {
-        config_control_item(
-            params->params_array[indx].param_name
-            ,params->params_array[indx].param_value);
+        if (params->params_array[indx].param_source == PARM_SRC_USER) {
+            config_control_item(
+                params->params_array[indx].param_name
+                ,params->params_array[indx].param_value);
+        }
     }
-
     retcd = camera->start(camctrls);
     if (retcd) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -786,8 +634,6 @@ int cls_libcam::libcam_start()
     started_aqr = false;
     started_req = false;
     set_controls = true;
-
-    start_params();
 
     if (start_mgr() != 0) {
         return -1;
@@ -854,41 +700,64 @@ void cls_libcam::parms_update()
     #ifdef HAVE_LIBCAM
         ctx_params  *prm_s;
         int indx, indx2;
-        bool tst;
+        bool chgnew;
 
-        prm_s = new ctx_params;
-        prm_s->params_cnt = 0;
-        util_parms_parse(prm_s, "libcam_params", cam->conf_src->libcam_params);
-
-        /*
-        Determine if any of the changed parameters are ones that require restarting camera.
-        */
-        tst = false;
-        for (indx=0;indx<prm_s->params_cnt;indx++) {
-            if ((prm_s->params_array[indx].param_name == "pixelformat")) {
+        if(cam->conf_src->libcam_params != cam->cfg->libcam_params) {
+            prm_s = new ctx_params;
+            prm_s->params_cnt = 0;
+            util_parms_parse(prm_s, "libcam_params", cam->conf_src->libcam_params);
+            for (indx=0;indx<prm_s->params_cnt;indx++) {
+                chgnew = true;
                 for (indx2=0;indx2<params->params_cnt;indx2++) {
                     if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
-                        (prm_s->params_array[indx].param_value != params->params_array[indx2].param_value)) {
+                        (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
+                        chgnew = false;
+                    }
+                }
+                if (chgnew == true) {
+                    util_parms_add(cam->conf_src->params_libcamera
+                        ,prm_s->params_array[indx].param_name
+                        ,prm_s->params_array[indx].param_value);
+                    util_parms_add(params
+                        ,prm_s->params_array[indx].param_name
+                        ,prm_s->params_array[indx].param_value);
+                    if ((prm_s->params_array[indx].param_name == "pixelformat")) {
                         MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
-                            , _("Restarting camera. Parameter %s changed %s to %s")
+                            , _("Restarting camera. Parameter %s changed to %s")
                             , prm_s->params_array[indx].param_name.c_str()
-                            , params->params_array[indx2].param_value.c_str()
                             , prm_s->params_array[indx].param_value.c_str());
-                        tst = true;
+                        mydelete(prm_s);
+                        cam->restart = true;
+                        return;
+                    }
+                }
+            }
+        } else {
+            prm_s = cam->conf_src->params_libcamera;
+            for (indx=0;indx<prm_s->params_cnt;indx++) {
+                chgnew = true;
+                for (indx2=0;indx2<params->params_cnt;indx2++) {
+                    if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
+                        (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
+                        chgnew = false;
+                    }
+                }
+                if (chgnew == true) {
+                    util_parms_add(params
+                        ,prm_s->params_array[indx].param_name
+                        ,prm_s->params_array[indx].param_value);
+                    if ((prm_s->params_array[indx].param_name == "pixelformat")) {
+                        MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                            , _("Restarting camera. Parameter %s changed to %s")
+                            , prm_s->params_array[indx].param_name.c_str()
+                            , prm_s->params_array[indx].param_value.c_str());
+                        cam->restart = true;
+                        return;
                     }
                 }
             }
         }
 
-        if (tst == true) {
-            mydelete(prm_s);
-            cam->restart = true;
-            return;
-        }
-
-        /* Delete exising params and change pointer to new parameters */
-        mydelete(params);
-        params = prm_s;
         set_controls = true;    /* Trigger update on next req_add*/
 
     #endif
@@ -982,7 +851,7 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
     #ifdef HAVE_LIBCAM
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
         convert = nullptr;
-        params = nullptr;
+        params = cam->cfg->params_libcamera;
         reconnect_count = 0;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
         cam_mgr = std::make_unique<CameraManager>();
