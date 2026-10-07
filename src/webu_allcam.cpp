@@ -415,7 +415,6 @@ void cls_allcam::getsizes_pct()
 {
     int indx, dst_w, dst_h, dst_scale;
     ctx_params  *params;
-    ctx_params_item *itm;
 
     if ((info.src_h == 0) || (info.src_w == 0)) {
         info.src_w = 320;
@@ -435,18 +434,17 @@ void cls_allcam::getsizes_pct()
 
     dst_scale = 100;
 
-    params = new ctx_params;
-    util_parms_parse(params
-        , "stream_allcam_params"
-        , app->cfg->stream_allcam_params);
-    for (indx=0;indx<params->params_cnt; indx++) {
-        itm = &params->params_array[indx];
-        if (itm->param_name == "scale") {
-            dst_scale = mtoi(itm->param_value);
+    params = nullptr;
+    for (indx=0;indx<app->cfg->params.size(); indx++) {
+        if (app->cfg->params[indx]->params_pcat == PARM_PCAT_ACAM) {
+            params = app->cfg->params[indx];
         }
     }
-    params->params_array.clear();
-    mydelete(params);
+    for (indx=0;indx<params->params_cnt; indx++) {
+        if (params->params_array[indx].param_name == "scale") {
+            dst_scale = mtoi(params->params_array[indx].param_value);
+        }
+    }
 
     dst_w = ((dst_scale * info.src_w) / 100);
     if ((dst_w % 8) != 0) {
@@ -477,29 +475,31 @@ void cls_allcam::getsizes_pct()
 
 void cls_allcam::init_params()
 {
-    int indx, indx1;
-    std::string portnbr;
+    int indx, indx1, indx2;
+    std::string portcam, portapp;
     ctx_params  *params;
     ctx_params_item *itm;
     cls_camera *p_cam;
 
-    portnbr = std::to_string(webu->cfg->webcontrol_port);
+    portcam = std::to_string(webu->cfg->webcontrol_port);
+    portapp = std::to_string(webu->app->cfg->webcontrol_port);
 
     memset(&info, 0, sizeof(ctx_allcam_info));
 
-    params = new ctx_params;
+    params = nullptr;
 
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx].cam;
-        active_cam[indx].row = -1;
-        active_cam[indx].col = -1;
-        active_cam[indx].offset_user_col = 0;
-        active_cam[indx].offset_user_row = 0;
-        active_cam[indx].scale = 100;
-
-        util_parms_parse(params
-            , "stream_allcam_params"
-            , p_cam->cfg->stream_allcam_params);
+        for (indx2=0;indx2<p_cam->cfg->params.size(); indx2++) {
+            if (p_cam->cfg->params[indx2]->params_pcat == PARM_PCAT_ACAM) {
+                params = p_cam->cfg->params[indx2];
+            }
+        }
+        util_parms_add_default(params,"row","-1");
+        util_parms_add_default(params,"col","-1");
+        util_parms_add_default(params,"offset_user_col","0");
+        util_parms_add_default(params,"offset_user_row","0");
+        util_parms_add_default(params,"scale","100");
 
         for (indx1=0;indx1<params->params_cnt;indx1++) {
             itm = &params->params_array[indx1];
@@ -518,37 +518,39 @@ void cls_allcam::init_params()
                     mtoi(itm->param_value);
             }
             if (itm->param_name == "scale") {
-                active_cam[indx].scale =
-                    mtoi(itm->param_value);
+                active_cam[indx].scale = mtoi(itm->param_value);
             }
         }
 
+        if (portcam != portapp) {
+            util_parms_add_default(params,"row"+portcam,"-1");
+            util_parms_add_default(params,"col"+portcam,"-1");
+            util_parms_add_default(params,"offset_user_col"+portcam,"0");
+            util_parms_add_default(params,"offset_user_row"+portcam,"0");
+            util_parms_add_default(params,"scale"+portcam,"100");
+        }
         for (indx1=0;indx1<params->params_cnt;indx1++) {
             itm = &params->params_array[indx1];
-            if (itm->param_name == "row"+portnbr) {
+            if (itm->param_name == "row"+portcam) {
                 active_cam[indx].row = mtoi(itm->param_value);
             }
-            if (itm->param_name == "col"+portnbr) {
+            if (itm->param_name == "col"+portcam) {
                 active_cam[indx].col = mtoi(itm->param_value);
             }
-            if (itm->param_name == "offset_col"+portnbr) {
+            if (itm->param_name == "offset_col"+portcam) {
                 active_cam[indx].offset_user_col =
                     mtoi(itm->param_value);
             }
-            if (itm->param_name == "offset_row"+portnbr) {
+            if (itm->param_name == "offset_row"+portcam) {
                 active_cam[indx].offset_user_row =
                     mtoi(itm->param_value);
             }
-            if (itm->param_name == "scale"+portnbr) {
+            if (itm->param_name == "scale"+portcam) {
                 active_cam[indx].scale =
                     mtoi(itm->param_value);
             }
         }
-        params->params_array.clear();
     }
-
-    mydelete(params);
-
 }
 
 void cls_allcam::init_validate()
@@ -701,7 +703,8 @@ void cls_allcam::init_cams()
             ,"stream_allcam_params values. Device %d row %d col %d"
             , p_cam->cfg->device_id
             , active_cam[indx].row
-            , active_cam[indx].col);
+            , active_cam[indx].col
+        );
     }
 
     info.src_w = 0;
@@ -763,6 +766,57 @@ void cls_allcam::timing()
     }
 
     clock_gettime(CLOCK_MONOTONIC, &curr_ts);
+
+}
+
+void cls_allcam::params_update()
+{
+    ctx_params  *prm_s, *prm_c;
+    int indx, indx2;
+    bool chgnew;
+    cls_config *cfg_s, *cfg_c;
+
+    for (indx=-1;indx<active_cam.size();indx++){
+        if (indx == -1) {
+            cfg_s = webu->app->conf_src;
+            cfg_c = webu->app->cfg;
+        } else {
+            cfg_s = active_cam[indx].cam->conf_src;
+            cfg_c = active_cam[indx].cam->cfg;
+        }
+        prm_c = nullptr;
+        for (indx=0; indx<cfg_c->params.size(); indx++) {
+            if (cfg_c->params[indx]->params_pcat == PARM_PCAT_ACAM) {
+                prm_c = cfg_c->params[indx];
+            }
+        }
+        prm_s = nullptr;
+        for (indx=0;indx<cfg_s->params.size();indx++) {
+            if (cfg_s->params[indx]->params_pcat == PARM_PCAT_ACAM) {
+                prm_s = cfg_s->params[indx];
+            }
+        }
+        util_parms_parse(prm_s, "stream_allcam_params"
+            , webu->app->conf_src->stream_allcam_params
+            , PARM_PCAT_ACAM);
+
+        for (indx=0;indx<prm_s->params_cnt;indx++) {
+            chgnew = true;
+            for (indx2=0;indx2<prm_c->params_cnt;indx2++) {
+                if ((prm_s->params_array[indx].param_name == prm_c->params_array[indx2].param_name) &&
+                    (prm_s->params_array[indx].param_value == prm_c->params_array[indx2].param_value)) {
+                    chgnew = false;
+                }
+            }
+            if (chgnew == true) {
+                util_parms_add(prm_c
+                    ,prm_s->params_array[indx].param_name
+                    ,prm_s->params_array[indx].param_value);
+            }
+        }
+    }
+
+    reset = true;
 
 }
 

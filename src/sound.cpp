@@ -129,7 +129,7 @@ void cls_sound::load_alerts()
 
     tmp_params = new ctx_params;
     for (it_a=parm_val.begin(); it_a!=parm_val.end(); it_a++) {
-        util_parms_parse(tmp_params,"snd_alerts", it_a->c_str());
+        util_parms_parse(tmp_params,"snd_alerts", it_a->c_str(), PARM_PCAT_MIN);
         init_alerts(&tmp_alert);
         for (indx=0;indx<tmp_params->params_cnt;indx++) {
             itm = &tmp_params->params_array[indx];
@@ -171,21 +171,26 @@ void cls_sound::load_params()
     int indx;
     ctx_params_item *itm;
 
-    util_parms_parse(snd_info->params,"snd_params", cfg->snd_params);
+    params = nullptr;
+    for (indx=0;indx<cfg->params.size();indx++){
+        if (cfg->params[indx]->params_pcat == PARM_PCAT_SND){
+            params=cfg->params[indx];
+        }
+    }
 
-    util_parms_add_default(snd_info->params,"source","alsa");
-    util_parms_add_default(snd_info->params,"channels","1");
-    util_parms_add_default(snd_info->params,"frames","2048");
-    util_parms_add_default(snd_info->params,"sample_rate","44100");
+    util_parms_add_default(params,"source","alsa");
+    util_parms_add_default(params,"channels","1");
+    util_parms_add_default(params,"frames","2048");
+    util_parms_add_default(params,"sample_rate","44100");
 
-    for (indx=0;indx<snd_info->params->params_cnt;indx++) {
-        itm = &snd_info->params->params_array[indx];
+    for (indx=0;indx<params->params_cnt;indx++) {
+        itm = &params->params_array[indx];
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
             ,itm->param_name.c_str(),itm->param_value.c_str());
     }
 
-    for (indx=0;indx<snd_info->params->params_cnt;indx++) {
-        itm = &snd_info->params->params_array[indx];
+    for (indx=0;indx<params->params_cnt;indx++) {
+        itm = &params->params_array[indx];
         if (itm->param_name == "source") {
             snd_info->source = itm->param_value;
         }
@@ -774,7 +779,6 @@ void cls_sound::cleanup()
     mydelete(snd_info->snd_alsa);
     mydelete(snd_info->snd_fftw);
     mydelete(snd_info->snd_pulse);
-    mydelete(snd_info->params);
     mydelete(snd_info);
 
     device_status = STATUS_CLOSED;
@@ -794,14 +798,13 @@ void cls_sound::init()
         restart = false;
     }
 
-    cfg->parms_copy(conf_src);
+    cfg->config_copy(conf_src);
 
     mythreadname_set("sl",cfg->device_id, cfg->device_name.c_str());
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Initialize sound frequency"));
 
     snd_info = new ctx_snd_info;
-    snd_info->params = new ctx_params;
     snd_info->snd_fftw = new ctx_snd_fftw;
     snd_info->snd_alsa = new ctx_snd_alsa;
     snd_info->snd_pulse = new ctx_snd_pulse;

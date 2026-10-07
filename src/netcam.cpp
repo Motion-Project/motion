@@ -870,14 +870,13 @@ void cls_netcam::hwdecoders()
             , cameratype.c_str(), decoder_nm.c_str());
     }
 
-    /* Update parms_array and config line*/
+    /* Update parms_array*/
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_name == "decoder") {
             params->params_array[indx].param_value = decoder_nm;
             break;
         }
     }
-    util_parms_update(params, cfg_params);
     return;
 }
 
@@ -916,8 +915,6 @@ void cls_netcam::decoder_error(int retcd, const char* fnc_nm)
                 break;
             }
         }
-
-        util_parms_update(params, cfg_params);
         hw_type = AV_HWDEVICE_TYPE_NONE;
         decoder_nm = "SW";
     }
@@ -1620,8 +1617,9 @@ int cls_netcam::ntc()
 void cls_netcam::set_options()
 {
     std::string tmp;
-    int indx;
+    int indx, indx2;
     ctx_params_item *itm;
+    bool chgnew;
 
     if ((service == "rtsp") ||
         (service == "rtsps") ||
@@ -1679,6 +1677,23 @@ void cls_netcam::set_options()
 
         }
     }
+
+    /*copy from params back into src since params may have newly changed/added items*/
+    for (indx=0;indx<params->params_cnt;indx++) {
+        chgnew = true;
+        for (indx2=0;indx2<prm_s->params_cnt;indx2++) {
+            if ((prm_s->params_array[indx2].param_name == params->params_array[indx].param_name) &&
+                (prm_s->params_array[indx2].param_value == params->params_array[indx].param_value)) {
+                chgnew = false;
+            }
+        }
+        if (chgnew == true) {
+            util_parms_add(prm_s
+                ,params->params_array[indx].param_name
+                ,params->params_array[indx].param_value);
+        }
+    }
+
 }
 
 void cls_netcam::set_path ()
@@ -1726,8 +1741,6 @@ void cls_netcam::set_parms ()
 {
     int indx;
 
-    params = new ctx_params;
-
     context_null();
     threadnbr = cam->cfg->device_id;
     cfg_width = cam->cfg->width;
@@ -1742,19 +1755,44 @@ void cls_netcam::set_parms ()
     cam->imgs.width_high  = 0;
     cam->imgs.height_high = 0;
     cam->imgs.size_high   = 0;
+    prm_s = nullptr;
+    params = nullptr;
 
     if (high_resolution) {
         imgsize.width = 0;
         imgsize.height = 0;
         cameratype = _("High");
-        cfg_params = cam->cfg->netcam_high_params;
-        util_parms_parse(params,"netcam_high_params", cfg_params);
+        for (indx=0;indx<cam->cfg->params.size();indx++){
+            if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_NETH) {
+                params = cam->cfg->params[indx];
+            }
+        }
+        for (indx=0;indx<cam->conf_src->params.size();indx++){
+            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_NETH) {
+                prm_s = cam->conf_src->params[indx];
+            }
+        }
+
     } else {
         imgsize.width = cfg_width;
         imgsize.height = cfg_height;
         cameratype = _("Norm");
-        cfg_params = cam->cfg->netcam_params;
-        util_parms_parse(params,"netcam_params", cfg_params);
+        for (indx=0;indx<cam->cfg->params.size();indx++){
+            if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_NET) {
+                params = cam->cfg->params[indx];
+            }
+        }
+        for (indx=0;indx<cam->conf_src->params.size();indx++){
+            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_NET) {
+                prm_s = cam->conf_src->params[indx];
+            }
+        }
+    }
+    if (prm_s == nullptr) {
+    MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO
+        , _("%s:%s null prm_s pointer")
+        , cameratype.c_str(), camera_name.c_str());
+
     }
     camera_name = cam->cfg->device_name;
 
@@ -2326,8 +2364,6 @@ void cls_netcam::handler_shutdown()
         img_recv   = nullptr;
     }
 
-    mydelete(params);
-
     cam->device_status = STATUS_CLOSED;
     status = NETCAM_NOTCONNECTED;
     MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
@@ -2460,6 +2496,30 @@ int cls_netcam::next(ctx_image_data *img_data)
     pthread_mutex_unlock(&mutex);
 
     return CAPTURE_SUCCESS;
+}
+
+void cls_netcam::params_update()
+{
+    int indx, indx2;
+    bool chgnew;
+
+    /*copy from prm_s to params and restart.  (nothing can be dyamically updated right now)*/
+    for (indx=0;indx<prm_s->params_cnt;indx++) {
+        chgnew = true;
+        for (indx2=0;indx2<params->params_cnt;indx2++) {
+            if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
+                (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
+                chgnew = false;
+            }
+        }
+        if (chgnew == true) {
+            util_parms_add(params
+                ,prm_s->params_array[indx].param_name
+                ,prm_s->params_array[indx].param_value);
+            cam->restart = true;
+        }
+    }
+
 }
 
 cls_netcam::cls_netcam(cls_camera *p_cam, bool p_is_high)

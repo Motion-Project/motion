@@ -510,39 +510,42 @@ void cls_algsec::params_model()
     }
 }
 
-void cls_algsec::params_defaults()
+void cls_algsec::params_defaults(ctx_params *prm)
 {
-    util_parms_add_default(params, "model_file", "");
-    util_parms_add_default(params, "frame_interval", "5");
-    util_parms_add_default(params, "image_type", "full");
-    util_parms_add_default(params, "rotate", "0");
+
+    util_parms_add_default(prm, "model_file", "");
+    util_parms_add_default(prm, "frame_interval", "5");
+    util_parms_add_default(prm, "image_type", "full");
+    util_parms_add_default(prm, "rotate", "0");
 
     if (method == "haar") {
-        util_parms_add_default(params, "threshold", "1.1");
-        util_parms_add_default(params, "scalefactor", "1.1");
-        util_parms_add_default(params, "flags", "0");
-        util_parms_add_default(params, "maxsize", "1024");
-        util_parms_add_default(params, "minsize", "8");
-        util_parms_add_default(params, "minneighbors", "8");
+        util_parms_add_default(prm, "threshold", "1.1");
+        util_parms_add_default(prm, "scalefactor", "1.1");
+        util_parms_add_default(prm, "flags", "0");
+        util_parms_add_default(prm, "maxsize", "1024");
+        util_parms_add_default(prm, "minsize", "8");
+        util_parms_add_default(prm, "minneighbors", "8");
     } else if (method == "hog") {
-        util_parms_add_default(params, "threshold", "1.1");
-        util_parms_add_default(params, "threshold_model", "2");
-        util_parms_add_default(params, "scalefactor", "1.05");
-        util_parms_add_default(params, "padding", "8");
-        util_parms_add_default(params, "winstride", "8");
+        util_parms_add_default(prm, "threshold", "1.1");
+        util_parms_add_default(prm, "threshold_model", "2");
+        util_parms_add_default(prm, "scalefactor", "1.05");
+        util_parms_add_default(prm, "padding", "8");
+        util_parms_add_default(prm, "winstride", "8");
     } else if (method == "dnn") {
-        util_parms_add_default(params, "backend", DNN_BACKEND_DEFAULT);
-        util_parms_add_default(params, "target", DNN_TARGET_CPU);
-        util_parms_add_default(params, "threshold", "0.75");
-        util_parms_add_default(params, "width", cam->imgs.width);
-        util_parms_add_default(params, "height", cam->imgs.height);
-        util_parms_add_default(params, "scale", "1.0");
+        util_parms_add_default(prm, "backend",std::to_string(DNN_BACKEND_DEFAULT));
+        util_parms_add_default(prm, "target",std::to_string(DNN_TARGET_CPU));
+        util_parms_add_default(prm, "threshold", "0.75");
+        util_parms_add_default(prm, "width", std::to_string(cam->imgs.width));
+        util_parms_add_default(prm, "height", std::to_string(cam->imgs.height));
+        util_parms_add_default(prm, "scale", "1.0");
     }
 }
 
 /**Load the parms from the config to algsec struct */
-void cls_algsec::load_params()
+void cls_algsec::params_load()
 {
+    int indx;
+
     method = cam->cfg->secondary_method;
     image_norm = nullptr;
     params = nullptr;
@@ -566,10 +569,17 @@ void cls_algsec::load_params()
 
     image_norm = (u_char*)mymalloc((size_t)cam->imgs.size_norm);
 
-    params = new ctx_params;
-    util_parms_parse(params, "secondary_params", cam->cfg->secondary_params);
-
-    params_defaults();
+    for (indx=0;indx<cam->cfg->params.size();indx++) {
+        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_SEC) {
+            params=cam->cfg->params[indx];
+            params_defaults(params);
+        }
+    }
+    for (indx=0;indx<cam->conf_src->params.size();indx++) {
+        if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_SEC) {
+            params_defaults(cam->conf_src->params[indx]);
+        }
+    }
 
     params_log();
 
@@ -601,7 +611,7 @@ void cls_algsec::handler()
     handler_running = true;
     handler_stop = false;
 
-    load_params();
+    params_load();
 
     interval = 1000000L / cfg_framerate;
     is_started = true;
@@ -664,7 +674,7 @@ void cls_algsec::handler_shutdown()
         }
         if (waitcnt == cam->cfg->watchdog_tmo) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                , _("Normal shutdown of camera failed"));
+                , _("Normal shutdown failed"));
             if (cam->cfg->watchdog_kill > 0) {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Waiting additional %d seconds (watchdog_kill).")
@@ -691,7 +701,6 @@ void cls_algsec::handler_shutdown()
     }
 
     myfree(image_norm);
-    mydelete(params);
 
 }
 
@@ -745,6 +754,40 @@ void cls_algsec::detect()
             handler_shutdown();
         }
 
+    #endif
+}
+
+void cls_algsec::params_update()
+{
+    #ifdef HAVE_OPENCV
+        int indx, indx2;
+        bool chgnew;
+        ctx_params *prm_s;
+
+        prm_s = nullptr;
+        for (indx=0;indx<cam->conf_src->params.size();indx++) {
+            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_SEC) {
+                prm_s =cam->conf_src->params[indx];
+            }
+        }
+
+        /*copy from prm_s to params and shutdown/starup */
+        for (indx=0;indx<prm_s->params_cnt;indx++) {
+            chgnew = true;
+            for (indx2=0;indx2<params->params_cnt;indx2++) {
+                if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
+                    (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
+                    chgnew = false;
+                }
+            }
+            if (chgnew == true) {
+                util_parms_add(params
+                    ,prm_s->params_array[indx].param_name
+                    ,prm_s->params_array[indx].param_value);
+            }
+        }
+        handler_shutdown();
+        handler_startup();
     #endif
 }
 

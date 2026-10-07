@@ -951,22 +951,49 @@ void cls_camera::init_cleandir_runtime()
 
 void cls_camera::init_cleandir()
 {
-    int indx;
-    ctx_params  *params;
+    int indx, indx2;
+    ctx_params *prm_c, *prm_s;
     std::string  pnm, pvl;
+    bool chkvalid, chgnew;
 
-    if (cfg->cleandir_params == "") {
+    prm_s = nullptr;
+    for (indx=0;indx<conf_src->params.size();indx++){
+        if (conf_src->params[indx]->params_pcat == PARM_PCAT_CLN){
+            prm_s = conf_src->params[indx];
+        }
+    }
+
+    prm_c = nullptr;
+    for (indx=0;indx<cfg->params.size();indx++){
+        if (cfg->params[indx]->params_pcat == PARM_PCAT_CLN){
+            prm_c = cfg->params[indx];
+        }
+    }
+    util_parms_parse(prm_s, "cleandir_params", conf_src->cleandir_params, PARM_PCAT_CLN);
+
+    chkvalid = false;
+    for (indx=0;indx<prm_s->params_cnt;indx++) {
+        if (prm_s->params_array[indx].param_source == PARM_SRC_USER){
+            chkvalid = true;
+        }
+        chgnew = true;
+        for (indx2=0;indx2<prm_c->params_cnt;indx2++) {
+            if ((prm_s->params_array[indx].param_name == prm_c->params_array[indx2].param_name) &&
+                (prm_s->params_array[indx].param_value == prm_c->params_array[indx2].param_value)) {
+                chgnew = false;
+            }
+        }
+        if (chgnew == true) {
+            util_parms_add(prm_c
+                ,prm_s->params_array[indx].param_name
+                ,prm_s->params_array[indx].param_value);
+        }
+    }
+    if (chkvalid == false) {
         return;
     }
 
-    params = new ctx_params;
-    util_parms_parse(params, "cleandir_params", cfg->cleandir_params);
-
-    if (params->params_cnt == 0) {
-        mydelete(params);
-        return;
-    }
-
+    mydelete(cleandir);
     cleandir = new ctx_cleandir;
     cleandir->action = "delete";
     cleandir->freq = "weekly";
@@ -976,9 +1003,9 @@ void cls_camera::init_cleandir()
     cleandir->dur_unit = "w";
     cleandir->dur_val = 2;
 
-    for (indx=0; indx<params->params_cnt; indx++) {
-        pnm = params->params_array[indx].param_name;
-        pvl = params->params_array[indx].param_value;
+    for (indx=0; indx<prm_c->params_cnt; indx++) {
+        pnm = prm_c->params_array[indx].param_name;
+        pvl = prm_c->params_array[indx].param_value;
         if (pnm == "runtime") {
             cleandir->runtime = pvl;
         }
@@ -1008,32 +1035,64 @@ void cls_camera::init_cleandir()
 
 void cls_camera::init_schedule()
 {
-    int indx, indx1;
+    int indx, indx1, indx2;
     bool dflt_detect, rev_detect;
-    ctx_params  *params;
+    ctx_params *prm_c, *prm_s;
     std::string  pnm, pvl, tst, action;
     std::vector<ctx_schedule_data> sched_day;
     ctx_schedule_data sched_itm;
+    bool chgnew;
 
-    if (cfg->schedule_params == "") {
-        return;
+    prm_s = nullptr;
+    for (indx=0;indx<conf_src->params.size();indx++){
+        if (conf_src->params[indx]->params_pcat == PARM_PCAT_SCH){
+            prm_s = conf_src->params[indx];
+        }
     }
 
-    params = new ctx_params;
-    util_parms_parse(params, "schedule_params", cfg->schedule_params);
+    prm_c = nullptr;
+    for (indx=0;indx<cfg->params.size();indx++){
+        if (cfg->params[indx]->params_pcat == PARM_PCAT_SCH){
+            prm_c = cfg->params[indx];
+        }
+    }
+    util_parms_parse(prm_s, "schedule_params", conf_src->schedule_params, PARM_PCAT_SCH);
 
-    if (params->params_cnt == 0) {
-        mydelete(params);
+    for (indx=0;indx<prm_s->params_cnt;indx++) {
+        chgnew = true;
+        for (indx2=0;indx2<prm_c->params_cnt;indx2++) {
+            if ((prm_s->params_array[indx].param_name == prm_c->params_array[indx2].param_name) &&
+                (prm_s->params_array[indx].param_value == prm_c->params_array[indx2].param_value)) {
+                chgnew = false;
+            }
+        }
+        if (chgnew == true) {
+            util_parms_add(prm_c
+                ,prm_s->params_array[indx].param_name
+                ,prm_s->params_array[indx].param_value);
+        }
+    }
+
+    schedule.clear();
+
+    chgnew = false;
+    for (indx=0;indx<prm_s->params_cnt;indx++) {
+        if (prm_s->params_array[indx].param_source == PARM_SRC_USER) {
+            chgnew = true;
+        }
+    }
+
+    if (chgnew == false) {
         return;
     }
 
     action = "pause";
     dflt_detect = true;
-    for (indx=0; indx<params->params_cnt; indx++) {
-        pnm = params->params_array[indx].param_name;
-        pvl = params->params_array[indx].param_value;
-        if (pnm == "default") {
-            dflt_detect = mtob(params->params_array[indx].param_value);
+    for (indx=0; indx<prm_c->params_cnt; indx++) {
+        pnm = prm_c->params_array[indx].param_name;
+        pvl = prm_c->params_array[indx].param_value;
+        if (pnm == "detection") {
+            dflt_detect = mtob(prm_c->params_array[indx].param_value);
         }
         if (pnm == "action") {
             if (pvl == "stop") {
@@ -1076,11 +1135,13 @@ void cls_camera::init_schedule()
         } else if (indx == 5) { tst = "fri";
         } else if (indx == 6) { tst = "sat";
         }
-        for (indx1=0; indx1<params->params_cnt; indx1++) {
-            pnm = params->params_array[indx1].param_name;
-            pvl = params->params_array[indx1].param_value;
-            if ((pnm == tst) || (pnm == "sun-sat") ||
-                ((pnm == "mon-fri") && (indx>=1) && (indx<=5))) {
+        for (indx1=0; indx1<prm_c->params_cnt; indx1++) {
+            pnm = prm_c->params_array[indx1].param_name;
+            pvl = prm_c->params_array[indx1].param_value;
+            if ((pvl != "") &&
+                ((pnm.substr(0,3) == tst) ||
+                (pnm == "sun-sat") ||
+                ((pnm == "mon-fri") && (indx>=1) && (indx<=5)))) {
                 //example:  mon 0902-1430
                 sched_itm.st_hr = mtoi(pvl.substr(0,2));
                 sched_itm.st_min = mtoi(pvl.substr(2,2));
@@ -1135,7 +1196,6 @@ void cls_camera::init_schedule()
         }
     }
 
-    mydelete(params);
 }
 
 /* initialize everything for the loop */
@@ -1151,7 +1211,7 @@ void cls_camera::init()
         restart = false;
     }
 
-    cfg->parms_copy(conf_src);
+    cfg->config_copy(conf_src);
     conf_chg = false;
 
     mythreadname_set("cl",cfg->device_id, cfg->device_name.c_str());
@@ -1863,17 +1923,48 @@ void cls_camera::check_schedule()
     */
 }
 
-/* Apply any changes to the configuration parameters set by webcontrol*/
-void cls_camera::check_config()
+void cls_camera::check_config_params()
+{
+    int indx;
+    ctx_params *prm;
+
+    for (indx=0;indx<conf_src->params.size();indx++) {
+        prm = conf_src->params[indx];
+        if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_SCH)) {
+            init_schedule();
+        } else if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_CLN)) {
+            init_cleandir();
+        } else if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_V4L2) &&
+            (camera_type == CAMERA_TYPE_V4L2)) {
+            v4l2cam->params_update();
+        } else if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_NET) &&
+            (camera_type == CAMERA_TYPE_NETCAM)) {
+            netcam->params_update();
+        } else if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_NETH) &&
+            (camera_type == CAMERA_TYPE_NETCAM)) {
+            netcam_high->params_update();
+        } else if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_LIB) &&
+            (camera_type == CAMERA_TYPE_LIBCAM)) {
+            libcam->params_update();
+        } else if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_SEC)) {
+            algsec->params_update();
+        }
+    }
+}
+
+void cls_camera::check_config_main()
 {
     std::string parm_nm, parm_vl_cur, parm_vl_src;
     PARM_CAT    parm_ct;
     PARM_CHG    parm_ch;
     int indx;
-
-    if ((restart == true) || (handler_stop == true) || (conf_chg == false)) {
-        return;
-    }
 
     indx=0;
     while (config_parms[indx].parm_name != "") {
@@ -1889,21 +1980,28 @@ void cls_camera::check_config()
                     , _("%s:%s applied")
                     , parm_nm.c_str(), parm_vl_src.c_str());
             } else if (parm_ch == PARM_CHG_CODE) {
-                if ((parm_nm == "v4l2_params")  &&
+                if (parm_nm == "schedule_params") {
+                    init_schedule();
+                } else if (parm_nm == "cleandir_params") {
+                    init_cleandir();
+                } else if ((parm_nm == "v4l2_params")  &&
                     (camera_type == CAMERA_TYPE_V4L2)) {
-                    v4l2cam->parms_update();
+                    v4l2cam->params_update();
+                } else if ((parm_nm == "netcam_params")  &&
+                    (camera_type == CAMERA_TYPE_NETCAM)) {
+                    netcam->params_update();
+                } else if ((parm_nm == "netcam_high_params")  &&
+                    (camera_type == CAMERA_TYPE_NETCAM)) {
+                    netcam_high->params_update();
                 } else if ((parm_nm == "libcam_params")  &&
                     (camera_type == CAMERA_TYPE_LIBCAM)) {
-                    libcam->parms_update();
+                    libcam->params_update();
+                } else if (parm_nm == "secondary_params") {
+                    algsec->params_update();
+
                 } else if (parm_nm == "threshold_maximum") {
                     cfg->edit_set(parm_nm, parm_vl_src);
-                    /*User may have changed both threshold and maximum
-                      so check against src threshold*/
-                    if (cfg->threshold_maximum > conf_src->threshold) {
-                        threshold_maximum = conf_src->threshold_maximum;
-                    } else {
-                        threshold_maximum = (imgs.height * imgs.width * 3) / 2;
-                    }
+                    threshold_maximum = cfg->threshold_maximum;
                     MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
                         , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
                 } else if (parm_nm == "threshold") {
@@ -1948,7 +2046,21 @@ void cls_camera::check_config()
         }
         indx++;
     }
-    conf_chg = false;
+
+}
+
+/* Apply any changes to the configuration parameters set by webcontrol*/
+void cls_camera::check_config()
+{
+    if ((restart == true) || (handler_stop == true) || (conf_chg == false)) {
+        return;
+    }
+    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("check config"));
+    pthread_mutex_lock(&app->mutex_post);
+        check_config_params();
+        check_config_main();
+        conf_chg = false;
+    pthread_mutex_unlock(&app->mutex_post);
 }
 
 /* sleep the loop to get framerate requested */

@@ -34,6 +34,7 @@ struct ctx_palette_item {
 struct ctx_v4l2ctrl_item {
     std::string ctrl_name;      /* The name as provided by the device */
     std::string ctrl_iddesc;    /* A description of the ID number for the control*/
+    std::string ctrl_stdnm;     /* The standardized name (all lower case with spaces changed to _) */
     int     ctrl_minimum;       /* The minimum value permitted as reported by device*/
     int     ctrl_maximum;       /* The maximum value permitted as reported by device*/
     int     ctrl_default;       /* The default value for the control*/
@@ -52,7 +53,7 @@ class cls_v4l2cam {
         cls_v4l2cam(cls_camera *p_cam);
         ~cls_v4l2cam();
         int next(ctx_image_data *img_data);
-        void parms_update();
+        void params_update();
         void noimage();
     private:
         cls_camera *cam;

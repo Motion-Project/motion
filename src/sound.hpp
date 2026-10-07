@@ -102,7 +102,6 @@ struct ctx_snd_info {
     std::string                 trig_freq;
     std::string                 trig_nbr;
     std::string                 trig_nm;
-    ctx_params                  *params;        /* Device parameters*/
     ctx_snd_fftw                *snd_fftw;      /* fftw for sound*/
     ctx_snd_alsa                *snd_alsa;      /* Alsa device for sound*/
     ctx_snd_pulse               *snd_pulse;     /* PulseAudio for sound*/
@@ -132,8 +131,8 @@ class cls_sound {
         void            handler_shutdown();
 
     private:
-        int             watchdog;
-
+        int         watchdog;
+        ctx_params  *params;        /* Device parameters*/
         void cleanup();
         void init_values();
         void init();

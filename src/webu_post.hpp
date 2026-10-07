@@ -61,9 +61,14 @@
             void action_pause_schedule();
             void action_user();
             void write_config();
-            void config_set(int pindx, int pcat, std::string pnm, std::string pvl);
+            void config_set(PARM_PCAT pcat, std::string pnm, std::string pvl);
+            void config_set(int pindx, PARM_CAT pcat, std::string pnm, std::string pval);
             void config_ra_set(std::string p_type, int p_indx, PARM_CHG p_chg);
             void config_ra_reset();
+            void config_ra_process();
+            void config_find_params(std::string pnm, std::string pval);
+            void config_find_main(std::string pnm, std::string pval);
+
             void config();
             void ptz();
 

@@ -51,6 +51,7 @@ class cls_allcam {
         bool            handler_running;
         pthread_t       handler_thread;
         void            handler();
+        void            params_update();
         ctx_stream      stream;
         ctx_allcam_info info;
         std::vector<ctx_allcam_info>    active_cam;

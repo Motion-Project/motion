@@ -46,7 +46,7 @@
     extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
 #endif
 
-#define _(STRING) mytranslate_text(STRING, 2)
+#define _(STRING) mytranslate_text(STRING)
 
 #define SLEEP(seconds, nanoseconds) {              \
                 struct timespec ts1;                \
@@ -66,22 +66,21 @@
 struct ctx_params_item {
     std::string     param_name;     /* The name or description of the ID as requested by user*/
     std::string     param_value;    /* The value that the user wants the control set to*/
-    std::string     param_default;  /* The default value for the parameter*/
     enum PARM_SRC   param_source;   /* enum of parm_src for user,system. */
     enum PARM_TYP   param_type;     /* enum of parm_typ for bool,int or string. */
-    enum PARM_CAT   param_cat;      /* enum of parm_cat for grouping. */
     int             param_lvl;      /* Enum of parm_lvl for webui*/
     enum PARM_CHG   param_chg;      /* Enum for whether a restart is needed to implement changes*/
-    int             param_min;      /* Minimum value permitted for the parameter*/
-    int             param_max;      /* Maximum value permitted for the parameter*/
     std::vector<std::string>   param_lst;      /* list of acceptable values*/
     std::string     param_desc;     /* Short description*/
 };
 typedef std::vector<ctx_params_item> vec_params;
 struct ctx_params {
-    vec_params  params_array;
-    int         params_cnt;
-    std::string params_desc;
+    vec_params      params_array;   /* Vector of parameter items*/
+    /*TODO  Remove this params_cnt and use vector size.  This is a holdover from when this was C code*/
+    int             params_cnt;     /* Count of items in vector*/
+    bool            params_changed; /* Flag to determine if they have changed since applied*/
+    std::string     params_desc;    /* Description of the parameters*/
+    enum PARM_PCAT  params_pcat;    /* enum of parm_cat for grouping. */
 };
 
     void *mymalloc(size_t nbytes);
@@ -104,8 +103,11 @@ struct ctx_params {
     void mythreadname_get(char *threadname);
     void mythreadname_get(std::string &threadname);
 
-    char* mytranslate_text(const char *msgid, int setnls);
-    void mytranslate_init(void);
+    char* mytranslate_text(const char *msgid);
+    std::string mytranslate_text(std::string msgid);
+    void mytranslate_set(bool setnls);
+    void mytranslate_init(std::string langcd);
+    void mytranslate_locale_chg(std::string langcd);
 
     int mystrceq(const char* var1, const char* var2);
     int mystrcne(const char* var1, const char* var2);
@@ -121,11 +123,11 @@ struct ctx_params {
     void myframe_interlaced(AVFrame *frame);
     AVPacket *mypacket_alloc(AVPacket *pkt);
 
-    void util_parms_parse(ctx_params *params, std::string parm_desc, std::string confline);
-    void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl);
-    void util_parms_add_default(ctx_params *params, std::string parm_nm, int parm_vl);
-    void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val);
+    void util_parms_parse(ctx_params *params, std::string pdesc, std::string confline, enum PARM_PCAT pcat);
+    void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl, bool showmsg=true);
+    void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val, bool showmsg=true);
     void util_parms_update(ctx_params *params, std::string &confline);
+
 
     int mtoi(std::string parm);
     int mtoi(char *parm);

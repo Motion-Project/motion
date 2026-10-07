@@ -288,9 +288,7 @@ ssize_t cls_webu_stream::mjpeg_response (char *buf, size_t max)
     }
 
     if ((stream_pos == 0) || (resp_used == 0)) {
-
         delay();
-
         stream_pos = 0;
         resp_used = 0;
 
@@ -641,7 +639,7 @@ void cls_webu_stream::main()
 {
     mhdrslt retcd = MHD_NO;
 
-    if (check_finish()) {
+    if (webu->finish){
         return;
     }
 

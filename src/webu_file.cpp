@@ -156,13 +156,12 @@ void cls_webu_file::user_page()
             (fname[indx] != '_') &&
             (fname[indx] != '-')) {
             MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-                , _("File names are restricted to -_ and alpha numberic characters: %s")
+                , _("File names are restricted to -_ and alpha numeric characters: %s")
                 , fname.c_str());
             return;
         }
     }
 
-    mylower(ext);
     if (ext == "json") {
         webua->resp_type = WEBUI_RESP_JSON;
     } else if ((ext == "js") ) {
@@ -173,8 +172,8 @@ void cls_webu_file::user_page()
         webua->resp_type = WEBUI_RESP_HTML;
     } else {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            , _("Invalid file extension requested: %s")
-            , fname.c_str());
+            , _("Invalid file extension.  Extension must be json,js,css or html. : %s")
+            , ext.c_str());
         return;
     }
 
@@ -206,7 +205,6 @@ void cls_webu_file::main()
         movies();
     } else {
         pthread_mutex_lock(&app->mutex_post);
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, "Getting user page");
             user_page();
         pthread_mutex_unlock(&app->mutex_post);
     }

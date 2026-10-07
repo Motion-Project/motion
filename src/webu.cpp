@@ -371,9 +371,14 @@ void cls_webu::mhd_flags()
 void cls_webu::init_actions()
 {
     std::string parm_vl;
+    int indx;
 
-    wb_actions = new ctx_params;
-    util_parms_parse(wb_actions,"webcontrol_actions", cfg->webcontrol_actions);
+    wb_actions = nullptr;
+    for (indx=0;indx<cfg->params.size();indx++) {
+        if (cfg->params[indx]->params_pcat == PARM_PCAT_ACTS) {
+            wb_actions = cfg->params[indx];
+        }
+    }
 
     if (cfg->webcontrol_access == 0) {
         parm_vl = "off";
@@ -455,8 +460,12 @@ void cls_webu::startup() {
         , _("Starting webcontrol on port %d"),portnbr);
 
     allcam = new cls_allcam(this, webuindx);
-    wb_headers = new ctx_params;
-    util_parms_parse(wb_headers, "webcontrol_headers", cfg->webcontrol_headers);
+    wb_headers = nullptr;
+    for (indx=0;indx<app->cfg->params.size();indx++) {
+        if (app->cfg->params[indx]->params_pcat == PARM_PCAT_HDR) {
+            wb_headers =app->cfg->params[indx];
+        }
+    }
 
     init_actions();
 
@@ -509,8 +518,6 @@ void cls_webu::shutdown()
         wb_daemon = nullptr;
     }
 
-    mydelete(wb_actions);
-    mydelete(wb_headers);
     mydelete(allcam);
 }
 

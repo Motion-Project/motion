@@ -57,6 +57,7 @@
             int             log_fflevel;
             int             log_type;
             bool            native_language;
+            std::string     native_language_code;
 
             std::string     device_name;
             int             device_id;
@@ -235,19 +236,21 @@
             void process();
 
             void edit_set(std::string parm_nm, std::string parm_val);
-            void edit_get(std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat);
-            void edit_get(std::string parm_nm, std::list<std::string> &parm_val, enum PARM_CAT parm_cat);
-            void edit_list(std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat);
+            void edit_get(std::string parm_nm, std::string &parm_val, enum PARM_CAT pcat);
+            void edit_get(std::string parm_nm, std::list<std::string> &parm_val, enum PARM_CAT pcat);
+            void edit_list(std::string parm_nm, std::string &parm_val, enum PARM_CAT pcat);
+            void edit_list(std::string parm_nm, std::string &parm_val, enum PARM_PCAT pcat);
 
             std::string type_desc(enum PARM_TYP ptype);
             std::string cat_desc(enum PARM_CAT pcat, bool shrt);
             void usage();
             void init();
-            void parms_log();
-            void parms_write();
-            void parms_copy(cls_config *src);
-            void parms_copy(cls_config *src, PARM_CAT p_cat);
-            ctx_params  *params_libcamera;
+            void config_log();
+            void config_write();
+            void config_copy(cls_config *src);
+            void config_copy(cls_config *src, PARM_CAT p_cat);
+            std::string params_prefix(enum PARM_PCAT pcat);
+            std::vector<ctx_params *> params;
 
         private:
             cls_motapp *app;
@@ -255,15 +258,25 @@
             void defaults();
             int get_next_devid();
             void params_load();
+            void params_load_schedule();
+            void params_load_cleandir();
+            void params_load_v4l2();
+            void params_load_netcam();
+            void params_load_netcam_high();
             void params_load_libcamera();
+            void params_load_secondary();
+            void params_load_allcam();
+            void params_load_actions();
+            void params_load_headers();
+            void params_load_sound();
 
-            void config_dir_parm(std::string confdir);
+            void config_dir_item(std::string confdir);
 
-            void parms_log_parm(std::string parm_nm, std::string parm_vl);
-            void parms_write_app();
-            void parms_write_cam();
-            void parms_write_parms(FILE *conffile, std::string parm_nm, std::string parm_vl, enum PARM_CAT parm_ct, bool reset);
-            void parms_write_snd();
+            void config_log_item(std::string parm_nm, std::string parm_vl);
+            void config_write_app();
+            void config_write_cam();
+            void config_write_item(FILE *conffile, std::string parm_nm, std::string parm_vl, enum PARM_CAT parm_ct, bool reset);
+            void config_write_snd();
 
             int edit_set_active(std::string parm_nm, std::string parm_val);
             int edit_set_depr(std::string &parm_nm, std::string &parm_val);
@@ -305,6 +318,7 @@
             void edit_log_fflevel(std::string &parm, enum PARM_ACT pact);
             void edit_log_type(std::string &parm, enum PARM_ACT pact);
             void edit_native_language(std::string &parm, enum PARM_ACT pact);
+            void edit_native_language_code(std::string &parm, enum PARM_ACT pact);
 
             void edit_device_name(std::string &parm, enum PARM_ACT pact);
             void edit_device_id(std::string &parm, enum PARM_ACT pact);

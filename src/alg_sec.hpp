@@ -48,6 +48,7 @@ class cls_algsec {
         bool            handler_running;
         pthread_t       handler_thread;
         void            handler();
+        void            params_update();
 
     private:
         #ifdef HAVE_OPENCV
@@ -68,8 +69,8 @@ class cls_algsec {
             void handler_startup();
             void handler_shutdown();
 
-            void load_params();
-            void params_defaults();
+            void params_load();
+            void params_defaults(ctx_params *prm);
             void params_model();
             void params_log();
 

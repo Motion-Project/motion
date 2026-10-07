@@ -405,6 +405,7 @@ void cls_motapp::check_restart()
     std::string parm_pid_org, parm_pid_new;
     int indx1, indx2;
 
+    pthread_mutex_lock(&mutex_post);
     if (motlog->restart == true) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting log"));
 
@@ -415,10 +416,10 @@ void cls_motapp::check_restart()
         }
 
         motlog->shutdown();
-        cfg->parms_copy(conf_src, PARM_CAT_00);
+        cfg->config_copy(conf_src, PARM_CAT_00);
         motlog->startup();
 
-        mytranslate_text("",cfg->native_language);
+        mytranslate_set(cfg->native_language);
         if (parm_pid_org != parm_pid_new) {
             pid_write();
         }
@@ -430,7 +431,7 @@ void cls_motapp::check_restart()
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting database"));
         pthread_mutex_lock(&dbse->mutex_dbse);
             dbse->shutdown();
-            cfg->parms_copy(conf_src, PARM_CAT_15);
+            cfg->config_copy(conf_src, PARM_CAT_15);
             dbse->startup();
         pthread_mutex_lock(&dbse->mutex_dbse);
         dbse->restart = false;
@@ -444,14 +445,14 @@ void cls_motapp::check_restart()
                 , webu_list[indx1]->cfg->webcontrol_port);
             webu_list[indx1]->shutdown();
             if (webu_list[indx1]->cfg == cfg) {
-                cfg->parms_copy(conf_src, PARM_CAT_13);
-                cfg->parms_copy(conf_src, PARM_CAT_14);
+                cfg->config_copy(conf_src, PARM_CAT_13);
+                cfg->config_copy(conf_src, PARM_CAT_14);
                 webu_list[indx1]->cfg = cfg;
             }
             for (indx2=0; indx2<cam_cnt; indx2++) {
                 if (cam_list[indx2]->cfg == webu_list[indx1]->cfg) {
-                    cam_list[indx2]->cfg->parms_copy(cam_list[indx2]->conf_src,PARM_CAT_13);
-                    cam_list[indx2]->cfg->parms_copy(cam_list[indx2]->conf_src,PARM_CAT_14);
+                    cam_list[indx2]->cfg->config_copy(cam_list[indx2]->conf_src,PARM_CAT_13);
+                    cam_list[indx2]->cfg->config_copy(cam_list[indx2]->conf_src,PARM_CAT_14);
                     webu_list[indx1]->cfg = cam_list[indx2]->cfg;
                 }
             }
@@ -463,7 +464,7 @@ void cls_motapp::check_restart()
                 , webu_list[indx1]->cfg->webcontrol_port);
         }
     }
-
+    pthread_mutex_unlock(&mutex_post);
 
 }
 
@@ -578,20 +579,19 @@ void cls_motapp::init(int p_argc, char *p_argv[])
     conf_src->init();
 
     cfg = new cls_config(this);
-    cfg->parms_copy(conf_src);
+    cfg->config_copy(conf_src);
 
     motlog->startup();
 
-    mytranslate_init();
-
-    mytranslate_text("",cfg->native_language);
+    mytranslate_init(cfg->native_language_code);
+    mytranslate_set(cfg->native_language);
 
     if (cfg->daemon) {
         daemon();
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion running as daemon process"));
     }
 
-    cfg->parms_log();
+    cfg->config_log();
 
     pid_write();
 

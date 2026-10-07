@@ -124,8 +124,12 @@
               <td bgcolor="#edf4f9" ><a href="#log_fflevel" >log_fflevel</a> </td>
               <td bgcolor="#edf4f9" ><a href="#log_type" >log_type</a> </td>
               <td bgcolor="#edf4f9" ><a href="#native_language" >native_language</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#native_language_code" >native_language_code</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#target_dir" >target_dir</a> </td>
             </tr>
+
           </tbody>
         </table>
         <p></p>
@@ -791,6 +795,14 @@
         </ul>
         <p></p>
 
+        <h3><a name="native_language_code"></a> native_language_code</h3>
+        <ul>
+          <li> Values: blank or two letter language abbreviation| Default: blank</li>
+          When native language messages are enabled, override the system default language
+          to use the specified language code.
+        </ul>
+        <p></p>
+
         <h3><a name="target_dir"></a> target_dir </h3>
         <ul>
           <li> Values: String</li>
@@ -845,7 +857,7 @@
           <p></p>
 
           <div>
-            <i><h4>default</h4></i>
+            <i><h4>detection</h4></i>
             Boolean specifying the default for the motion detection.  The times specified for the
             other parameters will then indicate the times for the inverse of this option.  For
             example, if the default is specified as <code><small>on</small></code>, then motion
@@ -868,15 +880,16 @@
           <p></p>
 
           <div>
-            <i><h4>sun, mon, tue, wed, thu, fri, sat</h4></i>
+            <i><h4>sun, mon, tue, wed, thu, fri, sat, sun-sat, mon-fri</h4></i>
             These parameters specify the day and the values specify the time period.  The
             time period is specified in the format <code><small>hhmm-hhmm</small></code> where
             the first <code><small>hhmm</small></code> specifies the start time and the
             second <code><small>hhmm</small></code> is the end time.  If the hours or minutes is
             less than 10, leading zeros must be included.  Each time value is also inclusive meaning
             that the criteria is greater than or equal or less than or equal.  For multiple
-            time periods during the same day specify the parameter multiple times.  For example,
-            <code><small>wed=0905-1130,wed=1330-1605</small></code>.
+            time periods during the same day specify the parameter multiple times with a numeric
+            suffix to the day abbreviation.  For example,
+            <code><small>wed1=0905-1130,wed2=1330-1605</small></code>.
           </div>
           <p></p>
 

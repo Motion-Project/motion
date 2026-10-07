@@ -103,6 +103,7 @@ class cls_netcam {
         void noimage();
         void netcam_start();
         void netcam_stop();
+        void params_update();
 
     private:
         AVFormatContext          *format_context;        /* Main format context for the camera */
@@ -151,6 +152,7 @@ class cls_netcam {
         struct timespec           frame_curr_tm;    /* Time during the interrupt to determine duration since start*/
 
         ctx_params                *params;          /* parameters for the camera */
+        ctx_params                *prm_s;           /* parameters for the camera */
 
         std::string               threadname;       /* The thread name*/
         int                       threadnbr;        /* The thread number */
@@ -158,7 +160,6 @@ class cls_netcam {
         int         cfg_height;
         int         cfg_framerate;
         int         cfg_idur;
-        std::string cfg_params;
 
         std::vector<ctx_filelist_item>    filelist;
         std::string                 filedir;

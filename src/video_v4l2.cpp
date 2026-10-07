@@ -101,17 +101,19 @@ void cls_v4l2cam::ctrls_log()
 
     if (device_ctrls.size() >0) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("---------Controls---------"));
-        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Default : Range "));
+        MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Standardized Name : Default : Range "));
         for (indx=0;indx<device_ctrls.size();indx++){
             if (device_ctrls[indx].ctrl_menuitem) {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s : %d"
+                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s : %s : %d"
                     ,device_ctrls[indx].ctrl_iddesc.c_str()
+                    ,device_ctrls[indx].ctrl_stdnm.c_str()
                     ,device_ctrls[indx].ctrl_name.c_str()
                     ,device_ctrls[indx].ctrl_default);
             } else {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %d: %d to %d"
+                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %s : %d: %d to %d"
                     ,device_ctrls[indx].ctrl_iddesc.c_str()
                     ,device_ctrls[indx].ctrl_name.c_str()
+                    ,device_ctrls[indx].ctrl_stdnm.c_str()
                     ,device_ctrls[indx].ctrl_default
                     ,device_ctrls[indx].ctrl_minimum
                     ,device_ctrls[indx].ctrl_maximum);
@@ -119,16 +121,19 @@ void cls_v4l2cam::ctrls_log()
         }
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "--------------------------");
     }
+
 }
 
 /* Get names of the controls and menu items the device supports */
 void cls_v4l2cam::ctrls_list()
 {
-    int indx;
+    int indx, indx1;
     v4l2_queryctrl      vid_ctrl;
     v4l2_querymenu      vid_menu;
     ctx_v4l2ctrl_item   vid_item;
     char tmp_desc[40];
+    ctx_params *prm_s;
+    std::string tmp;
 
     if (fd_device == -1) {
         return;
@@ -154,7 +159,6 @@ void cls_v4l2cam::ctrls_list()
         vid_item.ctrl_minimum = vid_ctrl.minimum;
         vid_item.ctrl_maximum = vid_ctrl.maximum;
         device_ctrls.push_back(vid_item);
-
         if (vid_ctrl.type == V4L2_CTRL_TYPE_MENU) {
             for (indx = vid_ctrl.minimum; indx <= vid_ctrl.maximum; indx++) {
                 memset(&vid_menu, 0, sizeof(struct v4l2_querymenu));
@@ -179,6 +183,35 @@ void cls_v4l2cam::ctrls_list()
     if (device_ctrls.size() == 0) {
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("No Controls found for device"));
         return;
+    }
+    prm_s = nullptr;
+    for (indx=0;indx<cam->conf_src->params.size();indx++){
+        if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_V4L2){
+            prm_s = cam->conf_src->params[indx];
+        }
+    }
+    for (indx=0;indx<device_ctrls.size();indx++){
+        device_ctrls[indx].ctrl_stdnm = device_ctrls[indx].ctrl_name;
+        mylower(device_ctrls[indx].ctrl_stdnm);
+        std::replace(
+            device_ctrls[indx].ctrl_stdnm.begin()
+            , device_ctrls[indx].ctrl_stdnm.end()
+            , ' ', '_');
+        tmp = "";
+        for (indx1=0;indx1<device_ctrls[indx].ctrl_stdnm.length();indx1++){
+            if (device_ctrls[indx].ctrl_stdnm.substr(indx1,1) != ",") {
+                tmp += device_ctrls[indx].ctrl_stdnm.substr(indx1,1);
+            }
+        }
+        device_ctrls[indx].ctrl_stdnm = tmp;
+        if (device_ctrls[indx].ctrl_menuitem == false){
+            util_parms_add_default(prm_s
+                ,device_ctrls[indx].ctrl_stdnm
+                ,std::to_string(device_ctrls[indx].ctrl_currval));
+            util_parms_add_default(params
+                ,device_ctrls[indx].ctrl_stdnm
+                ,std::to_string(device_ctrls[indx].ctrl_currval),false);
+        }
     }
 
     ctrls_log();
@@ -233,11 +266,13 @@ void cls_v4l2cam::parms_set()
         if ((params->params_array[indx_p].param_name != "palette") &&
             (params->params_array[indx_p].param_name != "input") &&
             (params->params_array[indx_p].param_name != "frequency") &&
-            (params->params_array[indx_p].param_name != "norm")) {
+            (params->params_array[indx_p].param_name != "norm") &&
+            (params->params_array[indx_p].param_source == PARM_SRC_USER)) {
             tst = false;
             for (indx_d = 0;indx_d< device_ctrls.size(); indx_d++) {
                 if ((device_ctrls[indx_d].ctrl_iddesc == params->params_array[indx_p].param_name) ||
-                    (device_ctrls[indx_d].ctrl_name   == params->params_array[indx_p].param_name)) {
+                    (device_ctrls[indx_d].ctrl_name   == params->params_array[indx_p].param_name) ||
+                    (device_ctrls[indx_d].ctrl_stdnm  == params->params_array[indx_p].param_name)) {
                     tst = true;
                     device_ctrls[indx_d].ctrl_newval = device_ctrls[indx_d].ctrl_default;
                     switch (device_ctrls[indx_d].ctrl_type) {
@@ -286,9 +321,7 @@ void cls_v4l2cam::parms_set()
             }
         } /* not special parameter name */
     }/*For loop of parameters */
-    for (indx_d = 0;indx_d< device_ctrls.size(); indx_d++) {
 
-    }
 }
 
 /* Set the device to the input number requested by user */
@@ -864,7 +897,7 @@ void cls_v4l2cam::set_imgs()
             ,_("Error converting fourcc string"));
     } else {
         pixfmt = fourcc;
-        MOTION_LOG(DBG, TYPE_VIDEO, SHOW_ERRNO
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
             ,_("Pixel conversion of %s"),pixfmt.c_str());
     };
 
@@ -921,18 +954,18 @@ int cls_v4l2cam::capture()
 
 void cls_v4l2cam::init_vars()
 {
+    int indx;
+
     buffer_count= 0;
     pframe = -1;
     buffers = nullptr;
     convert = nullptr;
 
-    params = new ctx_params;
-    params->params_cnt = 0;
-    util_parms_parse(params, "v4l2_params", cam->cfg->v4l2_params);
-    util_parms_add_default(params, "input", "-1");
-    util_parms_add_default(params, "palette", "17");
-    util_parms_add_default(params, "norm", "0");
-    util_parms_add_default(params, "frequency", "0");
+    for (indx=0;indx<cam->cfg->params.size();indx++) {
+        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_V4L2) {
+            params = cam->cfg->params[indx];
+        }
+    }
 
     palette_init();
 }
@@ -1141,7 +1174,6 @@ void cls_v4l2cam::stop_cam()
     }
 
     mydelete(convert);
-    mydelete(params);
 
 }
 
@@ -1197,7 +1229,17 @@ void cls_v4l2cam::noimage()
                 slp_dur = 30;
             }
             cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
-            SLEEP(slp_dur,0);
+
+            while (slp_dur > 0){
+                SLEEP(10,0);
+                slp_dur -= 10;
+                if (cam->finish == true) {
+                    stop_cam();
+                    cam->watchdog = cam->cfg->watchdog_tmo;
+                    return;
+                }
+            }
+
             stop_cam();
             start_cam();
         }
@@ -1205,54 +1247,45 @@ void cls_v4l2cam::noimage()
 }
 
 /*Dynamic update of camera parameters*/
-void cls_v4l2cam::parms_update()
+void cls_v4l2cam::params_update()
 {
     #ifdef HAVE_V4L2
         ctx_params  *prm_s;
         int indx, indx2;
-        bool tst;
+        bool chgnew;
 
-        prm_s = new ctx_params;
-        prm_s->params_cnt = 0;
-        util_parms_parse(prm_s, "v4l2_params", cam->conf_src->v4l2_params);
-        util_parms_add_default(prm_s, "input", "-1");
-        util_parms_add_default(prm_s, "palette", "17");
-        util_parms_add_default(prm_s, "norm", "0");
-        util_parms_add_default(prm_s, "frequency", "0");
+        prm_s = nullptr;
+        for (indx=0;indx<cam->conf_src->params.size();indx++) {
+            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_V4L2) {
+                prm_s = cam->conf_src->params[indx];
+            }
+        }
+        util_parms_parse(prm_s, "v4l2_params", cam->conf_src->v4l2_params, PARM_PCAT_V4L2);
 
-        /* Determine if any of the changed parameters are ones
-           that require restarting camera.*/
-        tst = false;
         for (indx=0;indx<prm_s->params_cnt;indx++) {
-            if ((prm_s->params_array[indx].param_name == "palette") ||
-                (prm_s->params_array[indx].param_name == "norm") ||
-                (prm_s->params_array[indx].param_name == "input") ||
-                (prm_s->params_array[indx].param_name == "frequency")) {
-                for (indx2=0;indx2<params->params_cnt;indx2++) {
-                    if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
-                        (prm_s->params_array[indx].param_value != params->params_array[indx2].param_value)) {
-                        MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
-                            , _("Restarting camera. Parameter %s changed %s to %s")
-                            , prm_s->params_array[indx].param_name.c_str()
-                            , params->params_array[indx2].param_value.c_str()
-                            , prm_s->params_array[indx].param_value.c_str());
-                        tst = true;
-                    }
+            chgnew = true;
+            for (indx2=0;indx2<params->params_cnt;indx2++) {
+                if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
+                    (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
+                    chgnew = false;
+                }
+            }
+            if (chgnew == true) {
+                util_parms_add(params
+                    ,prm_s->params_array[indx].param_name
+                    ,prm_s->params_array[indx].param_value);
+                if ((prm_s->params_array[indx].param_name == "palette") ||
+                    (prm_s->params_array[indx].param_name == "norm") ||
+                    (prm_s->params_array[indx].param_name == "frequency") ||
+                    (prm_s->params_array[indx].param_name == "input")) {
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("Restarting camera. Parameter %s changed to %s")
+                        , prm_s->params_array[indx].param_name.c_str()
+                        , prm_s->params_array[indx].param_value.c_str());
+                    cam->restart = true;
                 }
             }
         }
-
-        if (tst == true) {
-            mydelete(prm_s);
-            cam->restart = true;
-            return;
-        }
-
-        /* Delete exising params and change pointer to new parameters */
-        mydelete(params);
-        params = prm_s;
-
-        /* Transfer parameters to device array and then apply changes*/
         parms_set();
         ctrls_set();
 

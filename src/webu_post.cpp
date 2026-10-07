@@ -476,70 +476,110 @@ void cls_webu_post::write_config()
             }
         }
     }
-
-    app->conf_src->parms_write();
-
+    app->conf_src->config_write();
 }
 
 void cls_webu_post::config_set(
-    int pindx, int pcatin, std::string pnm, std::string pval)
+    PARM_PCAT pcat, std::string pnm, std::string pval)
 {
     std::string pcur, ptmp;
-    PARM_CHG    parm_ch;
-    PARM_CAT    pcat;
-    int indx;
+    int indx, indx1, indx2, st, en;
+    ctx_params *prm;
+    bool chgnew;
+    cls_config *cfg_s;
 
-    if (pcatin < 0 || pcatin >= PARM_CAT_MAX){
-        pcat = PARM_CAT_MAX;
+    if (webua->device_id == 0) {
+        st = -1;
+        en = app->cam_cnt;
     } else {
-        pcat = (PARM_CAT)pcatin;
+        st=webua->camindx;
+        en=webua->camindx+1;
     }
-    parm_ch = config_parms[pindx].parm_chg;
-
-    if (pcat == PARM_CAT_19) {
-        if (webua->device_id == 0) {
-          MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config category 19 edit set all %s:%s"
-            ,pnm.c_str(), pval.c_str());
-            util_parms_add(app->conf_src->params_libcamera, pnm, pval);
-            app->conf_src->edit_get("libcam_params", pcur, PARM_CAT_02);
-            for (indx=0;indx<app->cam_cnt;indx++) {
-                app->cam_list[indx]->conf_src->edit_get("libcam_params", ptmp, PARM_CAT_02);
-                if (pcur == ptmp) {
-                    util_parms_add(app->cam_list[indx]->conf_src->params_libcamera, pnm, pval);
+    for (indx=st; indx<en; indx++) {
+        if (indx == -1) {
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+                ,"Config default category %d edit set %s:%s"
+                ,pcat, pnm.c_str(), pval.c_str());
+            cfg_s = app->conf_src;
+        } else {
+            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+                ,"Config device_id %d category %d edit set  %s:%s"
+                ,app->cam_list[indx]->cfg->device_id
+                ,pcat,pnm.c_str(), pval.c_str());
+            cfg_s = app->cam_list[indx]->conf_src;
+        }
+        for (indx1=0;indx1<cfg_s->params.size();indx1++) {
+            prm = cfg_s->params[indx1];
+            if ((prm->params_pcat == pcat) && (pnm != "extra_options")) {
+                chgnew = true;
+                for (indx2=0;indx2<prm->params_array.size();indx2++){
+                    if (prm->params_array[indx2].param_name == pnm) {
+                        if (prm->params_array[indx2].param_type == PARM_TYP_INTLIST) {
+                            pval=pval.substr(0,pval.find("-",0));
+                        }
+                        if (prm->params_array[indx2].param_value == pval) {
+                            chgnew = false;
+                        }
+                    }
+                }
+                if (chgnew == true) {
+                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                        ,"Util parms add %s:%s", pnm.c_str(), pval.c_str());
+                    util_parms_add(prm, pnm, pval);
+                    prm->params_changed = true;
+                     if (pcat == PARM_PCAT_ACAM) {
+                        config_ra_set("allcam", indx, PARM_CHG_CODE);
+                    } else if (indx != -1) {
+                        if (app->cam_list[indx]->handler_running == true) {
+                            config_ra_set("cam", indx, PARM_CHG_CODE);
+                        }
+                    }
+                }
+                break;
+            } else if ((prm->params_pcat == pcat) && (pnm == "extra_options")) {
+                util_parms_parse(prm,prm->params_desc,pval, pcat);
+                prm->params_changed = true;
+                if (pcat == PARM_PCAT_ACAM) {
+                    config_ra_set("allcam", indx, PARM_CHG_CODE);
+                } else if (indx != -1) {
                     if (app->cam_list[indx]->handler_running == true) {
-                        config_ra_set("cam",indx, PARM_CHG_CODE);
+                        config_ra_set("cam", indx, PARM_CHG_CODE);
                     }
                 }
             }
-        } else {
-          MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config category 19 edit set. %s:%s"
-            ,pnm.c_str(), pval.c_str());
-            util_parms_add(
-                app->cam_list[webua->camindx]->conf_src->params_libcamera
-                ,pnm, pval);
-            if (app->cam_list[webua->camindx]->handler_running == true) {
-                config_ra_set("cam", webua->camindx,  parm_ch);
-            }
+
         }
-    } else if (webua->device_id == 0) {
+    }
+}
+
+void cls_webu_post::config_set(
+    int pindx, PARM_CAT pcat, std::string pnm, std::string pval)
+{
+    std::string pcur, ptmp;
+    PARM_CHG    parm_ch;
+    int indx;
+
+    parm_ch = config_parms[pindx].parm_chg;
+    if (config_parms[pindx].parm_type == PARM_TYP_INTLIST) {
+        pval=pval.substr(0, pval.find("-",0));
+    }
+    if (webua->device_id == 0) {
         app->conf_src->edit_get(pnm, pcur, pcat);
         if (pval == pcur) {
             return;
         }
+        app->conf_src->edit_set(pnm, pval);
         if (pcat == PARM_CAT_00) {
-            app->conf_src->edit_set(pnm, pval);
-            config_ra_set("log",0, parm_ch);
+            if ((pnm == "native_language") || (pnm == "native_language_code")){
+                config_ra_set("nls",0, PARM_CHG_CODE);
+            } else {
+                config_ra_set("log",0, parm_ch);
+            }
         } else if (pcat == PARM_CAT_13) {
-            app->conf_src->edit_set(pnm, pval);
             config_ra_set("webu",0, parm_ch);
         } else if (pcat == PARM_CAT_15) {
-            app->conf_src->edit_set(pnm, pval);
             config_ra_set("dbse",0, parm_ch);
         } else {
-            app->conf_src->edit_set(pnm, pval);
-            if (pcat == PARM_CAT_14) {
-                app->conf_src->edit_set(pnm, pval);
-            }
             for (indx=0;indx<app->cam_cnt;indx++){
                 app->cam_list[indx]->conf_src->edit_get(pnm, pcur, pcat);
                 if (pcur != pval) {
@@ -576,7 +616,7 @@ void cls_webu_post::config_set(
                 ,pnm.c_str(), pval.c_str());
             app->cam_list[webua->camindx]->conf_src->edit_set(pnm, pval);
             if (app->cam_list[webua->camindx]->handler_running == true) {
-                config_ra_set("cam", webua->camindx, PARM_CHG_CODE);
+                config_ra_set("cam", webua->camindx, parm_ch);
             }
         }
     }
@@ -617,7 +657,13 @@ void cls_webu_post::config_ra_reset()
     itm_res.comp_type ="webu";
     ra_list.push_back(itm_res);
 
+    itm_res.comp_type ="allcam";
+    ra_list.push_back(itm_res);
+
     itm_res.comp_type ="dbse";
+    ra_list.push_back(itm_res);
+
+    itm_res.comp_type ="nls";
     ra_list.push_back(itm_res);
 
     for (indx = 0; indx<app->cam_cnt; indx++) {
@@ -632,82 +678,10 @@ void cls_webu_post::config_ra_reset()
     }
 
 }
-/* Process the configuration parameters */
-void cls_webu_post::config()
+
+void cls_webu_post::config_ra_process()
 {
     int indx, indx2;
-    int pcat;
-    std::string pnm, pval;
-    ctx_params *prm;
-
-    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
-        if (webu->wb_actions->params_array[indx].param_name == "config") {
-            if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save action disabled");
-                return;
-            } else {
-                break;
-            }
-        }
-    }
-
-    config_ra_reset();
-    pcat = -1;
-    pnm = "";
-    for (indx = 0; indx < post_sz; indx++) {
-        if (mystreq(post_info[indx].key_nm, "parmcat")) {
-            pcat = mtoi(post_info[indx].key_val);
-        }
-        if (mystrne(post_info[indx].key_nm, "command") &&
-            mystrne(post_info[indx].key_nm, "camid") &&
-            mystrne(post_info[indx].key_nm, "parmcat")) {
-            pnm = post_info[indx].key_nm;
-            pval = post_info[indx].key_val;
-        }
-    }
-
-    indx2=0;
-    while (config_parms_depr[indx2].parm_name != "") {
-        if (config_parms_depr[indx2].parm_name == pnm) {
-            pnm = config_parms_depr[indx2].newname;
-            break;
-        }
-        indx2++;
-    }
-
-    if (pcat == (int)PARM_CAT_19) {
-        if (webua->device_id == 0) {
-            prm = app->conf_src->params_libcamera;
-        } else {
-            prm = app->cam_list[webua->camindx]->conf_src->params_libcamera;
-        }
-        for (indx=0;indx<prm->params_cnt;indx++) {
-            if ((prm->params_array[indx].param_name == pnm) &&
-                (prm->params_array[indx].param_lvl <= app->conf_src->webcontrol_access) &&
-                (prm->params_array[indx].param_lvl != PARM_LVL_99)) {
-                config_set(0, pcat, pnm, pval);
-                }
-
-        }
-    } else {
-        /* Ignore any requests for parms above webcontrol_access level. */
-        indx2=0;
-        while (config_parms[indx2].parm_name != "") {
-            if ((config_parms[indx2].parm_lvl > app->conf_src->webcontrol_access) ||
-                (config_parms[indx2].parm_lvl == PARM_LVL_99) ) {
-                indx2++;
-                continue;
-            }
-            if (config_parms[indx2].parm_name == pnm) {
-                break;
-            }
-            indx2++;
-        }
-        if (config_parms[indx2].parm_name == pnm) {
-            pcat = (int)config_parms[indx2].parm_cat;
-            config_set(indx2, pcat, pnm, pval);
-        }
-    }
     for (indx = 0; indx < ra_list.size(); indx++) {
         if (ra_list[indx].comp_type == "log") {
             if (ra_list[indx].restart == true) {
@@ -730,6 +704,21 @@ void cls_webu_post::config()
                     app->webu_list[indx2]->conf_chg = true;
                 }
             }
+        } else if (ra_list[indx].comp_type == "allcam") {
+            if (ra_list[indx].apply == true) {
+                for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
+                    app->webu_list[indx2]->allcam->params_update();
+                }
+            }
+        } else if (ra_list[indx].comp_type == "nls") {
+            if (ra_list[indx].apply == true) {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Changing nls to: %s"
+                    ,app->conf_src->native_language_code.c_str());
+                mytranslate_init(app->conf_src->native_language_code);
+                mytranslate_set(app->conf_src->native_language);
+                app->cfg->native_language_code = app->conf_src->native_language_code;
+                app->cfg->native_language = app->conf_src->native_language;
+            }
         } else if (ra_list[indx].comp_type == "dbse") {
             if (ra_list[indx].restart == true) {
                 app->dbse->restart = true;
@@ -745,6 +734,9 @@ void cls_webu_post::config()
                     "Restart request for camera %d"
                     , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
             } else if (ra_list[indx].apply == true) {
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,
+                    "Apply config change requested for camera %d"
+                    , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
                 app->cam_list[ra_list[indx].comp_indx]->conf_chg = true;
             }
         } else if (ra_list[indx].comp_type == "snd") {
@@ -760,6 +752,104 @@ void cls_webu_post::config()
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Bad programming");
         }
     }
+
+}
+
+void cls_webu_post::config_find_params(std::string pnm, std::string pval)
+{
+    int indx, indx2;
+    cls_config *cfg;
+    std::string pfx;
+    ctx_params *prm;
+
+    if (webua->device_id == 0) {
+        cfg = app->conf_src;
+    } else {
+        cfg = app->cam_list[webua->camindx]->conf_src;
+    }
+
+    for (indx=0;indx<cfg->params.size();indx++) {
+        prm = cfg->params[indx];
+        pfx = cfg->params_prefix(prm->params_pcat);
+        if (pfx == pnm.substr(0,5)) {
+            pnm = pnm.substr(5);
+            for (indx2=0;indx2<cfg->params[indx]->params_cnt;indx2++) {
+                if ((prm->params_array[indx2].param_name == pnm) &&
+                    (prm->params_array[indx2].param_lvl <= app->conf_src->webcontrol_access) &&
+                    (prm->params_array[indx2].param_lvl != PARM_LVL_99)) {
+                    config_set(prm->params_pcat, pnm, pval);
+                }
+            }
+        }
+    }
+}
+
+void cls_webu_post::config_find_main(std::string pnm, std::string pval)
+{
+    int indx;
+    /* Ignore any requests for parms above webcontrol_access level. */
+    indx=0;
+    while (config_parms[indx].parm_name != "") {
+        if ((config_parms[indx].parm_lvl > app->conf_src->webcontrol_access) ||
+            (config_parms[indx].parm_lvl == PARM_LVL_99) ) {
+            indx++;
+            continue;
+        }
+        if (config_parms[indx].parm_name == pnm) {
+            break;
+        }
+        indx++;
+    }
+    if (config_parms[indx].parm_name == pnm) {
+        config_set(indx, config_parms[indx].parm_cat, pnm, pval);
+    }
+
+}
+
+/* Process the configuration parameters */
+void cls_webu_post::config()
+{
+    int indx, indx2;
+    std::string pnm, pval;
+
+    for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
+        if (webu->wb_actions->params_array[indx].param_name == "config") {
+            if (webu->wb_actions->params_array[indx].param_value == "off") {
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Config save action disabled");
+                return;
+            } else {
+                break;
+            }
+        }
+    }
+
+    config_ra_reset();
+    pnm = "";
+    for (indx = 0; indx < post_sz; indx++) {
+        if (mystrne(post_info[indx].key_nm, "command") &&
+            mystrne(post_info[indx].key_nm, "camid")) {
+            pnm = post_info[indx].key_nm;
+            pval = post_info[indx].key_val;
+
+            indx2=0;
+            while (config_parms_depr[indx2].parm_name != "") {
+                if (config_parms_depr[indx2].parm_name == pnm) {
+                    pnm = config_parms_depr[indx2].newname;
+                    break;
+                }
+                indx2++;
+            }
+
+            config_find_main(pnm, pval);
+            if (pnm.length() > 5) {
+                if (pnm.substr(4,1) == "_") {
+                    config_find_params(pnm,pval);
+                }
+            }
+        }
+    }
+
+    config_ra_process();
 
 }
 

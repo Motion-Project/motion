@@ -43,79 +43,108 @@ std::string cls_webu_json::escstr(std::string invar)
 
 void cls_webu_json::parms_item_detail(cls_config *conf, std::string pNm)
 {
-    ctx_params  *params;
+    std::string catstr, plst, ppfx, pi10n;
+    std::string pval, pchk;
+    ctx_params  *prm;
     ctx_params_item *itm;
-    int indx;
+    int indx, indx2, pcnt;
+    bool first;
+    PARM_PCAT pcat;
 
-    params = new ctx_params;
-    params->params_cnt = 0;
-    mylower(pNm);
-
-    if (pNm == "v4l2_params") {
-        util_parms_parse(params, pNm, conf->v4l2_params);
-    } else if (pNm == "netcam_params") {
-        util_parms_parse(params, pNm, conf->netcam_params);
-    } else if (pNm == "netcam_high_params") {
-        util_parms_parse(params, pNm, conf->netcam_high_params);
-    } else if (pNm == "libcam_params") {
-        util_parms_parse(params, pNm, conf->libcam_params);
-    } else if (pNm == "schedule_params") {
-        util_parms_parse(params, pNm, conf->schedule_params);
-    } else if (pNm == "cleandir_params") {
-        util_parms_parse(params, pNm, conf->cleandir_params);
-    } else if (pNm == "secondary_params") {
-        util_parms_parse(params, pNm, conf->secondary_params);
-    } else if (pNm == "webcontrol_actions") {
-        util_parms_parse(params, pNm, conf->webcontrol_actions);
-    } else if (pNm == "webcontrol_headers") {
-        util_parms_parse(params, pNm, conf->webcontrol_headers);
-    } else if (pNm == "stream_allcam_params") {
-        util_parms_parse(params, pNm, conf->stream_allcam_params);
-    } else if (pNm == "snd_params") {
-        util_parms_parse(params, pNm, conf->snd_params);
-    }
-
-    webua->resp_page += ",\"count\":";
-    webua->resp_page += std::to_string(params->params_cnt);
-
-    if (params->params_cnt > 0) {
-        webua->resp_page += ",\"parsed\" :{";
-        for (indx=0; indx<params->params_cnt; indx++) {
-            itm = &params->params_array[indx];
-            if (indx != 0) {
-                webua->resp_page += ",";
-            }
-            webua->resp_page += "\""+std::to_string(indx)+"\":";
-            webua->resp_page += "{\"name\":\""+itm->param_name+"\",";
-            webua->resp_page += "\"value\":\""+itm->param_value+"\"}";
-
+    prm = nullptr;
+    pcat = PARM_PCAT_MIN;
+    for (indx=0;indx<conf->params.size();indx++) {
+        if (conf->params[indx]->params_desc == pNm) {
+            prm = conf->params[indx];
+            pcat = conf->params[indx]->params_pcat;
         }
-        webua->resp_page += "}";
+    }
+    if (prm == nullptr) {
+        webua->resp_page += ",\"prefix\":\"\"";
+        webua->resp_page += ",\"detail\":\"\"";
+        webua->resp_page += ",\"count\": 0";
+        return;
     }
 
-    mydelete(params);
+    catstr = std::to_string(pcat);
+    first = true;
+    pcnt = 0;
+    if (prm->params_cnt > 0) {
+        webua->resp_page += ",\"prefix\":\"" + conf->params_prefix(pcat)+"\"";
+        webua->resp_page += ",\"detail\":";
+        for (indx=0; indx<prm->params_array.size(); indx++) {
+            itm = &prm->params_array[indx];
+            if (itm->param_lvl <= webu->cfg->webcontrol_access) {
+                if (first) {
+                    first = false;
+                    webua->resp_page += "{";
+                } else {
+                    webua->resp_page += ",";
+                }
+                pval = itm->param_value;
+                plst = "";
+                for (indx2=0;indx2<itm->param_lst.size();indx2++){
+                    plst += ",\""+escstr(_(itm->param_lst[indx2]))+"\"";
+                    if (itm->param_type == PARM_TYP_INTLIST) {
+                        pchk = itm->param_lst[indx2];
+                        pchk = pchk.substr(0, pchk.find("-"));
+                        if (mtoi(pval) == mtoi(pchk)) {
+                            pval = itm->param_lst[indx2];
+                        }
+                    }
+                }
+                if (plst != "") {
+                    plst="["+plst.substr(1)+"]";
+                }
+                pcnt++;
+                parms_item(conf,itm->param_name, pval
+                    ,itm->param_type, plst, catstr, itm->param_desc);
+            }
+        }
+        if (first) {
+            first = false;
+            webua->resp_page += "{";
+        } else {
+            webua->resp_page += ",";
+        }
+        pcnt++;
+        parms_item(conf,"extra_options","",PARM_TYP_STRING,"",catstr,"");
+        webua->resp_page += "}";
+        webua->resp_page += ",\"count\":" + std::to_string(pcnt);
+
+    } else {
+        webua->resp_page += ",\"prefix\":\"" + conf->params_prefix(pcat)+"\"";
+        webua->resp_page += ",\"detail\":\"\"";
+        webua->resp_page += ",\"count\": 0";
+    }
 
 }
 
 void cls_webu_json::parms_item(cls_config *conf
     , std::string parm_name, std::string porig
-    , enum PARM_TYP ptyp, enum PARM_CAT pcat, std::string pdesc)
+    , enum PARM_TYP ptyp, std::string parm_list
+    , std::string parm_catstr, std::string pdesc_in)
 {
-    std::string parm_val, parm_list, parm_enable, parm_catstr, parm_typstr;
+    std::string parm_val, parm_enable;
+    std::string parm_bool, parm_typstr, pdesc;
+    std::string pl10n;
 
     parm_val = "";
-    parm_list = "";
-
     if (webu->cfg->webcontrol_access < PARM_LVL_01) {
         parm_enable = "false";
     } else {
         parm_enable = "true";
     }
 
-    parm_catstr = std::to_string(pcat);
+    pl10n = _(parm_name);
+    if (pl10n != parm_name){
+        pdesc =escstr(pl10n + _(pdesc_in));
+    } else {
+        pdesc =escstr(_(pdesc_in));
+    }
+
     parm_val = escstr(porig);
     parm_typstr = conf->type_desc(ptyp);
-    conf->edit_list(parm_name, parm_list, pcat);
 
     if ((ptyp == PARM_TYP_INT) || (ptyp == PARM_TYP_FLOAT)) {
         if (parm_val == ""){
@@ -131,27 +160,16 @@ void cls_webu_json::parms_item(cls_config *conf
             ",\"desc\":\"" + pdesc + "\"" +
             "}";
     } else if (ptyp == PARM_TYP_BOOL) {
-        if (parm_val == "on") {
-            webua->resp_page +=
-                "\"" + parm_name + "\"" +
-                ":{" +
-                " \"value\":true" +
-                ",\"enabled\":" + parm_enable +
-                ",\"category\":" + parm_catstr +
-                ",\"type\":\"" + parm_typstr + "\"" +
-                ",\"desc\":\"" + pdesc + "\"" +
-                "}";
-        } else {
-            webua->resp_page +=
-                "\"" + parm_name + "\"" +
-                ":{" +
-                " \"value\":false" +
-                ",\"enabled\":" + parm_enable +
-                ",\"category\":" + parm_catstr +
-                ",\"type\":\"" + parm_typstr + "\"" +
-                ",\"desc\":\"" + pdesc + "\"" +
-                "}";
-        }
+        parm_bool = (parm_val == "on") ? "true" : "false";
+        webua->resp_page +=
+            "\"" + parm_name + "\"" +
+            ":{" +
+            " \"value\":" + parm_bool +
+            ",\"enabled\":" + parm_enable +
+            ",\"category\":" + parm_catstr +
+            ",\"type\":\"" + parm_typstr + "\"" +
+            ",\"desc\":\"" + pdesc + "\"" +
+            "}";
     } else if ((ptyp == PARM_TYP_LIST) || (ptyp == PARM_TYP_INTLIST)) {
         webua->resp_page +=
             "\"" + parm_name + "\"" +
@@ -187,18 +205,17 @@ void cls_webu_json::parms_item(cls_config *conf
     }
 }
 
-void cls_webu_json::parms_one(cls_config *conf)
+void cls_webu_json::parms_one(cls_config *conf, PARM_CAT pcat)
 {
     int indx_parm;
     bool first;
-    std::string response, parm_orig;
-    ctx_params_item *itm;
-    ctx_params *prm;
+    std::string parm_orig, catstr, plst;
 
     indx_parm = 0;
     first = true;
     while ((config_parms[indx_parm].parm_name != "") ) {
-        if (config_parms[indx_parm].parm_lvl > webu->cfg->webcontrol_access) {
+        if ((config_parms[indx_parm].parm_lvl > webu->cfg->webcontrol_access) ||
+            (pcat != (int)config_parms[indx_parm].parm_cat)) {
             indx_parm++;
             continue;
         }
@@ -210,28 +227,13 @@ void cls_webu_json::parms_one(cls_config *conf)
         }
         conf->edit_get(config_parms[indx_parm].parm_name
             , parm_orig, config_parms[indx_parm].parm_cat);
+        conf->edit_list(config_parms[indx_parm].parm_name, plst, pcat);
+        catstr = std::to_string(pcat);
         parms_item(conf, config_parms[indx_parm].parm_name
             ,parm_orig,config_parms[indx_parm].parm_type
-            ,config_parms[indx_parm].parm_cat, "");
+            ,plst, catstr, "");
         indx_parm++;
     }
-
-    prm = conf->params_libcamera;
-    for (indx_parm=0; indx_parm<prm->params_cnt; indx_parm++) {
-        itm = &prm->params_array[indx_parm];
-        if (itm->param_lvl > webu->cfg->webcontrol_access) {
-            continue;
-        }
-        if (first) {
-            first = false;
-            webua->resp_page += "{";
-        } else {
-            webua->resp_page += ",";
-        }
-        parms_item(conf,itm->param_name,itm->param_value
-            ,itm->param_type, itm->param_cat,itm->param_desc);
-    }
-
     if (first == false) {
         webua->resp_page += "}";
     } else {
@@ -241,18 +243,33 @@ void cls_webu_json::parms_one(cls_config *conf)
 
 void cls_webu_json::parms_all()
 {
-    int indx_cam;
+    int indx_cam, indx_cat;
+    cls_config *pcfg;
 
     webua->resp_page += "{";
-    webua->resp_page += "\"default\": ";
-    parms_one(webu->cfg);
-
-    for (indx_cam=0; indx_cam<webu->cam_cnt; indx_cam++) {
-        webua->resp_page += ",\"cam" +
-            std::to_string(webu->cam_list[indx_cam]->cfg->device_id) + "\": ";
-        parms_one(webu->cam_list[indx_cam]->cfg);
+    indx_cat = 0;
+    while (indx_cat != PARM_CAT_MAX) {
+        if (indx_cat != 0) {
+            webua->resp_page += ",";
+        }
+        webua->resp_page += "\"" + std::to_string(indx_cat) + "\": ";
+        webua->resp_page += "{";
+        for (indx_cam=-1; indx_cam<webu->cam_cnt; indx_cam++) {
+            if (indx_cam == -1) {
+                pcfg = webu->cfg;
+                webua->resp_page += "\"0\": ";
+            } else {
+                pcfg = webu->cam_list[indx_cam]->cfg;
+                webua->resp_page += ",\"" +
+                    std::to_string(webu->cam_list[indx_cam]->cfg->device_id) + "\": ";
+            }
+            parms_one(pcfg, (PARM_CAT)indx_cat);
+        }
+        webua->resp_page += "}";
+        indx_cat++;
     }
     webua->resp_page += "}";
+
 }
 
 void cls_webu_json::cameras_list()
@@ -333,15 +350,49 @@ void cls_webu_json::categories_list()
         }
         webua->resp_page += "\"" + std::to_string(indx_cat) + "\": ";
 
-        catnm_long = webua->app->cfg->cat_desc((enum PARM_CAT)indx_cat, false);
         catnm_short = webua->app->cfg->cat_desc((enum PARM_CAT)indx_cat, true);
+        catnm_long = escstr(_(webua->app->cfg->cat_desc((enum PARM_CAT)indx_cat, false)));
 
         webua->resp_page += "{\"name\":\"" + catnm_short + "\",\"display\":\"" + catnm_long + "\"}";
-
         indx_cat++;
     }
 
     webua->resp_page += "}";
+}
+
+void cls_webu_json::i10n_list()
+{
+    std::string catnm_short, catnm_long;
+
+    webua->resp_page += "{";
+
+    webua->resp_page += "\"showhide\": \""+escstr(_("Show/Hide"))+"\"";
+    webua->resp_page += ",\"startevent\": \""+escstr(_("Start Event"))+"\"";
+    webua->resp_page += ",\"endevent\": \""+escstr(_("End Event"))+"\"";
+    webua->resp_page += ",\"snapshot\": \""+escstr(_("Snapshot"))+"\"";
+    webua->resp_page += ",\"pause\": \""+escstr(_("Pause"))+"\"";
+    webua->resp_page += ",\"unpause\": \""+escstr(_("UnPause"))+"\"";
+    webua->resp_page += ",\"startrestart\": \""+escstr(_("Start/Restart"))+"\"";
+    webua->resp_page += ",\"stop\": \""+escstr(_("Stop"))+"\"";
+    webua->resp_page += ",\"saveconfig\": \""+escstr(_("Save Config"))+"\"";
+    webua->resp_page += ",\"addcamera\": \""+escstr(_("Add Camera"))+"\"";
+    webua->resp_page += ",\"deletecamera\": \""+escstr(_("Delete Camera"))+"\"";
+    webua->resp_page += ",\"useraction\": \""+escstr(_("User Action"))+"\"";
+    webua->resp_page += ",\"showhidelog\": \""+escstr(_("Show/Hide Log"))+"\"";
+    webua->resp_page += ",\"submit\": \""+escstr(_("Submit"))+"\"";
+    webua->resp_page += ",\"cameras\": \""+escstr(_("Cameras"))+"\"";
+    webua->resp_page += ",\"camera\": \""+escstr(_("Camera"))+"\"";
+    webua->resp_page += ",\"allcameras\": \""+escstr(_("All Cameras"))+"\"";
+    webua->resp_page += ",\"scancameras\": \""+escstr(_("Scan Cameras"))+"\"";
+    webua->resp_page += ",\"actions\": \""+escstr(_("Actions"))+"\"";
+    webua->resp_page += ",\"configuration\": \""+escstr(_("Configuration"))+"\"";
+    webua->resp_page += ",\"recordings\": \""+escstr(_("Recordings"))+"\"";
+    webua->resp_page += ",\"parameters\": \""+escstr(_("Parameters"))+"\"";
+    webua->resp_page += ",\"selectcamera\": \""+escstr(_("Select Camera"))+"\"";
+    webua->resp_page += ",\"default\": \""+escstr(_("Default"))+"\"";
+
+    webua->resp_page += "}";
+
 }
 
 void cls_webu_json::config()
@@ -359,7 +410,11 @@ void cls_webu_json::config()
     webua->resp_page += ",\"categories\" : ";
     categories_list();
 
+    webua->resp_page += ",\"i10n\" : ";
+    i10n_list();
+
     webua->resp_page += "}";
+
 }
 
 void cls_webu_json::movies_list()
@@ -530,7 +585,7 @@ void cls_webu_json::status()
 
     webua->resp_page += "{\"count\" : " + std::to_string(webu->cam_cnt);
         for (indx_cam=0; indx_cam<webu->cam_cnt; indx_cam++) {
-            webua->resp_page += ",\"cam" +
+            webua->resp_page += ",\"" +
                 std::to_string(webu->cam_list[indx_cam]->cfg->device_id) + "\": ";
             status_vars(indx_cam);
         }

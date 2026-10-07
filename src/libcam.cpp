@@ -423,11 +423,18 @@ int cls_libcam::start_config()
 {
     int retcd, indx;
     char tmp4cc[5];
-    std::string pfmt;
+    std::string pfmt, tmpfmt;
+    StreamFormats allfmts;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     libcam_cfg = camera->generateConfiguration({ StreamRole::Viewfinder });
+
+    allfmts = libcam_cfg->at(0).formats();
+    for (indx=0;indx<allfmts.pixelformats().size();indx++){
+        tmpfmt = allfmts.pixelformats()[indx].toString();
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Available pixel format: %s",tmpfmt.c_str());
+    }
 
     pfmt = "YU12";
     for (indx=0;indx<params->params_cnt;indx++) {
@@ -439,6 +446,28 @@ int cls_libcam::start_config()
                 , pfmt.c_str());
         }
     }
+
+    for (indx=0;indx<allfmts.pixelformats().size();indx++){
+        tmpfmt = allfmts.pixelformats()[indx].toString();
+        if (pfmt ==tmpfmt) {
+            break;
+        }
+    }
+    if (pfmt != tmpfmt) {
+        pfmt="";
+        /*mjpeg doesn't seem to work very well so we pick the first alternative*/
+        for (indx=0;indx<allfmts.pixelformats().size();indx++) {
+            tmpfmt = allfmts.pixelformats()[indx].toString();
+            if (tmpfmt != "MJPEG") {
+                pfmt = tmpfmt;
+                break;
+            }
+        }
+    }
+    if (pfmt == "") {
+        pfmt = "MJPEG";
+    }
+
     libcam_cfg->at(0).pixelFormat = PixelFormat::fromString(pfmt);
     libcam_cfg->at(0).size.width = (uint)cam->cfg->width;
     libcam_cfg->at(0).size.height = (uint)cam->cfg->height;
@@ -660,28 +689,27 @@ void cls_libcam::libcam_stop()
 {
     int indx;
     mydelete(convert);
-    mydelete(params);
 
-    if (started_req) {
+    if (started_cam) {
+        camera->requestCompleted.disconnect(this, &cls_libcam::req_complete);
         while (req_queue.empty() == false) {
             req_queue.pop();
         }
-        camera->requestCompleted.disconnect(this, &cls_libcam::req_complete);
-        frmbuf->free(libcam_cfg->at(0).stream());
-        frmbuf.reset();
-        for (indx=0;indx<requests.size();indx++) {
-            requests[indx].reset();
-        }
-        requests.clear();
-        munmap(membuf.buf, membuf.bufsz);
-        started_req = false;
-    }
-
-    if (started_cam) {
         camera->stop();
         camera->release();
         camera.reset();
         started_cam = false;
+    }
+
+    if (started_req) {
+        for (indx=0;indx<requests.size();indx++) {
+            requests[indx].reset();
+        }
+        requests.clear();
+        frmbuf->free(libcam_cfg->at(0).stream());
+        frmbuf.reset();
+        munmap(membuf.buf, membuf.bufsz);
+        started_req = false;
     }
 
     if (started_mgr) {
@@ -695,65 +723,41 @@ void cls_libcam::libcam_stop()
 
 #endif
 
-void cls_libcam::parms_update()
+void cls_libcam::params_update()
 {
     #ifdef HAVE_LIBCAM
         ctx_params  *prm_s;
         int indx, indx2;
         bool chgnew;
 
-        if(cam->conf_src->libcam_params != cam->cfg->libcam_params) {
-            prm_s = new ctx_params;
-            prm_s->params_cnt = 0;
-            util_parms_parse(prm_s, "libcam_params", cam->conf_src->libcam_params);
-            for (indx=0;indx<prm_s->params_cnt;indx++) {
-                chgnew = true;
-                for (indx2=0;indx2<params->params_cnt;indx2++) {
-                    if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
-                        (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
-                        chgnew = false;
-                    }
-                }
-                if (chgnew == true) {
-                    util_parms_add(cam->conf_src->params_libcamera
-                        ,prm_s->params_array[indx].param_name
-                        ,prm_s->params_array[indx].param_value);
-                    util_parms_add(params
-                        ,prm_s->params_array[indx].param_name
-                        ,prm_s->params_array[indx].param_value);
-                    if ((prm_s->params_array[indx].param_name == "pixelformat")) {
-                        MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
-                            , _("Restarting camera. Parameter %s changed to %s")
-                            , prm_s->params_array[indx].param_name.c_str()
-                            , prm_s->params_array[indx].param_value.c_str());
-                        mydelete(prm_s);
-                        cam->restart = true;
-                        return;
-                    }
+        MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Updating libcam config"));
+
+        prm_s = nullptr;
+        for (indx=0;indx<cam->conf_src->params.size();indx++) {
+            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_LIB) {
+                prm_s = cam->conf_src->params[indx];
+            }
+        }
+        util_parms_parse(prm_s, "libcam_params", cam->conf_src->libcam_params,PARM_PCAT_LIB);
+
+        for (indx=0;indx<prm_s->params_cnt;indx++) {
+            chgnew = true;
+            for (indx2=0;indx2<params->params_cnt;indx2++) {
+                if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
+                    (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
+                    chgnew = false;
                 }
             }
-        } else {
-            prm_s = cam->conf_src->params_libcamera;
-            for (indx=0;indx<prm_s->params_cnt;indx++) {
-                chgnew = true;
-                for (indx2=0;indx2<params->params_cnt;indx2++) {
-                    if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
-                        (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
-                        chgnew = false;
-                    }
-                }
-                if (chgnew == true) {
-                    util_parms_add(params
-                        ,prm_s->params_array[indx].param_name
-                        ,prm_s->params_array[indx].param_value);
-                    if ((prm_s->params_array[indx].param_name == "pixelformat")) {
-                        MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
-                            , _("Restarting camera. Parameter %s changed to %s")
-                            , prm_s->params_array[indx].param_name.c_str()
-                            , prm_s->params_array[indx].param_value.c_str());
-                        cam->restart = true;
-                        return;
-                    }
+            if (chgnew == true) {
+                util_parms_add(params
+                    ,prm_s->params_array[indx].param_name
+                    ,prm_s->params_array[indx].param_value);
+                if ((prm_s->params_array[indx].param_name == "pixelformat")) {
+                    MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
+                        , _("Restarting camera. Parameter %s changed to %s")
+                        , prm_s->params_array[indx].param_name.c_str()
+                        , prm_s->params_array[indx].param_value.c_str());
+                    cam->restart = true;
                 }
             }
         }
@@ -787,7 +791,15 @@ void cls_libcam::noimage()
                 slp_dur = 30;
             }
             cam->watchdog = slp_dur + (cam->cfg->watchdog_tmo * 3);
-            SLEEP(slp_dur,0);
+            while (slp_dur > 0){
+                SLEEP(10,0);
+                slp_dur -= 10;
+                if (cam->finish == true) {
+                    libcam_stop();
+                    cam->watchdog = cam->cfg->watchdog_tmo;
+                    return;
+                }
+            }
             libcam_stop();
             if (libcam_start() < 0) {
                 MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("libcam failed to open"));
@@ -850,8 +862,14 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
     cam = p_cam;
     #ifdef HAVE_LIBCAM
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Opening libcam"));
+        int indx;
         convert = nullptr;
-        params = cam->cfg->params_libcamera;
+        params = nullptr;
+        for (indx=0;indx<cam->cfg->params.size();indx++) {
+            if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_LIB) {
+                params = cam->cfg->params[indx];
+            }
+        }
         reconnect_count = 0;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
         cam_mgr = std::make_unique<CameraManager>();

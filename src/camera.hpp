@@ -266,6 +266,8 @@ class cls_camera {
         void loopback();
         void check_schedule();
         void check_config();
+        void check_config_params();
+        void check_config_main();
         void frametiming();
 };
 

@@ -22,7 +22,7 @@
 #include "camera.hpp"
 #include "sound.hpp"
 #include "conf.hpp"
-
+/* TODO/MUSTDO  change variable names to use either params or parms.  This is nuts how I named them*/
 /*Configuration parameters */
 ctx_parm config_parms[] = {
     {"daemon",                    PARM_TYP_BOOL,   PARM_CAT_00, PARM_LVL_02, PARM_CHG_RESTART },
@@ -32,7 +32,8 @@ ctx_parm config_parms[] = {
     {"log_level",                 PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_COPY },
     {"log_fflevel",               PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_COPY },
     {"log_type",                  PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_COPY },
-    {"native_language",           PARM_TYP_BOOL,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_RESTART },
+    {"native_language",           PARM_TYP_BOOL,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_CODE },
+    {"native_language_code",      PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_CODE },
 
     {"device_name",               PARM_TYP_STRING, PARM_CAT_01, PARM_LVL_01, PARM_CHG_COPY },
     {"device_id",                 PARM_TYP_INT,    PARM_CAT_01, PARM_LVL_01, PARM_CHG_RESTART },
@@ -411,6 +412,33 @@ void cls_config::edit_native_language(std::string &parm, enum PARM_ACT pact)
     }
     return;
     MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","native_language",_("native_language"));
+}
+
+void cls_config::edit_native_language_code(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        native_language_code = "";
+    } else if (pact == PARM_ACT_SET) {
+        mytrim(parm);
+        if ((parm == "")   || (parm == "da") || (parm == "de") || (parm == "es") ||
+            (parm == "en") || (parm == "fi") || (parm == "fr") || (parm == "it") ||
+            (parm == "ja") || (parm == "ko") || (parm == "nl") || (parm == "no") ||
+            (parm == "pt") || (parm == "sv") || (parm == "zh")) {
+            native_language_code = parm;
+        } else {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid native_language_code %s"),parm.c_str());
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = native_language_code;
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[";
+        parm = parm + "\"\",\"da\",\"de\",\"es\",\"en\"";
+        parm = parm + ",\"fi\",\"fr\",\"it\",\"ja\",\"ko\"";
+        parm = parm + ",\"nl\",\"no\",\"pt\",\"sv\",\"zh\"";
+        parm = parm + "]";
+    }
+    return;
+    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","native_language_code",_("native_language_code"));
 }
 
 void cls_config::edit_device_name(std::string &parm, enum PARM_ACT pact)
@@ -2788,6 +2816,7 @@ void cls_config::edit_cat00(std::string cmd, std::string &parm_val, enum PARM_AC
     } else if (cmd == "log_fflevel") {             edit_log_fflevel(parm_val, pact);
     } else if (cmd == "log_type") {                edit_log_type(parm_val, pact);
     } else if (cmd == "native_language") {         edit_native_language(parm_val, pact);
+    } else if (cmd == "native_language_code") {    edit_native_language_code(parm_val, pact);
     }
 
 }
@@ -3077,228 +3106,751 @@ void cls_config::edit_cat(std::string parm_nm, std::string &parm_val, enum PARM_
 
 }
 
+void cls_config::params_load_schedule()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "schedule_params";
+    prm->params_pcat = PARM_PCAT_SCH;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"detection","",PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Detection on/off(checked/unchecked)"});
+    prm->params_array.push_back(
+        {"action","",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"pause","stop"},""});
+
+    prm->params_array.push_back(
+        {"sun","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Sunday"});
+    prm->params_array.push_back(
+        {"mon","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Monday"});
+    prm->params_array.push_back(
+        {"tue","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Tuesday"});
+    prm->params_array.push_back(
+        {"wed","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Wednesday"});
+    prm->params_array.push_back(
+        {"thu","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Thursday"});
+    prm->params_array.push_back(
+        {"fri","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Friday"});
+    prm->params_array.push_back(
+        {"sat","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Saturday"});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"schedule_params",schedule_params,PARM_PCAT_SCH);
+    params.push_back(prm);
+}
+
+void cls_config::params_load_cleandir()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "cleandir_params";
+    prm->params_pcat = PARM_PCAT_CLN;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"action","",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"delete","script"},""});
+    prm->params_array.push_back(
+        {"freq","",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"hourly","daily","weekly"},""});
+    prm->params_array.push_back(
+        {"runtime","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"dur_unit","",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"m","h","d","w"},"duration units(minutes,hours,days,weeks)"});
+    prm->params_array.push_back(
+        {"dur_val","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"duration value (expressed in duration units)"});
+    prm->params_array.push_back(
+        {"removedir","",PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"Remove directory"});
+    prm->params_array.push_back(
+        {"script","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},"script to execute"});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"cleandir_params",cleandir_params,PARM_PCAT_CLN);
+
+    params.push_back(prm);
+
+}
+
+void cls_config::params_load_v4l2()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "v4l2_params";
+    prm->params_pcat = PARM_PCAT_V4L2;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"input","-1",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"palette","17",PARM_SRC_SYS
+        , PARM_TYP_INTLIST , PARM_LVL_01, PARM_CHG_CODE
+        ,{"00-S910", "01-BYR2", "02-BA81", "03-S561", "04-GBRG"
+        , "05-GRBG", "06-P207", "07-PJPG", "08-MJPG", "09-JPEG"
+        , "10-RGB3", "11-S501", "12-S505", "13-S508", "14-UYVY"
+        , "15-YUYV", "16-422P", "17-YU12", "18-Y10" , "19-Y12"
+        , "20-GREY"},""});
+    prm->params_array.push_back(
+        {"norm","0",PARM_SRC_SYS
+        , PARM_TYP_INTLIST , PARM_LVL_01, PARM_CHG_CODE
+        ,{"0-PAL", "1-NTSC", "2-SECCAM", "3-PALBW"},""});
+    prm->params_array.push_back(
+        {"frequency","0",PARM_SRC_SYS
+        , PARM_TYP_INT , PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"v4l2_params",v4l2_params,PARM_PCAT_V4L2);
+
+    params.push_back(prm);
+
+}
+
+void cls_config::params_load_netcam()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "netcam_params";
+    prm->params_pcat = PARM_PCAT_NET;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"decoder","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"capture_rate","",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"interrupt","",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"netcam_params",netcam_params,PARM_PCAT_NET);
+
+    params.push_back(prm);
+
+}
+
+void cls_config::params_load_netcam_high()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "netcam_high_params";
+    prm->params_pcat = PARM_PCAT_NETH;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"decoder","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"capture_rate","",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"interrupt","",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"netcam_high_params",netcam_high_params,PARM_PCAT_NETH);
+
+    params.push_back(prm);
+
+}
+
 void cls_config::params_load_libcamera()
 {
-    mydelete(params_libcamera);
-    params_libcamera = new ctx_params;
-    params_libcamera->params_desc = "libcam_params";
+    ctx_params *prm;
 
-    /*param_name,param_value,param_default,param_source*/
-    /*param_type,param_cat,param_lvl,param_chg,param_min,param_max*/
-    /*param_lst,desc*/
-    params_libcamera->params_array.push_back(
-        {"pixelformat","","",PARM_SRC_SYS
-        , PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm = new ctx_params;
+    prm->params_desc = "libcam_params";
+    prm->params_pcat = PARM_PCAT_LIB;
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"pixelformat","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"params_file","","",PARM_SRC_SYS
-        , PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
 
-    params_libcamera->params_array.push_back(
-        {"Orientation","","Rotate0", PARM_SRC_SYS
-        ,PARM_TYP_LIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE, 0, 0
+    prm->params_array.push_back(
+        {"Orientation","", PARM_SRC_SYS
+        ,PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"Rotate0", "Rotate0Mirror", "Rotate180", "Rotate180Mirror"
         ,"Rotate90", "Rotate90Mirror", "Rotate270", "Rotate270Mirror"}
         ,""});
-    params_libcamera->params_array.push_back(
-        {"AeConstraintMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,3
+    prm->params_array.push_back(
+        {"AeConstraintMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Normal", "1-Highlight", "2-Shadows", "3-Custom"}
         ,""});
-    params_libcamera->params_array.push_back(
-        {"AeEnable","","",PARM_SRC_SYS
-        ,PARM_TYP_BOOL, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"AeEnable","",PARM_SRC_SYS
+        ,PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"AeExposureMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,3
+    prm->params_array.push_back(
+        {"AeExposureMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Normal", "1-Short", "2-Long", "3-Custom"},""});
-    params_libcamera->params_array.push_back(
-        {"AeFlickerMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,2
+    prm->params_array.push_back(
+        {"AeFlickerMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Off", "1-Manual", "2-Auto"},""});
-    params_libcamera->params_array.push_back(
-        {"AeFlickerPeriod","","",PARM_SRC_SYS
-        ,PARM_TYP_INT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,100000
+    prm->params_array.push_back(
+        {"AeFlickerPeriod","",PARM_SRC_SYS
+        ,PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"AeMeteringMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,3
+    prm->params_array.push_back(
+        {"AeMeteringMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-CentreWeighted", "1-Spot", "3-Matrix", "4-Custom"},""});
-    params_libcamera->params_array.push_back(
-        {"AeState","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,2
+    prm->params_array.push_back(
+        {"AeState","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Idle", "1-Searching", "2-Converged"},""});
-    params_libcamera->params_array.push_back(
-        {"AfMetering","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1
+    prm->params_array.push_back(
+        {"AfMetering","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Auto", "1-Windows"},""});
-    params_libcamera->params_array.push_back(
-        {"AfMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,2
+    prm->params_array.push_back(
+        {"AfMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Manual", "1-Auto", "2-Continuous"},""});
-    params_libcamera->params_array.push_back(
-        {"AfPause","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,2
+    prm->params_array.push_back(
+        {"AfPause","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Immediate", "1-Deferred", "2-Resume"},""});
-    params_libcamera->params_array.push_back(
-        {"AfPauseState","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,2
+    prm->params_array.push_back(
+        {"AfPauseState","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Running", "1-Pausing", "2-Paused"},""});
-    params_libcamera->params_array.push_back(
-        {"AfRange","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,2
+    prm->params_array.push_back(
+        {"AfRange","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Normal", "1-Macro", "2-Full"},""});
-    params_libcamera->params_array.push_back(
-        {"AfSpeed","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1
+    prm->params_array.push_back(
+        {"AfSpeed","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Normal", "1-Fast"},""});
-    params_libcamera->params_array.push_back(
-        {"AfState","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,3
+    prm->params_array.push_back(
+        {"AfState","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Idle", "1-Scanning", "2-Focused", "3-Failed"},""});
-    params_libcamera->params_array.push_back(
-        {"AfTrigger","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1
+    prm->params_array.push_back(
+        {"AfTrigger","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Start", "1-Cancel"},""});
-    params_libcamera->params_array.push_back(
-        {"AfWindows","","",PARM_SRC_SYS
-        ,PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"AfWindows","",PARM_SRC_SYS
+        ,PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},"Pipe delimited as x|y|h|w"});
-    params_libcamera->params_array.push_back(
-        {"AnalogueGain","","",PARM_SRC_SYS
-        ,PARM_TYP_INT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,1,100
+    prm->params_array.push_back(
+        {"AnalogueGain","",PARM_SRC_SYS
+        ,PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"AnalogueGainMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1
+    prm->params_array.push_back(
+        {"AnalogueGainMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Auto", "1-Manual"},""});
-    params_libcamera->params_array.push_back(
-        {"AwbEnable","","",PARM_SRC_SYS
-        ,PARM_TYP_BOOL, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"AwbEnable","",PARM_SRC_SYS
+        ,PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"AwbLocked","","",PARM_SRC_SYS
-        ,PARM_TYP_BOOL, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"AwbLocked","",PARM_SRC_SYS
+        ,PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"AwbMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,7
+    prm->params_array.push_back(
+        {"AwbMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Auto", "1-Incandescent", "2-Tungsten", "3-Fluorescent"
         ,"4-Indoor", "5-Daylight", "6-Cloudy", "7-Custom"},""});
-    params_libcamera->params_array.push_back(
-        {"Brightness","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"Brightness","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"ColourCorrectionMatrix","","",PARM_SRC_SYS
-        ,PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"ColourCorrectionMatrix","",PARM_SRC_SYS
+        ,PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},"Pipe delimited as var1|var2|...|var8|var9"});
-    params_libcamera->params_array.push_back(
-        {"ColourGains","","",PARM_SRC_SYS
-        , PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"ColourGains","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},"Pipe delimited as Red|Blue)"});
-    params_libcamera->params_array.push_back(
-        {"ColourTemperature","","",PARM_SRC_SYS
-        ,PARM_TYP_INT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1000
+    prm->params_array.push_back(
+        {"ColourTemperature","",PARM_SRC_SYS
+        ,PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"Contrast","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"Contrast","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"DigitalGain","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"DigitalGain","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"ExposureTime","","",PARM_SRC_SYS
-        ,PARM_TYP_INT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1000
+    prm->params_array.push_back(
+        {"ExposureTime","",PARM_SRC_SYS
+        ,PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"ExposureTimeMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1
+    prm->params_array.push_back(
+        {"ExposureTimeMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Auto", "1-Manual"},""});
-    params_libcamera->params_array.push_back(
-        {"ExposureValue","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"ExposureValue","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"FocusFoM","","",PARM_SRC_SYS
-        ,PARM_TYP_INT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1000
+    prm->params_array.push_back(
+        {"FocusFoM","",PARM_SRC_SYS
+        ,PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"FrameDuration","","",PARM_SRC_SYS
-        ,PARM_TYP_INT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1000
+    prm->params_array.push_back(
+        {"FrameDuration","",PARM_SRC_SYS
+        ,PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"FrameDurationLimits","","",PARM_SRC_SYS
-        ,PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"FrameDurationLimits","",PARM_SRC_SYS
+        ,PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},"Pipe delimited as min|max"});
-    params_libcamera->params_array.push_back(
-        {"Gamma","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,10
+    prm->params_array.push_back(
+        {"Gamma","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"HdrChannel","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,3
+    prm->params_array.push_back(
+        {"HdrChannel","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-None", "1-Short", "2-Medium", "3-Long"},""});
-    params_libcamera->params_array.push_back(
-        {"HdrMode","","",PARM_SRC_SYS
-        ,PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,4
+    prm->params_array.push_back(
+        {"HdrMode","",PARM_SRC_SYS
+        ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Off", "1-MultiExposureUnmerged", "2-MultiExposure"
         ,"3-SingleExposure", "4-Night"},""});
-    params_libcamera->params_array.push_back(
-        {"Hue","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-180,180
+    prm->params_array.push_back(
+        {"Hue","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"LensPosition","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,100
+    prm->params_array.push_back(
+        {"LensPosition","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"Lux","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"Lux","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"Saturation","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"Saturation","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"ScalerCrop","","",PARM_SRC_SYS
-        , PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"ScalerCrop","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},"Pipe delimited as x|y|h|w"});
-    params_libcamera->params_array.push_back(
-        {"SensorBlackLevels","","",PARM_SRC_SYS
-        ,PARM_TYP_STRING, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,0
+    prm->params_array.push_back(
+        {"SensorBlackLevels","",PARM_SRC_SYS
+        ,PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},"Pipe delimited as var1|var2|var3|var4"});
-    params_libcamera->params_array.push_back(
-        {"SensorTemperature","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"SensorTemperature","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"SensorTimestamp","","",PARM_SRC_SYS
-        ,PARM_TYP_INT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,1000
+    prm->params_array.push_back(
+        {"SensorTimestamp","",PARM_SRC_SYS
+        ,PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"Sharpness","","",PARM_SRC_SYS
-        ,PARM_TYP_FLOAT, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,-1,1
+    prm->params_array.push_back(
+        {"Sharpness","",PARM_SRC_SYS
+        ,PARM_TYP_FLOAT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
-    params_libcamera->params_array.push_back(
-        {"WdrMode","","",PARM_SRC_SYS
-        , PARM_TYP_INTLIST, PARM_CAT_19, PARM_LVL_01, PARM_CHG_CODE,0,4
+    prm->params_array.push_back(
+        {"WdrMode","",PARM_SRC_SYS
+        , PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"0-Off", "1-Linear", "2-Power"
         ,"3-Exponential", "4-HistogramEqualization"},""});
 
-    params_libcamera->params_cnt = (int)params_libcamera->params_array.size();
+    prm->params_cnt = (int)prm->params_array.size();
 
-    util_parms_parse(params_libcamera,"libcamera",libcam_params);
+    util_parms_parse(prm,"libcam_params",libcam_params,PARM_PCAT_LIB);
+    params.push_back(prm);
 }
 
+void cls_config::params_load_secondary()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "secondary_params";
+    prm->params_pcat = PARM_PCAT_SEC;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"frame_interval","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"model_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"image_type","",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"full","grey","roi"},""});
+    prm->params_array.push_back(
+        {"rotate","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"threshold","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"scalefactor","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"minsize","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"maxsize","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"padding","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"threshold_model","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"winstride","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"flags","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"minneighbors","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"config","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"classes_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"framework","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"backend","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"target","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"scale","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"width","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"height","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"secondary_params",secondary_params,PARM_PCAT_SEC);
+
+    params.push_back(prm);
+
+}
+
+void cls_config::params_load_allcam()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "stream_allcam_params";
+    prm->params_pcat = PARM_PCAT_ACAM;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"scale","100",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"row","1",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"col","1",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"offset_row","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"offset_col","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"stream_allcam_params",stream_allcam_params,PARM_PCAT_ACAM);
+
+    params.push_back(prm);
+
+}
+
+void cls_config::params_load_actions()
+{
+    ctx_params *prm;
+    std::string parm_vl;
+
+    if (webcontrol_access == 0) {
+        parm_vl = "off";
+    } else {
+        parm_vl = "on";
+    }
+
+    prm = new ctx_params;
+    prm->params_desc = "webcontrol_actions";
+    prm->params_pcat = PARM_PCAT_ACTS;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"pause",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"event",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"snapshot",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"camera_add",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"camera_delete",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"ptz",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"stop",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"restart",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"action_user",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"config_write",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"config",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"movies",parm_vl,PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+    util_parms_parse(prm,"webcontrol_actions", webcontrol_actions, PARM_PCAT_ACTS);
+
+    params.push_back(prm);
+
+}
+
+void cls_config::params_load_headers()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "webcontrol_headers";
+    prm->params_pcat = PARM_PCAT_HDR;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"webcontrol_headers",webcontrol_headers,PARM_PCAT_HDR);
+
+    params.push_back(prm);
+
+}
+
+void cls_config::params_load_sound()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->params_desc = "snd_params";
+    prm->params_pcat = PARM_PCAT_SND;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_cnt = (int)prm->params_array.size();
+
+    util_parms_parse(prm,"snd_params",snd_params,PARM_PCAT_SND);
+
+    params.push_back(prm);
+
+}
 
 void cls_config::params_load()
 {
+    params_load_schedule();
+    params_load_cleandir();
+    params_load_v4l2();
+    params_load_netcam();
+    params_load_netcam_high();
     params_load_libcamera();
+    params_load_secondary();
+    params_load_allcam();
+    params_load_actions();
+    params_load_headers();
+    params_load_sound();
+}
+
+std::string cls_config::params_prefix(enum PARM_PCAT pcat) {
+    /* To make the webu_json/post processing easier, these
+      need to be exactly 5 characters long ending in _
+      Also make sure these do not match the start of the names
+      of any of the primary configuration parameters */
+    if (pcat == PARM_PCAT_SCH)          { return "psch_";
+    } else if (pcat == PARM_PCAT_CLN)   { return "pcln_";
+    } else if (pcat == PARM_PCAT_V4L2)  { return "pv4l_";
+    } else if (pcat == PARM_PCAT_NET)   { return "pnet_";
+    } else if (pcat == PARM_PCAT_NETH)  { return "pnth_";
+    } else if (pcat == PARM_PCAT_LIB)   { return "plib_";
+    } else if (pcat == PARM_PCAT_SEC)   { return "psec_";
+    } else if (pcat == PARM_PCAT_ACAM)  { return "pacm_";
+    } else if (pcat == PARM_PCAT_ACTS)  { return "pact_";
+    } else if (pcat == PARM_PCAT_HDR)   { return "phdr_";
+    } else if (pcat == PARM_PCAT_SND)   { return "psnd_";
+    } else { return "pudf_";
+    }
 }
 
 void cls_config::defaults()
@@ -3312,7 +3864,7 @@ void cls_config::defaults()
             , PARM_ACT_DFLT, config_parms[indx].parm_cat);
         indx++;
     }
-
+    params.clear();
 }
 
 int cls_config::edit_set_active(std::string parm_nm, std::string parm_val)
@@ -3436,37 +3988,53 @@ void cls_config::edit_set(std::string parm_nm, std::string parm_val)
     MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
 }
 
-void cls_config::edit_list(std::string parm_nm, std::string &parm_val, enum PARM_CAT parm_cat)
+void cls_config::edit_list(std::string parm_nm, std::string &parm_val, enum PARM_PCAT pcat)
 {
     int indx1, indx2;
     ctx_params_item *itm;
     ctx_params  *prm;
 
-    if (parm_cat == PARM_CAT_19) {
-        prm = params_libcamera;
-        for (indx1=0;indx1<prm->params_cnt;indx1++) {
-            itm = &prm->params_array[indx1];
-            if (itm->param_name == parm_nm) {
-                for (indx2=0;indx2<itm->param_lst.size();indx2++) {
-                    if (indx2 == 0) {
-                        parm_val = "[";
-                    } else {
-                        parm_val += ",";
-                    }
-                    parm_val += "\"" + itm->param_lst[indx2] + "\"";
+    prm = nullptr;
+    for (indx1=0;indx1<params.size();indx1++) {
+        if (pcat == params[indx1]->params_pcat) {
+            prm = params[indx1];
+            break;
+        }
+    }
+    if (prm == nullptr) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("coding error %d"), pcat);
+        parm_val = "[\"\"]";
+        return;
+    }
+    for (indx1=0;indx1<prm->params_cnt;indx1++) {
+        itm = &prm->params_array[indx1];
+        if (itm->param_name == parm_nm) {
+            for (indx2=0;indx2<itm->param_lst.size();indx2++) {
+                if (indx2 == 0) {
+                    parm_val = "[";
+                } else {
+                    parm_val += ",";
                 }
-                if (itm->param_lst.size() > 0) {
-                    parm_val += "]";
-                }
+                parm_val += "\"" + itm->param_lst[indx2] + "\"";
+            }
+            if (itm->param_lst.size() > 0) {
+                parm_val += "]";
             }
         }
-    } else {
-        edit_cat(parm_nm, parm_val, PARM_ACT_LIST, parm_cat);
     }
     if (parm_val == "") {
         parm_val = "[\"\"]";
     }
+}
 
+void cls_config::edit_list(std::string parm_nm, std::string &parm_val, enum PARM_CAT pcat)
+{
+    edit_cat(parm_nm, parm_val, PARM_ACT_LIST, pcat);
+
+    if (parm_val == "") {
+        parm_val = "[\"\"]";
+    }
 }
 
 std::string cls_config::type_desc(enum PARM_TYP ptype)
@@ -3479,7 +4047,7 @@ std::string cls_config::type_desc(enum PARM_TYP ptype)
     } else if (ptype == PARM_TYP_STRING) {  return "string";
     } else if (ptype == PARM_TYP_ARRAY) {   return "array";
     } else if (ptype == PARM_TYP_PARAMS) {  return "params";
-    } else {                                return "error";
+    } else {                                return "string";
     }
 }
 
@@ -3505,7 +4073,6 @@ std::string cls_config::cat_desc(enum PARM_CAT pcat, bool shrt) {
         } else if (pcat == PARM_CAT_16) { return "sql";
         } else if (pcat == PARM_CAT_17) { return "track";
         } else if (pcat == PARM_CAT_18) { return "sound";
-        } else if (pcat == PARM_CAT_19) { return "libcamera";
         } else { return "unk";
         }
     } else {
@@ -3528,7 +4095,6 @@ std::string cls_config::cat_desc(enum PARM_CAT pcat, bool shrt) {
         } else if (pcat == PARM_CAT_16) { return "SQL";
         } else if (pcat == PARM_CAT_17) { return "Tracking";
         } else if (pcat == PARM_CAT_18) { return "Sound";
-        } else if (pcat == PARM_CAT_19) { return "Libcamera";
         } else { return "Other";
         }
     }
@@ -3688,7 +4254,7 @@ void cls_config::camera_add(std::string fname, bool srcdir)
     }
 
     cam_cls->cfg = new cls_config(app);
-    cam_cls->cfg->parms_copy(cam_cls->conf_src);
+    cam_cls->cfg->config_copy(cam_cls->conf_src);
 
     app->cam_list.push_back(cam_cls);
     app->cam_cnt = (int)app->cam_list.size();
@@ -3764,13 +4330,13 @@ void cls_config::sound_add(std::string fname, bool srcdir)
     }
 
     snd_cls->cfg = new cls_config(app);
-    snd_cls->cfg->parms_copy(snd_cls->conf_src);
+    snd_cls->cfg->config_copy(snd_cls->conf_src);
 
     app->snd_list.push_back(snd_cls);
     app->snd_cnt = (int)app->snd_list.size();
 }
 
-void cls_config::config_dir_parm(std::string confdir)
+void cls_config::config_dir_item(std::string confdir)
 {
     DIR *dp;
     dirent *ep;
@@ -3851,7 +4417,7 @@ void cls_config::process()
                 } else if ((parm_nm == "sound") && (app->conf_src == this)) {
                     sound_add(parm_vl, false);
                 } else if ((parm_nm == "config_dir") && (app->conf_src == this)){
-                    config_dir_parm(parm_vl);
+                    config_dir_item(parm_vl);
                 } else if ((parm_nm != "camera") && (parm_nm != "sound") &&
                     (parm_nm != "config_dir")) {
                    edit_set(parm_nm, parm_vl);
@@ -3867,10 +4433,9 @@ void cls_config::process()
 
     params_load();
 
-
 }
 
-void cls_config::parms_log_parm(std::string parm_nm, std::string parm_vl)
+void cls_config::config_log_item(std::string parm_nm, std::string parm_vl)
 {
     if ((parm_nm == "netcam_url") ||
         (parm_nm == "netcam_userpass") ||
@@ -3897,7 +4462,7 @@ void cls_config::parms_log_parm(std::string parm_nm, std::string parm_vl)
 
 }
 
-void cls_config::parms_log()
+void cls_config::config_log()
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -3922,12 +4487,12 @@ void cls_config::parms_log()
             (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
             (parm_typ != PARM_TYP_ARRAY)) {
             app->conf_src->edit_get(parm_nm,parm_vl, parm_ct);
-            parms_log_parm(parm_nm, parm_vl);
+            config_log_item(parm_nm, parm_vl);
         }
         if (parm_typ == PARM_TYP_ARRAY) {
             app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
             for (it = parm_array.begin(); it != parm_array.end(); it++) {
-                parms_log_parm(parm_nm, it->c_str());
+                config_log_item(parm_nm, it->c_str());
             }
         }
         i++;
@@ -3948,12 +4513,12 @@ void cls_config::parms_log()
             if ((parm_nm != "camera") && (parm_nm != "sound") &&
                 (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
                 (parm_main != parm_vl) && (parm_typ != PARM_TYP_ARRAY) ) {
-                parms_log_parm(parm_nm, parm_vl);
+                config_log_item(parm_nm, parm_vl);
             }
             if (parm_typ == PARM_TYP_ARRAY) {
                 app->cam_list[indx]->conf_src->edit_get(parm_nm, parm_array, parm_ct);
                 for (it = parm_array.begin(); it != parm_array.end(); it++) {
-                    parms_log_parm(parm_nm, it->c_str());
+                    config_log_item(parm_nm, it->c_str());
                 }
             }
             i++;
@@ -3974,12 +4539,12 @@ void cls_config::parms_log()
             if ((parm_nm != "camera") && (parm_nm != "sound") &&
                 (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
                 (parm_main != parm_vl) && (parm_typ != PARM_TYP_ARRAY) ) {
-                parms_log_parm(parm_nm, parm_vl);
+                config_log_item(parm_nm, parm_vl);
             }
             if (parm_typ == PARM_TYP_ARRAY) {
                 app->snd_list[indx]->conf_src->edit_get(parm_nm, parm_array, parm_ct);
                 for (it = parm_array.begin(); it != parm_array.end(); it++) {
-                    parms_log_parm(parm_nm, it->c_str());
+                    config_log_item(parm_nm, it->c_str());
                 }
             }
             i++;
@@ -3988,7 +4553,7 @@ void cls_config::parms_log()
 
 }
 
-void cls_config::parms_write_parms(FILE *conffile, std::string parm_nm
+void cls_config::config_write_item(FILE *conffile, std::string parm_nm
     , std::string parm_vl, enum PARM_CAT parm_ct, bool reset)
 {
     static enum PARM_CAT prev_ct;
@@ -4012,7 +4577,7 @@ void cls_config::parms_write_parms(FILE *conffile, std::string parm_nm
     }
 }
 
-void cls_config::parms_write_app()
+void cls_config::config_write_app()
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4039,7 +4604,7 @@ void cls_config::parms_write_app()
     fprintf(conffile, "; at %s\n", timestamp);
     fprintf(conffile, "\n\n");
 
-    parms_write_parms(conffile, "", "", PARM_CAT_00, true);
+    config_write_item(conffile, "", "", PARM_CAT_00, true);
 
     i=0;
     while (config_parms[i].parm_name != "") {
@@ -4050,12 +4615,12 @@ void cls_config::parms_write_app()
             (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
             (parm_typ != PARM_TYP_ARRAY)) {
             app->conf_src->edit_get(parm_nm, parm_vl, parm_ct);
-            parms_write_parms(conffile, parm_nm, parm_vl, parm_ct, false);
+            config_write_item(conffile, parm_nm, parm_vl, parm_ct, false);
         }
         if (parm_typ == PARM_TYP_ARRAY) {
             app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
             for (it = parm_array.begin(); it != parm_array.end(); it++) {
-                parms_write_parms(conffile, parm_nm, it->c_str(), parm_ct, false);
+                config_write_item(conffile, parm_nm, it->c_str(), parm_ct, false);
             }
         }
         i++;
@@ -4063,7 +4628,7 @@ void cls_config::parms_write_app()
 
     for (indx=0; indx<app->cam_cnt; indx++) {
         if (app->cam_list[indx]->conf_src->from_conf_dir == false) {
-            parms_write_parms(conffile, "camera"
+            config_write_item(conffile, "camera"
                 , app->cam_list[indx]->conf_src->conf_filename
                 , PARM_CAT_01, false);
         }
@@ -4071,7 +4636,7 @@ void cls_config::parms_write_app()
 
     for (indx=0; indx<app->snd_cnt; indx++) {
         if (app->snd_list[indx]->conf_src->from_conf_dir == false) {
-            parms_write_parms(conffile, "sound"
+            config_write_item(conffile, "sound"
                 , app->snd_list[indx]->conf_src->conf_filename
                 , PARM_CAT_01, false);
         }
@@ -4080,7 +4645,7 @@ void cls_config::parms_write_app()
     fprintf(conffile, "\n");
 
     app->conf_src->edit_get("config_dir", parm_vl, PARM_CAT_01);
-    parms_write_parms(conffile, "config_dir", parm_vl, PARM_CAT_01, false);
+    config_write_item(conffile, "config_dir", parm_vl, PARM_CAT_01, false);
 
     fprintf(conffile, "\n");
     myfclose(conffile);
@@ -4091,7 +4656,7 @@ void cls_config::parms_write_app()
 
 }
 
-void cls_config::parms_write_cam()
+void cls_config::config_write_cam()
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4117,7 +4682,7 @@ void cls_config::parms_write_cam()
         fprintf(conffile, ";\n; This config file was generated by Motion " VERSION "\n");
         fprintf(conffile, "; at %s\n", timestamp);
         fprintf(conffile, "\n\n");
-        parms_write_parms(conffile, "", "", PARM_CAT_00, true);
+        config_write_item(conffile, "", "", PARM_CAT_00, true);
 
         i=0;
         while (config_parms[i].parm_name != "") {
@@ -4130,13 +4695,13 @@ void cls_config::parms_write_cam()
                 app->conf_src->edit_get(parm_nm, parm_main, parm_ct);
                 app->cam_list[indx]->conf_src->edit_get(parm_nm, parm_vl, parm_ct);
                 if (parm_main != parm_vl) {
-                    parms_write_parms(conffile, parm_nm, parm_vl, parm_ct, false);
+                    config_write_item(conffile, parm_nm, parm_vl, parm_ct, false);
                 }
             }
             if (parm_typ == PARM_TYP_ARRAY) {
                 app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
                 for (it = parm_array.begin(); it != parm_array.end(); it++) {
-                    parms_write_parms(conffile, parm_nm, it->c_str(), parm_ct, false);
+                    config_write_item(conffile, parm_nm, it->c_str(), parm_ct, false);
                 }
             }
             i++;
@@ -4151,7 +4716,7 @@ void cls_config::parms_write_cam()
 
 }
 
-void cls_config::parms_write_snd()
+void cls_config::config_write_snd()
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4177,7 +4742,7 @@ void cls_config::parms_write_snd()
         fprintf(conffile, ";\n; This config file was generated by Motion " VERSION "\n");
         fprintf(conffile, "; at %s\n", timestamp);
         fprintf(conffile, "\n\n");
-        parms_write_parms(conffile, "", "", PARM_CAT_00, true);
+        config_write_item(conffile, "", "", PARM_CAT_00, true);
 
         i=0;
         while (config_parms[i].parm_name != "") {
@@ -4190,13 +4755,13 @@ void cls_config::parms_write_snd()
                 app->conf_src->edit_get(parm_nm, parm_main, parm_ct);
                 app->snd_list[indx]->conf_src->edit_get(parm_nm, parm_vl, parm_ct);
                 if (parm_main != parm_vl) {
-                    parms_write_parms(conffile, parm_nm, parm_vl, parm_ct, false);
+                    config_write_item(conffile, parm_nm, parm_vl, parm_ct, false);
                 }
             }
             if (parm_typ == PARM_TYP_ARRAY) {
                 app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
                 for (it = parm_array.begin(); it != parm_array.end(); ++it) {
-                    parms_write_parms(conffile, parm_nm, it->c_str(), parm_ct, false);
+                    config_write_item(conffile, parm_nm, it->c_str(), parm_ct, false);
                 }
             }
             i++;
@@ -4210,49 +4775,57 @@ void cls_config::parms_write_snd()
     }
 }
 
-void cls_config::parms_write()
+void cls_config::config_write()
 {
-    parms_write_app();
-    parms_write_cam();
-    parms_write_snd();
+    config_write_app();
+    config_write_cam();
+    config_write_snd();
 }
 
-void cls_config::parms_copy(cls_config *src)
+void cls_config::config_copy(cls_config *src)
 {
-    int indx;
+    int indx1, indx2;
     std::string parm_nm, parm_val;
     std::list<std::string> lst_val;
     std::list<std::string>::iterator  it_a;
     ctx_params_item itm;
+    ctx_params *prm, *prmsrc;
 
-    indx = 0;
-    while (config_parms[indx].parm_name != "") {
-        parm_nm = config_parms[indx].parm_name;
+    indx1 = 0;
+    while (config_parms[indx1].parm_name != "") {
+        parm_nm = config_parms[indx1].parm_name;
         if (parm_nm == "snd_alerts") {
             snd_alerts.clear();
-            src->edit_get(parm_nm, lst_val, config_parms[indx].parm_cat);
+            src->edit_get(parm_nm, lst_val, config_parms[indx1].parm_cat);
             for (it_a=lst_val.begin(); it_a!=lst_val.end(); it_a++) {
                 edit_set(parm_nm, it_a->c_str());
             }
         } else {
-            src->edit_get(parm_nm, parm_val, config_parms[indx].parm_cat);
+            src->edit_get(parm_nm, parm_val, config_parms[indx1].parm_cat);
             edit_set(parm_nm, parm_val);
         }
-        indx++;
+        indx1++;
     }
 
-    mydelete(params_libcamera);
-    params_libcamera = new ctx_params;
-    for (indx=0;indx<src->params_libcamera->params_cnt;indx++){
-        itm = src->params_libcamera->params_array[indx];
-        params_libcamera->params_array.push_back(itm);
+    for (indx1=0;indx1<params.size();indx1++) {
+        mydelete (params[indx1]);
     }
-    params_libcamera->params_cnt = (int)params_libcamera->params_array.size();
-    params_libcamera->params_desc= src->params_libcamera->params_desc;
+    params.clear();
+    for (indx1=0;indx1<src->params.size();indx1++) {
+        prmsrc = src->params[indx1];
+        prm = new ctx_params;
+        prm->params_pcat = prmsrc->params_pcat;
+        prm->params_desc = prmsrc->params_desc;
+        for (indx2=0;indx2<prmsrc->params_array.size();indx2++) {
+            prm->params_array.push_back(prmsrc->params_array[indx2]);
+        }
+        prm->params_cnt = (int)prm->params_array.size();
+        params.push_back(prm);
+    }
 
 }
 
-void cls_config::parms_copy(cls_config *src, PARM_CAT p_cat)
+void cls_config::config_copy(cls_config *src, PARM_CAT p_cat)
 {
     int indx;
     std::string parm_nm, parm_val;
@@ -4362,12 +4935,14 @@ cls_config::cls_config(cls_motapp *p_app)
 {
     app = p_app;
 
-    params_libcamera = nullptr;
-
     defaults();
 }
 
 cls_config::~cls_config()
 {
-    mydelete(params_libcamera);
+    int indx;
+
+    for (indx=0;indx<params.size();indx++) {
+        mydelete (params[indx]);
+    }
 }
