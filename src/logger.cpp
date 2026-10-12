@@ -17,8 +17,9 @@
  */
 #include "motion.hpp"
 #include "util.hpp"
-#include "conf.hpp"
+#include "i10n.hpp"
 #include "logger.hpp"
+#include "conf.hpp"
 
 cls_log *motlog;
 

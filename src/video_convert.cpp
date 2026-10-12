@@ -18,8 +18,9 @@
 
 #include "motion.hpp"
 #include "util.hpp"
-#include "camera.hpp"
+#include "i10n.hpp"
 #include "logger.hpp"
+#include "camera.hpp"
 #include "jpegutils.hpp"
 #include "video_convert.hpp"
 

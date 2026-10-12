@@ -41,13 +41,6 @@
 #endif
 
 
-#ifdef HAVE_GETTEXT
-    #include <libintl.h>
-    extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
-#endif
-
-#define _(STRING) mytranslate_text(STRING)
-
 #define SLEEP(seconds, nanoseconds) {              \
                 struct timespec ts1;                \
                 ts1.tv_sec = seconds;             \
@@ -102,12 +95,6 @@ struct ctx_params {
     void mythreadname_set(const char *abbr, int threadnbr, const char *threadname);
     void mythreadname_get(char *threadname);
     void mythreadname_get(std::string &threadname);
-
-    char* mytranslate_text(const char *msgid);
-    std::string mytranslate_text(std::string msgid);
-    void mytranslate_set(bool setnls);
-    void mytranslate_init(std::string langcd);
-    void mytranslate_locale_chg(std::string langcd);
 
     int mystrceq(const char* var1, const char* var2);
     int mystrcne(const char* var1, const char* var2);

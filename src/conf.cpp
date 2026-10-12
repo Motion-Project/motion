@@ -18,6 +18,7 @@
 
 #include "motion.hpp"
 #include "util.hpp"
+#include "i10n.hpp"
 #include "logger.hpp"
 #include "camera.hpp"
 #include "sound.hpp"
@@ -275,8 +276,6 @@ void cls_config::edit_daemon(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, daemon);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","daemon",_("daemon"));
 }
 
 void cls_config::edit_conf_filename(std::string &parm, enum PARM_ACT pact)
@@ -288,8 +287,6 @@ void cls_config::edit_conf_filename(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = conf_filename;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_file",_("log_file"));
 }
 
 void cls_config::edit_pid_file(std::string &parm, int pact)
@@ -301,8 +298,6 @@ void cls_config::edit_pid_file(std::string &parm, int pact)
     } else if (pact == PARM_ACT_GET) {
         parm = pid_file;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pid_file",_("pid_file"));
 }
 
 void cls_config::edit_log_file(std::string &parm, enum PARM_ACT pact)
@@ -321,8 +316,6 @@ void cls_config::edit_log_file(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = log_file;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_file",_("log_file"));
 }
 
 void cls_config::edit_log_level(std::string &parm, enum PARM_ACT pact)
@@ -345,9 +338,6 @@ void cls_config::edit_log_level(std::string &parm, enum PARM_ACT pact)
         parm = parm + ",\"6\",\"7\",\"8\",\"9\"";
         parm = parm + "]";
     }
-
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_level",_("log_level"));
 }
 
 void cls_config::edit_log_fflevel(std::string &parm, enum PARM_ACT pact)
@@ -370,9 +360,6 @@ void cls_config::edit_log_fflevel(std::string &parm, enum PARM_ACT pact)
         parm = parm + ",\"6\",\"7\",\"8\",\"9\"";
         parm = parm + "]";
     }
-
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_fflevel",_("log_fflevel"));
 }
 
 void cls_config::edit_log_type(std::string &parm, enum PARM_ACT pact)
@@ -397,8 +384,6 @@ void cls_config::edit_log_type(std::string &parm, enum PARM_ACT pact)
         parm = parm + ",\"DBL\",\"EVT\",\"TRK\",\"VID\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_type",_("log_type"));
 }
 
 void cls_config::edit_native_language(std::string &parm, enum PARM_ACT pact)
@@ -410,8 +395,6 @@ void cls_config::edit_native_language(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, native_language);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","native_language",_("native_language"));
 }
 
 void cls_config::edit_native_language_code(std::string &parm, enum PARM_ACT pact)
@@ -437,8 +420,6 @@ void cls_config::edit_native_language_code(std::string &parm, enum PARM_ACT pact
         parm = parm + ",\"nl\",\"no\",\"pt\",\"sv\",\"zh\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","native_language_code",_("native_language_code"));
 }
 
 void cls_config::edit_device_name(std::string &parm, enum PARM_ACT pact)
@@ -450,8 +431,6 @@ void cls_config::edit_device_name(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = device_name;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_name",_("device_name"));
 }
 
 void cls_config::edit_device_id(std::string &parm, enum PARM_ACT pact)
@@ -495,8 +474,6 @@ void cls_config::edit_device_id(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(device_id);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_id",_("device_id"));
 }
 
 void cls_config::edit_device_tmo(std::string &parm, enum PARM_ACT pact)
@@ -514,8 +491,6 @@ void cls_config::edit_device_tmo(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(device_tmo);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_tmo",_("device_tmo"));
 }
 
 void cls_config::edit_pause(std::string &parm, enum PARM_ACT pact)
@@ -551,8 +526,6 @@ void cls_config::edit_pause(std::string &parm, enum PARM_ACT pact)
         parm = parm + "\"schedule\",\"on\",\"off\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pause",_("pause"));
 }
 
 void cls_config::edit_schedule_params(std::string &parm, enum PARM_ACT pact)
@@ -564,8 +537,6 @@ void cls_config::edit_schedule_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = schedule_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","schedule_params",_("schedule_params"));
 }
 
 void cls_config::edit_cleandir_params(std::string &parm, enum PARM_ACT pact)
@@ -577,8 +548,6 @@ void cls_config::edit_cleandir_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = cleandir_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","cleandir_params",_("cleandir_params"));
 }
 
 void cls_config::edit_config_dir(std::string &parm, enum PARM_ACT pact)
@@ -590,8 +559,6 @@ void cls_config::edit_config_dir(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = config_dir;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","config_dir",_("config_dir"));
 }
 
 void cls_config::edit_target_dir(std::string &parm, enum PARM_ACT pact)
@@ -614,8 +581,6 @@ void cls_config::edit_target_dir(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = target_dir;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","target_dir",_("target_dir"));
 }
 
 void cls_config::edit_watchdog_tmo(std::string &parm, enum PARM_ACT pact)
@@ -633,8 +598,6 @@ void cls_config::edit_watchdog_tmo(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(watchdog_tmo);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","watchdog_tmo",_("watchdog_tmo"));
 }
 
 void cls_config::edit_watchdog_kill(std::string &parm, enum PARM_ACT pact)
@@ -652,8 +615,6 @@ void cls_config::edit_watchdog_kill(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(watchdog_kill);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","watchdog_kill",_("watchdog_kill"));
 }
 
 void cls_config::edit_v4l2_device(std::string &parm, enum PARM_ACT pact)
@@ -665,8 +626,6 @@ void cls_config::edit_v4l2_device(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = v4l2_device;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_device",_("v4l2_device"));
 }
 
 void cls_config::edit_v4l2_params(std::string &parm, enum PARM_ACT pact)
@@ -678,8 +637,6 @@ void cls_config::edit_v4l2_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = v4l2_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_params",_("v4l2_params"));
 }
 
 void cls_config::edit_netcam_url(std::string &parm, enum PARM_ACT pact)
@@ -691,8 +648,6 @@ void cls_config::edit_netcam_url(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = netcam_url;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_url",_("netcam_url"));
 }
 
 void cls_config::edit_netcam_params(std::string &parm, enum PARM_ACT pact)
@@ -704,8 +659,6 @@ void cls_config::edit_netcam_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = netcam_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_params",_("netcam_params"));
 }
 
 void cls_config::edit_netcam_high_url(std::string &parm, enum PARM_ACT pact)
@@ -717,8 +670,6 @@ void cls_config::edit_netcam_high_url(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = netcam_high_url;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_url",_("netcam_high_url"));
 }
 
 void cls_config::edit_netcam_high_params(std::string &parm, enum PARM_ACT pact)
@@ -730,8 +681,6 @@ void cls_config::edit_netcam_high_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = netcam_high_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_params",_("netcam_high_params"));
 }
 
 void cls_config::edit_netcam_userpass(std::string &parm, enum PARM_ACT pact)
@@ -743,8 +692,6 @@ void cls_config::edit_netcam_userpass(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = netcam_userpass;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_userpass",_("netcam_userpass"));
 }
 
 void cls_config::edit_libcam_device(std::string &parm, enum PARM_ACT pact)
@@ -756,8 +703,6 @@ void cls_config::edit_libcam_device(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = libcam_device;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","libcam_device",_("libcam_device"));
 }
 
 void cls_config::edit_libcam_params(std::string &parm, enum PARM_ACT pact)
@@ -769,8 +714,6 @@ void cls_config::edit_libcam_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = libcam_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","libcam_params",_("libcam_params"));
 }
 
 void cls_config::edit_width(std::string &parm, enum PARM_ACT pact)
@@ -795,8 +738,6 @@ void cls_config::edit_width(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(width);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","width",_("width"));
 }
 
 void cls_config::edit_height(std::string &parm, enum PARM_ACT pact)
@@ -821,8 +762,6 @@ void cls_config::edit_height(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(height);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","height",_("height"));
 }
 
 void cls_config::edit_framerate(std::string &parm, enum PARM_ACT pact)
@@ -840,8 +779,6 @@ void cls_config::edit_framerate(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(framerate);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","framerate",_("framerate"));
 }
 
 void cls_config::edit_rotate(std::string &parm, enum PARM_ACT pact)
@@ -862,8 +799,6 @@ void cls_config::edit_rotate(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"0\",\"90\",\"180\",\"270\"]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","rotate",_("rotate"));
 }
 
 void cls_config::edit_flip_axis(std::string &parm, enum PARM_ACT pact)
@@ -882,10 +817,7 @@ void cls_config::edit_flip_axis(std::string &parm, enum PARM_ACT pact)
         parm = flip_axis;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"none\",\"vertical\",\"horizontal\"]";
-
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","flip_axis",_("flip_axis"));
 }
 
 void cls_config::edit_locate_motion_mode(std::string &parm, enum PARM_ACT pact)
@@ -905,8 +837,6 @@ void cls_config::edit_locate_motion_mode(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"off\",\"on\",\"preview\"]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","locate_motion_mode",_("locate_motion_mode"));
 }
 
 void cls_config::edit_locate_motion_style(std::string &parm, enum PARM_ACT pact)
@@ -927,8 +857,6 @@ void cls_config::edit_locate_motion_style(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"box\",\"redbox\",\"cross\",\"redcross\"]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","locate_motion_style",_("locate_motion_style"));
 }
 
 void cls_config::edit_text_left(std::string &parm, enum PARM_ACT pact)
@@ -940,8 +868,6 @@ void cls_config::edit_text_left(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = text_left;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_left",_("text_left"));
 }
 
 void cls_config::edit_text_right(std::string &parm, enum PARM_ACT pact)
@@ -953,8 +879,6 @@ void cls_config::edit_text_right(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = text_right;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_right",_("text_right"));
 }
 
 void cls_config::edit_text_changes(std::string &parm, enum PARM_ACT pact)
@@ -966,8 +890,6 @@ void cls_config::edit_text_changes(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, text_changes);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_changes",_("text_changes"));
 }
 
 void cls_config::edit_text_scale(std::string &parm, enum PARM_ACT pact)
@@ -990,8 +912,6 @@ void cls_config::edit_text_scale(std::string &parm, enum PARM_ACT pact)
         parm = parm + ",\"6\",\"7\",\"8\",\"9\",\"10\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_scale",_("text_scale"));
 }
 
 void cls_config::edit_text_event(std::string &parm, enum PARM_ACT pact)
@@ -1003,8 +923,6 @@ void cls_config::edit_text_event(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = text_event;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_event",_("text_event"));
 }
 
 void cls_config::edit_emulate_motion(std::string &parm, enum PARM_ACT pact)
@@ -1016,8 +934,6 @@ void cls_config::edit_emulate_motion(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, emulate_motion);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
 }
 
 void cls_config::edit_threshold(std::string &parm, enum PARM_ACT pact)
@@ -1035,8 +951,6 @@ void cls_config::edit_threshold(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(threshold);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold",_("threshold"));
 }
 
 void cls_config::edit_threshold_maximum(std::string &parm, enum PARM_ACT pact)
@@ -1054,8 +968,6 @@ void cls_config::edit_threshold_maximum(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(threshold_maximum);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_maximum",_("threshold_maximum"));
 }
 
 void cls_config::edit_threshold_tune(std::string &parm, enum PARM_ACT pact)
@@ -1067,8 +979,6 @@ void cls_config::edit_threshold_tune(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, threshold_tune);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_tune",_("threshold_tune"));
 }
 
 void cls_config::edit_secondary_method(std::string &parm, enum PARM_ACT pact)
@@ -1089,8 +999,6 @@ void cls_config::edit_secondary_method(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"none\",\"haar\",\"hog\",\"dnn\"]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_method",_("secondary_method"));
 }
 
 void cls_config::edit_secondary_params(std::string &parm, enum PARM_ACT pact)
@@ -1102,8 +1010,6 @@ void cls_config::edit_secondary_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = secondary_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","secondary_params",_("secondary_params"));
 }
 
 void cls_config::edit_noise_level(std::string &parm, enum PARM_ACT pact)
@@ -1121,8 +1027,6 @@ void cls_config::edit_noise_level(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(noise_level);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","noise_level",_("noise_level"));
 }
 
 void cls_config::edit_noise_tune(std::string &parm, enum PARM_ACT pact)
@@ -1134,8 +1038,6 @@ void cls_config::edit_noise_tune(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, noise_tune);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","noise_tune",_("noise_tune"));
 }
 
 void cls_config::edit_despeckle_filter(std::string &parm, enum PARM_ACT pact)
@@ -1147,8 +1049,6 @@ void cls_config::edit_despeckle_filter(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = despeckle_filter;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","despeckle_filter",_("despeckle_filter"));
 }
 
 void cls_config::edit_area_detect(std::string &parm, enum PARM_ACT pact)
@@ -1160,8 +1060,6 @@ void cls_config::edit_area_detect(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = area_detect;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","area_detect",_("area_detect"));
 }
 
 void cls_config::edit_mask_file(std::string &parm, enum PARM_ACT pact)
@@ -1173,8 +1071,6 @@ void cls_config::edit_mask_file(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = mask_file;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mask_file",_("mask_file"));
 }
 
 void cls_config::edit_mask_privacy(std::string &parm, enum PARM_ACT pact)
@@ -1186,8 +1082,6 @@ void cls_config::edit_mask_privacy(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = mask_privacy;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","mask_privacy",_("mask_privacy"));
 }
 
 void cls_config::edit_smart_mask_speed(std::string &parm, enum PARM_ACT pact)
@@ -1210,8 +1104,6 @@ void cls_config::edit_smart_mask_speed(std::string &parm, enum PARM_ACT pact)
         parm = parm + ",\"6\",\"7\",\"8\",\"9\",\"10\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","smart_mask_speed",_("smart_mask_speed"));
 }
 
 void cls_config::edit_lightswitch_percent(std::string &parm, enum PARM_ACT pact)
@@ -1229,8 +1121,6 @@ void cls_config::edit_lightswitch_percent(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(lightswitch_percent);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","lightswitch_percent",_("lightswitch_percent"));
 }
 
 void cls_config::edit_lightswitch_frames(std::string &parm, enum PARM_ACT pact)
@@ -1248,8 +1138,6 @@ void cls_config::edit_lightswitch_frames(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(lightswitch_frames);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","lightswitch_frames",_("lightswitch_frames"));
 }
 
 void cls_config::edit_minimum_motion_frames(std::string &parm, enum PARM_ACT pact)
@@ -1267,8 +1155,6 @@ void cls_config::edit_minimum_motion_frames(std::string &parm, enum PARM_ACT pac
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(minimum_motion_frames);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","minimum_motion_frames",_("minimum_motion_frames"));
 }
 
 void cls_config::edit_static_object_time(std::string &parm, enum PARM_ACT pact)
@@ -1286,8 +1172,6 @@ void cls_config::edit_static_object_time(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(static_object_time);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","static_object_time",_("static_object_time"));
 }
 
 void cls_config::edit_event_gap(std::string &parm, enum PARM_ACT pact)
@@ -1305,8 +1189,6 @@ void cls_config::edit_event_gap(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(event_gap);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","event_gap",_("event_gap"));
 }
 
 void cls_config::edit_pre_capture(std::string &parm, enum PARM_ACT pact)
@@ -1324,8 +1206,6 @@ void cls_config::edit_pre_capture(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(pre_capture);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pre_capture",_("pre_capture"));
 }
 
 void cls_config::edit_post_capture(std::string &parm, enum PARM_ACT pact)
@@ -1343,8 +1223,6 @@ void cls_config::edit_post_capture(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(post_capture);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","post_capture",_("post_capture"));
 }
 
 void cls_config::edit_on_event_start(std::string &parm, enum PARM_ACT pact)
@@ -1356,8 +1234,6 @@ void cls_config::edit_on_event_start(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_event_start;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_event_start",_("on_event_start"));
 }
 
 void cls_config::edit_on_event_end(std::string &parm, enum PARM_ACT pact)
@@ -1369,8 +1245,6 @@ void cls_config::edit_on_event_end(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_event_end;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_event_end",_("on_event_end"));
 }
 
 void cls_config::edit_on_picture_save(std::string &parm, enum PARM_ACT pact)
@@ -1382,8 +1256,6 @@ void cls_config::edit_on_picture_save(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_picture_save;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_picture_save",_("on_picture_save"));
 }
 
 void cls_config::edit_on_area_detected(std::string &parm, enum PARM_ACT pact)
@@ -1395,8 +1267,6 @@ void cls_config::edit_on_area_detected(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_area_detected;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_area_detected",_("on_area_detected"));
 }
 
 void cls_config::edit_on_motion_detected(std::string &parm, enum PARM_ACT pact)
@@ -1408,8 +1278,6 @@ void cls_config::edit_on_motion_detected(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_motion_detected;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_motion_detected",_("on_motion_detected"));
 }
 
 void cls_config::edit_on_movie_start(std::string &parm, enum PARM_ACT pact)
@@ -1421,8 +1289,6 @@ void cls_config::edit_on_movie_start(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_movie_start;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_movie_start",_("on_movie_start"));
 }
 
 void cls_config::edit_on_movie_end(std::string &parm, enum PARM_ACT pact)
@@ -1434,8 +1300,6 @@ void cls_config::edit_on_movie_end(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_movie_end;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_movie_end",_("on_movie_end"));
 }
 
 void cls_config::edit_on_camera_lost(std::string &parm, enum PARM_ACT pact)
@@ -1447,8 +1311,6 @@ void cls_config::edit_on_camera_lost(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_camera_lost;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_camera_lost",_("on_camera_lost"));
 }
 
 void cls_config::edit_on_camera_found(std::string &parm, enum PARM_ACT pact)
@@ -1460,8 +1322,6 @@ void cls_config::edit_on_camera_found(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_camera_found;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_camera_found",_("on_camera_found"));
 }
 
 void cls_config::edit_on_secondary_detect(std::string &parm, enum PARM_ACT pact)
@@ -1473,8 +1333,6 @@ void cls_config::edit_on_secondary_detect(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_secondary_detect;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_secondary_detect",_("on_secondary_detect"));
 }
 
 void cls_config::edit_on_action_user(std::string &parm, enum PARM_ACT pact)
@@ -1486,8 +1344,6 @@ void cls_config::edit_on_action_user(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_action_user;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_action_user",_("on_action_user"));
 }
 
 void cls_config::edit_on_sound_alert(std::string &parm, enum PARM_ACT pact)
@@ -1499,8 +1355,6 @@ void cls_config::edit_on_sound_alert(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = on_sound_alert;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_sound_alert",_("on_sound_alert"));
 }
 
 void cls_config::edit_picture_output(std::string &parm, enum PARM_ACT pact)
@@ -1523,8 +1377,6 @@ void cls_config::edit_picture_output(std::string &parm, enum PARM_ACT pact)
         parm = parm +  "\"on\",\"off\",\"first\",\"best\",\"center\" ";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output",_("picture_output"));
 }
 
 void cls_config::edit_picture_output_motion(std::string &parm, enum PARM_ACT pact)
@@ -1546,8 +1398,6 @@ void cls_config::edit_picture_output_motion(std::string &parm, enum PARM_ACT pac
         parm = parm +  "\"on\",\"off\",\"roi\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output_motion",_("picture_output_motion"));
 }
 
 void cls_config::edit_picture_type(std::string &parm, enum PARM_ACT pact)
@@ -1569,8 +1419,6 @@ void cls_config::edit_picture_type(std::string &parm, enum PARM_ACT pact)
         parm = parm +  "\"jpg\",\"webp\",\"ppm\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_type",_("picture_type"));
 }
 
 void cls_config::edit_picture_quality(std::string &parm, enum PARM_ACT pact)
@@ -1588,8 +1436,6 @@ void cls_config::edit_picture_quality(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(picture_quality);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_quality",_("picture_quality"));
 }
 
 void cls_config::edit_picture_exif(std::string &parm, enum PARM_ACT pact)
@@ -1601,8 +1447,6 @@ void cls_config::edit_picture_exif(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = picture_exif;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_exif",_("picture_exif"));
 }
 
 void cls_config::edit_picture_filename(std::string &parm, enum PARM_ACT pact)
@@ -1621,8 +1465,6 @@ void cls_config::edit_picture_filename(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = picture_filename;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_filename",_("picture_filename"));
 }
 
 void cls_config::edit_snapshot_interval(std::string &parm, enum PARM_ACT pact)
@@ -1640,8 +1482,6 @@ void cls_config::edit_snapshot_interval(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(snapshot_interval);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snapshot_interval",_("snapshot_interval"));
 }
 
 void cls_config::edit_snapshot_filename(std::string &parm, enum PARM_ACT pact)
@@ -1660,8 +1500,6 @@ void cls_config::edit_snapshot_filename(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = snapshot_filename;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snapshot_filename",_("snapshot_filename"));
 }
 
 void cls_config::edit_movie_output(std::string &parm, enum PARM_ACT pact)
@@ -1673,8 +1511,6 @@ void cls_config::edit_movie_output(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, movie_output);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_output",_("movie_output"));
 }
 
 void cls_config::edit_movie_output_motion(std::string &parm, enum PARM_ACT pact)
@@ -1686,8 +1522,6 @@ void cls_config::edit_movie_output_motion(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, movie_output_motion);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_output_motion",_("movie_output_motion"));
 }
 
 void cls_config::edit_movie_max_time(std::string &parm, enum PARM_ACT pact)
@@ -1705,8 +1539,6 @@ void cls_config::edit_movie_max_time(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(movie_max_time);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_max_time",_("movie_max_time"));
 }
 
 void cls_config::edit_movie_bps(std::string &parm, enum PARM_ACT pact)
@@ -1724,8 +1556,6 @@ void cls_config::edit_movie_bps(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(movie_bps);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_bps",_("movie_bps"));
 }
 
 void cls_config::edit_movie_quality(std::string &parm, enum PARM_ACT pact)
@@ -1757,8 +1587,6 @@ void cls_config::edit_movie_quality(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(movie_quality);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_quality",_("movie_quality"));
 }
 
 void cls_config::edit_movie_container(std::string &parm, enum PARM_ACT pact)
@@ -1770,8 +1598,6 @@ void cls_config::edit_movie_container(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = movie_container;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_container",_("movie_container"));
 }
 
 void cls_config::edit_movie_passthrough(std::string &parm, enum PARM_ACT pact)
@@ -1783,8 +1609,6 @@ void cls_config::edit_movie_passthrough(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, movie_passthrough);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_passthrough",_("movie_passthrough"));
 }
 
 void cls_config::edit_movie_filename(std::string &parm, enum PARM_ACT pact)
@@ -1803,8 +1627,6 @@ void cls_config::edit_movie_filename(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = movie_filename;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_filename",_("movie_filename"));
 }
 
 void cls_config::edit_movie_retain(std::string &parm, enum PARM_ACT pact)
@@ -1826,8 +1648,6 @@ void cls_config::edit_movie_retain(std::string &parm, enum PARM_ACT pact)
         parm = parm +  "\"all\",\"secondary\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_retain",_("movie_retain"));
 }
 
 void cls_config::edit_movie_all_frames(std::string &parm, enum PARM_ACT pact)
@@ -1839,8 +1659,6 @@ void cls_config::edit_movie_all_frames(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, movie_all_frames);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_all_frames",_("movie_all_frames"));
 }
 
 void cls_config::edit_movie_extpipe_use(std::string &parm, enum PARM_ACT pact)
@@ -1852,8 +1670,6 @@ void cls_config::edit_movie_extpipe_use(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, movie_extpipe_use);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_extpipe_use",_("movie_extpipe_use"));
 }
 
 void cls_config::edit_movie_extpipe(std::string &parm, enum PARM_ACT pact)
@@ -1865,8 +1681,6 @@ void cls_config::edit_movie_extpipe(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = movie_extpipe;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_extpipe",_("movie_extpipe"));
 }
 
 void cls_config::edit_timelapse_interval(std::string &parm, enum PARM_ACT pact)
@@ -1884,8 +1698,6 @@ void cls_config::edit_timelapse_interval(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(timelapse_interval);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_interval",_("timelapse_interval"));
 }
 
 void cls_config::edit_timelapse_mode(std::string &parm, enum PARM_ACT pact)
@@ -1910,8 +1722,6 @@ void cls_config::edit_timelapse_mode(std::string &parm, enum PARM_ACT pact)
         parm = parm + ",\"weekly-monday\",\"monthly\",\"manual\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_mode",_("timelapse_mode"));
 }
 
 void cls_config::edit_timelapse_fps(std::string &parm, enum PARM_ACT pact)
@@ -1929,8 +1739,6 @@ void cls_config::edit_timelapse_fps(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(timelapse_fps);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_fps",_("timelapse_fps"));
 }
 
 void cls_config::edit_timelapse_container(std::string &parm, enum PARM_ACT pact)
@@ -1952,8 +1760,6 @@ void cls_config::edit_timelapse_container(std::string &parm, enum PARM_ACT pact)
         parm = parm +  "\"mpg\",\"mkv\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_container",_("timelapse_container"));
 }
 
 void cls_config::edit_timelapse_filename(std::string &parm, enum PARM_ACT pact)
@@ -1972,8 +1778,6 @@ void cls_config::edit_timelapse_filename(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = timelapse_filename;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_filename",_("timelapse_filename"));
 }
 
 void cls_config::edit_video_pipe(std::string &parm, enum PARM_ACT pact)
@@ -1985,8 +1789,6 @@ void cls_config::edit_video_pipe(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = video_pipe;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","video_pipe",_("video_pipe"));
 }
 
 void cls_config::edit_video_pipe_motion(std::string &parm, enum PARM_ACT pact)
@@ -1998,8 +1800,6 @@ void cls_config::edit_video_pipe_motion(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = video_pipe_motion;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","video_pipe_motion",_("video_pipe_motion"));
 }
 
 void cls_config::edit_webcontrol_port(std::string &parm, enum PARM_ACT pact)
@@ -2017,8 +1817,6 @@ void cls_config::edit_webcontrol_port(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(webcontrol_port);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_port",_("webcontrol_port"));
 }
 
 void cls_config::edit_webcontrol_base_path(std::string &parm, enum PARM_ACT pact)
@@ -2044,8 +1842,6 @@ void cls_config::edit_webcontrol_base_path(std::string &parm, enum PARM_ACT pact
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_base_path;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_base_path",_("webcontrol_base_path"));
 }
 
 void cls_config::edit_webcontrol_ipv6(std::string &parm, enum PARM_ACT pact)
@@ -2057,8 +1853,6 @@ void cls_config::edit_webcontrol_ipv6(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, webcontrol_ipv6);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_ipv6",_("webcontrol_ipv6"));
 }
 
 void cls_config::edit_webcontrol_localhost(std::string &parm, enum PARM_ACT pact)
@@ -2070,8 +1864,6 @@ void cls_config::edit_webcontrol_localhost(std::string &parm, enum PARM_ACT pact
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, webcontrol_localhost);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_localhost",_("webcontrol_localhost"));
 }
 
 void cls_config::edit_webcontrol_access(std::string &parm, enum PARM_ACT pact)
@@ -2093,8 +1885,6 @@ void cls_config::edit_webcontrol_access(std::string &parm, enum PARM_ACT pact)
         parm = parm +  "\"0\",\"1\",\"2\",\"3\",\"4\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_access",_("webcontrol_access"));
 }
 
 void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact)
@@ -2120,8 +1910,6 @@ void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact
         parm = parm +  "\"default\",\"stream\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_interface",_("webcontrol_interface"));
 }
 
 void cls_config::edit_webcontrol_auth_method(std::string &parm, enum PARM_ACT pact)
@@ -2143,8 +1931,6 @@ void cls_config::edit_webcontrol_auth_method(std::string &parm, enum PARM_ACT pa
         parm = parm +  "\"none\",\"basic\",\"digest\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_auth_method",_("webcontrol_auth_method"));
 }
 
 void cls_config::edit_webcontrol_auth_admin(std::string &parm, enum PARM_ACT pact)
@@ -2169,8 +1955,6 @@ void cls_config::edit_webcontrol_auth_admin(std::string &parm, enum PARM_ACT pac
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_auth_admin;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_auth_admin",_("webcontrol_auth_admin"));
 }
 
 void cls_config::edit_webcontrol_auth_user(std::string &parm, enum PARM_ACT pact)
@@ -2195,8 +1979,6 @@ void cls_config::edit_webcontrol_auth_user(std::string &parm, enum PARM_ACT pact
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_auth_user;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_auth_user",_("webcontrol_auth_user"));
 }
 
 void cls_config::edit_webcontrol_tls(std::string &parm, enum PARM_ACT pact)
@@ -2208,8 +1990,6 @@ void cls_config::edit_webcontrol_tls(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, webcontrol_tls);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_tls",_("webcontrol_tls"));
 }
 
 void cls_config::edit_webcontrol_cert(std::string &parm, enum PARM_ACT pact)
@@ -2221,8 +2001,6 @@ void cls_config::edit_webcontrol_cert(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_cert;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_cert",_("webcontrol_cert"));
 }
 
 void cls_config::edit_webcontrol_key(std::string &parm, enum PARM_ACT pact)
@@ -2234,8 +2012,6 @@ void cls_config::edit_webcontrol_key(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_key;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_key",_("webcontrol_key"));
 }
 
 void cls_config::edit_webcontrol_headers(std::string &parm, enum PARM_ACT pact)
@@ -2247,8 +2023,6 @@ void cls_config::edit_webcontrol_headers(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_headers;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_headers",_("webcontrol_headers"));
 }
 
 void cls_config::edit_webcontrol_html(std::string &parm, enum PARM_ACT pact)
@@ -2260,8 +2034,6 @@ void cls_config::edit_webcontrol_html(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_html;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_html",_("webcontrol_html"));
 }
 
 void cls_config::edit_webcontrol_actions(std::string &parm, enum PARM_ACT pact)
@@ -2273,8 +2045,6 @@ void cls_config::edit_webcontrol_actions(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_actions;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_actions",_("webcontrol_actions"));
 }
 
 void cls_config::edit_webcontrol_lock_minutes(std::string &parm, enum PARM_ACT pact)
@@ -2292,8 +2062,6 @@ void cls_config::edit_webcontrol_lock_minutes(std::string &parm, enum PARM_ACT p
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(webcontrol_lock_minutes);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_minutes",_("webcontrol_lock_minutes"));
 }
 
 void cls_config::edit_webcontrol_lock_attempts(std::string &parm, enum PARM_ACT pact)
@@ -2311,8 +2079,6 @@ void cls_config::edit_webcontrol_lock_attempts(std::string &parm, enum PARM_ACT 
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(webcontrol_lock_attempts);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_attempts",_("webcontrol_lock_attempts"));
 }
 
 void cls_config::edit_webcontrol_lock_script(std::string &parm, enum PARM_ACT pact)
@@ -2324,8 +2090,6 @@ void cls_config::edit_webcontrol_lock_script(std::string &parm, enum PARM_ACT pa
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_lock_script;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_script",_("webcontrol_lock_script"));
 }
 
 void cls_config::edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact)
@@ -2337,8 +2101,6 @@ void cls_config::edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact
     } else if (pact == PARM_ACT_GET) {
         parm = stream_allcam_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_allcam_params",_("stream_allcam_params"));
 }
 
 void cls_config::edit_stream_quality(std::string &parm, enum PARM_ACT pact)
@@ -2356,8 +2118,6 @@ void cls_config::edit_stream_quality(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(stream_quality);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_quality",_("stream_quality"));
 }
 
 void cls_config::edit_stream_grey(std::string &parm, enum PARM_ACT pact)
@@ -2369,8 +2129,6 @@ void cls_config::edit_stream_grey(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, stream_grey);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_grey",_("stream_grey"));
 }
 
 void cls_config::edit_stream_motion(std::string &parm, enum PARM_ACT pact)
@@ -2382,8 +2140,6 @@ void cls_config::edit_stream_motion(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, stream_motion);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_motion",_("stream_motion"));
 }
 
 void cls_config::edit_stream_maxrate(std::string &parm, enum PARM_ACT pact)
@@ -2401,8 +2157,6 @@ void cls_config::edit_stream_maxrate(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(stream_maxrate);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_maxrate",_("stream_maxrate"));
 }
 
 void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
@@ -2423,8 +2177,6 @@ void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
         parm = parm +  "\"\",\"mariadb\",\"postgresql\",\"sqlite3\"";
         parm = parm + "]";
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_type",_("database_type"));
 }
 
 void cls_config::edit_database_dbname(std::string &parm, enum PARM_ACT pact)
@@ -2436,8 +2188,6 @@ void cls_config::edit_database_dbname(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = database_dbname;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_dbname",_("database_dbname"));
 }
 
 void cls_config::edit_database_host(std::string &parm, enum PARM_ACT pact)
@@ -2449,8 +2199,6 @@ void cls_config::edit_database_host(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = database_host;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_host",_("database_host"));
 }
 
 void cls_config::edit_database_port(std::string &parm, enum PARM_ACT pact)
@@ -2468,8 +2216,6 @@ void cls_config::edit_database_port(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(database_port);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_port",_("database_port"));
 }
 
 void cls_config::edit_database_user(std::string &parm, enum PARM_ACT pact)
@@ -2481,8 +2227,6 @@ void cls_config::edit_database_user(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = database_user;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_user",_("database_user"));
 }
 
 void cls_config::edit_database_password(std::string &parm, enum PARM_ACT pact)
@@ -2494,8 +2238,6 @@ void cls_config::edit_database_password(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = database_password;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_password",_("database_password"));
 }
 
 void cls_config::edit_database_busy_timeout(std::string &parm, enum PARM_ACT pact)
@@ -2513,8 +2255,6 @@ void cls_config::edit_database_busy_timeout(std::string &parm, enum PARM_ACT pac
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(database_busy_timeout);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_busy_timeout",_("database_busy_timeout"));
 }
 
 void cls_config::edit_sql_event_start(std::string &parm, enum PARM_ACT pact)
@@ -2526,8 +2266,6 @@ void cls_config::edit_sql_event_start(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = sql_event_start;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_event_start",_("sql_event_start"));
 }
 
 void cls_config::edit_sql_event_end(std::string &parm, enum PARM_ACT pact)
@@ -2539,8 +2277,6 @@ void cls_config::edit_sql_event_end(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = sql_event_end;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_event_end",_("sql_event_end"));
 }
 
 void cls_config::edit_sql_movie_start(std::string &parm, enum PARM_ACT pact)
@@ -2552,8 +2288,6 @@ void cls_config::edit_sql_movie_start(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = sql_movie_start;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_movie_start",_("sql_movie_start"));
 }
 
 void cls_config::edit_sql_movie_end(std::string &parm, enum PARM_ACT pact)
@@ -2565,8 +2299,6 @@ void cls_config::edit_sql_movie_end(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = sql_movie_end;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_movie_end",_("sql_movie_end"));
 }
 
 void cls_config::edit_sql_pic_save(std::string &parm, enum PARM_ACT pact)
@@ -2578,8 +2310,6 @@ void cls_config::edit_sql_pic_save(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = sql_pic_save;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_pic_save",_("sql_pic_save"));
 }
 
 void cls_config::edit_ptz_auto_track(std::string &parm, enum PARM_ACT pact)
@@ -2591,8 +2321,6 @@ void cls_config::edit_ptz_auto_track(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, ptz_auto_track);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_auto_track",_("ptz_auto_track"));
 }
 
 void cls_config::edit_ptz_wait(std::string &parm, enum PARM_ACT pact)
@@ -2610,8 +2338,6 @@ void cls_config::edit_ptz_wait(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = std::to_string(ptz_wait);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_wait",_("ptz_wait"));
 }
 
 void cls_config::edit_ptz_move_track(std::string &parm, enum PARM_ACT pact)
@@ -2623,8 +2349,6 @@ void cls_config::edit_ptz_move_track(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = ptz_move_track;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_move_track",_("ptz_move_track"));
 }
 
 void cls_config::edit_ptz_pan_left(std::string &parm, enum PARM_ACT pact)
@@ -2636,8 +2360,6 @@ void cls_config::edit_ptz_pan_left(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = ptz_pan_left;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_pan_left",_("ptz_pan_left"));
 }
 
 void cls_config::edit_ptz_pan_right(std::string &parm, enum PARM_ACT pact)
@@ -2649,8 +2371,6 @@ void cls_config::edit_ptz_pan_right(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = ptz_pan_right;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_pan_right",_("ptz_pan_right"));
 }
 
 void cls_config::edit_ptz_tilt_up(std::string &parm, enum PARM_ACT pact)
@@ -2662,8 +2382,6 @@ void cls_config::edit_ptz_tilt_up(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = ptz_tilt_up;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_tilt_up",_("ptz_tilt_up"));
 }
 
 void cls_config::edit_ptz_tilt_down(std::string &parm, enum PARM_ACT pact)
@@ -2675,8 +2393,6 @@ void cls_config::edit_ptz_tilt_down(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = ptz_tilt_down;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_tilt_down",_("ptz_tilt_down"));
 }
 
 void cls_config::edit_ptz_zoom_in(std::string &parm, enum PARM_ACT pact)
@@ -2688,8 +2404,6 @@ void cls_config::edit_ptz_zoom_in(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = ptz_zoom_in;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_zoom_in",_("ptz_zoom_in"));
 }
 
 void cls_config::edit_ptz_zoom_out(std::string &parm, enum PARM_ACT pact)
@@ -2701,8 +2415,6 @@ void cls_config::edit_ptz_zoom_out(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = ptz_zoom_out;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_zoom_out",_("ptz_zoom_out"));
 }
 
 void cls_config::edit_snd_device(std::string &parm, enum PARM_ACT pact)
@@ -2714,8 +2426,6 @@ void cls_config::edit_snd_device(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = snd_device;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_device",_("snd_device"));
 }
 
 void cls_config::edit_snd_params(std::string &parm, enum PARM_ACT pact)
@@ -2727,8 +2437,6 @@ void cls_config::edit_snd_params(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         parm = snd_params;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_params",_("snd_params"));
 }
 
 void cls_config::edit_snd_alerts(std::string &parm, enum PARM_ACT pact)
@@ -2753,8 +2461,6 @@ void cls_config::edit_snd_alerts(std::string &parm, enum PARM_ACT pact)
             parm = snd_alerts.back();     /* Give last item*/
         }
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_alerts",_("snd_alerts"));
 }
 
 void cls_config::edit_snd_alerts(std::list<std::string> &parm, enum PARM_ACT pact)
@@ -2767,8 +2473,6 @@ void cls_config::edit_snd_alerts(std::list<std::string> &parm, enum PARM_ACT pac
     } else if (pact == PARM_ACT_GET) {
         parm = snd_alerts;
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_alerts",_("snd_alerts"));
 }
 
 void cls_config::edit_snd_window(std::string &parm, enum PARM_ACT pact)
@@ -2787,10 +2491,7 @@ void cls_config::edit_snd_window(std::string &parm, enum PARM_ACT pact)
         parm = snd_window;
     } else if (pact == PARM_ACT_LIST) {
         parm = "[\"none\",\"hamming\",\"hann\"]";
-
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_window",_("snd_window"));
 }
 
 void cls_config::edit_snd_show(std::string &parm, enum PARM_ACT pact)
@@ -2802,8 +2503,6 @@ void cls_config::edit_snd_show(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_GET) {
         edit_get_bool(parm, snd_show);
     }
-    return;
-    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_show",_("snd_show"));
 }
 
 void cls_config::edit_cat00(std::string cmd, std::string &parm_val, enum PARM_ACT pact)

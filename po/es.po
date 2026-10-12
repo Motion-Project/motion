@@ -3446,3 +3446,12 @@ msgstr "Hilo especificado no válido: %s"
 #: src/webu_stream.cpp
 msgid "Could not get image to stream."
 msgstr "No se pudo obtener la imagen para transmitir."
+
+msgid "schedule"
+msgstr "cronograma"
+
+msgid "off"
+msgstr "apagar"
+
+msgid "on"
+msgstr "encender"

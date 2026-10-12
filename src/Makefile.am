@@ -56,5 +56,6 @@ motion_SOURCES = \
 	webu_post.hpp      webu_post.cpp \
 	webu_stream.hpp    webu_stream.cpp \
 	webu_getimg.hpp    webu_getimg.cpp \
-	webu_mpegts.hpp    webu_mpegts.cpp
+	webu_mpegts.hpp    webu_mpegts.cpp \
+	i10n.hpp           i10n.cpp
 

@@ -17,10 +17,11 @@
  */
 #include "motion.hpp"
 #include "util.hpp"
+#include "i10n.hpp"
+#include "logger.hpp"
 #include "conf.hpp"
 #include "camera.hpp"
 #include "draw.hpp"
-#include "logger.hpp"
 #include "alg.hpp"
 
 #define MAX2(x, y) ((x) > (y) ? (x) : (y))

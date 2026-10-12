@@ -19,9 +19,10 @@
 
 #include "motion.hpp"
 #include "util.hpp"
+#include "i10n.hpp"
+#include "logger.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
-#include "logger.hpp"
 #include "jpegutils.hpp"
 #include <setjmp.h>
 #include <jpeglib.h>

@@ -17,9 +17,10 @@
  */
 #include "motion.hpp"
 #include "util.hpp"
+#include "i10n.hpp"
+#include "logger.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
-#include "logger.hpp"
 #include "video_loopback.hpp"
 
 #if (defined(HAVE_V4L2)) && (!defined(BSD))

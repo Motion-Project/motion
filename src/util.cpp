@@ -19,13 +19,12 @@
 
 #include "motion.hpp"
 #include "util.hpp"
+#include "i10n.hpp"
+#include "logger.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
-#include "logger.hpp"
 #include "alg_sec.hpp"
 #include "sound.hpp"
-
-static bool nls_enabled = true;
 
 /** Non case sensitive equality check for strings*/
 int mystrceq(const char* var1, const char* var2)
@@ -535,131 +534,6 @@ void mythreadname_get(char *threadname)
     #endif
 }
 
-void mytranslate_locale_chg(std::string langcd)
-{
-    #ifdef HAVE_GETTEXT
-        char *rslt;
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("setting language code to %s"),langcd.c_str());
-
-       if (langcd == "da")          {rslt = setlocale (LC_ALL, "da_DK.utf8");
-        } else if (langcd == "de")  {rslt = setlocale (LC_ALL, "de_DE.utf8");
-        } else if (langcd == "es")  {rslt = setlocale (LC_ALL, "es_ES.utf8");
-        } else if (langcd == "en")  {rslt = setlocale (LC_ALL, "en_US.utf8");
-        } else if (langcd == "fi")  {rslt = setlocale (LC_ALL, "fi_FI.utf8");
-        } else if (langcd == "fr")  {rslt = setlocale (LC_ALL, "fr_FR.utf8");
-        } else if (langcd == "it")  {rslt = setlocale (LC_ALL, "it_IT.utf8");
-        } else if (langcd == "ja")  {rslt = setlocale (LC_ALL, "ja_JP.utf8");
-        } else if (langcd == "ko")  {rslt = setlocale (LC_ALL, "ko_KR.utf8");
-        } else if (langcd == "nl")  {rslt = setlocale (LC_ALL, "nl_NL.utf8");
-        } else if (langcd == "no")  {rslt = setlocale (LC_ALL, "no_NO.utf8");
-        } else if (langcd == "pt")  {rslt = setlocale (LC_ALL, "pt_PT.utf8");
-        } else if (langcd == "sv")  {rslt = setlocale (LC_ALL, "sv_SE.utf8");
-        } else if (langcd == "zh")  {rslt = setlocale (LC_ALL, "zh_CN.utf8");
-        } else if (langcd == "")    {rslt = setlocale (LC_ALL, "");
-        } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("language code %s not supported for override")
-                ,langcd.c_str());
-            rslt = setlocale (LC_ALL, "");
-        }
-        if (rslt == nullptr) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,_("unable to set locale for %s"),langcd.c_str());
-
-        } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                ,_("set locale to %s"),rslt);
-        }
-        ++_nl_msg_cat_cntr;
-
-        return;
-
-        /* This section is for development testing only.  It is not used for
-        * regular users because once this locale is change, it changes the
-        * whole computer over to the new locale.
-        */
-
-        setenv ("LANGUAGE", langcd.c_str(), 1);
-        /* Invoke external function to change locale*/
-        ++_nl_msg_cat_cntr;
-    #else
-        if (langcd != "") {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"No native language support");
-        }
-    #endif
-}
-
-void mytranslate_init(std::string langcd)
-{
-    #ifdef HAVE_GETTEXT
-        mytranslate_set(true);
-        mytranslate_locale_chg(langcd);
-        bindtextdomain ("motion", LOCALEDIR);
-        bind_textdomain_codeset ("motion", "UTF-8");
-        textdomain ("motion");
-
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Language: English"));
-        return;
-
-    #else
-        /* Disable native language support */
-        mytranslate_set(false);
-
-        /* This avoids a unused function warning */
-        mytranslate_locale_chg("");
-    #endif
-}
-
-void mytranslate_set(bool setnls)
-{
-    if (setnls == true) {
-        if (nls_enabled == false) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
-        }
-        nls_enabled = true;
-    } else {
-        if (nls_enabled == true) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Disabling native language support"));
-        }
-        nls_enabled = false;
-    }
-}
-
-std::string mytranslate_text(std::string msgid)
-{
-    std::string tmp;
-
-    if (msgid == "") {
-        return "";
-    }
-    #ifdef HAVE_GETTEXT
-        if (nls_enabled) {
-            tmp = (char*)gettext(msgid.c_str());
-            return tmp;
-        } else {
-            return msgid;
-        }
-    #else
-        return msgid;
-    #endif
-}
-
-char* mytranslate_text(const char *msgid)
-{
-    if (msgid == nullptr) {
-        return nullptr;
-    }
-    #ifdef HAVE_GETTEXT
-        if (nls_enabled) {
-            return (char*)gettext(msgid);
-        } else {
-            return (char*)msgid;
-        }
-    #else
-        return (char*)msgid;
-    #endif
-}
 
 /****************************************************************************
  *  The section below is the "my" section of functions.

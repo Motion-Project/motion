@@ -18,11 +18,12 @@
 
 #include "motion.hpp"
 #include "util.hpp"
+#include "i10n.hpp"
+#include "logger.hpp"
 #include "camera.hpp"
 #include "sound.hpp"
 #include "dbse.hpp"
 #include "conf.hpp"
-#include "logger.hpp"
 #include "webu.hpp"
 #include "webu_allcam.hpp"
 #include "webu_ans.hpp"
@@ -714,8 +715,8 @@ void cls_webu_post::config_ra_process()
             if (ra_list[indx].apply == true) {
                 MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Changing nls to: %s"
                     ,app->conf_src->native_language_code.c_str());
-                mytranslate_init(app->conf_src->native_language_code);
-                mytranslate_set(app->conf_src->native_language);
+                i10n_init(app->conf_src->native_language_code);
+                i10n_set(app->conf_src->native_language);
                 app->cfg->native_language_code = app->conf_src->native_language_code;
                 app->cfg->native_language = app->conf_src->native_language;
             }

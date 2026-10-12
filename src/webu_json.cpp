@@ -18,9 +18,10 @@
 
 #include "motion.hpp"
 #include "util.hpp"
+#include "i10n.hpp"
+#include "logger.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
-#include "logger.hpp"
 #include "webu.hpp"
 #include "webu_allcam.hpp"
 #include "webu_ans.hpp"
@@ -83,13 +84,20 @@ void cls_webu_json::parms_item_detail(cls_config *conf, std::string pNm)
                 }
                 pval = itm->param_value;
                 plst = "";
-                for (indx2=0;indx2<itm->param_lst.size();indx2++){
-                    plst += ",\""+escstr(_(itm->param_lst[indx2]))+"\"";
+                for (indx2=0;indx2<itm->param_lst.size();indx2++) {
                     if (itm->param_type == PARM_TYP_INTLIST) {
+                        plst += ",\""+escstr(_(itm->param_lst[indx2]))+"\"";
                         pchk = itm->param_lst[indx2];
                         pchk = pchk.substr(0, pchk.find("-"));
                         if (mtoi(pval) == mtoi(pchk)) {
                             pval = itm->param_lst[indx2];
+                        }
+                    } else if (itm->param_type == PARM_TYP_LIST) {
+                        if (itm->param_lst[indx2] != _(itm->param_lst[indx2])) {
+                            plst += ",\""+escstr(itm->param_lst[indx2])+"(";
+                            plst += escstr(_(itm->param_lst[indx2])) + ")\"";
+                        } else {
+                            plst += ",\""+escstr(itm->param_lst[indx2])+"\"";
                         }
                     }
                 }

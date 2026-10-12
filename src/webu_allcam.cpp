@@ -19,8 +19,9 @@
 
 #include "motion.hpp"
 #include "util.hpp"
-#include "conf.hpp"
+#include "i10n.hpp"
 #include "logger.hpp"
+#include "conf.hpp"
 #include "webu.hpp"
 #include "webu_allcam.hpp"
 #include "camera.hpp"
