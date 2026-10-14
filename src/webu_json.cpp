@@ -213,6 +213,53 @@ void cls_webu_json::parms_item(cls_config *conf
     }
 }
 
+/* Temporary workaround until the configuration parameters get
+    rewritten to allow for the list to be provided directly via
+    a vector.  We parse this so that we can translate each item*/
+void cls_webu_json::parms_lst(std::string &parm)
+{
+    std::vector<std::string>   tmp_lst;
+    std::string tmp;
+    int indx;
+
+    tmp_lst.clear();
+    mytrim(parm);
+    parm = parm.substr(1, parm.length()-2); /* strip []*/
+    mytrim(parm);
+    while (parm.find(",") != std::string::npos) {
+        tmp = parm.substr(0,parm.find(","));
+        if (tmp.length()>=2) {
+            tmp = tmp.substr(1,tmp.length()-2); /* strip " */
+        }
+        mytrim(tmp);
+        tmp_lst.push_back(tmp);
+        parm=parm.substr(parm.find(",")+1);
+        mytrim(parm);
+    }
+    if (parm.length()>=2) {
+        parm = parm.substr(1,parm.length()-2); /* strip " */
+    }
+    mytrim(parm);
+    tmp_lst.push_back(parm);
+
+    /* Now we put it back together with translations*/
+    if (tmp_lst.size()>0) {
+        parm = "";
+        for (indx=0;indx<tmp_lst.size();indx++) {
+            if (tmp_lst[indx] == _(tmp_lst[indx])) {
+                parm += ",\""+tmp_lst[indx]+"\"";
+            } else {
+                parm += ",\""+tmp_lst[indx]+" (";
+                parm += _(tmp_lst[indx])+")\"";
+            }
+        }
+        parm="["+parm.substr(1)+"]";
+    } else {
+        parm="[\"\"]";
+    }
+
+}
+
 void cls_webu_json::parms_one(cls_config *conf, PARM_CAT pcat)
 {
     int indx_parm;
@@ -235,8 +282,13 @@ void cls_webu_json::parms_one(cls_config *conf, PARM_CAT pcat)
         }
         conf->edit_get(config_parms[indx_parm].parm_name
             , parm_orig, config_parms[indx_parm].parm_cat);
-        conf->edit_list(config_parms[indx_parm].parm_name, plst, pcat);
         catstr = std::to_string(pcat);
+        if (config_parms[indx_parm].parm_type == PARM_TYP_LIST) {
+            conf->edit_list(config_parms[indx_parm].parm_name, plst, pcat);
+            parms_lst(plst);
+        } else {
+            plst="[\"\"]";
+        }
         parms_item(conf, config_parms[indx_parm].parm_name
             ,parm_orig,config_parms[indx_parm].parm_type
             ,plst, catstr, "");

@@ -2903,7 +2903,7 @@ void cls_config::params_load_cleandir()
         ,{""},"Remove directory"});
     prm->params_array.push_back(
         {"script","",PARM_SRC_SYS
-        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        , PARM_TYP_STRING, PARM_LVL_03, PARM_CHG_CODE
         ,{""},"script to execute"});
 
     prm->params_cnt = (int)prm->params_array.size();
@@ -3075,7 +3075,7 @@ void cls_config::params_load_libcamera()
     prm->params_array.push_back(
         {"AeMeteringMode","",PARM_SRC_SYS
         ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE
-        ,{"0-CentreWeighted", "1-Spot", "3-Matrix", "4-Custom"},""});
+        ,{"0-CentreWeighted", "1-Spot", "2-Matrix", "3-Custom"},""});
     prm->params_array.push_back(
         {"AeState","",PARM_SRC_SYS
         ,PARM_TYP_INTLIST, PARM_LVL_01, PARM_CHG_CODE

@@ -27,6 +27,7 @@
             cls_motapp      *app;
             cls_webu        *webu;
             cls_webu_ans    *webua;
+            void parms_lst(std::string &parm);
             void parms_one(cls_config *conf, PARM_CAT pcat);
             void parms_all();
             void cameras_list();

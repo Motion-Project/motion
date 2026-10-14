@@ -321,13 +321,18 @@
 
     function send_config_item(frmdata, pval, jkey, catkey) {
       var itm = document.getElementById(catkey);
+      var trm;
       if (itm != null) {
+        trm = String(itm.value).trim();
+        if (trm.indexOf("(") != -1) {
+          trm=trm.substring(0,trm.indexOf("(")).trim();
+        }
         if (itm.type == 'checkbox') {
           if (pval != itm.checked) {
             frmdata.append(jkey, itm.checked);
           }
-        } else if (pval != itm.value) {
-          frmdata.append(jkey, itm.value);
+        } else if (pval != trm) {
+          frmdata.append(jkey, trm);
         }
       } else {
         console.log("null element:"+catkey);
@@ -671,14 +676,27 @@
 
     }
 
-    function assign_vals_item(pCfg, jkey, catkey) {
-      var itm;
+        function assign_vals_item(pCfg, jkey, catkey) {
+      var itm, trm, drpopt;
       itm =document.getElementById(catkey);
       if (itm != null) {
         if (pCfg[jkey].enabled) {
           itm.disabled = false;
+
           if (itm.type == "checkbox") {
             itm.checked = pCfg[jkey].value;
+          } else if (itm.type.substring(0,6) == "select") {
+            itm.selectedIndex = -1;
+            for (drpopt of itm.options) {
+              trm = String(drpopt.value).trim();
+              if (trm.indexOf("(") != -1) {
+                trm=trm.substring(0,trm.indexOf("(")).trim();
+              }
+              if (trm == pCfg[jkey].value) {
+                drpopt.selected = true;
+                break;
+              }
+            }
           } else {
             itm.value = pCfg[jkey].value;
           }
