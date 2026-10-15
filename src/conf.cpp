@@ -4188,12 +4188,15 @@ void cls_config::config_log_item(std::string parm_nm, std::string parm_vl)
 
 void cls_config::config_log()
 {
-    int i, indx;
+    int i, indx, indx2, indx3;
     std::string parm_vl, parm_main, parm_nm;
     std::list<std::string> parm_array;
     std::list<std::string>::iterator it;
     enum PARM_CAT parm_ct;
     enum PARM_TYP parm_typ;
+    ctx_params *prm_a, *prm_c;
+    ctx_params_item *itma, *itmc;
+    bool chk;
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Logging configuration parameters from all files"));
@@ -4206,7 +4209,6 @@ void cls_config::config_log()
         parm_nm=config_parms[i].parm_name;
         parm_ct=config_parms[i].parm_cat;
         parm_typ=config_parms[i].parm_type;
-
         if ((parm_nm != "camera") && (parm_nm != "sound") &&
             (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
             (parm_typ != PARM_TYP_ARRAY)) {
@@ -4217,6 +4219,19 @@ void cls_config::config_log()
             app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
             for (it = parm_array.begin(); it != parm_array.end(); it++) {
                 config_log_item(parm_nm, it->c_str());
+            }
+        } else if (parm_typ == PARM_TYP_PARAMS) {
+            prm_a=nullptr;
+            for (indx=0;indx<app->conf_src->params.size();indx++){
+                if (parm_nm == app->conf_src->params[indx]->params_desc) {
+                    prm_a=app->conf_src->params[indx];
+                }
+            }
+            if (prm_a != nullptr) {
+                for (indx=0;indx<prm_a->params_array.size();indx++){
+                    itma = &prm_a->params_array[indx];
+                    config_log_item("  "+itma->param_name, itma->param_value);
+                }
             }
         }
         i++;
@@ -4244,7 +4259,37 @@ void cls_config::config_log()
                 for (it = parm_array.begin(); it != parm_array.end(); it++) {
                     config_log_item(parm_nm, it->c_str());
                 }
+            } else if (parm_typ == PARM_TYP_PARAMS) {
+                prm_a=nullptr;
+                for (indx2=0;indx2<app->conf_src->params.size();indx2++){
+                    if (parm_nm == app->conf_src->params[indx2]->params_desc) {
+                        prm_a=app->conf_src->params[indx2];
+                    }
+                }
+                prm_c=nullptr;
+                for (indx2=0;indx2<app->cam_list[indx]->conf_src->params.size();indx2++){
+                    if (parm_nm == app->cam_list[indx]->conf_src->params[indx2]->params_desc) {
+                        prm_c=app->cam_list[indx]->conf_src->params[indx2];
+                    }
+                }
+                if ((prm_a != nullptr) && (prm_c != nullptr)) {
+                    for (indx2=0;indx2<prm_c->params_array.size();indx2++) {
+                        itmc = &prm_c->params_array[indx2];
+                        chk = false;
+                        for (indx3=0;indx3<prm_a->params_array.size();indx3++) {
+                            itma = &prm_a->params_array[indx3];
+                            if ((itma->param_name == itmc->param_name) &&
+                                (itma->param_value == itmc->param_value)) {
+                                chk=true;
+                            }
+                        }
+                        if (chk == false){
+                            config_log_item("  "+itmc->param_name,itmc->param_value);
+                        }
+                    }
+                }
             }
+
             i++;
         }
     }
@@ -4391,7 +4436,7 @@ void cls_config::config_write_item(FILE *conffile, std::string parm_nm
 void cls_config::config_write_app()
 {
     int i, indx;
-    std::string parm_vl, parm_main, parm_nm, chk;
+    std::string parm_vl, parm_main, parm_nm;
     std::list<std::string> parm_array;
     std::list<std::string>::iterator it;
     enum PARM_CAT parm_ct;
