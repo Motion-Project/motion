@@ -68,6 +68,7 @@ struct ctx_params_item {
 };
 typedef std::vector<ctx_params_item> vec_params;
 struct ctx_params {
+    cls_motapp      *app;
     vec_params      params_array;   /* Vector of parameter items*/
     /*TODO  Remove this params_cnt and use vector size.  This is a holdover from when this was C code*/
     int             params_cnt;     /* Count of items in vector*/

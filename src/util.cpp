@@ -726,15 +726,15 @@ void util_exec_command(cls_sound *snd, std::string usrcmd)
 }
 
 /*********************************************/
-static void util_parms_file(ctx_params *params, std::string params_file,bool showmsg)
+static void util_parms_file(ctx_params *params, std::string params_file, bool showmsg)
 {
     int chk, indx;
     size_t stpos;
-    std::string line, parm_nm, parm_vl;
+    std::string line, parm_nm, parm_vl, mdir;
     std::ifstream ifs;
 
     if (showmsg == true){
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("parse file:%s"), params_file.c_str());
     }
     chk = 0;
@@ -749,34 +749,54 @@ static void util_parms_file(ctx_params *params, std::string params_file,bool sho
         return;
     }
 
+    /* If not a full path prepend motion config directory*/
+    if (params_file.find("/") == std::string::npos) {
+        mdir = params->app->conf_src->conf_filename;
+        mdir = mdir.substr(0,mdir.find_last_of("/"));
+        params_file = mdir+"/"+params_file;
+    }
+
     ifs.open(params_file.c_str());
         if (ifs.is_open() == false) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                ,_("params_file not found: %s"), params_file.c_str());
+                ,_("Unable to open params_file: %s"), params_file.c_str());
             return;
         }
         while (std::getline(ifs, line)) {
             mytrim(line);
+            if ((line == "") ||
+                (line.substr(0, 1) == ";") ||
+                (line.substr(0, 1) == "#")) {
+                continue;
+            }
             stpos = line.find(" ");
             if (stpos > line.find("=")) {
                 stpos = line.find("=");
             }
-            if ((stpos != std::string::npos) &&
-                (stpos != line.length()-1) &&
-                (stpos != 0) &&
-                (line.substr(0, 1) != ";") &&
-                (line.substr(0, 1) != "#")) {
+            if (stpos == std::string::npos) {
+                parm_nm = line;
+                parm_vl = "";
+            } else  if (stpos != 0) {
                 parm_nm = line.substr(0, stpos);
-                parm_vl = line.substr(stpos+1, line.length()-stpos);
-                mytrim(parm_nm);
-                mytrim(parm_vl);
-                util_parms_add(params, parm_nm.c_str(), parm_vl.c_str());
-            } else if ((line != "") &&
-                (line.substr(0, 1) != ";") &&
-                (line.substr(0, 1) != "#")) {
+                while ((stpos < line.length()) &&
+                    ((line.substr(stpos,1) == "=") ||
+                     (line.substr(stpos,1) == " "))) {
+                    stpos++;
+                }
+                if (stpos >= line.length()) {
+                    parm_vl = "";
+                } else {
+                    parm_vl = line.substr(stpos, line.length()-stpos);
+                }
+            } else {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
                     ,_("Unable to parse line:%s"), line.c_str());
+                continue;
             }
+            mytrim(parm_nm);
+            mytrim(parm_vl);
+
+            util_parms_add(params, parm_nm, parm_vl);
         }
     ifs.close();
 
@@ -787,8 +807,17 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     int indx;
     ctx_params_item parm_itm;
 
+    if (showmsg == true) {
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
+            ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
+    }
+
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_name == parm_nm) {
+            if ((parm_nm == "params_file") &&
+                (parm_val != params->params_array[indx].param_value)) {
+                util_parms_file(params, parm_val, showmsg);
+            }
             params->params_array[indx].param_value.assign(parm_val);
             params->params_array[indx].param_source = PARM_SRC_USER;
             return;
@@ -803,10 +832,6 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     parm_itm.param_lvl = PARM_LVL_01;
     params->params_array.push_back(parm_itm);
 
-    if (showmsg == true) {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
-            ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
-    }
     if ((parm_nm == "params_file") && (parm_val != "")) {
         util_parms_file(params, parm_val, showmsg);
     }
@@ -1036,6 +1061,9 @@ void util_parms_parse(ctx_params *params, std::string pdesc, std::string conflin
     /* We make a copy because the parsing destroys the value passed */
     parmline = confline;
 
+    if (params == nullptr) {
+        return;
+    }
     params->params_cnt = (int)params->params_array.size();
     params->params_desc = pdesc;
     params->params_pcat = pcat;
@@ -1073,18 +1101,14 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string
 }
 
 /* Update config line with the values from the params array */
-void util_parms_update(ctx_params *params, std::string &confline)
+void util_parms_update(ctx_params *params, std::string &parmline)
 {
-    std::string parmline;
-    std::string comma;
     int indx;
 
-    comma = "";
     parmline = "";
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_source == PARM_SRC_USER) {
-            parmline += comma;
-            comma = ",";
+            parmline += ",";
             if (params->params_array[indx].param_name.find(" ") == std::string::npos) {
                 parmline += params->params_array[indx].param_name;
             } else {
@@ -1103,13 +1127,9 @@ void util_parms_update(ctx_params *params, std::string &confline)
             }
         }
     }
+
     parmline += " ";
-
-    confline = parmline;
-
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
-        ,_("New config:%s"), confline.c_str());
-
+    parmline=parmline.substr(1);
 }
 
 /* my to integer*/

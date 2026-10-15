@@ -524,8 +524,17 @@ void cls_webu::shutdown()
 
 cls_webu::cls_webu(cls_motapp *p_app, cls_config *p_cfg)
 {
+    int indx;
     app = p_app;
     cfg = p_cfg;
+
+    conf_src = p_cfg;
+    for (indx=0;indx<app->cam_cnt;indx++){
+        if (app->cam_list[indx]->cfg == cfg) {
+            conf_src =app->cam_list[indx]->conf_src;
+        }
+    }
+
     restart = false;
     allcam = nullptr;
     shutdown_in_progress = false;

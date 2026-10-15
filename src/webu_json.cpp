@@ -316,10 +316,10 @@ void cls_webu_json::parms_all()
         webua->resp_page += "{";
         for (indx_cam=-1; indx_cam<webu->cam_cnt; indx_cam++) {
             if (indx_cam == -1) {
-                pcfg = webu->cfg;
+                pcfg = webu->conf_src;
                 webua->resp_page += "\"0\": ";
             } else {
-                pcfg = webu->cam_list[indx_cam]->cfg;
+                pcfg = webu->cam_list[indx_cam]->conf_src;
                 webua->resp_page += ",\"" +
                     std::to_string(webu->cam_list[indx_cam]->cfg->device_id) + "\": ";
             }

@@ -246,7 +246,7 @@
             void usage();
             void init();
             void config_log();
-            void config_write();
+            void config_write(int camindx);
             void config_copy(cls_config *src);
             void config_copy(cls_config *src, PARM_CAT p_cat);
             std::string params_prefix(enum PARM_PCAT pcat);
@@ -274,7 +274,8 @@
 
             void config_log_item(std::string parm_nm, std::string parm_vl);
             void config_write_app();
-            void config_write_cam();
+            void config_write_cam(int camindx);
+            void config_write_params(FILE *conffile, cls_config *cfg, std::string &parm_nm , std::string &parm_vl);
             void config_write_item(FILE *conffile, std::string parm_nm, std::string parm_vl, enum PARM_CAT parm_ct, bool reset);
             void config_write_snd();
 

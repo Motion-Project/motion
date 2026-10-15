@@ -1939,22 +1939,27 @@ void cls_camera::check_config_params()
             init_cleandir();
         } else if ((prm->params_changed == true) &&
             (prm->params_pcat == PARM_PCAT_V4L2) &&
-            (camera_type == CAMERA_TYPE_V4L2)) {
+            (camera_type == CAMERA_TYPE_V4L2) &&
+            (v4l2cam != nullptr)) {
             v4l2cam->params_update();
         } else if ((prm->params_changed == true) &&
             (prm->params_pcat == PARM_PCAT_NET) &&
-            (camera_type == CAMERA_TYPE_NETCAM)) {
+            (camera_type == CAMERA_TYPE_NETCAM) &&
+            (netcam != nullptr)) {
             netcam->params_update();
         } else if ((prm->params_changed == true) &&
             (prm->params_pcat == PARM_PCAT_NETH) &&
-            (camera_type == CAMERA_TYPE_NETCAM)) {
+            (camera_type == CAMERA_TYPE_NETCAM) &&
+            (netcam_high != nullptr)) {
             netcam_high->params_update();
         } else if ((prm->params_changed == true) &&
             (prm->params_pcat == PARM_PCAT_LIB) &&
-            (camera_type == CAMERA_TYPE_LIBCAM)) {
+            (camera_type == CAMERA_TYPE_LIBCAM) &&
+            (libcam != nullptr)) {
             libcam->params_update();
         } else if ((prm->params_changed == true) &&
-            (prm->params_pcat == PARM_PCAT_SEC)) {
+            (prm->params_pcat == PARM_PCAT_SEC) &&
+            (algsec != nullptr)) {
             algsec->params_update();
         }
     }
@@ -1985,21 +1990,30 @@ void cls_camera::check_config_main()
                     init_schedule();
                 } else if (parm_nm == "cleandir_params") {
                     init_cleandir();
-                } else if ((parm_nm == "v4l2_params")  &&
-                    (camera_type == CAMERA_TYPE_V4L2)) {
-                    v4l2cam->params_update();
-                } else if ((parm_nm == "netcam_params")  &&
-                    (camera_type == CAMERA_TYPE_NETCAM)) {
-                    netcam->params_update();
-                } else if ((parm_nm == "netcam_high_params")  &&
-                    (camera_type == CAMERA_TYPE_NETCAM)) {
-                    netcam_high->params_update();
-                } else if ((parm_nm == "libcam_params")  &&
-                    (camera_type == CAMERA_TYPE_LIBCAM)) {
-                    libcam->params_update();
+                } else if (parm_nm == "v4l2_params") {
+                    if ((camera_type == CAMERA_TYPE_V4L2) &&
+                        (v4l2cam != nullptr)) {
+                        v4l2cam->params_update();
+                    }
+                } else if (parm_nm == "netcam_params") {
+                    if ((camera_type == CAMERA_TYPE_NETCAM) &&
+                        (netcam != nullptr)) {
+                        netcam->params_update();
+                    }
+                } else if (parm_nm == "netcam_high_params") {
+                    if ((camera_type == CAMERA_TYPE_NETCAM) &&
+                        (netcam_high != nullptr)) {
+                        netcam_high->params_update();
+                    }
+                } else if (parm_nm == "libcam_params") {
+                    if ((camera_type == CAMERA_TYPE_LIBCAM) &&
+                        (libcam != nullptr)) {
+                        libcam->params_update();
+                    }
                 } else if (parm_nm == "secondary_params") {
-                    algsec->params_update();
-
+                    if (algsec != nullptr) {
+                        algsec->params_update();
+                    }
                 } else if (parm_nm == "threshold_maximum") {
                     cfg->edit_set(parm_nm, parm_vl_src);
                     threshold_maximum = cfg->threshold_maximum;

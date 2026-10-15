@@ -2810,6 +2810,7 @@ void cls_config::params_load_schedule()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "schedule_params";
     prm->params_pcat = PARM_PCAT_SCH;
 
@@ -2868,6 +2869,7 @@ void cls_config::params_load_cleandir()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "cleandir_params";
     prm->params_pcat = PARM_PCAT_CLN;
 
@@ -2919,6 +2921,7 @@ void cls_config::params_load_v4l2()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "v4l2_params";
     prm->params_pcat = PARM_PCAT_V4L2;
 
@@ -2962,6 +2965,7 @@ void cls_config::params_load_netcam()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "netcam_params";
     prm->params_pcat = PARM_PCAT_NET;
 
@@ -2997,6 +3001,7 @@ void cls_config::params_load_netcam_high()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "netcam_high_params";
     prm->params_pcat = PARM_PCAT_NETH;
 
@@ -3032,6 +3037,7 @@ void cls_config::params_load_libcamera()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "libcam_params";
     prm->params_pcat = PARM_PCAT_LIB;
     /*param_name,param_value,param_source*/
@@ -3251,6 +3257,7 @@ void cls_config::params_load_secondary()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "secondary_params";
     prm->params_pcat = PARM_PCAT_SEC;
 
@@ -3358,6 +3365,7 @@ void cls_config::params_load_allcam()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "stream_allcam_params";
     prm->params_pcat = PARM_PCAT_ACAM;
 
@@ -3408,6 +3416,7 @@ void cls_config::params_load_actions()
     }
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "webcontrol_actions";
     prm->params_pcat = PARM_PCAT_ACTS;
 
@@ -3478,6 +3487,7 @@ void cls_config::params_load_headers()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "webcontrol_headers";
     prm->params_pcat = PARM_PCAT_HDR;
 
@@ -3500,6 +3510,7 @@ void cls_config::params_load_sound()
     ctx_params *prm;
 
     prm = new ctx_params;
+    prm->app = app;
     prm->params_desc = "snd_params";
     prm->params_pcat = PARM_PCAT_SND;
 
@@ -3530,6 +3541,7 @@ void cls_config::params_load()
     params_load_actions();
     params_load_headers();
     params_load_sound();
+
 }
 
 std::string cls_config::params_prefix(enum PARM_PCAT pcat) {
@@ -4079,7 +4091,7 @@ void cls_config::process()
     ifs.open(conf_filename);
         if (ifs.is_open() == false) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                , _("params_file not found: %s")
+                , _("Unable to open configuration file: %s")
                 , conf_filename.c_str());
             return;
         }
@@ -4090,42 +4102,55 @@ void cls_config::process()
 
         while (std::getline(ifs, line)) {
             mytrim(line);
+            if ((line == "") ||
+                (line.substr(0, 1) == ";") ||
+                (line.substr(0, 1) == "#")) {
+                continue;
+            }
             stpos = line.find(" ");
             if (line.find('\t') != std::string::npos) {
                 if (line.find('\t') < stpos) {
                     stpos =line.find('\t');
+                    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+                        , _("Tabs should not be used in configuration file.:%s")
+                        , line.c_str());
                 }
             }
             if (stpos > line.find("=")) {
                 stpos = line.find("=");
             }
-            if ((stpos != line.length()-1) &&
-                (stpos != 0) &&
-                (line.substr(0, 1) != ";") &&
-                (line.substr(0, 1) != "#")) {
+            if (stpos == std::string::npos) {
+                parm_nm = line;
+                parm_vl = "";
+            } else if (stpos != 0) {
                 parm_nm = line.substr(0, stpos);
-                if (stpos != std::string::npos) {
-                    parm_vl = line.substr(stpos+1, line.length()-stpos);
-                } else {
+                while ((stpos < line.length()) &&
+                    ((line.substr(stpos,1) == "=") ||
+                     (line.substr(stpos,1) == " "))) {
+                    stpos++;
+                }
+                if (stpos >= line.length()) {
                     parm_vl = "";
+                } else {
+                    parm_vl = line.substr(stpos, line.length()-stpos);
                 }
-                myunquote(parm_nm);
-                myunquote(parm_vl);
-                if ((parm_nm == "camera") && (app->conf_src == this)) {
-                    camera_add(parm_vl, false);
-                } else if ((parm_nm == "sound") && (app->conf_src == this)) {
-                    sound_add(parm_vl, false);
-                } else if ((parm_nm == "config_dir") && (app->conf_src == this)){
-                    config_dir_item(parm_vl);
-                } else if ((parm_nm != "camera") && (parm_nm != "sound") &&
-                    (parm_nm != "config_dir")) {
-                   edit_set(parm_nm, parm_vl);
-                }
-            } else if ((line != "") &&
-                (line.substr(0, 1) != ";") &&
-                (line.substr(0, 1) != "#") ) {
+
+            } else {
                 MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
-                , _("Unable to parse line: %s"), line.c_str());
+                    , _("Unable to parse line: %s"), line.c_str());
+                continue;
+            }
+            myunquote(parm_nm);
+            myunquote(parm_vl);
+            if ((parm_nm == "camera") && (app->conf_src == this)) {
+                camera_add(parm_vl, false);
+            } else if ((parm_nm == "sound") && (app->conf_src == this)) {
+                sound_add(parm_vl, false);
+            } else if ((parm_nm == "config_dir") && (app->conf_src == this)){
+                config_dir_item(parm_vl);
+            } else if ((parm_nm != "camera") && (parm_nm != "sound") &&
+                (parm_nm != "config_dir")) {
+                edit_set(parm_nm, parm_vl);
             }
         }
     ifs.close();
@@ -4252,6 +4277,93 @@ void cls_config::config_log()
 
 }
 
+void cls_config::config_write_params(FILE *conffile, cls_config *cfg
+    , std::string &parm_nm , std::string &parm_vl)
+{
+    int indx;
+    std::string fnm_chk, mdir;
+    ctx_params *prm;
+    ctx_params_item *itm;
+    char timestamp[32];
+    FILE *prmfile;
+
+    time_t now = time(0);
+    strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
+
+    prm=nullptr;
+    for (indx=0;indx<cfg->params.size();indx++) {
+        if (parm_nm == cfg->params[indx]->params_desc) {
+            prm= cfg->params[indx];
+        }
+    }
+    if (prm == nullptr) {
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("Coding error with %s"), parm_nm.c_str());
+        return;
+    }
+
+    fnm_chk = "";
+    for (indx=0;indx<prm->params_array.size();indx++) {
+        itm = &prm->params_array[indx];
+        if (itm->param_name == "params_file") {
+            fnm_chk = itm->param_value;
+        }
+    }
+
+    if (fnm_chk == "") {
+        util_parms_update(prm, parm_vl);
+    } else {
+        /* set new val for parm and write everything out to the params_file*/
+        if (fnm_chk.find(" ") != std::string::npos) {
+            parm_vl="params_file=\""+fnm_chk+"\"";
+        } else {
+            parm_vl="params_file=" + fnm_chk;
+        }
+        if (fnm_chk.find("/") == std::string::npos) {
+            mdir = app->conf_src->conf_filename;
+            mdir = mdir.substr(0,mdir.find_last_of("/"));
+            fnm_chk = mdir+"/"+fnm_chk;
+        }
+        prmfile = myfopen(fnm_chk.c_str(), "we");
+        if (prmfile == NULL) {
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                , _("Failed to open for writing %s params_file %s")
+                , parm_nm.c_str(), fnm_chk.c_str());
+            return;
+        }
+        fprintf(prmfile, ";\n; This %s params_file was generated by Motion " VERSION "\n",parm_nm.c_str());
+        fprintf(prmfile, "; at %s\n", timestamp);
+        fprintf(prmfile, "\n\n");
+        for (indx=0;indx<prm->params_array.size();indx++) {
+            itm = &prm->params_array[indx];
+            if ((itm->param_name != "params_file") &&
+                (itm->param_source == PARM_SRC_USER)) {
+                if (itm->param_value.find(" ") != std::string::npos) {
+                    fprintf(prmfile, "%s=\"%s\"\n"
+                        , itm->param_name.c_str()
+                        , itm->param_value.c_str());
+                } else {
+                    fprintf(prmfile, "%s=%s\n"
+                        , itm->param_name.c_str()
+                        , itm->param_value.c_str());
+                }
+            }
+        }
+        fprintf(prmfile, "\n");
+        myfclose(prmfile);
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            , _("%s values written to params_file: %s")
+            , parm_nm.c_str(), fnm_chk.c_str());
+
+    }
+
+    if (parm_vl.compare(0, 1, " ") == 0) {
+        fprintf(conffile, "%s \"%s\"\n", parm_nm.c_str(), parm_vl.c_str());
+    } else {
+        fprintf(conffile, "%s %s\n", parm_nm.c_str(), parm_vl.c_str());
+    }
+}
+
 void cls_config::config_write_item(FILE *conffile, std::string parm_nm
     , std::string parm_vl, enum PARM_CAT parm_ct, bool reset)
 {
@@ -4279,7 +4391,7 @@ void cls_config::config_write_item(FILE *conffile, std::string parm_nm
 void cls_config::config_write_app()
 {
     int i, indx;
-    std::string parm_vl, parm_main, parm_nm;
+    std::string parm_vl, parm_main, parm_nm, chk;
     std::list<std::string> parm_array;
     std::list<std::string>::iterator it;
     enum PARM_CAT parm_ct;
@@ -4312,11 +4424,14 @@ void cls_config::config_write_app()
         parm_typ=config_parms[i].parm_type;
         if ((parm_nm != "camera") && (parm_nm != "sound") &&
             (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
-            (parm_typ != PARM_TYP_ARRAY)) {
+            (parm_typ != PARM_TYP_ARRAY) && (parm_typ != PARM_TYP_PARAMS)) {
             app->conf_src->edit_get(parm_nm, parm_vl, parm_ct);
             config_write_item(conffile, parm_nm, parm_vl, parm_ct, false);
         }
-        if (parm_typ == PARM_TYP_ARRAY) {
+        if (parm_typ == PARM_TYP_PARAMS) {
+            config_write_params(conffile,app->conf_src,parm_nm,parm_vl);
+            app->conf_src->edit_set(parm_nm, parm_vl);
+        } else if (parm_typ == PARM_TYP_ARRAY) {
             app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
             for (it = parm_array.begin(); it != parm_array.end(); it++) {
                 config_write_item(conffile, parm_nm, it->c_str(), parm_ct, false);
@@ -4355,7 +4470,7 @@ void cls_config::config_write_app()
 
 }
 
-void cls_config::config_write_cam()
+void cls_config::config_write_cam(int camindx)
 {
     int i, indx;
     std::string parm_vl, parm_main, parm_nm;
@@ -4365,53 +4480,72 @@ void cls_config::config_write_cam()
     enum PARM_TYP parm_typ;
     char timestamp[32];
     FILE *conffile;
+    cls_config *cfgm, *cfgc;
 
     time_t now = time(0);
     strftime(timestamp, 32, "%Y-%m-%dT%H:%M:%S", localtime(&now));
 
-    for (indx=0; indx<app->cam_cnt; indx++) {
-        conffile = myfopen(app->cam_list[indx]->conf_src->conf_filename.c_str(), "we");
-        if (conffile == NULL) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , _("Failed to write configuration to %s")
-                , app->cam_list[indx]->conf_src->conf_filename.c_str());
-            return;
-        }
-        fprintf(conffile, "; %s\n", app->cam_list[indx]->conf_src->conf_filename.c_str());
-        fprintf(conffile, ";\n; This config file was generated by Motion " VERSION "\n");
-        fprintf(conffile, "; at %s\n", timestamp);
-        fprintf(conffile, "\n\n");
-        config_write_item(conffile, "", "", PARM_CAT_00, true);
+    cfgm = app->conf_src;
 
-        i=0;
-        while (config_parms[i].parm_name != "") {
-            parm_nm=config_parms[i].parm_name;
-            parm_ct=config_parms[i].parm_cat;
-            parm_typ=config_parms[i].parm_type;
-            if ((parm_nm != "camera") && (parm_nm != "sound") &&
-                (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
-                (parm_typ != PARM_TYP_ARRAY) ) {
-                app->conf_src->edit_get(parm_nm, parm_main, parm_ct);
-                app->cam_list[indx]->conf_src->edit_get(parm_nm, parm_vl, parm_ct);
-                if (parm_main != parm_vl) {
-                    config_write_item(conffile, parm_nm, parm_vl, parm_ct, false);
-                }
-            }
-            if (parm_typ == PARM_TYP_ARRAY) {
-                app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
-                for (it = parm_array.begin(); it != parm_array.end(); it++) {
-                    config_write_item(conffile, parm_nm, it->c_str(), parm_ct, false);
-                }
-            }
-            i++;
-        }
-        fprintf(conffile, "\n");
-        myfclose(conffile);
-
+    cfgc = app->cam_list[camindx]->conf_src;
+    conffile = myfopen(cfgc->conf_filename.c_str(), "we");
+    if (conffile == NULL) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            , _("Configuration written to %s")
-            , app->cam_list[indx]->conf_src->conf_filename.c_str());
+            , _("Failed to write configuration to %s")
+            , cfgc->conf_filename.c_str());
+        return;
     }
+    fprintf(conffile, "; %s\n", cfgc->conf_filename.c_str());
+    fprintf(conffile, ";\n; This config file was generated by Motion " VERSION "\n");
+    fprintf(conffile, "; at %s\n", timestamp);
+    fprintf(conffile, "\n\n");
+    config_write_item(conffile, "", "", PARM_CAT_00, true);
+
+    i=0;
+    while (config_parms[i].parm_name != "") {
+        parm_nm=config_parms[i].parm_name;
+        parm_ct=config_parms[i].parm_cat;
+        parm_typ=config_parms[i].parm_type;
+        if ((parm_nm != "camera") && (parm_nm != "sound") &&
+            (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
+            (parm_typ != PARM_TYP_ARRAY) && (parm_typ != PARM_TYP_PARAMS)) {
+            cfgm->edit_get(parm_nm, parm_main, parm_ct);
+            cfgc->edit_get(parm_nm, parm_vl, parm_ct);
+            if (parm_main != parm_vl) {
+                config_write_item(conffile, parm_nm, parm_vl, parm_ct, false);
+            }
+        }
+        if (parm_typ == PARM_TYP_PARAMS) {
+            parm_main="";
+            parm_vl = "";
+            for (indx=0;indx<cfgm->params.size();indx++) {
+                if (cfgm->params[indx]->params_desc == parm_nm) {
+                    util_parms_update(cfgm->params[indx],parm_main);
+                }
+            }
+            for (indx=0;indx<cfgc->params.size();indx++) {
+                if (cfgc->params[indx]->params_desc == parm_nm) {
+                    util_parms_update(cfgc->params[indx],parm_vl);
+                }
+            }
+            if (parm_main != parm_vl) {
+                config_write_params(conffile,cfgc,parm_nm,parm_vl);
+                cfgc->edit_set(parm_nm, parm_vl);
+            }
+        } else if (parm_typ == PARM_TYP_ARRAY) {
+            app->conf_src->edit_get(parm_nm, parm_array, parm_ct);
+            for (it = parm_array.begin(); it != parm_array.end(); it++) {
+                config_write_item(conffile, parm_nm, it->c_str(), parm_ct, false);
+            }
+        }
+        i++;
+    }
+    fprintf(conffile, "\n");
+    myfclose(conffile);
+
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        , _("Configuration written to %s")
+        , cfgc->conf_filename.c_str());
 
 }
 
@@ -4474,11 +4608,18 @@ void cls_config::config_write_snd()
     }
 }
 
-void cls_config::config_write()
+void cls_config::config_write(int camindx)
 {
-    config_write_app();
-    config_write_cam();
-    config_write_snd();
+    int indx;
+    if (camindx == -1) {
+        config_write_app();
+        for (indx=0;indx<app->cam_cnt;indx++) {
+            config_write_cam(indx);
+        }
+        config_write_snd();
+    } else {
+        config_write_cam(camindx);
+    }
 }
 
 void cls_config::config_copy(cls_config *src)

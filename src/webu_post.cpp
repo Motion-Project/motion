@@ -477,7 +477,13 @@ void cls_webu_post::write_config()
             }
         }
     }
-    app->conf_src->config_write();
+    if (webua->camindx == -1) {
+        app->conf_src->config_write(webua->camindx);
+    } else {
+        app->cam_list[webua->camindx]->conf_src->config_write(webua->camindx);
+    }
+
+
 }
 
 void cls_webu_post::config_set(

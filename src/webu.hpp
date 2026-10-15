@@ -93,6 +93,7 @@
             ~cls_webu();
             cls_motapp      *app;
             cls_config      *cfg;
+            cls_config      *conf_src;
             cls_allcam      *allcam;
             std::vector<cls_camera*>    cam_list;
             int                         cam_cnt;
