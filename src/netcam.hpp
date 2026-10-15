@@ -184,7 +184,7 @@ class cls_netcam {
         int decode_video();
         int decode_packet();
         void hwdecoders();
-        void decoder_error(int retcd, const char* fnc_nm);
+        void decoder_msg(int retcd, const char* fnc_nm);
         int init_vaapi();
         int init_cuda();
         int init_drm();
