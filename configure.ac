@@ -1,6 +1,6 @@
 AC_INIT(motion, esyscmd(['./scripts/version.sh']))
 AM_INIT_AUTOMAKE([subdir-objects foreign])
-CXXFLAGS="$CXXFLAGS -std=c++17"
+CXXFLAGS="$CXXFLAGS -std=c++20"
 AC_PROG_CC
 AC_PROG_CXX
 AC_CONFIG_HEADERS([config.hpp])
@@ -617,7 +617,7 @@ AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
     TEMP_CPPFLAGS="$TEMP_CPPFLAGS  -DSHOWI10N -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-sign-conversion -Wno-sign-compare -ggdb -g3 "
   ],[
     AS_IF([test "${CLANG_FLAGS}" = "yes"], [
-      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-c11-extensions -Wno-sign-conversion -Wno-sign-compare -ggdb -g3 "
+      TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-c11-extensions -Wno-sign-conversion -Wno-sign-compare -Wno-deprecated-anon-enum-enum-conversion -ggdb -g3 "
     ],[
       TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -O3 -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-sign-conversion -Wno-sign-compare -ggdb -g3 "
     ])

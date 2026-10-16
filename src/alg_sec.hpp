@@ -23,6 +23,7 @@
 #ifdef HAVE_OPENCV
     #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wconversion"
+        #pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
         #include <opencv2/objdetect.hpp>
         #include <opencv2/dnn.hpp>
         #include <opencv2/highgui.hpp>

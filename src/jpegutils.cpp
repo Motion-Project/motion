@@ -744,7 +744,7 @@ static void put_jpeg_exif(j_compress_ptr cinfo, cls_camera *cam,
  *    Success 0, Failure -1
  */
 int jpgutl_decode_jpeg (u_char *jpeg_data_in, int jpeg_data_len,
-        uint width, uint height, u_char *volatile img_out)
+        uint width, uint height, u_char *img_out)
 {
     JSAMPARRAY      line;           /* Array of decomp data lines */
     u_char  *wline;          /* Will point to line[0] */

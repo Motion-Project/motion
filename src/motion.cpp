@@ -31,7 +31,7 @@
 #include "movie.hpp"
 #include "netcam.hpp"
 
-volatile enum MOTION_SIGNAL motsignal;
+enum MOTION_SIGNAL motsignal;
 
 /** Handle signals sent */
 static void sig_handler(int signo)

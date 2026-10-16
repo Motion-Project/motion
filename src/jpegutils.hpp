@@ -22,7 +22,7 @@
 #define _INCLUDE_JPEGUTILS_HPP_
 
     int jpgutl_decode_jpeg (unsigned char *jpeg_data_in, int jpeg_data_len,
-        unsigned int width, unsigned int height, unsigned char *volatile img_out);
+        unsigned int width, unsigned int height, unsigned char *img_out);
     int jpgutl_put_yuv420p(unsigned char *dest_image, int image_size,
         unsigned char *input_image, int width, int height, int quality,
         cls_camera *cam, timespec *ts1, ctx_coord *box);
