@@ -434,27 +434,36 @@ int cls_libcam::start_config()
     allfmts = libcam_cfg->at(0).formats();
     for (indx=0;indx<allfmts.pixelformats().size();indx++){
         tmpfmt = allfmts.pixelformats()[indx].toString();
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Available pixel format: %s",tmpfmt.c_str());
+        sprintf(tmp4cc,"%c%c%c%c"
+            , allfmts.pixelformats()[indx].fourcc() >> 0
+            , allfmts.pixelformats()[indx].fourcc() >> 8
+            , allfmts.pixelformats()[indx].fourcc() >> 16
+            , allfmts.pixelformats()[indx].fourcc() >> 24);
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                , "Available pixel format: %s (FourCC %s)"
+                , tmpfmt.c_str(), tmp4cc);
     }
 
-    pfmt = "YU12";
+    pfmt = "YUV420";
     for (indx=0;indx<params->params_cnt;indx++) {
         if ((params->params_array[indx].param_name == "pixelformat") &&
             (params->params_array[indx].param_source == PARM_SRC_USER)) {
             pfmt = params->params_array[indx].param_value;
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                , "Using user specified pixelformat %s."
+                , "User specified pixelformat %s."
                 , pfmt.c_str());
         }
     }
 
     for (indx=0;indx<allfmts.pixelformats().size();indx++){
         tmpfmt = allfmts.pixelformats()[indx].toString();
-        if (pfmt ==tmpfmt) {
+        if (pfmt == tmpfmt) {
             break;
         }
     }
     if (pfmt != tmpfmt) {
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+            , "Did not find pixelformat %s", pfmt.c_str());
         pfmt="";
         /*mjpeg doesn't seem to work very well so we pick the first alternative*/
         for (indx=0;indx<allfmts.pixelformats().size();indx++) {
@@ -469,6 +478,9 @@ int cls_libcam::start_config()
         pfmt = "MJPEG";
     }
 
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
+        , "Trying pixel format %s", pfmt.c_str());
+
     libcam_cfg->at(0).pixelFormat = PixelFormat::fromString(pfmt);
     libcam_cfg->at(0).size.width = (uint)cam->cfg->width;
     libcam_cfg->at(0).size.height = (uint)cam->cfg->height;
@@ -477,7 +489,7 @@ int cls_libcam::start_config()
 
     retcd = libcam_cfg->validate();
     if (retcd == CameraConfiguration::Adjusted) {
-        if (libcam_cfg->at(0).pixelFormat != PixelFormat::fromString(pixfmt)) {
+        if (libcam_cfg->at(0).pixelFormat.toString() != pfmt) {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "Pixel format was adjusted to %s."
                 , libcam_cfg->at(0).pixelFormat.toString().c_str());
@@ -509,8 +521,10 @@ int cls_libcam::start_config()
     }
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        , "Image size %d x %d"
-        , libcam_cfg->at(0).size.width, libcam_cfg->at(0).size.height);
+        , "Pixelformat %s Image size %d x %d"
+        , pixfmt.c_str()
+        , libcam_cfg->at(0).size.width
+        , libcam_cfg->at(0).size.height);
 
     cam->imgs.width = (int)libcam_cfg->at(0).size.width;
     cam->imgs.height = (int)libcam_cfg->at(0).size.height;
@@ -836,7 +850,9 @@ int cls_libcam::next(ctx_image_data *img_data)
             retcd = convert->process(
                 img_data->image_norm
                 , membuf.buf, membuf.bufsz);
-            if (retcd != 0) {
+            if (retcd < 0) {
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                    , "Unable to process image.");
                 return CAPTURE_FAILURE;
             }
 
