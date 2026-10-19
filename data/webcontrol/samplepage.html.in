@@ -378,11 +378,6 @@
     }
 
     function send_action(actval) {
-      var dsp_cam = document.getElementById('div_cam').style.display;
-      if ((dsp_cam == 'none' || dsp_cam == '') && (actval != 'config_write')) {
-        return;
-      }
-
       var formData = new FormData();
       var camid;
       var ans;
