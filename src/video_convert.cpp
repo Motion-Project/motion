@@ -521,6 +521,8 @@ void cls_convert::greytoyuv420p(u_char *img_dst, u_char *img_src)
 /* Convert captured image to the standard pixel format*/
 int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
 {
+    int retcd=0;
+
     if (pixfmt_src == "RGB3") {         rgb24toyuv420p(img_dst, img_src);
     } else if (pixfmt_src == "UYVY") {  uyvyto420p(img_dst, img_src);
     } else if (pixfmt_src == "YUYV"){   yuv422to420p(img_dst, img_src);
@@ -529,7 +531,7 @@ int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
     } else if (pixfmt_src == "GREY") {  greytoyuv420p(img_dst, img_src);
     } else if ((pixfmt_src == "PJPG") || (pixfmt_src =="JPEG") ||
         (pixfmt_src =="MJPG")) {
-        return mjpegtoyuv420p(img_dst, img_src, clen);
+        retcd=mjpegtoyuv420p(img_dst, img_src, clen);
     } else if ((pixfmt_src == "BYR2") || (pixfmt_src == "GBRG") ||
         (pixfmt_src == "GRBG") || (pixfmt_src == "BA81") || (pixfmt_src == "RGGB")) {
         bayer2rgb24(common_buffer, img_src);
@@ -545,9 +547,9 @@ int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
         y10torgb24(common_buffer, img_src, 4);
         rgb24toyuv420p(img_dst, common_buffer);
     } else {
-        return -1;
+        retcd=util_resize(img_src,width,height,pixfmt_src,img_dst,width,height);
     }
-    return 0;
+    return retcd;
 }
 
 cls_convert::cls_convert(cls_camera *p_cam, std::string p_pix, int p_w, int p_h)

@@ -1207,7 +1207,7 @@ std::string mtok(std::string &parm, std::string tok)
     return tmp;
 }
 
-void util_resize(uint8_t *src, int src_w, int src_h
+int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
     , uint8_t *dst, int dst_w, int dst_h)
 {
     int     retcd, img_sz;
@@ -1215,15 +1215,52 @@ void util_resize(uint8_t *src, int src_w, int src_h
     uint8_t *buf;
     AVFrame *frm_in, *frm_out;
     struct SwsContext *swsctx;
+    enum AVPixelFormat src_fmt;
 
     img_sz = (dst_h * dst_w * 3)/2;
     memset(dst, 0x00, (size_t)img_sz);
+
+    if ((src_w == dst_w) && (src_h == dst_h) && (src_4cc=="YU12")) {
+        memcpy(dst, src, (uint)img_sz);
+        return 0;
+    }
+    /* I tried to iterate and match fourcc tags in
+       ffmpeg but the results were sketchy.  Duplicates,
+       null results, codes with brackets such as [24]
+       instead of letters, etc.  As a result, there is
+       this hard coded if block.  Yuk.
+       But I have a ton of other stuff to do*/
+    if (src_4cc == "I420")          {src_fmt = AV_PIX_FMT_YUV420P;
+    } else if (src_4cc == "YU12")   {src_fmt = AV_PIX_FMT_YUV420P;
+    } else if (src_4cc == "BGR3")   {src_fmt = AV_PIX_FMT_BGR24;
+    } else if (src_4cc == "RGB3")   {src_fmt = AV_PIX_FMT_RGB24;
+    } else if (src_4cc == "NV12")   {src_fmt = AV_PIX_FMT_NV12;
+    } else if (src_4cc == "NV21")   {src_fmt = AV_PIX_FMT_NV21;
+    } else if (src_4cc == "YV12")   {src_fmt = AV_PIX_FMT_NONE;
+    } else if (src_4cc == "XB24")   {src_fmt = AV_PIX_FMT_RGB0;
+    } else if (src_4cc == "BG24")   {src_fmt = AV_PIX_FMT_BGR24;
+    } else if (src_4cc == "RG24")   {src_fmt = AV_PIX_FMT_RGB24;
+    } else if (src_4cc == "XR24")   {src_fmt = AV_PIX_FMT_BGR0;
+    } else if (src_4cc == "RG16")   {src_fmt = AV_PIX_FMT_BAYER_RGGB16;
+    } else if (src_4cc == "YVYU")   {src_fmt = AV_PIX_FMT_YVYU422;
+    } else if (src_4cc == "YUYV")   {src_fmt = AV_PIX_FMT_YUYV422;
+    } else if (src_4cc == "VYUY")   {src_fmt = AV_PIX_FMT_NONE;
+    } else if (src_4cc == "UYVY")   {src_fmt = AV_PIX_FMT_UYVY422;
+    } else {src_fmt = AV_PIX_FMT_NONE;}
+
+    if (src_fmt == AV_PIX_FMT_NONE) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Unsupported pixel format >%s<"),src_4cc.c_str());
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+            , _("Find corresponding AVPIXELFORMAT and adjust code"));
+        return -1;
+    }
 
     frm_in = av_frame_alloc();
     if (frm_in == NULL) {
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate frm_in."));
-        return;
+        return -1;
     }
 
     frm_out = av_frame_alloc();
@@ -1231,12 +1268,12 @@ void util_resize(uint8_t *src, int src_w, int src_h
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
             , _("Unable to allocate frm_out."));
         av_frame_free(&frm_in);
-        return;
+        return -1;
     }
 
     retcd = av_image_fill_arrays(
         frm_in->data, frm_in->linesize
-        , src, AV_PIX_FMT_YUV420P
+        , src, src_fmt
         , src_w, src_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
@@ -1244,7 +1281,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
             , "Error filling arrays: %s", errstr);
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
-        return;
+        return -1;
     }
 
     buf = (uint8_t *)mymalloc((size_t)img_sz);
@@ -1260,11 +1297,11 @@ void util_resize(uint8_t *src, int src_w, int src_h
         free(buf);
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
-        return;
+        return -1;
     }
 
     swsctx = sws_getContext(
-            src_w, src_h, AV_PIX_FMT_YUV420P
+            src_w, src_h, src_fmt
             ,dst_w, dst_h, AV_PIX_FMT_YUV420P
             ,SWS_BICUBIC, NULL, NULL, NULL);
     if (swsctx == NULL) {
@@ -1273,7 +1310,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
         free(buf);
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
-        return;
+        return -1;
     }
 
     retcd = sws_scale(swsctx
@@ -1287,7 +1324,7 @@ void util_resize(uint8_t *src, int src_w, int src_h
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
         sws_freeContext(swsctx);
-        return;
+        return -1;
     }
 
     retcd = av_image_copy_to_buffer(
@@ -1295,7 +1332,6 @@ void util_resize(uint8_t *src, int src_w, int src_h
         , (const uint8_t * const*)frm_out
         , frm_out->linesize
         , AV_PIX_FMT_YUV420P, dst_w, dst_h, 1);
-
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
@@ -1304,12 +1340,13 @@ void util_resize(uint8_t *src, int src_w, int src_h
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
         sws_freeContext(swsctx);
-        return;
+        return -1;
     }
 
     free(buf);
     av_frame_free(&frm_in);
     av_frame_free(&frm_out);
     sws_freeContext(swsctx);
-}
 
+    return 0;
+}

@@ -64,7 +64,7 @@ void cls_allcam::getsizes_img(int indx)
 void cls_allcam::getimg_src(cls_camera *p_cam
     , std::string imgtyp, u_char *dst_img, u_char *src_img, int indx_act)
 {
-    int indx;
+    int indx, retcd;
     ctx_stream_data *strm_c;
 
     if (imgtyp == "norm") {
@@ -116,12 +116,18 @@ void cls_allcam::getimg_src(cls_camera *p_cam
         }
     pthread_mutex_unlock(&p_cam->stream.mutex);
 
-    util_resize(src_img
+
+    retcd = util_resize(src_img
         , active_cam[indx_act].src_w
         , active_cam[indx_act].src_h
+        , "I420"
         , dst_img
         , active_cam[indx_act].dst_w
         , active_cam[indx_act].dst_h);
+    if (retcd == -1){
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Unable to scale image");
+        memset(dst_img, 0x80, (uint)active_cam[indx_act].dst_sz);
+    }
 
 }
 
@@ -130,7 +136,7 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
     int a_y, a_u, a_v; /* all img y,u,v */
     int c_y, c_u, c_v; /* camera img y,u,v */
     int img_orow, img_ocol;
-    int indx, row, dst_w, dst_h;
+    int indx, row, dst_w, dst_h, retcd;
     u_char *dst_img, *src_img, *all_img;
     cls_camera *p_cam;
 
@@ -187,8 +193,12 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
 
     pthread_mutex_lock(&stream.mutex);
         memset(strm_a->img_data, 0x80, (size_t)info.dst_sz);
-        util_resize(all_img, info.src_w, info.src_h
+        retcd = util_resize(all_img, info.src_w, info.src_h, "I420"
             , strm_a->img_data, info.dst_w, info.dst_h);
+        if (retcd == -1) {
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Unable to scale image");
+            memset(strm_a->img_data, 0x80, (size_t)info.dst_sz);
+        }
         myfree(all_img);
 
         strm_a->jpg_sz = jpgutl_put_yuv420p(

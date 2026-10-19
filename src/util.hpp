@@ -127,7 +127,7 @@ struct ctx_params {
     long mtol(char *parm);
     std::string mtok(std::string &parm, std::string tok);
 
-    void util_resize(uint8_t *src, int src_w, int src_h
+    int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
         , uint8_t *dst, int dst_w, int dst_h);
 
 #endif /* _INCLUDE_UTIL_HPP_ */
