@@ -36,6 +36,8 @@ void cls_libcam::log_controls()
     int indx, indx2;
     ctx_params_item *itm;
 
+    return;
+
     MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
     for (indx=0;indx<params->params_cnt;indx++){
         itm = &params->params_array[indx];
@@ -711,20 +713,24 @@ void cls_libcam::libcam_stop()
             req_queue.pop();
         }
         camera->stop();
-        camera->release();
-        camera.reset();
-        started_cam = false;
     }
 
     if (started_req) {
+        munmap(membuf.buf, membuf.bufsz);
+
         for (indx=0;indx<requests.size();indx++) {
             requests[indx].reset();
         }
         requests.clear();
         frmbuf->free(libcam_cfg->at(0).stream());
         frmbuf.reset();
-        munmap(membuf.buf, membuf.bufsz);
         started_req = false;
+    }
+
+    if (started_cam) {
+        camera->release();
+        camera.reset();
+        started_cam = false;
     }
 
     if (started_mgr) {
@@ -832,14 +838,18 @@ int cls_libcam::next(ctx_image_data *img_data)
         int indx, retcd;
 
         if (started_cam == false) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Unable to get image.  Camera not started.");
             return CAPTURE_FAILURE;
         }
 
         cam->watchdog = cam->cfg->watchdog_tmo;
-        /* Allow time for request to finish.*/
+        /* Allow up to 2 seconds for request to finish.
+         This extended time may be needed when initially
+         starting a usb/v4l2 device*/
         indx=0;
-        while ((req_queue.empty() == true) && (indx < 50)) {
-            SLEEP(0,2000)
+        while ((req_queue.empty() == true) && (indx < 2000)) {
+            SLEEP(0,1000000)    /* 1 ms*/
             indx++;
         }
 
@@ -866,6 +876,8 @@ int cls_libcam::next(ctx_image_data *img_data)
             return CAPTURE_SUCCESS;
 
         } else {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+                , "Request queue empty.  No images.");
             return CAPTURE_FAILURE;
         }
     #else
