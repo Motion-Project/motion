@@ -5,7 +5,7 @@ src/camera.cpp
 src/conf.cpp
 src/dbse.cpp
 src/draw.cpp
-src/i10n.cpp
+src/i18n.cpp
 src/jpegutils.cpp
 src/libcam.cpp
 src/logger.cpp

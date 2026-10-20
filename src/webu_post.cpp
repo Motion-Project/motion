@@ -18,7 +18,7 @@
 
 #include "motion.hpp"
 #include "util.hpp"
-#include "i10n.hpp"
+#include "i18n.hpp"
 #include "logger.hpp"
 #include "camera.hpp"
 #include "sound.hpp"
@@ -721,8 +721,8 @@ void cls_webu_post::config_ra_process()
             if (ra_list[indx].apply == true) {
                 MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Changing nls to: %s"
                     ,app->conf_src->native_language_code.c_str());
-                i10n_init(app->conf_src->native_language_code);
-                i10n_set(app->conf_src->native_language);
+                l18n_init(app->conf_src->native_language_code);
+                l18n_set(app->conf_src->native_language);
                 app->cfg->native_language_code = app->conf_src->native_language_code;
                 app->cfg->native_language = app->conf_src->native_language;
             }

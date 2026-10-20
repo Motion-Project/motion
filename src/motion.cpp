@@ -18,7 +18,7 @@
 */
 #include "motion.hpp"
 #include "util.hpp"
-#include "i10n.hpp"
+#include "i18n.hpp"
 #include "logger.hpp"
 #include "conf.hpp"
 #include "schedule.hpp"
@@ -420,7 +420,7 @@ void cls_motapp::check_restart()
         cfg->config_copy(conf_src, PARM_CAT_00);
         motlog->startup();
 
-        i10n_set(cfg->native_language);
+        l18n_set(cfg->native_language);
         if (parm_pid_org != parm_pid_new) {
             pid_write();
         }
@@ -584,8 +584,8 @@ void cls_motapp::init(int p_argc, char *p_argv[])
 
     motlog->startup();
 
-    i10n_init(cfg->native_language_code);
-    i10n_set(cfg->native_language);
+    l18n_init(cfg->native_language_code);
+    l18n_set(cfg->native_language);
 
     if (cfg->daemon) {
         daemon();

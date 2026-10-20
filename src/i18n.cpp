@@ -19,38 +19,43 @@
 
 #include "motion.hpp"
 #include "util.hpp"
-#include "i10n.hpp"
+#include "i18n.hpp"
 #include "logger.hpp"
 
 static bool nls_enabled = true;
 
-void i10n_locale_chg(std::string langcd)
+void l18n_locale_chg(std::string langcd)
 {
     #ifdef HAVE_GETTEXT
         char *rslt, *curr;
+        std::string lclcd;
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
             ,_("setting language code to %s"),langcd.c_str());
         curr = setlocale (LC_ALL, NULL);
-        if (langcd == "da")         {rslt = setlocale (LC_ALL, "da_DK.utf8");
-        } else if (langcd == "de")  {rslt = setlocale (LC_ALL, "de_DE.utf8");
-        } else if (langcd == "es")  {rslt = setlocale (LC_ALL, "es_ES.utf8");
-        } else if (langcd == "en")  {rslt = setlocale (LC_ALL, "en_US.utf8");
-        } else if (langcd == "fi")  {rslt = setlocale (LC_ALL, "fi_FI.utf8");
-        } else if (langcd == "fr")  {rslt = setlocale (LC_ALL, "fr_FR.utf8");
-        } else if (langcd == "it")  {rslt = setlocale (LC_ALL, "it_IT.utf8");
-        } else if (langcd == "ja")  {rslt = setlocale (LC_ALL, "ja_JP.utf8");
-        } else if (langcd == "ko")  {rslt = setlocale (LC_ALL, "ko_KR.utf8");
-        } else if (langcd == "nl")  {rslt = setlocale (LC_ALL, "nl_NL.utf8");
-        } else if (langcd == "no")  {rslt = setlocale (LC_ALL, "no_NO.utf8");
-        } else if (langcd == "pt")  {rslt = setlocale (LC_ALL, "pt_PT.utf8");
-        } else if (langcd == "sv")  {rslt = setlocale (LC_ALL, "sv_SE.utf8");
-        } else if (langcd == "zh")  {rslt = setlocale (LC_ALL, "zh_CN.utf8");
-        } else if (langcd == "")    {rslt = setlocale (LC_ALL, "");
+        if (langcd == "da")         {lclcd = "da_DK.utf8";
+        } else if (langcd == "de")  {lclcd = "de_DE.utf8";
+        } else if (langcd == "es")  {lclcd = "es_ES.utf8";
+        } else if (langcd == "en")  {lclcd = "en_US.utf8";
+        } else if (langcd == "fi")  {lclcd = "fi_FI.utf8";
+        } else if (langcd == "fr")  {lclcd = "fr_FR.utf8";
+        } else if (langcd == "it")  {lclcd = "it_IT.utf8";
+        } else if (langcd == "ja")  {lclcd = "ja_JP.utf8";
+        } else if (langcd == "ko")  {lclcd = "ko_KR.utf8";
+        } else if (langcd == "nl")  {lclcd = "nl_NL.utf8";
+        } else if (langcd == "no")  {lclcd = "no_NO.utf8";
+        } else if (langcd == "pt")  {lclcd = "pt_PT.utf8";
+        } else if (langcd == "sv")  {lclcd = "sv_SE.utf8";
+        } else if (langcd == "zh")  {lclcd = "zh_CN.utf8";
+        } else if (langcd == "")    {lclcd = "";
         } else {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
                 ,_("language code %s not supported for override")
                 ,langcd.c_str());
-            rslt = setlocale (LC_ALL, "");
+        }
+        if (lclcd == "") {
+            rslt = setlocale (LC_ALL, NULL);
+        } else {
+            rslt = setlocale (LC_ALL, lclcd.c_str());
         }
         if (rslt == nullptr) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -58,7 +63,7 @@ void i10n_locale_chg(std::string langcd)
         } else {
             if (curr != nullptr) {
                 if(std::string(rslt) != std::string(curr)) {
-                    i10n_log();
+                    l18n_log();
                 }
             }
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -83,12 +88,12 @@ void i10n_locale_chg(std::string langcd)
     #endif
 }
 
-void i10n_init(std::string langcd)
+void l18n_init(std::string langcd)
 {
     #ifdef HAVE_GETTEXT
         setlocale (LC_ALL, "");
-        i10n_set(true);
-        i10n_locale_chg(langcd);
+        l18n_set(true);
+        l18n_locale_chg(langcd);
         bindtextdomain ("motion", LOCALEDIR);
         bind_textdomain_codeset ("motion", "UTF-8");
         textdomain ("motion");
@@ -98,19 +103,19 @@ void i10n_init(std::string langcd)
 
     #else
         /* Disable native language support */
-        i10n_set(false);
+        l18n_set(false);
 
         /* This avoids a unused function warning */
-        i10n_locale_chg("");
+        l18n_locale_chg("");
     #endif
 }
 
-void i10n_set(bool setnls)
+void l18n_set(bool setnls)
 {
     if (setnls == true) {
         if (nls_enabled == false) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
-            i10n_log();
+            l18n_log();
         }
         nls_enabled = true;
     } else {
@@ -121,7 +126,7 @@ void i10n_set(bool setnls)
     }
 }
 
-std::string i10n_text(std::string msgid)
+std::string l18n_text(std::string msgid)
 {
     std::string tmp;
 
@@ -140,7 +145,7 @@ std::string i10n_text(std::string msgid)
     #endif
 }
 
-char* i10n_text(const char *msgid)
+char* l18n_text(const char *msgid)
 {
     if (msgid == nullptr) {
         return nullptr;
@@ -156,11 +161,11 @@ char* i10n_text(const char *msgid)
     #endif
 }
 
-void i10n_log()
+void l18n_log()
 {
     bool showmsg = false;
 
-    #ifdef SHOWI10N
+    #ifdef L10NLOG
         showmsg = true;
     #endif
 
@@ -168,11 +173,11 @@ void i10n_log()
         return;
     }
 
-    i10n_config_names();
-    i10n_config_options();
+    l18n_config_names();
+    l18n_config_options();
 }
 
-void i10n_config_names()
+void l18n_config_names()
 {
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","daemon",_("daemon"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pid_file",_("pid_file"));
@@ -323,7 +328,7 @@ void i10n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_show",_("snd_show"));
 }
 
-void i10n_config_options()
+void l18n_config_options()
 {
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","schedule",_("schedule"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on",_("on"));

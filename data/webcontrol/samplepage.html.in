@@ -404,12 +404,12 @@
       var request = new XMLHttpRequest();
       var xmlhttp = new XMLHttpRequest();
       var camid, ans;
-      var pI10N = pData["i10n"];
+      var pl10n = pData["l10n"];
 
       camid = assign_camid();
 
       if (actval == 'camera_delete') {
-        ans = confirm(pI10N["deletecamera"]+" " + camid);
+        ans = confirm(pl10n["deletecamera"]+" " + camid);
         if (ans == false) {
           return;
         }
@@ -535,14 +535,14 @@
       var camcnt = pData['cameras']['count'];
       var indx;
       var html_cam = "\n", html_mov = "\n";
-      var pI10N = pData["i10n"];
+      var pl10n = pData["l10n"];
 
       for (indx=0; indx<camcnt; indx++) {
         if (indx == 0) {
           html_cam += "<a onclick='cams_all_click();'>";
-          html_cam += pI10N["allcameras"]+"</a>\n";
+          html_cam += pl10n["allcameras"]+"</a>\n";
           html_cam += "<a onclick='cams_scan_click();'>";
-          html_cam += pI10N["scancameras"]+"</a>\n";
+          html_cam += pl10n["scancameras"]+"</a>\n";
         }
 
         html_cam += "<a onclick='cams_one_click(" + indx + ");'>";
@@ -555,7 +555,7 @@
       html_cam = "\n";
       html_cam += "<button onclick='display_cameras()'";
       html_cam += " id='cam_btn' class='dropbtn'>";
-      html_cam += pI10N["cameras"]
+      html_cam += pl10n["cameras"]
       html_cam += "</button>";
       document.getElementById("divnav_cam_btn").innerHTML = html_cam;
 
@@ -563,7 +563,7 @@
       html_mov = "\n";
       html_mov += "<button onclick='display_movies()'";
       html_mov += " id='mov_btn' class='dropbtn'>";
-      html_mov += pI10N["recordings"]
+      html_mov += pl10n["recordings"]
       html_mov += "</button>";
       document.getElementById("divnav_movies_btn").innerHTML = html_mov;
 
@@ -571,12 +571,12 @@
 
     function assign_actions() {
       var html_actions;
-      var pI10N = pData["i10n"];
+      var pl10n = pData["l10n"];
 
       html_actions = "\n";
       html_actions += "<button onclick='display_actions()'";
       html_actions += " id='actions_btn' class='dropbtn'>";
-      html_actions += pI10N["actions"];
+      html_actions += pl10n["actions"];
       html_actions += "</button>";
       document.getElementById("divnav_actions_btn").innerHTML = html_actions;
       assign_actions_drop();
@@ -584,7 +584,7 @@
 
     function assign_actions_detail(camid) {
       var html_act;
-      var pI10N = pData["i10n"];
+      var pl10n = pData["l10n"];
 
       html_act = "\n";
       html_act += "<table style='float: left'>";
@@ -593,11 +593,11 @@
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'eventstart');\">";
-      html_act += pI10N["startevent"]+"</td>\n";
+      html_act += pl10n["startevent"]+"</td>\n";
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'eventend');\">";
-      html_act += pI10N["endevent"]+"</td>\n";
+      html_act += pl10n["endevent"]+"</td>\n";
       html_act += "</tr>";
 
       html_act += "<tr><td>"+build_nbsp(4)+"</td></tr>\n";
@@ -605,7 +605,7 @@
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'snapshot');\">";
-      html_act += pI10N["snapshot"]+"</td>\n";
+      html_act += pl10n["snapshot"]+"</td>\n";
       html_act += "</tr>";
 
       html_act += "<tr><td>"+build_nbsp(4)+"</td></tr>\n";
@@ -613,11 +613,11 @@
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'pause');\">";
-      html_act += pI10N["pause"]+"</td>\n";
+      html_act += pl10n["pause"]+"</td>\n";
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'unpause');\">";
-      html_act += pI10N["unpause"]+"</td>\n";
+      html_act += pl10n["unpause"]+"</td>\n";
       html_act += "</tr>";
 
       html_act += "<tr><td>"+build_nbsp(4)+"</td></tr>\n";
@@ -625,11 +625,11 @@
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'restart');\">";
-      html_act += pI10N["startrestart"]+"</td>\n";
+      html_act += pl10n["startrestart"]+"</td>\n";
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'stop');\">";
-      html_act += pI10N["stop"]+"</td>\n";
+      html_act += pl10n["stop"]+"</td>\n";
       html_act += "</tr>";
 
       html_act += "<tr><td>"+build_nbsp(4)+"</td></tr>\n";
@@ -637,7 +637,7 @@
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'config_write');\">";
-      html_act += pI10N["saveconfig"]+"</td>\n";
+      html_act += pl10n["saveconfig"]+"</td>\n";
       html_act += "</tr>";
 
       if (camid == 0) {
@@ -646,11 +646,11 @@
         html_act += "<td>"+build_nbsp(4)+"</td>";
         html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
         html_act += "'camera_add');\">";
-        html_act += pI10N["addcamera"]+"</td>\n";
+        html_act += pl10n["addcamera"]+"</td>\n";
         html_act += "<td>"+build_nbsp(4)+"</td>";
         html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
         html_act += "'camera_delete');\">";
-        html_act += pI10N["deletecamera"]+"</td>\n";
+        html_act += pl10n["deletecamera"]+"</td>\n";
         html_act += "</tr>";
       }
 
@@ -659,11 +659,11 @@
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'action_user');\">";
-      html_act += pI10N["useraction"]+"</td>\n";
+      html_act += pl10n["useraction"]+"</td>\n";
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
       html_act += "'log_showhide');\">";
-      html_act += pI10N["showhidelog"]+"</td>\n";
+      html_act += pl10n["showhidelog"]+"</td>\n";
       html_act += "</tr>";
       html_act += "<table>";
 
@@ -719,13 +719,13 @@
 
     function assign_config_nav() {
       var pCat = pData['categories'];
-      var pI10N=pData["i10n"];
+      var pl10n=pData["l10n"];
       var html_nav, jcat;
 
       html_nav = "\n";
       html_nav += "<button";
       html_nav += " onclick='display_config()' id='cfg_btn' class='dropbtn'>";
-      html_nav += pI10N["configuration"];
+      html_nav += pl10n["configuration"];
       html_nav += "</button>";
       document.getElementById("divnav_config_btn").innerHTML = html_nav;
 
@@ -758,7 +758,7 @@
     function assign_config_item(pCfg, catkey, jcat, camid, jNm) {
       var html_cfg = "";
       var indx_lst;
-      var pI10N = pData["i10n"];
+      var pl10n = pData["l10n"];
 
       if (pCfg["type"] == "string") {
         html_cfg += "<td><textarea ";
@@ -778,7 +778,7 @@
         } else {
           html_cfg += "<td> <button onclick=params_showhide(";
           html_cfg += "'"+"rowid-"+catkey+"'"
-          html_cfg += ")>"+pI10N["showhide"]+"</button></td></tr>\n";
+          html_cfg += ")>"+pl10n["showhide"]+"</button></td></tr>\n";
           html_cfg += assign_config_params(pCfg["detail"], jcat, camid, jNm, pCfg["prefix"]);
         }
 
@@ -900,7 +900,7 @@
     function assign_config_drop(jcat) {
       var pCat = pData['categories'][jcat];
       var camcnt = pData['cameras']['count'];
-      var pI10N = pData["i10n"];
+      var pl10n = pData["l10n"];
       var indx, html_cfg = "";
       var jdropid = "camdrop"+jcat;
 
@@ -909,19 +909,19 @@
       html_cfg += "' style='display:none' class='cls_config'>\n";
       html_cfg += "<table>";
       html_cfg += "<tr><th colspan='2'>";
-      html_cfg += pCat["display"]+" "+pI10N["parameters"];
+      html_cfg += pCat["display"]+" "+pl10n["parameters"];
       html_cfg += "</th></tr>\n";
       html_cfg += "<tr><td><label ";
       html_cfg += " for='"+jdropid+"'";
-      html_cfg += ">"+pI10N["camera"]+"</label></td>\n";
+      html_cfg += ">"+pl10n["camera"]+"</label></td>\n";
       html_cfg += "<td class='cls_camdrop'>\n";
       html_cfg += "<select class='cls_drop' ";
       html_cfg += "onchange='dropchange_cam(this)' ";
       html_cfg += " name='"+jdropid+"'";
       html_cfg += " id='"+jdropid+"'>\n";
       html_cfg += "<option value='' disabled hidden selected>";
-      html_cfg += pI10N["selectcamera"]+"</option>\n";
-      html_cfg += "<option value='0'>"+pI10N["default"]+"</option>\n";
+      html_cfg += pl10n["selectcamera"]+"</option>\n";
+      html_cfg += "<option value='0'>"+pl10n["default"]+"</option>\n";
       for (indx=0; indx<camcnt; indx++) {
         html_cfg += "<option ";
         html_cfg += " value='"+pData["cameras"][indx]["id"]+"'>";
@@ -942,7 +942,7 @@
 
     function assign_actions_drop() {
       var camcnt = pData['cameras']['count'];
-      var pI10N = pData["i10n"];
+      var pl10n = pData["l10n"];
       var indx, html_act = "";
       var jdropid = "actiondrop";
 
@@ -950,19 +950,19 @@
       html_act += " class='cls_actions'>\n";
       html_act += "<table>";
       html_act += "<tr><th colspan='2'>";
-      html_act += pI10N["actions"];
+      html_act += pl10n["actions"];
       html_act += "</th></tr>\n";
       html_act += "<tr><td><label ";
       html_act += " for='"+jdropid+"'";
-      html_act += ">"+pI10N["camera"]+"</label></td>\n";
+      html_act += ">"+pl10n["camera"]+"</label></td>\n";
       html_act += "<td class='cls_camdrop'>\n";
       html_act += "<select class='cls_drop' ";
       html_act += "onchange='dropchange_actions(this)' ";
       html_act += " name='"+jdropid+"'";
       html_act += " id='"+jdropid+"'>\n";
       html_act += "<option value='' disabled hidden selected>";
-      html_act += pI10N["selectcamera"]+"</option>\n";
-      html_act += "<option value='0'>"+pI10N["default"]+"</option>\n";
+      html_act += pl10n["selectcamera"]+"</option>\n";
+      html_act += "<option value='0'>"+pl10n["default"]+"</option>\n";
       for (indx=0; indx<camcnt; indx++) {
         html_act += "<option ";
         html_act += " value='"+pData["cameras"][indx]["id"]+"'>";

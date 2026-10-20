@@ -18,7 +18,7 @@
 
 #include "motion.hpp"
 #include "util.hpp"
-#include "i10n.hpp"
+#include "i18n.hpp"
 #include "logger.hpp"
 #include "camera.hpp"
 #include "conf.hpp"
@@ -44,7 +44,7 @@ std::string cls_webu_json::escstr(std::string invar)
 
 void cls_webu_json::parms_item_detail(cls_config *conf, std::string pNm)
 {
-    std::string catstr, plst, ppfx, pi10n;
+    std::string catstr, plst, ppfx, pl10n;
     std::string pval, pchk;
     ctx_params  *prm;
     ctx_params_item *itm;
@@ -420,7 +420,7 @@ void cls_webu_json::categories_list()
     webua->resp_page += "}";
 }
 
-void cls_webu_json::i10n_list()
+void cls_webu_json::l18n_list()
 {
     std::string catnm_short, catnm_long;
 
@@ -470,8 +470,8 @@ void cls_webu_json::config()
     webua->resp_page += ",\"categories\" : ";
     categories_list();
 
-    webua->resp_page += ",\"i10n\" : ";
-    i10n_list();
+    webua->resp_page += ",\"l10n\" : ";
+    l18n_list();
 
     webua->resp_page += "}";
 

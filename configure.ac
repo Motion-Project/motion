@@ -598,6 +598,19 @@ AS_IF([test "${FFTW3}" = "no"], [
   ]
 )
 
+###############################################################################
+###  log l10n translations strings
+###############################################################################
+AC_ARG_WITH(l10nlog,
+  AS_HELP_STRING([--with-l10nlog],[Log l10n translations ]),
+  [L10NLOG="$withval"],
+  [L10NLOG="no"]
+)
+AS_IF([test "${L10NLOG}" = "yes" ], [
+  AC_DEFINE([L10NLOG], [1], [Define to 1 to log l10n messages])
+  ]
+)
+
 ##############################################################################
 ###  Developer Flags
 ##############################################################################
@@ -614,7 +627,7 @@ AC_ARG_WITH([clang-flags],
     [CLANG_FLAGS=no])
 
 AS_IF([test "${DEVELOPER_FLAGS}" = "yes"], [
-    TEMP_CPPFLAGS="$TEMP_CPPFLAGS  -DSHOWI10N -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-sign-conversion -Wno-sign-compare -ggdb -g3 "
+    TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-sign-conversion -Wno-sign-compare -ggdb -g3 "
   ],[
     AS_IF([test "${CLANG_FLAGS}" = "yes"], [
       TEMP_CPPFLAGS="$TEMP_CPPFLAGS -W -pedantic -Werror -Wall -Wextra -Wconversion -Wformat -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wno-c11-extensions -Wno-sign-conversion -Wno-sign-compare -Wno-deprecated-anon-enum-enum-conversion -ggdb -g3 "

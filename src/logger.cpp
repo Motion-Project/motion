@@ -17,7 +17,7 @@
  */
 #include "motion.hpp"
 #include "util.hpp"
-#include "i10n.hpp"
+#include "i18n.hpp"
 #include "logger.hpp"
 #include "conf.hpp"
 
