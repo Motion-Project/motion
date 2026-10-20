@@ -24,7 +24,7 @@
 
 static bool nls_enabled = true;
 
-void l18n_locale_chg(std::string langcd)
+void i18n_locale_chg(std::string langcd)
 {
     #ifdef HAVE_GETTEXT
         char *rslt, *curr;
@@ -63,7 +63,7 @@ void l18n_locale_chg(std::string langcd)
         } else {
             if (curr != nullptr) {
                 if(std::string(rslt) != std::string(curr)) {
-                    l18n_log();
+                    i18n_log();
                 }
             }
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
@@ -88,12 +88,12 @@ void l18n_locale_chg(std::string langcd)
     #endif
 }
 
-void l18n_init(std::string langcd)
+void i18n_init(std::string langcd)
 {
     #ifdef HAVE_GETTEXT
         setlocale (LC_ALL, "");
-        l18n_set(true);
-        l18n_locale_chg(langcd);
+        i18n_set(true);
+        i18n_locale_chg(langcd);
         bindtextdomain ("motion", LOCALEDIR);
         bind_textdomain_codeset ("motion", "UTF-8");
         textdomain ("motion");
@@ -103,19 +103,19 @@ void l18n_init(std::string langcd)
 
     #else
         /* Disable native language support */
-        l18n_set(false);
+        i18n_set(false);
 
         /* This avoids a unused function warning */
-        l18n_locale_chg("");
+        i18n_locale_chg("");
     #endif
 }
 
-void l18n_set(bool setnls)
+void i18n_set(bool setnls)
 {
     if (setnls == true) {
         if (nls_enabled == false) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Enabling native language support"));
-            l18n_log();
+            i18n_log();
         }
         nls_enabled = true;
     } else {
@@ -126,7 +126,7 @@ void l18n_set(bool setnls)
     }
 }
 
-std::string l18n_text(std::string msgid)
+std::string i18n_text(std::string msgid)
 {
     std::string tmp;
 
@@ -145,7 +145,7 @@ std::string l18n_text(std::string msgid)
     #endif
 }
 
-char* l18n_text(const char *msgid)
+char* i18n_text(const char *msgid)
 {
     if (msgid == nullptr) {
         return nullptr;
@@ -161,7 +161,7 @@ char* l18n_text(const char *msgid)
     #endif
 }
 
-void l18n_log()
+void i18n_log()
 {
     bool showmsg = false;
 
@@ -173,11 +173,11 @@ void l18n_log()
         return;
     }
 
-    l18n_config_names();
-    l18n_config_options();
+    i18n_config_names();
+    i18n_config_options();
 }
 
-void l18n_config_names()
+void i18n_config_names()
 {
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","daemon",_("daemon"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pid_file",_("pid_file"));
@@ -328,7 +328,7 @@ void l18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_show",_("snd_show"));
 }
 
-void l18n_config_options()
+void i18n_config_options()
 {
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","schedule",_("schedule"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on",_("on"));

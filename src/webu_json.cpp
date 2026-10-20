@@ -420,7 +420,7 @@ void cls_webu_json::categories_list()
     webua->resp_page += "}";
 }
 
-void cls_webu_json::l18n_list()
+void cls_webu_json::i18n_list()
 {
     std::string catnm_short, catnm_long;
 
@@ -471,7 +471,7 @@ void cls_webu_json::config()
     categories_list();
 
     webua->resp_page += ",\"l10n\" : ";
-    l18n_list();
+    i18n_list();
 
     webua->resp_page += "}";
 

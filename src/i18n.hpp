@@ -16,23 +16,23 @@
  *
  *
 */
-#ifndef _INCLUDE_L18N_HPP_
-#define _INCLUDE_L18N_HPP_
+#ifndef _INCLUDE_I18N_HPP_
+#define _INCLUDE_I18N_HPP_
 
     #ifdef HAVE_GETTEXT
         #include <libintl.h>
         extern int  _nl_msg_cat_cntr;    /* Required for changing the locale dynamically */
     #endif
 
-    #define _(STRING) l18n_text(STRING)
+    #define _(STRING) i18n_text(STRING)
 
-    char* l18n_text(const char *msgid);
-    std::string l18n_text(std::string msgid);
-    void l18n_set(bool setnls);
-    void l18n_init(std::string langcd);
-    void l18n_locale_chg(std::string langcd);
-    void l18n_log();
-    void l18n_config_names();
-    void l18n_config_options();
+    char* i18n_text(const char *msgid);
+    std::string i18n_text(std::string msgid);
+    void i18n_set(bool setnls);
+    void i18n_init(std::string langcd);
+    void i18n_locale_chg(std::string langcd);
+    void i18n_log();
+    void i18n_config_names();
+    void i18n_config_options();
 
-#endif /* _INCLUDE_L18N_HPP_ */
+#endif /* _INCLUDE_I18N_HPP_ */

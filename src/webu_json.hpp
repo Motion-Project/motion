@@ -32,7 +32,7 @@
             void parms_all();
             void cameras_list();
             void categories_list();
-            void l18n_list();
+            void i18n_list();
             void config();
             void movies_list();
             void movies();
