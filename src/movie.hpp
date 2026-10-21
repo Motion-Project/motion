@@ -43,9 +43,11 @@ class cls_movie {
         std::string         file_nm;
         std::string         file_dir;
         bool                is_running;
+        bool                all_frames;
 
     private:
-        cls_camera *cam;
+        cls_camera  *cam;
+        ctx_params  *params;
 
         void free_pkt();
         void free_nal();
@@ -54,10 +56,12 @@ class cls_movie {
         int encode_video();
         int timelapse_append(AVPacket *pkt);
         void free_context();
-        int get_oformat();
+        int set_oformat();
+        void set_params();
         int set_pts(const struct timespec *ts1);
         int set_quality();
         int set_codec_preferred();
+        void set_flags();
         int set_codec();
         int set_stream();
         int alloc_video_buffer(AVFrame *frame, int align);
@@ -119,6 +123,8 @@ class cls_movie {
         std::string         container;
         std::string         preferred_codec;
         std::string         movie_type;
+        int                 quality;
+        bool                secdetect_only;     /*Retain only if secondary detected*/
 
 };
 

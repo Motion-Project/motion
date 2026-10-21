@@ -164,6 +164,7 @@ enum PARM_PCAT {  /* The params categories*/
     ,PARM_PCAT_ACTS /* webcontrol_actions */
     ,PARM_PCAT_HDR  /* webcontrol_headers */
     ,PARM_PCAT_SND  /* snd_params */
+    ,PARM_PCAT_MOVIE /* movie_params */
     ,PARM_PCAT_MAX  /* Maximum params category*/
 };
 enum PARM_TYP{

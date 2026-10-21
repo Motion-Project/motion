@@ -370,19 +370,16 @@
               <td bgcolor="#edf4f9" ><a href="#movie_output" >movie_output</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_output_motion" >movie_output_motion</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_max_time" >movie_max_time</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#movie_bps" >movie_bps</a> </td>
-            </tr>
-            <tr>
-              <td bgcolor="#edf4f9" ><a href="#movie_quality" >movie_quality</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_container" >movie_container</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#movie_retain" >movie_retain</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#movie_passthrough" >movie_passthrough</a> </td>
             </tr>
             <tr>
+              <td bgcolor="#edf4f9" ><a href="#movie_params" >movie_params</a> </td>
+              <td bgcolor="#edf4f9" ><a href="#movie_passthrough" >movie_passthrough</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_filename" >movie_filename</a> </td>
+            </tr>
+            <tr>
               <td bgcolor="#edf4f9" ><a href="#movie_extpipe_use" >movie_extpipe_use</a> </td>
               <td bgcolor="#edf4f9" ><a href="#movie_extpipe" >movie_extpipe</a> </td>
-              <td bgcolor="#edf4f9" ><a href="#movie_all_frames" >movie_all_frames</a> </td>
             </tr>
             <tr>
               <td bgcolor="#edf4f9" ><a href="#timelapse_filename" >timelapse_filename</a> </td>
@@ -2190,22 +2187,6 @@
         </ul>
         <p></p>
 
-        <h3><a name="movie_bps"></a> movie_bps </h3>
-        <ul>
-          <li> Values: Integer | Default: 400000</li>
-          Bitrate to use in encoding of movies.  This option is ignored if movie_quality is specified.
-        </ul>
-        <p></p>
-
-        <h3><a name="movie_quality"></a> movie_quality </h3>
-        <ul>
-          <li> Values: 0 - 100 | Default: 60</li>
-          A value of 0 disables this option while values 1 - 100 change the quality
-          of the movie.  The value of 1 means worst quality and 100 is the best quality.  High
-          values of this option (e.g. 100) may cause difficulty with some players.
-        </ul>
-        <p></p>
-
         <h3><a name="movie_container"></a> movie_container </h3>
         <ul>
           <li> Values: flv, ogg, webm, mp4, mkv, hevc, mov | Default: mkv</li>
@@ -2213,11 +2194,105 @@
         </ul>
         <p></p>
 
-        <h3><a name="movie_retain"></a>movie_retain</h3>
+        <h3><a name="movie_params"></a>movie_params</h3>
         <ul>
-          <li> Values: on, off | Default: off</li>
-          Retain movie only if the secondary detection occurred.
+         <li> Values: String | Default: Not Defined</li>
+          Comma separated parameters for the movies
+          Format is parm1=value1,parm2=value2 etc.
+          <p></p>
+          <div>
+            <i><h4>params_file</h4></i>
+            <ul>
+              Full file name for providing the movie_params option.  Provides
+              option of specifying each parameter on a different line instead of
+              having them as comma separated pairs.
+            </ul>
+            <i><h4>preferred_codec</h4></i>
+            <ul>
+              Name of the preferred codec to use for encoding the movie.
+            </ul>
+            <i><h4>quality</h4></i>
+            <ul>
+              The quality to encode the movie.  Acceptable range is from 5 to
+              90 with a default of 60.  If CRF is not specified explicitly,
+              the quality value will be used to calculate the CRF.
+            </ul>
+            <i><h4>profile</h4></i>
+            <ul>
+              The H264 profile to use (baseline,main,high).
+            </ul>
+            <i><h4>bit_rate</h4></i>
+            <ul>
+              The bit rate to use for encoding.
+            </ul>
+            <i><h4>dict_*</h4></i>
+            <ul>
+              The FFMpeg options to set using av_dict_set on the codec context.  Motion
+              will strip off the prefix of <code>dict_</code> and then apply the remainder
+              as the name of FFMpeg option. The defaults for Motion are
+              <code>dict_preset=superfast,dict_tune=zerolatency</code> which corresponds
+              to the FFMpeg options of <code>preset=superfast</code> and
+              <code>tune=zerolatency</code>
+            </ul>
+            <i><h4>opt_*</h4></i>
+            <ul>
+              The FFMpeg options to set using av_opt_set on the codec context.  Motion
+              will strip off the prefix of <code>opt_</code> and then apply the remainder
+              as the name of FFMpeg option. The defaults for Motion are
+              <code>opt_profile=main,opt_crf=18,opt_preset=superfast</code> which
+              corresponds to the FFMpeg options of <code>profile=main</code>,
+              <code>crf=18</code>, <code>preset=superfast</code>
+            </ul>
+            <i><h4>priv_*</h4></i>
+            <ul>
+              The FFMpeg options to set using av_opt_set on the codec context priv_data.
+              Motion will strip off the prefix of <code>priv_</code> and then apply
+              the remainder as the name of FFMpeg option.
+            </ul>
+            <i><h4>global_quality</h4></i>
+            <ul>
+              The global_quality to apply for the codec context.
+            </ul>
+            <i><h4>flags</h4></i>
+            <ul>
+              Flags to apply for the codec context.  The format is specified as the
+              numeric value and the shift amount.  The values are provided in
+              FFMpeg definitions of the value.  e.g. AV_CODEC_FLAG_GLOBAL_HEADER
+              is defined(at the time of writing) as 1<<22.  To specify multiple flags
+              separate them with a | and they will be or'd together.  The Motion
+              default is 1<<22|1<<1 which corresponds to AV_CODEC_FLAG_GLOBAL_HEADER
+              or'd with AV_CODEC_FLAG_QSCALE.
+            </ul>
+            <i><h4>flags2</h4></i>
+            <ul>
+              Same as flags without default but applied to flags2.
+            </ul>
+            <i><h4>gop_size</h4></i>
+            <ul>
+              Group of pictures size.
+            </ul>
+            <i><h4>max_b_frames</h4></i>
+            <ul>
+              max_b_frames value.
+            </ul>
+            <i><h4>secdetect_only</h4></i>
+            <ul>
+              Boolean to specify whether to only retain movies if secondary detection
+              was true.  Motion default is false so all movies created will be retained
+              regardless of whether secondary detection occurred.
+            </ul>
+            <i><h4>all_frames</h4></i>
+            <ul>
+              Write all frames to the movie during an event.  The Motion default
+              is false which means that only frames that have Motion and the post
+              capture number of frames will be written.  Note that this may
+              result in disjointed movies.  A value of true means that all
+              frames captured during the event will be written to the movies.  This
+              may result in larger movie files and some portions of the movie
+              not displaying any movement in the video.
+            </ul>
         </ul>
+
         <p></p>
 
         <h3><a name="movie_passthrough"></a> movie_passthrough </h3>
@@ -2247,14 +2322,6 @@
         <ul>
           <li> Values: String | Default: Not defined</li>
           The program name and options for processing the images.
-        </ul>
-        <p></p>
-
-        <h3><a name="movie_all_frames"></a> movie_all_frames </h3>
-        <ul>
-          <li> Values: on, off | Default: on</li>
-          Specifies whether to send all frames for encoding during an event instead of just
-          those associated with motion or pre/post capture.
         </ul>
         <p></p>
 

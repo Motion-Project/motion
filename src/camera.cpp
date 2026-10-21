@@ -1665,7 +1665,7 @@ void cls_camera::actions_motion()
         current_image->save_pic = true;
         current_image->save_movie = true;
         postcap--;
-    } else if ((cfg->movie_all_frames) && (event_curr_nbr == event_prev_nbr)) {
+    } else if ((movie_norm->all_frames) && (event_curr_nbr == event_prev_nbr)) {
         current_image->save_movie = true;
     } else {
         current_image->precap = true;
@@ -1740,7 +1740,7 @@ void cls_camera::actions()
         return;
     }
 
-     if ((current_image->diffs > threshold) &&
+    if ((current_image->diffs > threshold) &&
         (current_image->diffs < threshold_maximum)) {
         current_image->motion = true;
         info_diff_cnt++;
@@ -1756,7 +1756,7 @@ void cls_camera::actions()
         current_image->save_pic = true;
         current_image->save_movie = true;
         postcap--;
-    } else if ((cfg->movie_all_frames) && (event_curr_nbr == event_prev_nbr)) {
+    } else if ((movie_norm->all_frames) && (event_curr_nbr == event_prev_nbr)) {
         current_image->save_movie = true;
     } else {
         current_image->precap = true;

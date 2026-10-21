@@ -120,15 +120,12 @@ ctx_parm config_parms[] = {
     {"movie_output",              PARM_TYP_BOOL,   PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
     {"movie_output_motion",       PARM_TYP_BOOL,   PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
     {"movie_max_time",            PARM_TYP_INT,    PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
-    {"movie_bps",                 PARM_TYP_INT,    PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
-    {"movie_quality",             PARM_TYP_INT,    PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
     {"movie_container",           PARM_TYP_STRING, PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
     {"movie_passthrough",         PARM_TYP_BOOL,   PARM_CAT_10, PARM_LVL_01, PARM_CHG_CODE },
     {"movie_filename",            PARM_TYP_STRING, PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
-    {"movie_retain",              PARM_TYP_LIST,   PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
-    {"movie_all_frames",          PARM_TYP_BOOL,   PARM_CAT_10, PARM_LVL_01, PARM_CHG_COPY },
     {"movie_extpipe_use",         PARM_TYP_BOOL,   PARM_CAT_10, PARM_LVL_04, PARM_CHG_COPY },
     {"movie_extpipe",             PARM_TYP_STRING, PARM_CAT_10, PARM_LVL_04, PARM_CHG_COPY },
+    {"movie_params",              PARM_TYP_PARAMS, PARM_CAT_10, PARM_LVL_01, PARM_CHG_CODE },
 
     {"timelapse_interval",        PARM_TYP_INT,    PARM_CAT_11, PARM_LVL_01, PARM_CHG_COPY },
     {"timelapse_mode",            PARM_TYP_LIST,   PARM_CAT_11, PARM_LVL_01, PARM_CHG_COPY },
@@ -246,6 +243,15 @@ ctx_parm_depr config_parms_depr[] = {
         ,"\"webcontrol_authentication\" replaced with \"webcontrol_auth_admin\""}
     ,{"webcontrol_parms", "5.0.0","webcontrol_access"
         ,"\"webcontrol_parms\" replaced with \"webcontrol_access\""}
+    ,{"movie_quality", "5.0.0","movie_params option"
+        ,"\"movie_quality\" replaced with \"movie_params\" parameter \"quality\""}
+    ,{"movie_bps", "5.0.0","movie_params option"
+        ,"\"movie_bps\" replaced with \"movie_params\" parameter \"bit_rate\""}
+    ,{"movie_all_frames", "5.0.0","movie_params option"
+        ,"\"movie_all_frames\" replaced with \"movie_params\" parameter \"all_frames\""}
+    ,{"movie_retain", "5.0.0","movie_params option"
+        ,"\"movie_retain\" replaced with \"movie_params\" parameter \"secdetect_only\""}
+
     ,{ "","","",""}
 };
 
@@ -1541,54 +1547,6 @@ void cls_config::edit_movie_max_time(std::string &parm, enum PARM_ACT pact)
     }
 }
 
-void cls_config::edit_movie_bps(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        movie_bps = 400000;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 0) || (parm_in > 9999999)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_bps %d"),parm_in);
-        } else {
-            movie_bps = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(movie_bps);
-    }
-}
-
-void cls_config::edit_movie_quality(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        movie_quality = 60;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in <= 0) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_quality %d"),parm_in);
-        } else if (parm_in > 90) {
-            /*
-               Many movie players can not handle the 100% quality
-               setting from ffmpeg.  It sets baseline and x265 to high, etc.
-               As a result, we limit it to an arbritrary number less
-               than 100 (i.e. 90)
-            */
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , _("Movie quality settings greater than 90 are not permitted."));
-            movie_quality = 90;
-        } else if (parm_in < 5) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , _("Movie quality settings less then 5 are not permitted."));
-            movie_quality = 5;
-        } else {
-            movie_quality = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(movie_quality);
-    }
-}
-
 void cls_config::edit_movie_container(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -1629,38 +1587,6 @@ void cls_config::edit_movie_filename(std::string &parm, enum PARM_ACT pact)
     }
 }
 
-void cls_config::edit_movie_retain(std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        movie_retain = "all";
-    } else if (pact == PARM_ACT_SET) {
-        if ((parm == "all") || (parm == "secondary") )  {
-            movie_retain = parm;
-        } else if (parm == "") {
-            movie_retain = "all";
-        } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_retain %s"), parm.c_str());
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = movie_retain;
-    } else if (pact == PARM_ACT_LIST) {
-        parm = "[";
-        parm = parm +  "\"all\",\"secondary\"";
-        parm = parm + "]";
-    }
-}
-
-void cls_config::edit_movie_all_frames(std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        movie_all_frames = true;
-    } else if (pact == PARM_ACT_SET) {
-        edit_set_bool(movie_all_frames, parm);
-    } else if (pact == PARM_ACT_GET) {
-        edit_get_bool(parm, movie_all_frames);
-    }
-}
-
 void cls_config::edit_movie_extpipe_use(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -1680,6 +1606,17 @@ void cls_config::edit_movie_extpipe(std::string &parm, enum PARM_ACT pact)
         movie_extpipe = parm;
     } else if (pact == PARM_ACT_GET) {
         parm = movie_extpipe;
+    }
+}
+
+void cls_config::edit_movie_params(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        movie_params = "";
+    } else if (pact == PARM_ACT_SET) {
+        movie_params = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = movie_params;
     }
 }
 
@@ -2651,15 +2588,12 @@ void cls_config::edit_cat10(std::string parm_nm, std::string &parm_val, enum PAR
     if (parm_nm == "movie_output") {                   edit_movie_output(parm_val, pact);
     } else if (parm_nm == "movie_output_motion") {     edit_movie_output_motion(parm_val, pact);
     } else if (parm_nm == "movie_max_time") {          edit_movie_max_time(parm_val, pact);
-    } else if (parm_nm == "movie_bps") {               edit_movie_bps(parm_val, pact);
-    } else if (parm_nm == "movie_quality") {           edit_movie_quality(parm_val, pact);
     } else if (parm_nm == "movie_container") {         edit_movie_container(parm_val, pact);
     } else if (parm_nm == "movie_passthrough") {       edit_movie_passthrough(parm_val, pact);
     } else if (parm_nm == "movie_filename") {          edit_movie_filename(parm_val, pact);
-    } else if (parm_nm == "movie_retain") {            edit_movie_retain(parm_val, pact);
-    } else if (parm_nm == "movie_all_frames") {        edit_movie_all_frames(parm_val, pact);
     } else if (parm_nm == "movie_extpipe_use") {       edit_movie_extpipe_use(parm_val, pact);
     } else if (parm_nm == "movie_extpipe") {           edit_movie_extpipe(parm_val, pact);
+    } else if (parm_nm == "movie_params") {            edit_movie_params(parm_val, pact);
     }
 
 }
@@ -3528,6 +3462,113 @@ void cls_config::params_load_sound()
 
 }
 
+void cls_config::params_load_movie()
+{
+    int indx;
+    ctx_params *prm, *dprm;
+
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "movie_params";
+    prm->params_pcat = PARM_PCAT_MOVIE;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"preferred_codec","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"quality","60",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"profile","main",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"baseline","main","high"},""});
+    prm->params_array.push_back(
+        {"bit_rate","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"dict_preset","superfast",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"ultrafast","superfast","veryfast","faster"
+        ,"fast","medium","slow","slower","veryslow"},""});
+    prm->params_array.push_back(
+        {"dict_tune","zerolatency",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"film","animation","grain","stillimage"
+        ,"fastdecode","zerolatency"},""});
+    prm->params_array.push_back(
+        {"opt_profile","main",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{"baseline","main","high"},""});
+    prm->params_array.push_back(
+        {"opt_crf","18",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"opt_preset","superfast",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{"ultrafast","superfast","veryfast","faster"
+        ,"fast","medium","slow","slower","veryslow"},""});
+    prm->params_array.push_back(
+        {"global_quality","75",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"flags","1<<22|1<<1",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"flags2","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"gop_size","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"max_b_frames","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"secdetect_only","false",PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"all_frames","false",PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    /* Add in any deprecated options*/
+    dprm = nullptr;
+    for (indx=0;indx<depr_params.size();indx++){
+        if (depr_params[indx]->params_pcat == PARM_PCAT_MOVIE) {
+            dprm =depr_params[indx];
+        }
+    }
+    if (dprm != nullptr) {
+        for (indx=0;indx<dprm->params_array.size();indx++) {
+            util_parms_add(prm
+                , dprm->params_array[indx].param_name
+                , dprm->params_array[indx].param_value, false);
+        }
+    }
+    util_parms_parse(prm,"movie_params",movie_params,PARM_PCAT_MOVIE);
+
+    params.push_back(prm);
+
+}
+
 void cls_config::params_load()
 {
     params_load_schedule();
@@ -3541,7 +3582,7 @@ void cls_config::params_load()
     params_load_actions();
     params_load_headers();
     params_load_sound();
-
+    params_load_movie();
 }
 
 std::string cls_config::params_prefix(enum PARM_PCAT pcat) {
@@ -3560,6 +3601,7 @@ std::string cls_config::params_prefix(enum PARM_PCAT pcat) {
     } else if (pcat == PARM_PCAT_ACTS)  { return "pact_";
     } else if (pcat == PARM_PCAT_HDR)   { return "phdr_";
     } else if (pcat == PARM_PCAT_SND)   { return "psnd_";
+    } else if (pcat == PARM_PCAT_MOVIE) { return "pmov_";
     } else { return "pudf_";
     }
 }
@@ -3576,6 +3618,22 @@ void cls_config::defaults()
         indx++;
     }
     params.clear();
+    defaults_depr();
+}
+
+void cls_config::defaults_depr()
+{
+    ctx_params *prm;
+
+    depr_params.clear();
+
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "movies_params";
+    prm->params_pcat = PARM_PCAT_MOVIE;
+    prm->params_cnt = 0;
+    depr_params.push_back(prm);
+
 }
 
 int cls_config::edit_set_active(std::string parm_nm, std::string parm_val)
@@ -3642,6 +3700,53 @@ void cls_config::edit_depr_tdbl(std::string newname, std::string &parm_val)
     edit_set_active(newname, parm_new);
 }
 
+void cls_config::edit_depr_movie(std::string parm_nm, std::string parm_val)
+{
+    std::string pnew_nm, pnew_val;
+    int indx;
+    ctx_params *prm;
+
+    prm = nullptr;
+    for (indx=0;indx<depr_params.size();indx++) {
+        if (depr_params[indx]->params_pcat == PARM_PCAT_MOVIE) {
+            prm = depr_params[indx];
+        }
+    }
+    if (prm == nullptr) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Bad programming"));
+        return;
+    }
+
+    if (parm_nm == "movie_quality") {
+        pnew_nm = "quality";
+        pnew_val = parm_val;
+    } else if (parm_nm == "movie_bps") {
+        pnew_nm = "bit_rate";
+        pnew_val = parm_val;
+    } else if (parm_nm == "movie_retain") {
+        pnew_nm="secdetect_only";
+        if (parm_val == "all") {
+            pnew_val = "false";
+        } else if (parm_val == "secondary") {
+            pnew_val = "true";
+        } else {
+            pnew_val = "false";
+        }
+    } else if (parm_nm == "movie_all_frames") {
+        pnew_nm="all_frames";
+        pnew_val = parm_val;
+    } else {
+        return;
+    }
+    util_parms_add(prm, pnew_nm, pnew_val, false);
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+        ,_("%s %s changed to movie_params option %s=%s")
+        ,parm_nm.c_str(),parm_val.c_str()
+        ,pnew_nm.c_str(),pnew_val.c_str());
+
+}
+
 int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
 {
     int indx;
@@ -3653,18 +3758,20 @@ int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
                 , config_parms_depr[indx].info.c_str()
                 , config_parms_depr[indx].last_version.c_str());
 
-            if ((config_parms_depr[indx].parm_name == "brightness") ||
-                (config_parms_depr[indx].parm_name == "contrast") ||
-                (config_parms_depr[indx].parm_name == "saturation") ||
-                (config_parms_depr[indx].parm_name == "hue") ||
-                (config_parms_depr[indx].parm_name == "power_line_frequency")) {
+            if ((parm_nm == "brightness") || (parm_nm == "contrast") ||
+                (parm_nm == "saturation") || (parm_nm == "hue") ||
+                (parm_nm == "power_line_frequency")) {
                 edit_depr_vid(parm_nm, config_parms_depr[indx].newname, parm_val);
 
-            } else if ((config_parms_depr[indx].parm_name == "webcontrol_html_output")) {
+            } else if ((parm_nm == "webcontrol_html_output")) {
                 edit_depr_web(config_parms_depr[indx].newname, parm_val);
 
-            } else if ((config_parms_depr[indx].parm_name == "text_double")) {
+            } else if ((parm_nm == "text_double")) {
                 edit_depr_tdbl(config_parms_depr[indx].newname, parm_val);
+
+            } else if ((parm_nm == "movie_quality") || (parm_nm == "movie_bps") ||
+                (parm_nm == "movie_retain") || (parm_nm == "movie_all_frames")) {
+                edit_depr_movie(parm_nm, parm_val);
 
             } else {
                 edit_set_active(config_parms_depr[indx].newname, parm_val);

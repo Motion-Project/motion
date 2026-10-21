@@ -124,7 +124,25 @@ void cls_movie::free_context()
     }
 }
 
-int cls_movie::get_oformat()
+void cls_movie::set_params()
+{
+    int indx;
+    ctx_params_item *itm;
+
+    secdetect_only = false;
+    all_frames = false;
+    for (indx=0;indx<params->params_array.size();indx++){
+        itm = &params->params_array[indx];
+        if (itm->param_name == "secdetect_only") {
+            secdetect_only=mtob(itm->param_value);
+        }
+        if (itm->param_name == "all_frames") {
+            all_frames=mtob(itm->param_value);
+        }
+    }
+}
+
+int cls_movie::set_oformat()
 {
     if (tlapse == TIMELAPSE_APPEND) {
         oc->oformat = av_guess_format("mpeg2video", nullptr, nullptr);
@@ -285,73 +303,139 @@ int cls_movie::set_pts(const struct timespec *ts1)
 
 int cls_movie::set_quality()
 {
-    int quality;
+    int indx, bitrate, gblqual;
+    std::string prfl, crf;
+    ctx_params_item *itm;
 
-    opts = 0;
-    quality = cam->cfg->movie_quality;
-    if (quality > 100) {
-        quality = 100;
-    }
-    if (ctx_codec->codec_id == AV_CODEC_ID_H264 ||
-        ctx_codec->codec_id == AV_CODEC_ID_HEVC) {
-        if (quality <= 0) {
-            quality = 45; // default to 45%
+    opts = NULL;
+    quality = 60;
+    bitrate = 0;
+    prfl="";
+    crf="";
+    gblqual=0;
+    for (indx=0;indx<params->params_array.size();indx++){
+        itm = &params->params_array[indx];
+        if (itm->param_name == "quality") {
+            quality=mtoi(itm->param_value);
+            if ((quality > 90) || (quality < 5)) {
+                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+                ,_("Invalid quality %d. Permitted range 5-90"), quality);
+                quality = 60;
+                itm->param_value="60";
+            }
+        } else if (itm->param_name == "bit_rate") {
+            bitrate=mtoi(itm->param_value);
+        } else if (itm->param_name == "profile") {
+            prfl = itm->param_value;
+        } else if (itm->param_name.substr(0,5) == "dict_") {
+            av_dict_set(&opts
+                ,itm->param_name.substr(5).c_str()
+                ,itm->param_value.c_str(), 0);
+            if (itm->param_name.substr(5) == "crf") {
+                crf=itm->param_value;
+            }
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                , "av_dict_set %s = %s"
+                , itm->param_name.substr(5).c_str()
+                , itm->param_value.c_str());
+        } else if (itm->param_name.substr(0,4) == "opt_") {
+            av_opt_set(ctx_codec
+                ,itm->param_name.substr(4).c_str()
+                ,itm->param_value.c_str(), 0);
+            if (itm->param_name.substr(4) == "crf") {
+                crf=itm->param_value;
+            }
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                , "av_opt_set %s = %s"
+                , itm->param_name.substr(4).c_str()
+                , itm->param_value.c_str());
+        } else if (itm->param_name.substr(0,5) == "priv_") {
+            av_opt_set(ctx_codec->priv_data
+                ,itm->param_name.substr(5).c_str()
+                ,itm->param_value.c_str(), 0);
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                , "av_opt_set  priv_data %s = %s"
+                , itm->param_name.substr(5).c_str()
+                , itm->param_value.c_str());
+            if (itm->param_name.substr(5) == "crf") {
+                crf=itm->param_value;
+            }
+        } else if (itm->param_name == "global_quality") {
+            gblqual=mtoi(itm->param_value);
         }
+    }
+    if (bitrate == 0) {
+        bitrate = (int)(((int64_t)width * height * fps * quality) >> 7);
+        if (bitrate < 4000) { // magic number
+            bitrate = 4000;
+        }
+    }
+    ctx_codec->bit_rate = bitrate;
 
-        if (preferred_codec == "h264_v4l2m2m") {
-
-            // bit_rate = width * height * fps * quality_factor
-            quality = (int)(((int64_t)width * height * fps * quality) >> 7);
-            // Clip bit rate to min
-            if (quality < 4000) {
-                // magic number
-                quality = 4000;
-            }
+    if ((ctx_codec->codec_id == AV_CODEC_ID_H264) ||
+        (ctx_codec->codec_id == AV_CODEC_ID_HEVC)) {
+        if (prfl == "main") {
             ctx_codec->profile = MY_PROFILE_H264_MAIN;
-            ctx_codec->bit_rate = quality;
-            av_dict_set(&opts, "preset", "ultrafast", 0);
-            av_dict_set(&opts, "tune", "zerolatency", 0);
-
+        } else if (prfl == "baseline") {
+            ctx_codec->profile = MY_PROFILE_H264_BASELINE;
+        } else if (prfl == "high") {
+            ctx_codec->profile = MY_PROFILE_H264_HIGH;
         } else {
-            /* Control other H264 encoders quality is via CRF.  To get the profiles
-             * to work (main), (high), we are setting this via the opt instead of
-             * dictionary.  The ultrafast is not used because at that level, the
-             * profile reverts to (baseline) and a bit more efficiency is in
-             * (main) or (high) so we choose next fastest option (superfast)
-             */
-            char crf[10];
-            quality = (int)(( (100-quality) * 51)/100);
-            snprintf(crf, 10, "%d", quality);
-            if (ctx_codec->codec_id == AV_CODEC_ID_H264) {
-                av_opt_set(ctx_codec->priv_data, "profile", "high", 0);
-            }
-            av_opt_set(ctx_codec->priv_data, "crf", crf, 0);
-            av_opt_set(ctx_codec->priv_data, "tune", "zerolatency", 0);
-            av_opt_set(ctx_codec->priv_data, "preset", "superfast",0);
+            prfl="main";
+            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+                ,_("Unknown movie profile: %s")
+                , prfl.c_str());
+            ctx_codec->profile = MY_PROFILE_H264_MAIN;
+        }
+        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            , "codec profile = %s", prfl.c_str());
+        av_opt_set(ctx_codec->priv_data, "profile", prfl.c_str(), 0);
+        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            , "av_opt_set priv_data profile = %s", prfl.c_str());
+
+        if (crf == "") {
+            crf = std::to_string(((100-quality) * 51)/100);
+            av_opt_set(ctx_codec->priv_data, "crf", crf.c_str(), 0);
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                , "av_opt_set priv_data crf = %s", crf.c_str());
         }
     } else {
-        /* The selection of 8000 is a subjective number based upon viewing output files */
-        if (quality > 0) {
-            quality =(int)(((100-quality)*(100-quality)*(100-quality) * 8000) / 1000000) + 1;
-            ctx_codec->flags |= AV_CODEC_FLAG_QSCALE;
-            ctx_codec->global_quality=quality;
+        if (gblqual ==0) {
+            /* The selection of 8000 is a subjective number based upon viewing output files */
+            gblqual =(int)(((100-quality)*(100-quality)*(100-quality) * 8000) / 1000000) + 1;
         }
+        ctx_codec->global_quality=gblqual;
     }
     MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
-        ,_("%s codec vbr/crf/bit_rate: %d"), codec->name, quality);
+        ,_("%s codec quality: %d crf: %s bit_rate: %d gblqual: %d")
+        , codec->name, quality, crf.c_str(), bitrate, gblqual);
+
 
     return 0;
 }
 
 int cls_movie::set_codec_preferred()
 {
+    int indx;
+
     codec = nullptr;
+    for (indx=0;indx<params->params_array.size();indx++){
+        if (params->params_array[indx].param_name == "preferred_codec") {
+            preferred_codec=params->params_array[indx].param_value;
+        }
+    }
     if (preferred_codec != "") {
         codec = avcodec_find_encoder_by_name(preferred_codec.c_str());
         if (codec == nullptr) {
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
                 ,_("Failed to find user requested codec %s")
                 , preferred_codec.c_str());
+            preferred_codec = "";
+            for (indx=0;indx<params->params_array.size();indx++){
+                if (params->params_array[indx].param_name == "preferred_codec") {
+                    params->params_array[indx].param_value="";
+                }
+            }
             codec = avcodec_find_encoder(oc->video_codec_id);
         } else {
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
@@ -370,11 +454,73 @@ int cls_movie::set_codec_preferred()
     return 0;
 }
 
+void cls_movie::set_flags()
+{
+    int indx;
+    std::string fflags, fflags2;
+    std::string svar, shft, sflg;
+    size_t chkloc;
+
+    fflags="";
+    fflags2="";
+    for (indx=0;indx<params->params_array.size();indx++){
+        if (params->params_array[indx].param_name == "flags") {
+            fflags=params->params_array[indx].param_value;
+        }
+        if (params->params_array[indx].param_name == "flags2") {
+            fflags2=params->params_array[indx].param_value;
+        }
+    }
+
+    while (fflags != "") {
+        chkloc = fflags.find("|");
+        if (chkloc == std::string::npos) {
+            sflg = fflags;
+            fflags="";
+        } else {
+            sflg = fflags.substr(0,chkloc);
+            fflags = fflags.substr(chkloc+1);
+        }
+        chkloc = sflg.find("<<");
+        if (chkloc != std::string::npos) {
+            ctx_codec->flags |=
+               mtoi(sflg.substr(0,chkloc)) <<
+               mtoi(sflg.substr(chkloc+2));
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                ,_("Set codec flags %s<<%s")
+                ,sflg.substr(0,chkloc).c_str()
+                ,sflg.substr(chkloc+2).c_str());
+        }
+    }
+
+    while (fflags2 != "") {
+        chkloc = fflags2.find("|");
+        if (chkloc == std::string::npos) {
+            sflg = fflags2;
+            fflags2="";
+        } else {
+            sflg = fflags2.substr(0,chkloc);
+            fflags2 = fflags2.substr(chkloc+1);
+        }
+        chkloc = sflg.find("<<");
+        if (chkloc != std::string::npos) {
+            ctx_codec->flags2 |=
+               mtoi(sflg.substr(0,chkloc)) <<
+               mtoi(sflg.substr(chkloc+2));
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                ,_("Set codec flags2 %s<<%s")
+                ,sflg.substr(0,chkloc).c_str()
+                ,sflg.substr(chkloc+2).c_str());
+        }
+    }
+
+}
+
 int cls_movie::set_codec()
 {
-    int retcd;
+    int retcd, indx, chkrate, gopsz;
     char errstr[128];
-    int chkrate;
+
 
     if (set_codec_preferred() != 0) {
         return -1;
@@ -393,18 +539,33 @@ int cls_movie::set_codec()
         return -1;
     }
 
-    if (tlapse != TIMELAPSE_NONE) {
-        ctx_codec->gop_size = 1;
-    } else {
-        if (fps <= 5) {
-            ctx_codec->gop_size = 1;
-        } else if (fps > 30) {
-            ctx_codec->gop_size = 15;
-        } else {
-            ctx_codec->gop_size = (fps / 2);
+    gopsz=0;
+    ctx_codec->max_b_frames=0;
+    for (indx=0;indx<params->params_array.size();indx++){
+        if (params->params_array[indx].param_name == "gop_size") {
+            gopsz=mtoi(params->params_array[indx].param_value);
         }
-        gop_cnt = ctx_codec->gop_size - 1;
+        if (params->params_array[indx].param_name == "max_b_frames") {
+            ctx_codec->max_b_frames=mtoi(params->params_array[indx].param_value);
+        }
     }
+
+    if (gopsz == 0) {
+        if (tlapse != TIMELAPSE_NONE) {
+            ctx_codec->gop_size = 1;
+        } else {
+            if (fps <= 5) {
+                ctx_codec->gop_size = 1;
+            } else if (fps > 30) {
+                ctx_codec->gop_size = 15;
+            } else {
+                ctx_codec->gop_size = (fps / 2);
+            }
+        }
+    } else {
+        ctx_codec->gop_size = gopsz;
+    }
+    gop_cnt = ctx_codec->gop_size - 1;
 
     /*  For certain containers, setting the fps to very low numbers results in
     **  a very poor quality playback.  We can set the FPS to a higher number and
@@ -423,14 +584,13 @@ int cls_movie::set_codec()
 
     ctx_codec->codec_id      = codec->id;
     ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
-    ctx_codec->bit_rate      = cam->cfg->movie_bps;
     ctx_codec->width         = width;
     ctx_codec->height        = height;
     ctx_codec->time_base.num = 1;
     ctx_codec->time_base.den = fps;
     ctx_codec->pix_fmt   = AV_PIX_FMT_YUV420P;
-    ctx_codec->max_b_frames  = 0;
-    ctx_codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+    set_flags();
 
     if (set_quality() < 0) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to set quality"));
@@ -563,10 +723,8 @@ int cls_movie::set_picture()
         return -1;
     }
 
-    if (cam->cfg->movie_quality) {
-        picture->quality = (int)(FF_LAMBDA_MAX *
-            (float)((100-cam->cfg->movie_quality)/100))+1;
-    }
+    picture->quality = (int)(FF_LAMBDA_MAX *
+        (float)((100-quality)/100))+1;
 
     picture->linesize[0] = ctx_codec->width;
     picture->linesize[1] = ctx_codec->width / 2;
@@ -1124,7 +1282,7 @@ int cls_movie::passthru_open()
 
     passthru_minpts();
 
-    retcd = get_oformat();
+    retcd = set_oformat();
     if (retcd < 0 ) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get output format!"));
         return -1;
@@ -1210,7 +1368,9 @@ int cls_movie::movie_open()
     oc->interrupt_callback.callback = movie_interrupt;
     oc->interrupt_callback.opaque = this;
 
-    if (get_oformat() < 0 ) {
+    set_params();
+
+    if (set_oformat() < 0 ) {
         MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
         free_context();
         return -1;
@@ -1285,7 +1445,7 @@ void cls_movie::stop()
     if ((movie_type == "norm") || (movie_type == "motion") || (movie_type == "extpipe")) {
         on_movie_end();
         cam->app->dbse->exec(cam, full_nm, "movie_end");
-        if ((cam->cfg->movie_retain == "secondary") &&
+        if ((secdetect_only) &&
             (cam->algsec->detected == false) &&
             (cam->algsec->method != "none")) {
             if (remove(full_nm.c_str()) != 0) {
@@ -1446,6 +1606,8 @@ void cls_movie::init_container()
     if (col_pos == std::string::npos) {
         preferred_codec = "";
     } else {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            ,_("Setting preferred codec using container no longer supported.  Use movie_params"));
         preferred_codec = container.substr(col_pos+1);
         container = container.substr(0,col_pos);
     }
@@ -1454,6 +1616,7 @@ void cls_movie::init_container()
 
 void cls_movie::start_norm()
 {
+    int indx;
     char tmp[PATH_MAX];
 
     if (cam->cfg->movie_output == false) {
@@ -1502,6 +1665,18 @@ void cls_movie::start_norm()
     motion_images = false;
     passthrough = cam->movie_passthrough;
 
+    params = nullptr;
+    for (indx=0;indx<cam->cfg->params.size();indx++) {
+        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_MOVIE) {
+            params = cam->cfg->params[indx];
+        }
+    }
+    if (params == nullptr) {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            ,_("Error getting movie_params"));
+        return;
+    }
+
     if (movie_open() < 0) {
         MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
             ,_("Error initializing movie."));
@@ -1518,6 +1693,7 @@ void cls_movie::start_norm()
 
 void cls_movie::start_motion()
 {
+    int indx;
     char tmp[PATH_MAX];
     ctx_image_data save_data;
 
@@ -1562,6 +1738,18 @@ void cls_movie::start_motion()
     motion_images = true;
     passthrough = false;
     high_resolution = false;
+
+    params = nullptr;
+    for (indx=0;indx<cam->cfg->params.size();indx++) {
+        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_MOVIE) {
+            params = cam->cfg->params[indx];
+        }
+    }
+    if (params == nullptr) {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            ,_("Error getting movie_params"));
+        return;
+    }
 
     if (movie_open() < 0) {
         MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO

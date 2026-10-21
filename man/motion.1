@@ -1176,37 +1176,6 @@ The value of 0 means that there is no limit.
 .RE
 
 .TP
-.B  movie_bps
-.RS
-.nf
-Values: 0 to unlimited
-Default: 400000
-Description:
-.fi
-.RS
-Bitrate to be used by the ffmpeg encoder.
-This option is ignored if movie_quality is not 0.
-.RE
-.RE
-
-.TP
-.B  movie_quality
-.RS
-.nf
-Values: 0 to 100
-Default: 60
-Description:
-.fi
-.RS
-Enable and define the variable bitrate for the ffmpeg encoder.
-movie_bps is ignored if variable bitrate is enabled.
-When specified as 0, use the fixed bitrate defined by movie_bps.
-When defined as 1 - 100 varies the quality of the movie.
-A value of 1 is worst quality versus a value of 100 is best quality.
-.RE
-.RE
-
-.TP
 .B  movie_container
 .RS
 .nf
@@ -1234,15 +1203,15 @@ For regular motion videos, the container/codec must be available in the ffmpeg i
 .RE
 
 .TP
-.B movie_duplicate_frames
+.B movie_params
 .RS
 .nf
-Values: on/off
-Default: off
+Values: string
+Default:
 Description:
 .fi
 .RS
-When creating videos, should frames be duplicated in order to keep up with the requested frames per second
+Comma separated parameter=value pairs for movie configuration options
 .RE
 .RE
 

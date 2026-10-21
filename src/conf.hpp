@@ -149,15 +149,13 @@
             bool            movie_output;
             bool            movie_output_motion;
             int             movie_max_time;
-            int             movie_bps;
-            int             movie_quality;
             std::string     movie_container;
             bool            movie_passthrough;
             std::string     movie_filename;
-            std::string     movie_retain;
             bool            movie_all_frames;
             bool            movie_extpipe_use;
             std::string     movie_extpipe;
+            std::string     movie_params;
 
             /* Timelapse movie configuration parameters */
             int             timelapse_interval;
@@ -256,7 +254,10 @@
             cls_motapp *app;
             void cmdline();
             void defaults();
+            void defaults_depr();
             int get_next_devid();
+            std::vector<ctx_params *> depr_params;
+
             void params_load();
             void params_load_schedule();
             void params_load_cleandir();
@@ -269,6 +270,7 @@
             void params_load_actions();
             void params_load_headers();
             void params_load_sound();
+            void params_load_movie();
 
             void config_dir_item(std::string confdir);
 
@@ -284,6 +286,7 @@
             void edit_depr_tdbl(std::string newname, std::string &parm_val);
             void edit_depr_vid(std::string parm_nm, std::string newname, std::string parm_val);
             void edit_depr_web(std::string newname, std::string &parm_val);
+            void edit_depr_movie(std::string parm_nm, std::string parm_val);
             void edit_config_dir(std::string &parm, enum PARM_ACT pact);
             void edit_get_bool(std::string &parm_dest, bool &parm_in);
             void edit_set_bool(bool &parm_dest, std::string &parm_in);
@@ -412,6 +415,7 @@
             void edit_movie_passthrough(std::string &parm, enum PARM_ACT pact);
             void edit_movie_quality(std::string &parm, enum PARM_ACT pact);
             void edit_movie_retain(std::string &parm, enum PARM_ACT pact);
+            void edit_movie_params(std::string &parm, enum PARM_ACT pact);
 
             void edit_timelapse_container(std::string &parm, enum PARM_ACT pact);
             void edit_timelapse_filename(std::string &parm, enum PARM_ACT pact);
