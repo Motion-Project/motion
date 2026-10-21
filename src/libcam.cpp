@@ -31,38 +31,6 @@
 
 using namespace libcamera;
 
-void cls_libcam::log_controls()
-{
-    int indx, indx2;
-    ctx_params_item *itm;
-
-    return;
-
-    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "Libcamera Controls:");
-    for (indx=0;indx<params->params_cnt;indx++){
-        itm = &params->params_array[indx];
-        MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO
-            , "  %s (%s)"
-            , itm->param_name.c_str()
-            , cam->cfg->type_desc(itm->param_type).c_str());
-        if (itm->param_lst[0] != "") {
-            if ((itm->param_type == PARM_TYP_INT) &&
-                (itm->param_lst.size() > 1)) {
-                for (indx2=0;indx2<itm->param_lst.size();indx2++) {
-                    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    %d = %s"
-                        ,indx2, itm->param_lst[indx2].c_str());
-                }
-            } else {
-                for (indx2=0;indx2<itm->param_lst.size();indx2++) {
-                    MOTION_SHT(DBG, TYPE_VIDEO, NO_ERRNO, "    %s"
-                        ,itm->param_lst[indx2].c_str());
-                }
-            }
-        }
-    }
-
-}
-
 int cls_libcam::start_mgr()
 {
     int retcd, indx;
@@ -532,8 +500,6 @@ int cls_libcam::start_config()
     cam->imgs.height = (int)libcam_cfg->at(0).size.height;
     cam->imgs.size_norm = (cam->imgs.width * cam->imgs.height * 3) / 2;
     cam->imgs.motionsize = cam->imgs.width * cam->imgs.height;
-
-    log_controls();
 
     config_orientation();
     camera->configure(libcam_cfg.get());

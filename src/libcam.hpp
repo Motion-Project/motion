@@ -59,7 +59,6 @@
                 int     reconnect_count;
                 bool    set_controls;
                 std::string pixfmt;
-                void log_controls();
 
                 int libcam_start();
                 void libcam_stop();
