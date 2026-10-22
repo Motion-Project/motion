@@ -3464,8 +3464,7 @@ void cls_config::params_load_sound()
 
 void cls_config::params_load_movie()
 {
-    int indx;
-    ctx_params *prm, *dprm;
+    ctx_params *prm;
 
     prm = new ctx_params;
     prm->app = app;
@@ -3549,24 +3548,138 @@ void cls_config::params_load_movie()
 
     prm->params_cnt = (int)prm->params_array.size();
 
-    /* Add in any deprecated options*/
-    dprm = nullptr;
-    for (indx=0;indx<depr_params.size();indx++){
-        if (depr_params[indx]->params_pcat == PARM_PCAT_MOVIE) {
-            dprm =depr_params[indx];
-        }
-    }
-    if (dprm != nullptr) {
-        for (indx=0;indx<dprm->params_array.size();indx++) {
-            util_parms_add(prm
-                , dprm->params_array[indx].param_name
-                , dprm->params_array[indx].param_value, false);
-        }
-    }
+    params_load_dpritm(app->conf_src, prm, PARM_PCAT_MOVIE);
+
     util_parms_parse(prm,"movie_params",movie_params,PARM_PCAT_MOVIE);
 
     params.push_back(prm);
 
+}
+
+void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCAT pcat)
+{
+    int indx;
+    ctx_params *dprm;
+
+    dprm = nullptr;
+    for (indx=0;indx<cfgs->depr_params.size();indx++){
+        if (cfgs->depr_params[indx]->params_pcat == pcat) {
+            dprm =cfgs->depr_params[indx];
+        }
+    }
+    if (dprm != nullptr) {
+        for (indx=0;indx<dprm->params_array.size();indx++) {
+            util_parms_add(prmd
+                , dprm->params_array[indx].param_name
+                , dprm->params_array[indx].param_value, false);
+        }
+    }
+}
+
+void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_params *prmd)
+{
+    int ipa, ipd;
+    ctx_params_item *itm_a, *itm_d, itm_n;
+    bool chknew;
+    std::string ptmp;
+
+    if (prmd->params_pcat == PARM_PCAT_SCH) {           ptmp=cfgs->schedule_params;
+    } else if (prmd->params_pcat == PARM_PCAT_CLN) {    ptmp=cfgs->cleandir_params;
+    } else if (prmd->params_pcat == PARM_PCAT_V4L2){    ptmp=cfgs->v4l2_params;
+    } else if (prmd->params_pcat == PARM_PCAT_NET) {    ptmp=cfgs->netcam_params;
+    } else if (prmd->params_pcat == PARM_PCAT_NETH) {   ptmp=cfgs->netcam_high_params;
+    } else if (prmd->params_pcat == PARM_PCAT_LIB) {    ptmp=cfgs->libcam_params;
+    } else if (prmd->params_pcat == PARM_PCAT_SEC) {    ptmp=cfgs->secondary_params;
+    } else if (prmd->params_pcat == PARM_PCAT_ACAM) {   ptmp=cfgs->stream_allcam_params;
+    } else if (prmd->params_pcat == PARM_PCAT_ACTS) {   ptmp=cfgs->webcontrol_actions;
+    } else if (prmd->params_pcat == PARM_PCAT_HDR) {    ptmp=cfgs->webcontrol_headers;
+    } else if (prmd->params_pcat == PARM_PCAT_SND) {    ptmp=cfgs->snd_params;
+    } else if (prmd->params_pcat == PARM_PCAT_MOVIE) {  ptmp=cfgs->movie_params;
+    } else {  return;
+    }
+    params_load_dpritm(cfgs, prmd, prmd->params_pcat);
+    util_parms_parse(prmd, prmd->params_desc, ptmp, prmd->params_pcat);
+
+    for (ipa=0;ipa<prma->params_array.size();ipa++) {
+        itm_a = &prma->params_array[ipa];
+        chknew = true;
+        for (ipd=0;ipd<prmd->params_array.size();ipd++) {
+            itm_d = &prmd->params_array[ipd];
+            if (itm_a->param_name == itm_d->param_name) {
+                chknew = false;
+            }
+        }
+        if (chknew == true) {
+            itm_n = prma->params_array[ipa];
+            prmd->params_array.push_back(itm_n);
+        }
+    }
+    prmd->params_cnt = (int)prmd->params_array.size();
+
+}
+
+void cls_config::params_load_listcam()
+{
+    int ica, icd, idev;
+    ctx_params *prm_a, *prm_d;
+    cls_camera *dev;
+
+    for (ica=0;ica<app->conf_src->params.size();ica++) {
+        prm_a = app->conf_src->params[ica];
+        for (idev=0; idev<app->cam_cnt; idev++) {
+            dev = app->cam_list[idev];
+            prm_d = nullptr;
+            for (icd=0;icd<dev->conf_src->params.size();icd++) {
+                if (prm_a->params_pcat ==dev->conf_src->params[icd]->params_pcat) {
+                    prm_d = dev->conf_src->params[icd];
+                    break;
+                }
+            }
+            if (prm_d == nullptr) {
+                prm_d = new ctx_params;
+                prm_d->app = app;
+                prm_d->params_desc = prm_a->params_desc;
+                prm_d->params_pcat = prm_a->params_pcat;
+                prm_d->params_changed = prm_a->params_changed;
+                prm_d->params_cnt = 0;
+                prm_d->params_array.clear();
+                dev->conf_src->params.push_back(prm_d);
+            }
+            params_load_listitm(dev->conf_src, prm_a, prm_d);
+        }
+    }
+}
+/* ToDo:  Optimize code by consolidating with params_load_camlist*/
+void cls_config::params_load_listsnd()
+{
+    int ica, icd, idev;
+    ctx_params *prm_a, *prm_d;
+    cls_sound *dev;
+
+    for (ica=0;ica<app->conf_src->params.size();ica++) {
+        prm_a = app->conf_src->params[ica];
+        for (idev=0; idev<app->snd_cnt; idev++) {
+            dev =app->snd_list[idev];
+            prm_d = nullptr;
+            for (icd=0;icd<dev->conf_src->params.size();icd++) {
+                if (prm_a->params_pcat == prm_d->params_pcat) {
+                    prm_d = dev->conf_src->params[icd];
+                    break;
+                }
+            }
+            if (prm_d == nullptr) {
+                prm_d = new ctx_params;
+                prm_d->app = app;
+                prm_d->params_desc = prm_a->params_desc;
+                prm_d->params_pcat = prm_a->params_pcat;
+                prm_d->params_changed = prm_a->params_changed;
+                prm_d->params_cnt = 0;
+                prm_d->params_array.clear();
+                dev->conf_src->params.push_back(prm_d);
+            }
+            params_load_listitm(dev->conf_src, prm_a, prm_d);
+        }
+    }
 }
 
 void cls_config::params_load()
@@ -3585,7 +3698,7 @@ void cls_config::params_load()
     params_load_movie();
 }
 
-std::string cls_config::params_prefix(enum PARM_PCAT pcat) {
+std::string cls_config::params_prefix(PARM_PCAT pcat) {
     /* To make the webu_json/post processing easier, these
       need to be exactly 5 characters long ending in _
       Also make sure these do not match the start of the names
@@ -4262,8 +4375,6 @@ void cls_config::process()
         }
     ifs.close();
 
-    params_load();
-
 }
 
 void cls_config::config_log_item(std::string parm_nm, std::string parm_vl)
@@ -4303,7 +4414,7 @@ void cls_config::config_log()
     enum PARM_TYP parm_typ;
     ctx_params *prm_a, *prm_c;
     ctx_params_item *itma, *itmc;
-    bool chk;
+    bool chk, chklbl;
 
     MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
         ,_("Logging configuration parameters from all files"));
@@ -4350,6 +4461,7 @@ void cls_config::config_log()
             , app->cam_list[indx]->conf_src->conf_filename.c_str());
         i = 0;
         while (config_parms[i].parm_name != "") {
+            chklbl = false;
             parm_nm=config_parms[i].parm_name;
             parm_ct=config_parms[i].parm_cat;
             parm_typ=config_parms[i].parm_type;
@@ -4359,6 +4471,7 @@ void cls_config::config_log()
             if ((parm_nm != "camera") && (parm_nm != "sound") &&
                 (parm_nm != "config_dir") && (parm_nm != "conf_filename") &&
                 (parm_main != parm_vl) && (parm_typ != PARM_TYP_ARRAY) ) {
+                chklbl = true;
                 config_log_item(parm_nm, parm_vl);
             }
             if (parm_typ == PARM_TYP_ARRAY) {
@@ -4390,7 +4503,11 @@ void cls_config::config_log()
                                 chk=true;
                             }
                         }
-                        if (chk == false){
+                        if (chk == false) {
+                            if (chklbl == false) {
+                                MOTION_SHT(INF, TYPE_ALL, NO_ERRNO, "%-25s ", parm_nm.c_str());
+                                chklbl = true;
+                            }
                             config_log_item("  "+itmc->param_name,itmc->param_value);
                         }
                     }
@@ -4911,7 +5028,11 @@ void cls_config::init()
         app->conf_src->camera_add("", false);
     }
 
+
     cmdline();
+    app->conf_src->params_load();
+    app->conf_src->params_load_listcam();
+    app->conf_src->params_load_listsnd();
 
     for (indx=0; indx<app->cam_cnt; indx++) {
         app->cam_list[indx]->threadnr = indx;

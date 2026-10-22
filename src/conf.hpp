@@ -247,7 +247,7 @@
             void config_write(int camindx);
             void config_copy(cls_config *src);
             void config_copy(cls_config *src, PARM_CAT p_cat);
-            std::string params_prefix(enum PARM_PCAT pcat);
+            std::string params_prefix(PARM_PCAT pcat);
             std::vector<ctx_params *> params;
 
         private:
@@ -259,6 +259,10 @@
             std::vector<ctx_params *> depr_params;
 
             void params_load();
+            void params_load_listcam();
+            void params_load_listsnd();
+            void params_load_listitm(cls_config *cfgs, ctx_params *prma, ctx_params *prmd);
+            void params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCAT pcat);
             void params_load_schedule();
             void params_load_cleandir();
             void params_load_v4l2();

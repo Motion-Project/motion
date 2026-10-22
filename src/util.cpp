@@ -812,7 +812,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
             ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
     }
 
-    for (indx=0;indx<params->params_cnt;indx++) {
+    for (indx=0;indx<params->params_array.size();indx++) {
         if (params->params_array[indx].param_name == parm_nm) {
             if ((parm_nm == "params_file") &&
                 (parm_val != params->params_array[indx].param_value)) {
@@ -825,12 +825,12 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     }
 
     /* This is a new parameter*/
-    params->params_cnt++;
     parm_itm.param_name.assign(parm_nm);
     parm_itm.param_value.assign(parm_val);
     parm_itm.param_source = PARM_SRC_USER;
     parm_itm.param_lvl = PARM_LVL_01;
     params->params_array.push_back(parm_itm);
+    params->params_cnt = (int)params->params_array.size();
 
     if ((parm_nm == "params_file") && (parm_val != "")) {
         util_parms_file(params, parm_val, showmsg);
