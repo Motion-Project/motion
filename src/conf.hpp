@@ -288,7 +288,7 @@
             int edit_set_active(std::string parm_nm, std::string parm_val);
             int edit_set_depr(std::string &parm_nm, std::string &parm_val);
             void edit_depr_tdbl(std::string newname, std::string &parm_val);
-            void edit_depr_vid(std::string parm_nm, std::string newname, std::string parm_val);
+            void edit_depr_vid(std::string parm_nm, std::string parm_val);
             void edit_depr_web(std::string newname, std::string &parm_val);
             void edit_depr_movie(std::string parm_nm, std::string parm_val);
             void edit_config_dir(std::string &parm, enum PARM_ACT pact);

@@ -3747,6 +3747,13 @@ void cls_config::defaults_depr()
     prm->params_cnt = 0;
     depr_params.push_back(prm);
 
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "v4l2_params";
+    prm->params_pcat = PARM_PCAT_V4L2;
+    prm->params_cnt = 0;
+    depr_params.push_back(prm);
+
 }
 
 int cls_config::edit_set_active(std::string parm_nm, std::string parm_val)
@@ -3767,25 +3774,29 @@ int cls_config::edit_set_active(std::string parm_nm, std::string parm_val)
 
 }
 
-void cls_config::edit_depr_vid(std::string parm_nm, std::string newname, std::string parm_val)
+void cls_config::edit_depr_vid(std::string parm_nm, std::string parm_val)
 {
-    std::string parm_curr, parm_new;
+    std::string pnew_nm, pnew_val;
+    int indx;
+    ctx_params *prm;
 
-    edit_v4l2_params(parm_curr, PARM_ACT_GET);
-    if (parm_curr == "") {
-        if (parm_nm == "power_line_frequency") {
-            parm_new = "\"power line frequency\"=" + parm_val;
-        } else {
-            parm_new = parm_nm + "=" + parm_val;
-        }
-    } else {
-        if (parm_nm == "power_line_frequency") {
-            parm_new = parm_curr + ", \"power line frequency\"=" + parm_val;
-        } else {
-            parm_new = parm_curr +", " + parm_nm + "=" + parm_val;
+    prm = nullptr;
+    for (indx=0;indx<depr_params.size();indx++) {
+        if (depr_params[indx]->params_pcat == PARM_PCAT_V4L2) {
+            prm = depr_params[indx];
         }
     }
-    edit_set_active(newname, parm_new);
+    if (prm == nullptr) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Bad programming"));
+        return;
+    }
+
+    util_parms_add(prm, parm_nm, parm_val, false);
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+        ,_("%s %s changed to v4l2_params option %s=%s")
+        ,parm_nm.c_str(),parm_val.c_str()
+        ,parm_nm.c_str(),parm_val.c_str());
 
 }
 
@@ -3874,7 +3885,7 @@ int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
             if ((parm_nm == "brightness") || (parm_nm == "contrast") ||
                 (parm_nm == "saturation") || (parm_nm == "hue") ||
                 (parm_nm == "power_line_frequency")) {
-                edit_depr_vid(parm_nm, config_parms_depr[indx].newname, parm_val);
+                edit_depr_vid(parm_nm, parm_val);
 
             } else if ((parm_nm == "webcontrol_html_output")) {
                 edit_depr_web(config_parms_depr[indx].newname, parm_val);
