@@ -70,8 +70,8 @@ void cls_webu_stream::delay()
     /* The stream rate MUST be less than 1000000000 otherwise undefined behaviour
      * will occur with the SLEEP function.
      */
-    stream_delay = (long)((time_curr.tv_nsec - time_last.tv_nsec)) +
-        ((time_curr.tv_sec - time_last.tv_sec)*1000000000);
+    stream_delay = ((long)(time_curr.tv_nsec - time_last.tv_nsec)) +
+        ((long)(time_curr.tv_sec - time_last.tv_sec)*1000000000);
     if (stream_delay < 0)  {
         stream_delay = 0;
     }
