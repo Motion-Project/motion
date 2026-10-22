@@ -612,11 +612,11 @@
       html_act += "<tr>";
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
-      html_act += "'pause');\">";
+      html_act += "'pause_on');\">";
       html_act += pl10n["pause"]+"</td>\n";
       html_act += "<td>"+build_nbsp(4)+"</td>";
       html_act += "<td><button class=cls_samebtn onclick=\"send_action(";
-      html_act += "'unpause');\">";
+      html_act += "'pause_off');\">";
       html_act += pl10n["unpause"]+"</td>\n";
       html_act += "</tr>";
 
