@@ -501,7 +501,7 @@ void cls_camera::init_firstimage()
 
     current_image = &imgs.image_ring[imgs.ring_in];
     if (device_status == STATUS_OPENED) {
-        for (indx = 0; indx < 5; indx++) {
+        for (indx = 0; indx < 10; indx++) {
             if (cam_next(current_image) == CAPTURE_SUCCESS) {
                 break;
             }
@@ -515,7 +515,7 @@ void cls_camera::init_firstimage()
         return;
     }
 
-    if ((indx >= 5) || (device_status != STATUS_OPENED)) {
+    if ((indx >= 10) || (device_status != STATUS_OPENED)) {
         if (device_status != STATUS_OPENED) {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Unable to open camera");
         } else {

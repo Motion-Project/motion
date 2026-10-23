@@ -2977,12 +2977,16 @@ void cls_config::params_load_libcamera()
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
     prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
         {"pixelformat","",PARM_SRC_SYS
         , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
     prm->params_array.push_back(
-        {"params_file","",PARM_SRC_SYS
-        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        {"buffer_count","4",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
 
     prm->params_array.push_back(

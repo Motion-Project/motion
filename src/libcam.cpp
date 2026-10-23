@@ -123,7 +123,8 @@ void cls_libcam::config_assign_int(int pctrl, std::string pvalue)
 
     auto fdctrl = camera->controls().find(pctrl);
     if (fdctrl == camera->controls().end()) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Control not found");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "Control id %d not found. value=%s", pctrl,pvalue.c_str());
         return;
     }
 
@@ -148,71 +149,57 @@ void cls_libcam::config_assign_int(int pctrl, std::string pvalue)
     }
 }
 
-void cls_libcam::config_control_item(std::string pname, std::string pvalue)
+void cls_libcam::config_control_item(std::string pnm, std::string pvalue)
 {
-    if (pname == "AeMeteringMode") {
+    std::string pname;
+    pname = pnm;
+    mylower(pname);
+
+    if (pname == "aemeteringmode") {
        config_assign_int(libcamera::controls::AeMeteringMode.id(), pvalue);
-    }
-    if (pname == "AeConstraintMode") {
+    } else if (pname == "aeconstraintmode") {
         config_assign_int(libcamera::controls::AeConstraintMode.id(), pvalue);
-    }
-    if (pname == "AeExposureMode") {
+    } else if (pname == "aeexposuremode") {
         config_assign_int(libcamera::controls::AeExposureMode.id(), pvalue);
-    }
-    if (pname == "ExposureValue") {
+    } else if (pname == "exposurevalue") {
         config_assign_float(libcamera::controls::ExposureValue.id(), pvalue);
-    }
-    if (pname == "ExposureTime") {
+    } else if (pname == "exposuretime") {
         config_assign_int(libcamera::controls::ExposureTime.id(), pvalue);
-    }
-    if (pname == "AnalogueGain") {
+    } else if (pname == "analoguegain") {
         config_assign_float(libcamera::controls::AnalogueGain.id(), pvalue);
-    }
-    if (pname == "Brightness") {
+    } else if (pname == "brightness") {
         config_assign_float(libcamera::controls::Brightness.id(), pvalue);
-    }
-    if (pname == "Contrast") {
+    } else if (pname == "contrast") {
         config_assign_float(libcamera::controls::Contrast.id(), pvalue);
-    }
-    if (pname == "Lux") {
+    } else if (pname == "lux") {
         config_assign_float(libcamera::controls::Lux.id(), pvalue);
-    }
-    if (pname == "AwbEnable") {
+    } else if (pname == "awbenable") {
         camctrls->set(controls::AwbEnable, mtob(pvalue));
-    }
-    if (pname == "AwbMode") {
+    } else if (pname == "awbmode") {
         config_assign_int(libcamera::controls::AwbMode.id(), pvalue);
-    }
-    if (pname == "AwbLocked") {
+    } else if (pname == "awblocked") {
         camctrls->set(controls::AwbLocked, mtob(pvalue));
-    }
-    if (pname == "ColourGains") {
+    } else if (pname == "colourgains") {
         float cg[2];
         cg[0] = mtof(mtok(pvalue,"|"));
         cg[1] = mtof(mtok(pvalue,"|"));
         camctrls->set(controls::ColourGains, cg);
-    }
-    if (pname == "ColourTemperature") {
+    } else if (pname == "colourtemperature") {
         camctrls->set(controls::ColourTemperature, mtoi(pvalue));
-    }
-    if (pname == "Saturation") {
+    } else if (pname == "saturation") {
         config_assign_float(libcamera::controls::Saturation.id(), pvalue);
-    }
-    if (pname == "SensorBlackLevels") {
+    } else if (pname == "sensorblacklevels") {
         int32_t sbl[4];
         sbl[0] = mtoi(mtok(pvalue,"|"));
         sbl[1] = mtoi(mtok(pvalue,"|"));
         sbl[2] = mtoi(mtok(pvalue,"|"));
         sbl[3] = mtoi(mtok(pvalue,"|"));
         camctrls->set(controls::SensorBlackLevels, sbl);
-    }
-    if (pname == "Sharpness") {
+    } else if (pname == "sharpness") {
         config_assign_float(libcamera::controls::Sharpness.id(), pvalue);
-    }
-    if (pname == "FocusFoM") {
+    } else if (pname == "focusfom") {
         config_assign_int(libcamera::controls::FocusFoM.id(), pvalue);
-    }
-    if (pname == "ColourCorrectionMatrix") {
+    } else if (pname == "colourcorrectionmatrix") {
         float ccm[9];
         ccm[0] = mtof(mtok(pvalue,"|"));
         ccm[1] = mtof(mtok(pvalue,"|"));
@@ -224,96 +211,74 @@ void cls_libcam::config_control_item(std::string pname, std::string pvalue)
         ccm[7] = mtof(mtok(pvalue,"|"));
         ccm[8] = mtof(mtok(pvalue,"|"));
         camctrls->set(controls::ColourCorrectionMatrix, ccm);
-    }
-    if (pname == "ScalerCrop") {
+    } else if (pname == "scalercrop") {
         Rectangle crop;
         crop.x = mtoi(mtok(pvalue,"|"));
         crop.y = mtoi(mtok(pvalue,"|"));
         crop.width =(uint)mtoi(mtok(pvalue,"|"));
         crop.height =(uint)mtoi(mtok(pvalue,"|"));
         camctrls->set(controls::ScalerCrop, crop);
-    }
-    if (pname == "DigitalGain") {
+    } else if (pname == "digitalgain") {
         config_assign_float(libcamera::controls::DigitalGain.id(), pvalue);
-    }
-    if (pname == "FrameDuration") {
+    } else if (pname == "frameduration") {
         config_assign_int(libcamera::controls::FrameDuration.id(), pvalue);
-    }
-    if (pname == "FrameDurationLimits") {
+    } else if (pname == "framedurationlimits") {
         int64_t fdl[2];
         fdl[0] = mtol(mtok(pvalue,"|"));
         fdl[1] = mtol(mtok(pvalue,"|"));
         camctrls->set(controls::FrameDurationLimits, fdl);
-    }
-    if (pname == "SensorTemperature") {
+    } else if (pname == "sensortemperature") {
         config_assign_float(libcamera::controls::SensorTemperature.id(), pvalue);
-    }
-    if (pname == "SensorTimestamp") {
+    } else if (pname == "sensortimestamp") {
         config_assign_int(libcamera::controls::SensorTimestamp.id(), pvalue);
-    }
-    if (pname == "AfMode") {
+    } else if (pname == "afmode") {
         config_assign_int(libcamera::controls::AfMode.id(), pvalue);
-    }
-    if (pname == "AfRange") {
+    } else if (pname == "afrange") {
         config_assign_int(libcamera::controls::AfRange.id(), pvalue);
-    }
-    if (pname == "AfSpeed") {
+    } else if (pname == "afspeed") {
         config_assign_int(libcamera::controls::AfSpeed.id(), pvalue);
-    }
-    if (pname == "AfMetering") {
+    } else if (pname == "afmetering") {
         config_assign_int(libcamera::controls::AfMetering.id(), pvalue);
-    }
-    if (pname == "AfWindows") {
+    } else if (pname == "afwindows") {
         Rectangle afwin[1];
         afwin[0].x = mtoi(mtok(pvalue,"|"));
         afwin[0].y = mtoi(mtok(pvalue,"|"));
         afwin[0].width = (uint)mtoi(mtok(pvalue,"|"));
         afwin[0].height = (uint)mtoi(mtok(pvalue,"|"));
         camctrls->set(controls::AfWindows, afwin);
-    }
-    if (pname == "AfTrigger") {
+    } else if (pname == "aftrigger") {
         config_assign_int(libcamera::controls::AfTrigger.id(), pvalue);
-    }
-    if (pname == "AfPause") {
+    } else if (pname == "afpause") {
         config_assign_int(libcamera::controls::AfPause.id(), pvalue);
-    }
-    if (pname == "LensPosition") {
+    } else if (pname == "lensposition") {
         config_assign_float(libcamera::controls::LensPosition.id(), pvalue);
-    }
-    if (pname == "AfState") {
+    } else if (pname == "afstate") {
         config_assign_int(libcamera::controls::AfState.id(), pvalue);
-    }
-    if (pname == "AfPauseState") {
+    } else if (pname == "afpausestate") {
         config_assign_int(libcamera::controls::AfPauseState.id(), pvalue);
-    }
 
     /* DRAFT*/
-    if (pname == "AePrecaptureTrigger") {
+    } else if (pname == "aeprecapturetrigger") {
         config_assign_int(libcamera::controls::draft::AePrecaptureTrigger.id(), pvalue);
-    }
-    if (pname == "NoiseReductionMode") {
+    } else if (pname == "noisereductionmode") {
         config_assign_int(libcamera::controls::draft::NoiseReductionMode.id(), pvalue);
-    }
-    if (pname == "ColorCorrectionAberrationMode") {
+    } else if (pname == "colorcorrectionaberrationmode") {
         config_assign_int(libcamera::controls::draft::ColorCorrectionAberrationMode.id(), pvalue);
-    }
-    if (pname == "AwbState") {
+    } else if (pname == "awbstate") {
         config_assign_int(libcamera::controls::draft::AwbState.id(), pvalue);
-    }
-    if (pname == "SensorRollingShutterSkew") {
+    } else if (pname == "sensorrollingshutterskew") {
         config_assign_int(libcamera::controls::draft::SensorRollingShutterSkew.id(), pvalue);
-    }
-    if (pname == "LensShadingMapMode") {
+    } else if (pname == "lensshadingmapmode") {
         config_assign_int(libcamera::controls::draft::LensShadingMapMode.id(), pvalue);
-    }
-    if (pname == "PipelineDepth") {
+    } else if (pname == "pipelinedepth") {
         config_assign_int(libcamera::controls::draft::PipelineDepth.id(), pvalue);
-    }
-    if (pname == "MaxLatency") {
+    } else if (pname == "maxlatency") {
         config_assign_int(libcamera::controls::draft::MaxLatency.id(), pvalue);
-    }
-    if (pname == "TestPatternMode") {
+    } else if (pname == "testpatternmode") {
         config_assign_int(libcamera::controls::draft::TestPatternMode.id(), pvalue);
+    } else {
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
+            , "Unknown libcamera control %s", pnm.c_str());
     }
 
 }
@@ -392,7 +357,7 @@ void cls_libcam:: config_orientation()
 
 int cls_libcam::start_config()
 {
-    int retcd, indx;
+    int retcd, indx, bufcnt;
     char tmp4cc[5];
     std::string pfmt, tmpfmt;
     StreamFormats allfmts;
@@ -415,6 +380,7 @@ int cls_libcam::start_config()
     }
 
     pfmt = "YUV420";
+    bufcnt = 4;
     for (indx=0;indx<params->params_cnt;indx++) {
         if ((params->params_array[indx].param_name == "pixelformat") &&
             (params->params_array[indx].param_source == PARM_SRC_USER)) {
@@ -422,6 +388,9 @@ int cls_libcam::start_config()
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
                 , "User specified pixelformat %s."
                 , pfmt.c_str());
+        }
+        if (params->params_array[indx].param_name == "buffer_count") {
+            bufcnt = mtoi(params->params_array[indx].param_value);
         }
     }
 
@@ -435,17 +404,31 @@ int cls_libcam::start_config()
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
             , "Did not find pixelformat %s", pfmt.c_str());
         pfmt="";
-        /*mjpeg doesn't seem to work very well so we pick the first alternative*/
         for (indx=0;indx<allfmts.pixelformats().size();indx++) {
-            tmpfmt = allfmts.pixelformats()[indx].toString();
-            if (tmpfmt != "MJPEG") {
-                pfmt = tmpfmt;
+            sprintf(tmp4cc,"%c%c%c%c"
+                , allfmts.pixelformats()[indx].fourcc() >> 0
+                , allfmts.pixelformats()[indx].fourcc() >> 8
+                , allfmts.pixelformats()[indx].fourcc() >> 16
+                , allfmts.pixelformats()[indx].fourcc() >> 24);
+            tmpfmt = tmp4cc;
+            if ((tmpfmt == "I420")||(tmpfmt == "YU12")||(tmpfmt == "IYUV")) {
+                pfmt=allfmts.pixelformats()[indx].toString();
                 break;
             }
         }
-    }
-    if (pfmt == "") {
-        pfmt = "MJPEG";
+        if (pfmt == "") {
+            /*mjpeg doesn't seem to work very well so we pick the first alternative*/
+            for (indx=0;indx<allfmts.pixelformats().size();indx++) {
+                tmpfmt = allfmts.pixelformats()[indx].toString();
+                if (tmpfmt != "MJPEG") {
+                    pfmt = tmpfmt;
+                    break;
+                }
+            }
+        }
+        if (pfmt == "") {
+            pfmt = "MJPEG";
+        }
     }
 
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
@@ -454,7 +437,7 @@ int cls_libcam::start_config()
     libcam_cfg->at(0).pixelFormat = PixelFormat::fromString(pfmt);
     libcam_cfg->at(0).size.width = (uint)cam->cfg->width;
     libcam_cfg->at(0).size.height = (uint)cam->cfg->height;
-    libcam_cfg->at(0).bufferCount = 1;
+    libcam_cfg->at(0).bufferCount = bufcnt;
     libcam_cfg->at(0).stride = 0;
 
     retcd = libcam_cfg->validate();
@@ -465,7 +448,8 @@ int cls_libcam::start_config()
                 , libcam_cfg->at(0).pixelFormat.toString().c_str());
         } else {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                , "Configuration adjusted.");
+                , "Configuration adjusted: %s"
+                ,libcam_cfg->at(0).toString().c_str());
         }
     } else if (retcd == CameraConfiguration::Valid) {
          MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
@@ -475,6 +459,13 @@ int cls_libcam::start_config()
             , "Error setting configuration");
         return -1;
     }
+
+    if (bufcnt != (int)libcam_cfg->at(0).bufferCount) {
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+            , "Configuration adjusted: buffer count from %d to %d"
+            ,bufcnt, libcam_cfg->at(0).bufferCount);
+    }
+
     sprintf(tmp4cc,"%c%c%c%c"
         , libcam_cfg->at(0).pixelFormat.fourcc() >> 0
         , libcam_cfg->at(0).pixelFormat.fourcc() >> 8
@@ -516,11 +507,15 @@ int cls_libcam::req_add(Request *request)
     if (set_controls) {
         camctrls = &request->controls();
         for (indx=0;indx<params->params_cnt;indx++) {
-            if (params->params_array[indx].param_source == PARM_SRC_USER) {
+            if ((params->params_array[indx].param_name == "params_file") ||
+                (params->params_array[indx].param_name == "pixelformat") ||
+                (params->params_array[indx].param_name == "buffer_count") ||
+                (params->params_array[indx].param_name == "Orientation")) {
+                continue;
+            } else if (params->params_array[indx].param_source == PARM_SRC_USER) {
                 config_control_item(
                     params->params_array[indx].param_name
                     ,params->params_array[indx].param_value);
-
             }
         }
         set_controls = false;
@@ -532,56 +527,54 @@ int cls_libcam::req_add(Request *request)
 
 int cls_libcam::start_req()
 {
-    int retcd, bytes, indx;
+    int retcd, bytes, indx, indx2;
+    ctx_imgmap  mbuf;
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
 
     camera->requestCompleted.connect(this, &cls_libcam::req_complete);
+
+    libcamera::Stream *stream = libcam_cfg->at(0).stream();
     frmbuf = std::make_unique<FrameBufferAllocator>(camera);
 
-    retcd = frmbuf->allocate(libcam_cfg->at(0).stream());
+    retcd = frmbuf->allocate(stream);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Buffer allocation error.");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Buffer allocation error.");
         return -1;
     }
+    const std::vector<std::unique_ptr<FrameBuffer>> &buffers = frmbuf->buffers(stream);
+    for (indx=0;indx<buffers.size();indx++) {
+        std::unique_ptr<Request> request = camera->createRequest(indx);
+        if (request == nullptr) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Create request error.");
+            return -1;
+        }
+        const libcamera::Stream *strm = libcam_cfg->at(0).stream();
+        retcd = request->addBuffer(strm, buffers[indx].get());
+        if (retcd < 0) {
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Add buffer for request error.");
+            return -1;
+        }
+        const FrameBuffer::Plane &plane0 = buffers[indx]->planes()[0];
+        bytes = 0;
+        for (indx2=0; indx2<(int)buffers[indx]->planes().size(); indx2++) {
+            bytes += buffers[indx]->planes()[(uint)indx2].length;
+            MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                , "Buffer %d plane %d of %d length %d"
+                , indx, indx2, buffers[indx]->planes().size()
+                , buffers[indx]->planes()[(uint)indx2].length);
 
-    std::unique_ptr<Request> request = camera->createRequest();
-    if (!request) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Create request error.");
-        return -1;
-    }
+        }
+        mbuf.buf = (uint8_t *)mmap(NULL, (uint)bytes, PROT_READ
+            , MAP_SHARED, plane0.fd.get(), 0);
+        mbuf.bufsz = bytes;
+        mbuf.id = indx;
+        membuf.push_back(mbuf);
+        requests.push_back(std::move(request));
 
-    Stream *stream = libcam_cfg->at(0).stream();
-    const std::vector<std::unique_ptr<FrameBuffer>> &buffers =
-        frmbuf->buffers(stream);
-    const std::unique_ptr<FrameBuffer> &buffer = buffers[0];
-
-    retcd = request->addBuffer(stream, buffer.get());
-    if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Add buffer for request error.");
-        return -1;
-    }
-
-    const FrameBuffer::Plane &plane0 = buffer->planes()[0];
-
-    bytes = 0;
-    for (indx=0; indx<(int)buffer->planes().size(); indx++) {
-        bytes += buffer->planes()[(uint)indx].length;
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "Buffer plane %d of %d length %d"
-            , indx, buffer->planes().size()
-            , buffer->planes()[(uint)indx].length);
     }
 
     convert = new cls_convert(cam, pixfmt, cam->imgs.width, cam->imgs.height);
-
-    membuf.buf = (uint8_t *)mmap(NULL, (uint)bytes, PROT_READ
-        , MAP_SHARED, plane0.fd.get(), 0);
-    membuf.bufsz = bytes;
-
-    requests.push_back(std::move(request));
 
     started_req = true;
 
@@ -598,7 +591,12 @@ int cls_libcam::start_capture()
 
     camctrls = new libcamera::ControlList();
     for (indx=0;indx<params->params_cnt;indx++) {
-        if (params->params_array[indx].param_source == PARM_SRC_USER) {
+        if ((params->params_array[indx].param_name == "params_file") ||
+            (params->params_array[indx].param_name == "pixelformat") ||
+            (params->params_array[indx].param_name == "buffer_count") ||
+            (params->params_array[indx].param_name == "Orientation")) {
+            continue;
+        } else if (params->params_array[indx].param_source == PARM_SRC_USER) {
             config_control_item(
                 params->params_array[indx].param_name
                 ,params->params_array[indx].param_value);
@@ -617,8 +615,7 @@ int cls_libcam::start_capture()
     for (std::unique_ptr<Request> &request : requests) {
         retcd = req_add(request.get());
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "Failed to queue request.");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Failed to queue request.");
             if (started_cam) {
                 camera->stop();
                 started_cam = false;
@@ -682,7 +679,10 @@ void cls_libcam::libcam_stop()
     }
 
     if (started_req) {
-        munmap(membuf.buf, membuf.bufsz);
+        for (indx=0;indx<membuf.size();indx++){
+            munmap(membuf[indx].buf, membuf[indx].bufsz);
+        }
+        membuf.clear();
 
         for (indx=0;indx<requests.size();indx++) {
             requests[indx].reset();
@@ -716,6 +716,7 @@ void cls_libcam::params_update()
         ctx_params  *prm_s;
         int indx, indx2;
         bool chgnew;
+        ctx_params_item *itm_s;
 
         MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO, _("Updating libcam config"));
 
@@ -729,21 +730,21 @@ void cls_libcam::params_update()
 
         for (indx=0;indx<prm_s->params_cnt;indx++) {
             chgnew = true;
+            itm_s = &prm_s->params_array[indx];
             for (indx2=0;indx2<params->params_cnt;indx2++) {
-                if ((prm_s->params_array[indx].param_name == params->params_array[indx2].param_name) &&
-                    (prm_s->params_array[indx].param_value == params->params_array[indx2].param_value)) {
+                if ((itm_s->param_name == params->params_array[indx2].param_name) &&
+                    (itm_s->param_value == params->params_array[indx2].param_value)) {
                     chgnew = false;
                 }
             }
             if (chgnew == true) {
-                util_parms_add(params
-                    ,prm_s->params_array[indx].param_name
-                    ,prm_s->params_array[indx].param_value);
-                if ((prm_s->params_array[indx].param_name == "pixelformat")) {
+                util_parms_add(params,itm_s->param_name,itm_s->param_value);
+                if ((itm_s->param_name == "pixelformat") ||
+                    (itm_s->param_name == "buffer_count") ||
+                    (itm_s->param_name == "Orientation")) {
                     MOTION_LOG(INF, TYPE_EVENTS, NO_ERRNO
                         , _("Restarting camera. Parameter %s changed to %s")
-                        , prm_s->params_array[indx].param_name.c_str()
-                        , prm_s->params_array[indx].param_value.c_str());
+                        , itm_s->param_name.c_str(),itm_s->param_value.c_str());
                     cam->restart = true;
                 }
             }
@@ -802,6 +803,7 @@ int cls_libcam::next(ctx_image_data *img_data)
 {
     #ifdef HAVE_LIBCAM
         int indx, retcd;
+        static int chkcnt=0;
 
         if (started_cam == false) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
@@ -810,40 +812,36 @@ int cls_libcam::next(ctx_image_data *img_data)
         }
 
         cam->watchdog = cam->cfg->watchdog_tmo;
-        /* Allow up to 2 seconds for request to finish.
-         This extended time may be needed when initially
-         starting a usb/v4l2 device*/
-        indx=0;
-        while ((req_queue.empty() == true) && (indx < 2000)) {
-            SLEEP(0,1000000)    /* 1 ms*/
-            indx++;
-        }
-
-        cam->watchdog = cam->cfg->watchdog_tmo;
         if (req_queue.empty() == false) {
             Request *request = this->req_queue.front();
-
-            retcd = convert->process(
-                img_data->image_norm
-                , membuf.buf, membuf.bufsz);
-            if (retcd < 0) {
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                    , "Unable to process image.");
-                return CAPTURE_FAILURE;
+            indx=(int)request->cookie();
+            if (indx == membuf[indx].id) {
+                retcd = convert->process(img_data->image_norm
+                    , membuf[indx].buf, membuf[indx].bufsz);
+                if (retcd < 0) {
+                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to process image.");
+                    return CAPTURE_FAILURE;
+                }
+            } else {
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "index, ID and cookie mismatch.");
             }
-
             this->req_queue.pop();
             request->reuse(Request::ReuseBuffers);
             req_add(request);
 
             cam->rotate->process(img_data);
             reconnect_count = 0;
+            chkcnt=0;
 
             return CAPTURE_SUCCESS;
 
         } else {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "Request queue empty.  No images.");
+            if (chkcnt > 1000) {
+                MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
+                    , "Excessive empty queue requests: %d", chkcnt);
+                chkcnt=0;
+            }
+            chkcnt++;
             return CAPTURE_FAILURE;
         }
     #else

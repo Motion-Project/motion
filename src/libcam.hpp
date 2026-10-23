@@ -29,6 +29,7 @@
         struct ctx_imgmap {
             uint8_t *buf;
             int     bufsz;
+            int     id;
         };
 
         class cls_libcam {
@@ -42,15 +43,15 @@
                 cls_camera  *cam;
                 cls_convert *convert;
 
-                std::unique_ptr<libcamera::CameraManager>          cam_mgr;
-                std::shared_ptr<libcamera::Camera>                 camera;
-                std::unique_ptr<libcamera::CameraConfiguration>    libcam_cfg;
-                std::unique_ptr<libcamera::FrameBufferAllocator>   frmbuf;
-                std::vector<std::unique_ptr<libcamera::Request>>   requests;
+                std::unique_ptr<libcamera::CameraManager>           cam_mgr;
+                std::shared_ptr<libcamera::Camera>                  camera;
+                std::unique_ptr<libcamera::CameraConfiguration>     libcam_cfg;
+                std::unique_ptr<libcamera::FrameBufferAllocator>    frmbuf;
+                std::vector<std::unique_ptr<libcamera::Request>>    requests;
 
                 std::queue<libcamera::Request *>   req_queue;
                 libcamera::ControlList             *camctrls;
-                ctx_imgmap              membuf;
+                std::vector<ctx_imgmap> membuf;
                 ctx_params              *params;
                 bool    started_cam;
                 bool    started_mgr;
