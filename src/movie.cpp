@@ -1929,6 +1929,8 @@ void cls_movie::init_vars()
     extpipe_stream = nullptr;
     container = "";
     preferred_codec = "";
+    all_frames = false;
+    secdetect_only = false;
 
 }
 
