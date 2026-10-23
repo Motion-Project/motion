@@ -3734,14 +3734,23 @@ void cls_config::defaults()
             , PARM_ACT_DFLT, config_parms[indx].parm_cat);
         indx++;
     }
+
+    for (indx=0;indx<params.size();indx++) {
+        mydelete(params[indx]);
+    }
     params.clear();
+
     defaults_depr();
 }
 
 void cls_config::defaults_depr()
 {
     ctx_params *prm;
+    int indx;
 
+    for (indx=0;indx<depr_params.size();indx++) {
+        mydelete(depr_params[indx]);
+    }
     depr_params.clear();
 
     prm = new ctx_params;
@@ -4947,6 +4956,22 @@ void cls_config::config_copy(cls_config *src)
         params.push_back(prm);
     }
 
+    for (indx1=0;indx1<depr_params.size();indx1++) {
+        mydelete (depr_params[indx1]);
+    }
+    depr_params.clear();
+    for (indx1=0;indx1<src->depr_params.size();indx1++) {
+        prmsrc = src->depr_params[indx1];
+        prm = new ctx_params;
+        prm->params_pcat = prmsrc->params_pcat;
+        prm->params_desc = prmsrc->params_desc;
+        for (indx2=0;indx2<prmsrc->params_array.size();indx2++) {
+            prm->params_array.push_back(prmsrc->params_array[indx2]);
+        }
+        prm->params_cnt = (int)prm->params_array.size();
+        depr_params.push_back(prm);
+    }
+
 }
 
 void cls_config::config_copy(cls_config *src, PARM_CAT p_cat)
@@ -5062,7 +5087,8 @@ void cls_config::init()
 cls_config::cls_config(cls_motapp *p_app)
 {
     app = p_app;
-
+    params.clear();
+    depr_params.clear();
     defaults();
 }
 
@@ -5072,5 +5098,8 @@ cls_config::~cls_config()
 
     for (indx=0;indx<params.size();indx++) {
         mydelete (params[indx]);
+    }
+    for (indx=0;indx<depr_params.size();indx++) {
+        mydelete (depr_params[indx]);
     }
 }
