@@ -1254,10 +1254,27 @@
         <ul>
           <p></p>
           <p></p>
-          <i><h4>pixelformat</h4></i>
-           User requested pixelformat to use.  Default of YU12 is most efficient.  Usually
-           this parameter is specified as the fourcc character code.
+          <i><h4> params_file </h4></i>
+          <div>
+          <ul>
+            <li> Values: String | Default: Not Defined </li>
+            Full path and file name for a file containing the params listed one per line.
+          </ul>
           <p></p>
+          <i><h4>pixelformat</h4></i>
+           User requested pixelformat to use.
+           This parameter is usually specified as the fourcc character code.
+          <p></p>
+          <i><h4>buffer_count</h4></i>
+          <div>
+          <ul>
+            <li> Values: integer | Default: 4 </li>
+            The requested number of buffers for libcamera to use when capturing
+            images from the device.  The actual number of buffers used may be
+            adjusted by libcamera based upon the hardware capabilities.
+          </ul>
+          <p></p>
+
           <i><h4> Orientation(string)</h4></i>
            (These are libcamera orientation options and may not provide result you anticipate.)
           <div><ul>
