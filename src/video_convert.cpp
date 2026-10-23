@@ -528,6 +528,8 @@ int cls_convert::process(u_char *img_dst, u_char *img_src, int clen)
     } else if (pixfmt_src == "YUYV"){   yuv422to420p(img_dst, img_src);
     } else if (pixfmt_src == "422P") {  yuv422pto420p(img_dst, img_src);
     } else if (pixfmt_src == "YU12") {  memcpy(img_dst, img_src, (uint)clen);
+    } else if (pixfmt_src == "I420") {  memcpy(img_dst, img_src, (uint)clen);
+    } else if (pixfmt_src == "IYUV") {  memcpy(img_dst, img_src, (uint)clen);
     } else if (pixfmt_src == "GREY") {  greytoyuv420p(img_dst, img_src);
     } else if ((pixfmt_src == "PJPG") || (pixfmt_src =="JPEG") ||
         (pixfmt_src =="MJPG")) {
