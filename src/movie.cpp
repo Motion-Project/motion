@@ -1665,6 +1665,8 @@ void cls_movie::start_norm()
     motion_images = false;
     passthrough = cam->movie_passthrough;
 
+    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("Movie fps %d"),fps);
+
     params = nullptr;
     for (indx=0;indx<cam->cfg->params.size();indx++) {
         if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_MOVIE) {
