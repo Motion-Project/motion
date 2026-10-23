@@ -486,6 +486,7 @@
               <td bgcolor="#edf4f9" ><a href="#stream_maxrate" >stream_maxrate</a> </td>
             </tr>
            <tr>
+              <td bgcolor="#edf4f9" ><a href="#stream_mpegts_params" >stream_mpegts_params</a> </td>
               <td bgcolor="#edf4f9" ><a href="#stream_motion" >stream_motion</a> </td>
            </tr>
            </tbody>
@@ -2736,6 +2737,96 @@
           is no motion being detected and increase to the stream_maxrate when there is motion.
         </ul>
         <p></p>
+        <h3><a name="stream_mpegts_params"></a>stream_mpegts_params</h3>
+        <ul>
+         <li> Values: String | Default: Not Defined</li>
+          Comma separated parameters for the movies
+          Format is parm1=value1,parm2=value2 etc.
+          <p></p>
+          <div>
+            <i><h4>params_file</h4></i>
+            <ul>
+              Full file name for providing the stream_mpegts_params option.  Provides
+              option of specifying each parameter on a different line instead of
+              having them as comma separated pairs.
+            </ul>
+            <i><h4>stream_fps</h4></i>
+            <ul>
+              FPS for the stream, defaults to 30.
+            </ul>
+            <i><h4>aviobuf_sz</h4></i>
+            <ul>
+              aviobuf_sz for FFMPEG, defaults to 4096.
+            </ul>
+            <i><h4>gop_size</h4></i>
+            <ul>
+              Group of pictures size.
+            </ul>
+            <i><h4>bit_rate</h4></i>
+            <ul>
+              The bit rate to use for encoding.
+            </ul>
+            <i><h4>max_b_frames</h4></i>
+            <ul>
+              max_b_frames value.
+            </ul>
+            <i><h4>framerate_num</h4></i>
+            <ul>
+              Codec context framerate numerator.
+            </ul>
+            <i><h4>framerate_den</h4></i>
+            <ul>
+              Codec context framerate denominator.
+            </ul>
+            <i><h4>profile</h4></i>
+            <ul>
+              The H264 profile to use (baseline,main,high).
+            </ul>
+            <i><h4>dict_*</h4></i>
+            <ul>
+              The FFMpeg options to set using av_dict_set on the codec context.  Motion
+              will strip off the prefix of <code>dict_</code> and then apply the remainder
+              as the name of FFMpeg option. The defaults for Motion are
+              <code>dict_movflags=empty_moov</code> which
+              corresponds to the FFMpeg options of <code>movflags=empty_moov</code>
+            </ul>
+            <i><h4>opt_*</h4></i>
+            <ul>
+              The FFMpeg options to set using av_opt_set on the codec context.  Motion
+              will strip off the prefix of <code>opt_</code> and then apply the remainder
+              as the name of FFMpeg option.
+            </ul>
+            <i><h4>priv_*</h4></i>
+            <ul>
+              The FFMpeg options to set using av_opt_set on the codec context priv_data.
+              Motion will strip off the prefix of <code>priv_</code> and then apply
+              the remainder as the name of FFMpeg option.
+            </ul>
+            <i><h4>hdr_*</h4></i>
+            <ul>
+              The http headers specific to the mpegts feed.  Defaults:
+              <code>Cache-Control=no-store,no-cache,must-revalidate,max-age=0</code>
+              ,<code>Content-Transfer-Encoding=BINARY</code>
+              ,<code>Content-Type=video/mp2t</code>
+            </ul>
+
+            <i><h4>flags</h4></i>
+            <ul>
+              Flags to apply for the codec context.  The format is specified as the
+              numeric value and the shift amount.  The values are provided in
+              FFMpeg definitions of the value.  e.g. AV_CODEC_FLAG_GLOBAL_HEADER
+              is defined(at the time of writing) as 1<<22.  To specify multiple flags
+              separate them with a | and they will be or'd together.  The Motion
+              default is 1<<22 which corresponds to AV_CODEC_FLAG_GLOBAL_HEADER
+            </ul>
+            <i><h4>flags2</h4></i>
+            <ul>
+              Same as flags without default but applied to flags2.
+            </ul>
+        </ul>
+
+        <p></p>
+
       </ul>
 
       <h3><a name="OptDetail_Database"></a>Database</h3>

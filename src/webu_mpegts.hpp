@@ -35,16 +35,22 @@
 
             AVFrame         *picture;
             AVFormatContext *fmtctx;
+            const AVCodec   *codec;
             AVCodecContext  *ctx_codec;
+            AVDictionary    *opts;
             size_t          stream_pos;     /* Stream position of sent image */
             struct timespec start_time;     /* Start time of the stream*/
             struct timespec st_mono_time;
+            ctx_params      *params;
+            int              aviobuf_sz;
 
             int pic_send(unsigned char *img);
             int pic_get();
             void resetpos();
             int getimg();
             int open_mpegts();
+            void set_flags();
+            void set_codec();
     };
 
 #endif /* _INCLUDE_WEBU_MPEGTS_HPP_ */

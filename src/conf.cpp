@@ -156,6 +156,7 @@ ctx_parm config_parms[] = {
     {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, PARM_LVL_03, PARM_CHG_RESTART },
 
     {"stream_allcam_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
+    {"stream_mpegts_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_grey",               PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
     {"stream_motion",             PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
@@ -2040,6 +2041,17 @@ void cls_config::edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact
     }
 }
 
+void cls_config::edit_stream_mpegts_params(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        stream_mpegts_params = "";
+    } else if (pact == PARM_ACT_SET) {
+        stream_mpegts_params = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = stream_mpegts_params;
+    }
+}
+
 void cls_config::edit_stream_quality(std::string &parm, enum PARM_ACT pact)
 {
     int parm_in;
@@ -2644,6 +2656,7 @@ void cls_config::edit_cat13(std::string parm_nm, std::string &parm_val, enum PAR
 void cls_config::edit_cat14(std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
 {
     if (parm_nm == "stream_allcam_params") {    edit_stream_allcam_params(parm_val, pact);
+    } else if (parm_nm == "stream_mpegts_params") {edit_stream_mpegts_params(parm_val, pact);
     } else if (parm_nm == "stream_quality") {   edit_stream_quality(parm_val, pact);
     } else if (parm_nm == "stream_grey") {      edit_stream_grey(parm_val, pact);
     } else if (parm_nm == "stream_motion") {    edit_stream_motion(parm_val, pact);
@@ -3560,6 +3573,105 @@ void cls_config::params_load_movie()
 
 }
 
+void cls_config::params_load_mpegts()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "stream_mpegts_params";
+    prm->params_pcat = PARM_PCAT_MPEGTS;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"stream_fps","30",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"aviobuf_sz","4096",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"gop_size","15",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"bit_rate","400000",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"max_b_frames","1",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"framerate_num","1",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"framerate_den","1",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"priv_profile","main",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{"baseline","main","high"},""});
+    prm->params_array.push_back(
+        {"priv_crf","21",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"priv_tune","zerolatency",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"film","animation","grain","stillimage"
+        ,"fastdecode","zerolatency"},""});
+    prm->params_array.push_back(
+        {"priv_preset","superfast",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"ultrafast","superfast","veryfast","faster"
+        ,"fast","medium","slow","slower","veryslow"},""});
+    prm->params_array.push_back(
+        {"dict_movflags","empty_moov",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"flags","1<<22",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"flags2","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"hdr_Cache-Control","no-store,no-cache,must-revalidate,max-age=0"
+        , PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"hdr_Content-Transfer-Encoding","BINARY"
+        , PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"hdr_Content-Type","video/mp2t"
+        , PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    params_load_dpritm(app->conf_src, prm, PARM_PCAT_MPEGTS);
+
+    util_parms_parse(prm,"stream_mpegts_params",stream_mpegts_params,PARM_PCAT_MPEGTS);
+
+    params.push_back(prm);
+
+}
+
 void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCAT pcat)
 {
     int indx;
@@ -3599,6 +3711,7 @@ void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_para
     } else if (prmd->params_pcat == PARM_PCAT_HDR) {    ptmp=cfgs->webcontrol_headers;
     } else if (prmd->params_pcat == PARM_PCAT_SND) {    ptmp=cfgs->snd_params;
     } else if (prmd->params_pcat == PARM_PCAT_MOVIE) {  ptmp=cfgs->movie_params;
+    } else if (prmd->params_pcat == PARM_PCAT_MPEGTS) { ptmp=cfgs->stream_mpegts_params;
     } else {  return;
     }
     params_load_dpritm(cfgs, prmd, prmd->params_pcat);
@@ -3700,6 +3813,7 @@ void cls_config::params_load()
     params_load_headers();
     params_load_sound();
     params_load_movie();
+    params_load_mpegts();
 }
 
 std::string cls_config::params_prefix(PARM_PCAT pcat) {
@@ -3719,6 +3833,7 @@ std::string cls_config::params_prefix(PARM_PCAT pcat) {
     } else if (pcat == PARM_PCAT_HDR)   { return "phdr_";
     } else if (pcat == PARM_PCAT_SND)   { return "psnd_";
     } else if (pcat == PARM_PCAT_MOVIE) { return "pmov_";
+    } else if (pcat == PARM_PCAT_MPEGTS){ return "pmts_";
     } else { return "pudf_";
     }
 }

@@ -292,28 +292,74 @@ ssize_t cls_webu_mpegts::response(char *buf, size_t max)
     return (ssize_t)sent_bytes;
 }
 
-int cls_webu_mpegts::open_mpegts()
+void cls_webu_mpegts::set_flags()
 {
-    int retcd, img_w, img_h;
-    char errstr[128];
-    unsigned char   *buf_image;
-    AVStream        *strm;
-    const AVCodec   *codec;
-    AVDictionary    *opts;
-    size_t          aviobuf_sz;
+    int indx;
+    std::string fflags, fflags2;
+    std::string svar, shft, sflg;
+    size_t chkloc;
 
-    opts = NULL;
-    webus->stream_fps = 30;
-    aviobuf_sz = 4096;
-    clock_gettime(CLOCK_REALTIME, &start_time);
-    clock_gettime(CLOCK_MONOTONIC, &st_mono_time);
+    fflags="";
+    fflags2="";
+    for (indx=0;indx<params->params_array.size();indx++){
+        if (params->params_array[indx].param_name == "flags") {
+            fflags=params->params_array[indx].param_value;
+        }
+        if (params->params_array[indx].param_name == "flags2") {
+            fflags2=params->params_array[indx].param_value;
+        }
+    }
 
-    fmtctx = avformat_alloc_context();
-    fmtctx->oformat = av_guess_format("mpegts", NULL, NULL);
-    fmtctx->video_codec_id = AV_CODEC_ID_H264;
+    while (fflags != "") {
+        chkloc = fflags.find("|");
+        if (chkloc == std::string::npos) {
+            sflg = fflags;
+            fflags="";
+        } else {
+            sflg = fflags.substr(0,chkloc);
+            fflags = fflags.substr(chkloc+1);
+        }
+        chkloc = sflg.find("<<");
+        if (chkloc != std::string::npos) {
+            ctx_codec->flags |=
+               mtoi(sflg.substr(0,chkloc)) <<
+               mtoi(sflg.substr(chkloc+2));
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                ,_("Set codec flags %s<<%s")
+                ,sflg.substr(0,chkloc).c_str()
+                ,sflg.substr(chkloc+2).c_str());
+        }
+    }
 
-    codec = avcodec_find_encoder(AV_CODEC_ID_H264);
-    strm = avformat_new_stream(fmtctx, codec);
+    while (fflags2 != "") {
+        chkloc = fflags2.find("|");
+        if (chkloc == std::string::npos) {
+            sflg = fflags2;
+            fflags2="";
+        } else {
+            sflg = fflags2.substr(0,chkloc);
+            fflags2 = fflags2.substr(chkloc+1);
+        }
+        chkloc = sflg.find("<<");
+        if (chkloc != std::string::npos) {
+            ctx_codec->flags2 |=
+               mtoi(sflg.substr(0,chkloc)) <<
+               mtoi(sflg.substr(chkloc+2));
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                ,_("Set codec flags2 %s<<%s")
+                ,sflg.substr(0,chkloc).c_str()
+                ,sflg.substr(chkloc+2).c_str());
+        }
+    }
+
+}
+
+void cls_webu_mpegts::set_codec()
+{
+    int indx, img_w, img_h;
+    ctx_params_item *itm;
+
+    codec = avcodec_find_encoder(fmtctx->video_codec_id);
 
     if (webua->device_id > 0) {
         if ((webua->cnct_type == WEBUI_CNCT_TS_SUB) &&
@@ -326,43 +372,109 @@ int cls_webu_mpegts::open_mpegts()
             img_h = webua->cam->imgs.height;
         }
     } else {
-        if (webus->all_ready() == false) {
-            return -1;
-        }
         img_w = webu->allcam->info.dst_w;
         img_h = webu->allcam->info.dst_h;
     }
 
+    webus->stream_fps = 30;
+    aviobuf_sz = 4096;
+
     ctx_codec = avcodec_alloc_context3(codec);
-    ctx_codec->gop_size      = 15;
-    ctx_codec->codec_id      = AV_CODEC_ID_H264;
+
+    set_flags();
+
+    ctx_codec->codec_id      = fmtctx->video_codec_id;
     ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
-    ctx_codec->bit_rate      = 400000;
     ctx_codec->width         = img_w;
     ctx_codec->height        = img_h;
     ctx_codec->time_base.num = 1;
     ctx_codec->time_base.den = 90000;
     ctx_codec->pix_fmt       = AV_PIX_FMT_YUV420P;
-    ctx_codec->max_b_frames  = 1;
-    ctx_codec->flags         |= AV_CODEC_FLAG_GLOBAL_HEADER;
-    ctx_codec->framerate.num  = 1;
-    ctx_codec->framerate.den  = 1;
-    av_opt_set(ctx_codec->priv_data, "profile", "main", 0);
-    av_opt_set(ctx_codec->priv_data, "crf", "22", 0);
-    av_opt_set(ctx_codec->priv_data, "tune", "zerolatency", 0);
-    av_opt_set(ctx_codec->priv_data, "preset", "superfast",0);
-    av_dict_set(&opts, "movflags", "empty_moov", 0);
+
+    for (indx=0;indx<params->params_array.size();indx++){
+        itm=&params->params_array[indx];
+        if (itm->param_name == "stream_fps") {
+            webus->stream_fps = mtoi(itm->param_value);
+        } else if (itm->param_name == "aviobuf_sz") {
+            aviobuf_sz = mtoi(itm->param_value);
+        } else if (itm->param_name == "gop_size") {
+            ctx_codec->gop_size = mtoi(itm->param_value);
+        } else if (itm->param_name == "bit_rate") {
+            ctx_codec->bit_rate = mtoi(itm->param_value);
+        } else if (itm->param_name == "max_b_frames") {
+            ctx_codec->max_b_frames = mtoi(itm->param_value);
+        } else if (itm->param_name == "framerate_num") {
+            ctx_codec->framerate.num = mtoi(itm->param_value);
+        } else if (itm->param_name == "framerate_den") {
+            ctx_codec->framerate.den = mtoi(itm->param_value);
+        } else if (itm->param_name == "profile") {
+            if (itm->param_value == "main") {
+                ctx_codec->profile = MY_PROFILE_H264_MAIN;
+            } else if (itm->param_value == "baseline") {
+                ctx_codec->profile = MY_PROFILE_H264_BASELINE;
+            } else if (itm->param_value == "high") {
+                ctx_codec->profile = MY_PROFILE_H264_HIGH;
+            }
+        } else if (itm->param_name.substr(0,5) == "dict_") {
+            av_dict_set(&opts
+                ,itm->param_name.substr(5).c_str()
+                ,itm->param_value.c_str(), 0);
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                , "av_dict_set %s = %s"
+                , itm->param_name.substr(5).c_str()
+                , itm->param_value.c_str());
+        } else if (itm->param_name.substr(0,4) == "opt_") {
+            av_opt_set(ctx_codec
+                ,itm->param_name.substr(4).c_str()
+                ,itm->param_value.c_str(), 0);
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                , "av_opt_set %s = %s"
+                , itm->param_name.substr(4).c_str()
+                , itm->param_value.c_str());
+        } else if (itm->param_name.substr(0,5) == "priv_") {
+            av_opt_set(ctx_codec->priv_data
+                ,itm->param_name.substr(5).c_str()
+                ,itm->param_value.c_str(), 0);
+            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+                , "av_opt_set  priv_data %s = %s"
+                , itm->param_name.substr(5).c_str()
+                , itm->param_value.c_str());
+        }
+    }
+}
+
+int cls_webu_mpegts::open_mpegts()
+{
+    int retcd;
+    char errstr[128];
+    unsigned char   *buf_image;
+    AVStream        *strm;
+
+    if ((webua->device_id == 0) && (webus->all_ready() == false)) {
+        return -1;
+    }
+
+    opts = NULL;
+    clock_gettime(CLOCK_REALTIME, &start_time);
+    clock_gettime(CLOCK_MONOTONIC, &st_mono_time);
+
+    fmtctx = avformat_alloc_context();
+    fmtctx->oformat = av_guess_format("mpegts", NULL, NULL);
+    fmtctx->video_codec_id = AV_CODEC_ID_H264;
+
+    set_codec();
 
     retcd = avcodec_open2(ctx_codec, codec, &opts);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-            ,_("Failed to open codec context for %dx%d transport stream: %s")
-            , img_w, img_h, errstr);
+            ,_("Failed to open codec context for transport stream: %s")
+            , errstr);
         av_dict_free(&opts);
         return -1;
     }
 
+    strm = avformat_new_stream(fmtctx, codec);
     retcd = avcodec_parameters_from_context(strm->codecpar, ctx_codec);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
@@ -377,7 +489,6 @@ int cls_webu_mpegts::open_mpegts()
     } else {
         webus->one_buffer();
     }
-
 
     buf_image = (unsigned char*)av_malloc(aviobuf_sz);
     fmtctx->pb = avio_alloc_context(
@@ -407,6 +518,7 @@ mhdrslt cls_webu_mpegts::main()
     mhdrslt retcd;
     struct MHD_Response *response;
     int indx;
+    std::string pnm, pvl;
 
     if (webua->device_id == 0) {
         if (webus->all_ready() == false) {
@@ -430,15 +542,26 @@ mhdrslt cls_webu_mpegts::main()
 
     if (webu->wb_headers->params_cnt > 0) {
         for (indx=0;indx<webu->wb_headers->params_cnt;indx++) {
-            MHD_add_response_header (response
-                , webu->wb_headers->params_array[indx].param_name.c_str()
-                , webu->wb_headers->params_array[indx].param_value.c_str());
+            pnm=webu->wb_headers->params_array[indx].param_name;
+            pvl=webu->wb_headers->params_array[indx].param_value;
+            if (pnm != "params_file") {
+                MHD_add_response_header (response,pnm.c_str(),pvl.c_str());
+                MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                    , _("WB Header: %s = %s"),pnm.c_str(),pvl.c_str());
+            }
         }
     }
 
-    MHD_add_response_header(response, "Cache-Control", "no-store,no-cache,must-revalidate,max-age=0");
-    MHD_add_response_header(response, "Content-Transfer-Encoding", "BINARY");
-    MHD_add_response_header(response, "Content-Type", "video/mp2t");
+    for (indx=0;indx<params->params_array.size();indx++){
+        pnm=params->params_array[indx].param_name;
+        pvl=params->params_array[indx].param_value;
+        if (pnm.substr(0,4)=="hdr_") {
+            pnm=pnm.substr(4);
+            MHD_add_response_header (response,pnm.c_str(),pvl.c_str());
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                , _("TS Header: %s = %s"),pnm.c_str(),pvl.c_str());
+        }
+    }
 
     retcd = MHD_queue_response (webua->connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
@@ -448,6 +571,7 @@ mhdrslt cls_webu_mpegts::main()
 
 cls_webu_mpegts::cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus)
 {
+    int indx;
     app    = p_webua->app;
     webu   = p_webua->webu;
     webua  = p_webua;
@@ -457,6 +581,18 @@ cls_webu_mpegts::cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus
     picture = nullptr;;
     ctx_codec = nullptr;
     fmtctx = nullptr;
+
+    params = nullptr;
+    for (indx=0;indx<webu->cfg->params.size();indx++) {
+        if (webu->cfg->params[indx]->params_pcat == PARM_PCAT_MPEGTS) {
+            params = webu->cfg->params[indx];
+        }
+    }
+    if (params == nullptr) {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Coding error: Null stream_mpegts_params"));
+        abort();
+    }
+
 }
 
 cls_webu_mpegts::~cls_webu_mpegts()

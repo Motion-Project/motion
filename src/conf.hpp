@@ -190,6 +190,7 @@
 
             /* Live stream configuration parameters */
             std::string     stream_allcam_params;
+            std::string     stream_mpegts_params;
             int             stream_quality;
             bool            stream_grey;
             bool            stream_motion;
@@ -275,6 +276,7 @@
             void params_load_headers();
             void params_load_sound();
             void params_load_movie();
+            void params_load_mpegts();
 
             void config_dir_item(std::string confdir);
 
@@ -453,6 +455,7 @@
             void edit_stream_maxrate(std::string &parm, enum PARM_ACT pact);
             void edit_stream_motion(std::string &parm, enum PARM_ACT pact);
             void edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact);
+            void edit_stream_mpegts_params(std::string &parm, enum PARM_ACT pact);
             void edit_stream_quality(std::string &parm, enum PARM_ACT pact);
 
             void edit_database_busy_timeout(std::string &parm, enum PARM_ACT pact);
