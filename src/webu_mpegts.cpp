@@ -445,13 +445,22 @@ void cls_webu_mpegts::set_codec()
 
 int cls_webu_mpegts::open_mpegts()
 {
-    int retcd;
+    int retcd, indx;
     char errstr[128];
     unsigned char   *buf_image;
     AVStream        *strm;
 
-    if ((webua->device_id == 0) && (webus->all_ready() == false)) {
-        return -1;
+    if (webua->device_id == 0) {
+        indx=0;
+        while ((webus->all_ready() == false) && (indx<4)) {
+            SLEEP(1,0);
+            indx++;
+        }
+        if (indx == 4){
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                ,_("Failed to get consolidated image."));
+            return -1;
+        }
     }
 
     opts = NULL;
@@ -519,12 +528,6 @@ mhdrslt cls_webu_mpegts::main()
     struct MHD_Response *response;
     int indx;
     std::string pnm, pvl;
-
-    if (webua->device_id == 0) {
-        if (webus->all_ready() == false) {
-            return MHD_NO;
-        }
-    }
 
     if (open_mpegts() < 0 ) {
         MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Unable to open mpegts"));
