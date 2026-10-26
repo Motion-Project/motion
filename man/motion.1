@@ -1313,15 +1313,15 @@ File rollover mode for the timelapse video.
 .RE
 
 .TP
-.B timelapse_fps
+.B timelapse_params
 .RS
 .nf
-Values: 0 to unlimited
-Default: 30
+Values: string
+Default:
 Description:
 .fi
 .RS
-Frames per second used for playback of the timelapse video.
+Comma separated parameter=value pairs for movie configuration options
 .RE
 .RE
 
@@ -1332,7 +1332,7 @@ Frames per second used for playback of the timelapse video.
 Values:
 .RS
 mpg - Creates mpg file with mpeg-2 encoding.
-mpeg4 - Creates avi file with the default encoding.
+mkv - Creates mkv file with the default encoding.
 .RE
 Default: mpg
 Description:
@@ -1340,7 +1340,7 @@ Description:
 .RS
 For mpg timelapse videos, if Motion is shutdown and restarted, new pics will be appended
 to any previously created file with name indicated for timelapse.
-For mpeg4 timelapse videos, if Motion is shutdown and restarted, new pics will create a
+For mkv timelapse videos, if Motion is shutdown and restarted, new pics will create a
 new file with the name indicated for timelapse.
 .RE
 .RE

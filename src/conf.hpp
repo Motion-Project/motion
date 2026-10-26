@@ -160,9 +160,9 @@
             /* Timelapse movie configuration parameters */
             int             timelapse_interval;
             std::string     timelapse_mode;
-            int             timelapse_fps;
             std::string     timelapse_container;
             std::string     timelapse_filename;
+            std::string     timelapse_params;
 
             /* Loopback device configuration parameters */
             std::string     video_pipe;
@@ -276,6 +276,7 @@
             void params_load_headers();
             void params_load_sound();
             void params_load_movie();
+            void params_load_timelapse();
             void params_load_mpegts();
 
             void config_dir_item(std::string confdir);
@@ -293,6 +294,7 @@
             void edit_depr_vid(std::string parm_nm, std::string parm_val);
             void edit_depr_web(std::string newname, std::string &parm_val);
             void edit_depr_movie(std::string parm_nm, std::string parm_val);
+            void edit_depr_timelapse(std::string parm_nm, std::string parm_val);
             void edit_config_dir(std::string &parm, enum PARM_ACT pact);
             void edit_get_bool(std::string &parm_dest, bool &parm_in);
             void edit_set_bool(bool &parm_dest, std::string &parm_in);
@@ -425,9 +427,9 @@
 
             void edit_timelapse_container(std::string &parm, enum PARM_ACT pact);
             void edit_timelapse_filename(std::string &parm, enum PARM_ACT pact);
-            void edit_timelapse_fps(std::string &parm, enum PARM_ACT pact);
             void edit_timelapse_interval(std::string &parm, enum PARM_ACT pact);
             void edit_timelapse_mode(std::string &parm, enum PARM_ACT pact);
+            void edit_timelapse_params(std::string &parm, enum PARM_ACT pact);
 
             void edit_video_pipe(std::string &parm, enum PARM_ACT pact);
             void edit_video_pipe_motion(std::string &parm, enum PARM_ACT pact);

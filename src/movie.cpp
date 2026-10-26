@@ -1768,7 +1768,7 @@ void cls_movie::start_motion()
 void cls_movie::start_timelapse()
 {
     char tmp[PATH_MAX];
-
+    int indx;
     mystrftime(cam, tmp, sizeof(tmp), cam->cfg->timelapse_filename.c_str(), nullptr);
 
     file_nm = tmp;
@@ -1786,7 +1786,6 @@ void cls_movie::start_timelapse()
         high_resolution = false;
     }
     pkt = nullptr;
-    fps = cam->cfg->timelapse_fps;
     start_time.tv_sec = cam->current_image->imgts.tv_sec;
     start_time.tv_nsec = cam->current_image->imgts.tv_nsec;
     last_pts = -1;
@@ -1809,9 +1808,32 @@ void cls_movie::start_timelapse()
         container = "mkv";
     }
 
+    params = nullptr;
+    for (indx=0;indx<cam->cfg->params.size();indx++) {
+        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_TLSP) {
+            params = cam->cfg->params[indx];
+        }
+    }
+    if (params == nullptr) {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            ,_("Error getting timelapse_params"));
+        return;
+    }
+    fps = 30;
+    for (indx=0;indx<params->params_array.size();indx++){
+        if (params->params_array[indx].param_name == "fps"){
+            fps=mtoi(params->params_array[indx].param_value);
+        }
+    }
+    if ((fps<2) || (fps>100)){
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            ,_("Invalid fps provided in timelapse_params.  Using 30"));
+        fps=30;
+    }
+
     if (movie_open() < 0) {
         MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
-            ,_("Error initializing movie."));
+            ,_("Error initializing timelapse."));
         return;
     }
 
@@ -1824,9 +1846,22 @@ void cls_movie::start_timelapse()
 void cls_movie::start_extpipe()
 {
     char tmp[PATH_MAX];
+    int indx;
 
     if (cam->cfg->movie_extpipe_use == false) {
         is_running = false;
+        return;
+    }
+
+    params = nullptr;
+    for (indx=0;indx<cam->cfg->params.size();indx++) {
+        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_MOVIE) {
+            params = cam->cfg->params[indx];
+        }
+    }
+    if (params == nullptr) {
+        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+            ,_("Error getting movie_params"));
         return;
     }
 

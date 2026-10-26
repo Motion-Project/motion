@@ -129,9 +129,9 @@ ctx_parm config_parms[] = {
 
     {"timelapse_interval",        PARM_TYP_INT,    PARM_CAT_11, PARM_LVL_01, PARM_CHG_COPY },
     {"timelapse_mode",            PARM_TYP_LIST,   PARM_CAT_11, PARM_LVL_01, PARM_CHG_COPY },
-    {"timelapse_fps",             PARM_TYP_INT,    PARM_CAT_11, PARM_LVL_01, PARM_CHG_COPY },
     {"timelapse_container",       PARM_TYP_LIST,   PARM_CAT_11, PARM_LVL_01, PARM_CHG_COPY },
     {"timelapse_filename",        PARM_TYP_STRING, PARM_CAT_11, PARM_LVL_01, PARM_CHG_COPY },
+    {"timelapse_params",          PARM_TYP_PARAMS, PARM_CAT_11, PARM_LVL_01, PARM_CHG_CODE },
 
     {"video_pipe",                PARM_TYP_STRING, PARM_CAT_12, PARM_LVL_01, PARM_CHG_RESTART },
     {"video_pipe_motion",         PARM_TYP_STRING, PARM_CAT_12, PARM_LVL_01, PARM_CHG_RESTART },
@@ -252,6 +252,8 @@ ctx_parm_depr config_parms_depr[] = {
         ,"\"movie_all_frames\" replaced with \"movie_params\" parameter \"all_frames\""}
     ,{"movie_retain", "5.0.0","movie_params option"
         ,"\"movie_retain\" replaced with \"movie_params\" parameter \"secdetect_only\""}
+    ,{"timelapse_fps", "5.0.0","timelapse_params option"
+        ,"\"timelapse_fps\" replaced with \"timelapse_params\" parameter \"fps\""}
 
     ,{ "","","",""}
 };
@@ -1662,23 +1664,6 @@ void cls_config::edit_timelapse_mode(std::string &parm, enum PARM_ACT pact)
     }
 }
 
-void cls_config::edit_timelapse_fps(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        timelapse_fps = 30;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 2) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_fps %d"),parm_in);
-        } else {
-            timelapse_fps = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(timelapse_fps);
-    }
-}
-
 void cls_config::edit_timelapse_container(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
@@ -1715,6 +1700,17 @@ void cls_config::edit_timelapse_filename(std::string &parm, enum PARM_ACT pact)
         }
     } else if (pact == PARM_ACT_GET) {
         parm = timelapse_filename;
+    }
+}
+
+void cls_config::edit_timelapse_params(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        timelapse_params = "";
+    } else if (pact == PARM_ACT_SET) {
+        timelapse_params = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = timelapse_params;
     }
 }
 
@@ -2614,9 +2610,9 @@ void cls_config::edit_cat11(std::string parm_nm, std::string &parm_val, enum PAR
 {
     if (parm_nm == "timelapse_interval") {             edit_timelapse_interval(parm_val, pact);
     } else if (parm_nm == "timelapse_mode") {          edit_timelapse_mode(parm_val, pact);
-    } else if (parm_nm == "timelapse_fps") {           edit_timelapse_fps(parm_val, pact);
     } else if (parm_nm == "timelapse_container") {     edit_timelapse_container(parm_val, pact);
     } else if (parm_nm == "timelapse_filename") {      edit_timelapse_filename(parm_val, pact);
+    } else if (parm_nm == "timelapse_params") {        edit_timelapse_params(parm_val, pact);
     }
 
 }
@@ -3672,6 +3668,91 @@ void cls_config::params_load_mpegts()
 
 }
 
+void cls_config::params_load_timelapse()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "timelapse_params";
+    prm->params_pcat = PARM_PCAT_TLSP;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"fps","30",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"quality","60",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"profile","main",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"baseline","main","high"},""});
+    prm->params_array.push_back(
+        {"bit_rate","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"dict_preset","superfast",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"ultrafast","superfast","veryfast","faster"
+        ,"fast","medium","slow","slower","veryslow"},""});
+    prm->params_array.push_back(
+        {"dict_tune","zerolatency",PARM_SRC_SYS
+        , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
+        ,{"film","animation","grain","stillimage"
+        ,"fastdecode","zerolatency"},""});
+    prm->params_array.push_back(
+        {"opt_profile","main",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{"baseline","main","high"},""});
+    prm->params_array.push_back(
+        {"opt_crf","18",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"opt_preset","superfast",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{"ultrafast","superfast","veryfast","faster"
+        ,"fast","medium","slow","slower","veryslow"},""});
+    prm->params_array.push_back(
+        {"global_quality","75",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"flags","1<<22|1<<1",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"flags2","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"gop_size","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"max_b_frames","0",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+
+    prm->params_cnt = (int)prm->params_array.size();
+
+    params_load_dpritm(app->conf_src, prm, PARM_PCAT_TLSP);
+
+    util_parms_parse(prm,"timelapse_params",timelapse_params,PARM_PCAT_TLSP);
+
+    params.push_back(prm);
+
+}
+
 void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCAT pcat)
 {
     int indx;
@@ -3813,6 +3894,7 @@ void cls_config::params_load()
     params_load_headers();
     params_load_sound();
     params_load_movie();
+    params_load_timelapse();
     params_load_mpegts();
 }
 
@@ -3833,6 +3915,7 @@ std::string cls_config::params_prefix(PARM_PCAT pcat) {
     } else if (pcat == PARM_PCAT_HDR)   { return "phdr_";
     } else if (pcat == PARM_PCAT_SND)   { return "psnd_";
     } else if (pcat == PARM_PCAT_MOVIE) { return "pmov_";
+    } else if (pcat == PARM_PCAT_TLSP)  { return "ptlp_";
     } else if (pcat == PARM_PCAT_MPEGTS){ return "pmts_";
     } else { return "pudf_";
     }
@@ -3999,6 +4082,38 @@ void cls_config::edit_depr_movie(std::string parm_nm, std::string parm_val)
 
 }
 
+void cls_config::edit_depr_timelapse(std::string parm_nm, std::string parm_val)
+{
+    std::string pnew_nm, pnew_val;
+    int indx;
+    ctx_params *prm;
+
+    prm = nullptr;
+    for (indx=0;indx<depr_params.size();indx++) {
+        if (depr_params[indx]->params_pcat == PARM_PCAT_TLSP) {
+            prm = depr_params[indx];
+        }
+    }
+    if (prm == nullptr) {
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Bad programming"));
+        return;
+    }
+
+    if (parm_nm == "timelapse_fps") {
+        pnew_nm = "fps";
+        pnew_val = parm_val;
+    } else {
+        return;
+    }
+    util_parms_add(prm, pnew_nm, pnew_val, false);
+    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+        ,_("%s %s changed to timelapse_params option %s=%s")
+        ,parm_nm.c_str(),parm_val.c_str()
+        ,pnew_nm.c_str(),pnew_val.c_str());
+
+}
+
 int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
 {
     int indx;
@@ -4024,6 +4139,9 @@ int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
             } else if ((parm_nm == "movie_quality") || (parm_nm == "movie_bps") ||
                 (parm_nm == "movie_retain") || (parm_nm == "movie_all_frames")) {
                 edit_depr_movie(parm_nm, parm_val);
+
+            } else if ((parm_nm == "timelapse_fps")) {
+                edit_depr_timelapse(parm_nm, parm_val);
 
             } else {
                 edit_set_active(config_parms_depr[indx].newname, parm_val);
