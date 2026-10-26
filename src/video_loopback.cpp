@@ -141,15 +141,15 @@ static void vlp_show_vcap(struct v4l2_capability *cap)
     unsigned int c    = cap->capabilities;
     int i;
 
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Pipe Device");
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.driver:   %s",cap->driver);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %s",cap->card);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: %s",cap->bus_info);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "cap.card:     %u.%u.%u",(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "Device capabilities");
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Pipe Device"));
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("cap.driver:   %s"),cap->driver);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("cap.card:     %s"),cap->card);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("cap.bus_info: %s"),cap->bus_info);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("cap.card:     %u.%u.%u"),(vers >> 16) & 0xFF,(vers >> 8) & 0xFF,vers & 0xFF);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Device capabilities"));
     for (i=0;cap_list[i].code;i++) {
         if (c & cap_list[i].code) {
-            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s",cap_list[i].cap);
+            MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("%s"),cap_list[i].cap);
         }
     }
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
@@ -157,14 +157,14 @@ static void vlp_show_vcap(struct v4l2_capability *cap)
 
 static void vlp_show_vfmt(struct v4l2_format *v)
 {
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "type: type:           %d",v->type);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.width:        %d",v->fmt.pix.width);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.height:       %d",v->fmt.pix.height);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.pixelformat:  %d",v->fmt.pix.pixelformat);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.sizeimage:    %d",v->fmt.pix.sizeimage);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.field:        %d",v->fmt.pix.field);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.bytesperline: %d",v->fmt.pix.bytesperline);
-    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "fmt.pix.colorspace:   %d",v->fmt.pix.colorspace);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("type: type:           %d"),v->type);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("fmt.pix.width:        %d"),v->fmt.pix.width);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("fmt.pix.height:       %d"),v->fmt.pix.height);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("fmt.pix.pixelformat:  %d"),v->fmt.pix.pixelformat);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("fmt.pix.sizeimage:    %d"),v->fmt.pix.sizeimage);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("fmt.pix.field:        %d"),v->fmt.pix.field);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("fmt.pix.bytesperline: %d"),v->fmt.pix.bytesperline);
+    MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("fmt.pix.colorspace:   %d"),v->fmt.pix.colorspace);
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "------------------------");
 }
 
@@ -188,7 +188,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
 
 
     if (ioctl(dev, VIDIOC_QUERYCAP, &vc) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_QUERYCAP)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("ioctl (VIDIOC_QUERYCAP)"));
         return -1;
     }
 
@@ -199,7 +199,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 
     if (ioctl(dev, VIDIOC_G_FMT, &v) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_G_FMT)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("ioctl (VIDIOC_G_FMT)"));
         return -1;
     }
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("Original pipe specifications"));
@@ -217,7 +217,7 @@ int vlp_startpipe(const char *dev_name, int width, int height)
     vlp_show_vfmt(&v);
 
     if (ioctl(dev,VIDIOC_S_FMT, &v) == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "ioctl (VIDIOC_S_FMT)");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("ioctl (VIDIOC_S_FMT)"));
         return -1;
     }
 

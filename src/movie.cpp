@@ -335,7 +335,7 @@ int cls_movie::set_quality()
                 crf=itm->param_value;
             }
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                , "av_dict_set %s = %s"
+                ,_("av_dict_set %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
         } else if (itm->param_name.substr(0,4) == "opt_") {
@@ -346,7 +346,7 @@ int cls_movie::set_quality()
                 crf=itm->param_value;
             }
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                , "av_opt_set %s = %s"
+                ,_("av_opt_set %s = %s")
                 , itm->param_name.substr(4).c_str()
                 , itm->param_value.c_str());
         } else if (itm->param_name.substr(0,5) == "priv_") {
@@ -354,7 +354,7 @@ int cls_movie::set_quality()
                 ,itm->param_name.substr(5).c_str()
                 ,itm->param_value.c_str(), 0);
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                , "av_opt_set  priv_data %s = %s"
+                ,_("av_opt_set  priv_data %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
             if (itm->param_name.substr(5) == "crf") {
@@ -388,16 +388,16 @@ int cls_movie::set_quality()
             ctx_codec->profile = MY_PROFILE_H264_MAIN;
         }
         MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-            , "codec profile = %s", prfl.c_str());
+            ,_("codec profile = %s"), prfl.c_str());
         av_opt_set(ctx_codec->priv_data, "profile", prfl.c_str(), 0);
         MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-            , "av_opt_set priv_data profile = %s", prfl.c_str());
+            ,_("av_opt_set priv_data profile = %s"), prfl.c_str());
 
         if (crf == "") {
             crf = std::to_string(((100-quality) * 51)/100);
             av_opt_set(ctx_codec->priv_data, "crf", crf.c_str(), 0);
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                , "av_opt_set priv_data crf = %s", crf.c_str());
+                ,_("av_opt_set priv_data crf = %s"), crf.c_str());
         }
     } else {
         if (gblqual ==0) {
@@ -576,7 +576,7 @@ int cls_movie::set_codec()
             (container == "mp4") ||
             (container == "hevc")) {
             MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
-                , "Low fps. Encoding %d frames into a %d frames container."
+                ,_("Low fps. Encoding %d frames into a %d frames container.")
                 , fps, 10);
             fps = 10;
         }
@@ -930,7 +930,7 @@ int cls_movie::passthru_pktpts()
 
     if (pkt->pts != AV_NOPTS_VALUE) {
         if (pkt->pts < base_pdts) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "Invalid pkt->pts");
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("Invalid pkt->pts"));
             return -1;
         } else {
             ts_interval = pkt->pts - base_pdts;
@@ -938,13 +938,13 @@ int cls_movie::passthru_pktpts()
         pkt->pts = av_rescale_q(ts_interval
             , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
     } else {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->pts is AV_NOPTS_VALUE");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->pts is AV_NOPTS_VALUE"));
         return -1;
     }
 
     if (pkt->dts != AV_NOPTS_VALUE) {
         if (pkt->dts < base_pdts) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->dts is invalid");
+            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->dts is invalid"));
             return -1;
         } else {
             ts_interval = pkt->dts - base_pdts;
@@ -952,7 +952,7 @@ int cls_movie::passthru_pktpts()
         pkt->dts = av_rescale_q(ts_interval
             , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
     } else {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->dts is AV_NOPTS_VALUE");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->dts is AV_NOPTS_VALUE"));
         return -1;
     }
 
@@ -961,7 +961,7 @@ int cls_movie::passthru_pktpts()
         , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
 
     if ((pkt->pts == AV_NOPTS_VALUE) || (pkt->dts == AV_NOPTS_VALUE)) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, "pkt->dts or pkt->pts is AV_NOPTS_VALUE");
+        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->dts or pkt->pts is AV_NOPTS_VALUE"));
         return -1;
     }
 
@@ -989,7 +989,7 @@ void cls_movie::passthru_write(int indx)
     retcd = av_packet_ref(pkt, netcam_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "av_copy_packet: %s",errstr);
+        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO,_("av_copy_packet: %s"),errstr);
         free_pkt();
         return;
     }
@@ -1309,7 +1309,7 @@ int cls_movie::passthru_open()
             , strm_video->time_base.den);
     }
 
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, "Pass-through stream opened");
+    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO,_("Pass-through stream opened"));
 
     return 0;
 }
@@ -1575,7 +1575,7 @@ void cls_movie::init_container()
     size_t col_pos;
 
     if (cam->cfg->movie_container == "test") {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, "Running test of the various output formats.");
+        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,_("Running test of the various output formats."));
         codenbr = cam->event_curr_nbr % 10;
         if (codenbr == 1) {
             container = "flv";

@@ -563,7 +563,8 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
 
     for (y = 0; y < mask_height; y++) {
         if ((int)fread(&image[y * mask_width], 1, (uint)mask_width, picture) != mask_width) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, "Failed reading image data from pgm file");
+            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                ,_("Failed reading image data from pgm file"));
         }
 
         for (x = 0; x < mask_width; x++) {

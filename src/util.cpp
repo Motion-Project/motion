@@ -630,10 +630,10 @@ void util_exec_base(cls_motapp *p_app, std::string rslt)
             MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
                 ,_("Adjusting the path provided since webcontrol is open"));
         }
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,"Original >%s<",cmd_full.c_str());
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,"New >%s<",cmd_tmp.c_str());
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("Original >%s<"),cmd_full.c_str());
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("New >%s<"),cmd_tmp.c_str());
         cmd_full = cmd_tmp;
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,"Adjusted >%s<",cmd_full.c_str());
+        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("Adjusted >%s<"),cmd_full.c_str());
     }
 
     /* The vector is being used for ease of programming
@@ -808,7 +808,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     ctx_params_item parm_itm;
 
     if (showmsg == true) {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"%s:>%s< >%s<"
+        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("%s:>%s< >%s<")
             ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
     }
 
@@ -993,7 +993,7 @@ static void util_parms_parse_qte(ctx_params *params, std::string &parmline)
             }
         }
 
-        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1044,7 +1044,7 @@ static void util_parms_parse_comma(ctx_params *params, std::string &parmline)
         }
         indxvl_en = parmline.length() - 1;
 
-        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,"Parsing: >%s< >%ld %ld %ld %ld<"
+        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1278,7 +1278,7 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            , "Error filling arrays: %s", errstr);
+            ,_("Error filling arrays: %s"), errstr);
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
         return -1;
@@ -1293,7 +1293,7 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
         MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
-            , "Error Filling array 2: %s", errstr);
+            ,_("Error Filling array 2: %s"), errstr);
         free(buf);
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);

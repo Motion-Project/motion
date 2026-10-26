@@ -105,13 +105,13 @@ void cls_v4l2cam::ctrls_log()
         MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, _("  V4L2 ID :  Name : Standardized Name : Default : Range "));
         for (indx=0;indx<device_ctrls.size();indx++){
             if (device_ctrls[indx].ctrl_menuitem) {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "  %s : %s : %s : %d"
+                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("  %s : %s : %s : %d")
                     ,device_ctrls[indx].ctrl_iddesc.c_str()
                     ,device_ctrls[indx].ctrl_stdnm.c_str()
                     ,device_ctrls[indx].ctrl_name.c_str()
                     ,device_ctrls[indx].ctrl_default);
             } else {
-                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO, "%s : %s : %s : %d: %d to %d"
+                MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO,_("%s : %s : %s : %d: %d to %d")
                     ,device_ctrls[indx].ctrl_iddesc.c_str()
                     ,device_ctrls[indx].ctrl_name.c_str()
                     ,device_ctrls[indx].ctrl_stdnm.c_str()
@@ -698,7 +698,7 @@ int cls_v4l2cam::pixfmt_list()
 
     while (xioctl(VIDIOC_ENUM_FMT, &fmtd) != -1) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            , "(%i) %c%c%c%c (%s)", v4l2_pal
+            ,_("(%i) %c%c%c%c (%s)"), v4l2_pal
             , fmtd.pixelformat >> 0, fmtd.pixelformat >> 8
             , fmtd.pixelformat >> 16, fmtd.pixelformat >> 24
             , fmtd.description);
@@ -859,7 +859,7 @@ void cls_v4l2cam::set_mmap()
         vidbuf.index = (uint)buffer_index;
 
         if (xioctl(VIDIOC_QBUF, &vidbuf) == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
+            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("VIDIOC_QBUF"));
             device_close();
             return;
         }
@@ -925,7 +925,7 @@ int cls_v4l2cam::capture()
     if (pframe >= 0) {
         retcd = xioctl(VIDIOC_QBUF, &vidbuf);
         if (retcd == -1) {
-            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_QBUF");
+            MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("VIDIOC_QBUF"));
             pthread_sigmask(SIG_UNBLOCK, &old, nullptr);
             return -1;
         }
@@ -939,7 +939,7 @@ int cls_v4l2cam::capture()
 
     retcd = xioctl(VIDIOC_DQBUF, &vidbuf);
     if (retcd == -1) {
-        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO, "VIDIOC_DQBUF");
+        MOTION_LOG(ERR, TYPE_VIDEO, SHOW_ERRNO,_("VIDIOC_DQBUF"));
         pthread_sigmask(SIG_UNBLOCK, &old, nullptr);
         return -1;
     }
@@ -1007,48 +1007,48 @@ void cls_v4l2cam::log_types()
         return;
     }
 
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.driver: \"%s\"",vidcap.driver);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.card: \"%s\"",vidcap.card);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.bus_info: \"%s\"",vidcap.bus_info);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "cap.capabilities=0x%08X",vidcap.capabilities);
-    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "------------------------");
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("------------------------"));
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("cap.driver: \"%s\""),vidcap.driver);
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("cap.card: \"%s\""),vidcap.card);
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("cap.bus_info: \"%s\""),vidcap.bus_info);
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("cap.capabilities=0x%08X"),vidcap.capabilities);
+    MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("------------------------"));
 
     if (vidcap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_CAPTURE");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- VIDEO_CAPTURE"));
     }
     if (vidcap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OUTPUT");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- VIDEO_OUTPUT"));
     }
     if (vidcap.capabilities & V4L2_CAP_VIDEO_OVERLAY) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VIDEO_OVERLAY");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- VIDEO_OVERLAY"));
     }
     if (vidcap.capabilities & V4L2_CAP_VBI_CAPTURE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_CAPTURE");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- VBI_CAPTURE"));
     }
     if (vidcap.capabilities & V4L2_CAP_VBI_OUTPUT) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- VBI_OUTPUT");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- VBI_OUTPUT"));
     }
     if (vidcap.capabilities & V4L2_CAP_RDS_CAPTURE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- RDS_CAPTURE");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- RDS_CAPTURE"));
     }
     if (vidcap.capabilities & V4L2_CAP_TUNER) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TUNER");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- TUNER"));
     }
     if (vidcap.capabilities & V4L2_CAP_AUDIO) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- AUDIO");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- AUDIO"));
     }
     if (vidcap.capabilities & V4L2_CAP_READWRITE) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- READWRITE");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- READWRITE"));
     }
     if (vidcap.capabilities & V4L2_CAP_ASYNCIO) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- ASYNCIO");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- ASYNCIO"));
     }
     if (vidcap.capabilities & V4L2_CAP_STREAMING) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- STREAMING");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- STREAMING"));
     }
     if (vidcap.capabilities & V4L2_CAP_TIMEPERFRAME) {
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "- TIMEPERFRAME");
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO,_("- TIMEPERFRAME"));
     }
 
 }

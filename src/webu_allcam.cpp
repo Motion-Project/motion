@@ -97,7 +97,7 @@ void cls_allcam::getimg_src(cls_camera *p_cam
         if ((p_cam->imgs.height != active_cam[indx_act].src_h) ||
             (p_cam->imgs.width  != active_cam[indx_act].src_w)) {
             MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
-                , "Image has changed. Device: %d %dx%d to %dx%d"
+                ,_("Image has changed. Device: %d %dx%d to %dx%d")
                 , p_cam->cfg->device_id
                 , active_cam[indx_act].src_w
                 , active_cam[indx_act].src_h
@@ -108,7 +108,7 @@ void cls_allcam::getimg_src(cls_camera *p_cam
             reset = true;
         } else if (strm_c->img_data == nullptr) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                , "Could not get image for device %d"
+                ,_("Could not get image for device %d")
                 , p_cam->cfg->device_id);
             memset(src_img, 0x00, (uint)active_cam[indx_act].src_sz);
         } else {
@@ -125,7 +125,7 @@ void cls_allcam::getimg_src(cls_camera *p_cam
         , active_cam[indx_act].dst_w
         , active_cam[indx_act].dst_h);
     if (retcd == -1){
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Unable to scale image");
+        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Unable to scale image"));
         memset(dst_img, 0x80, (uint)active_cam[indx_act].dst_sz);
     }
 
@@ -196,7 +196,7 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
         retcd = util_resize(all_img, info.src_w, info.src_h, "I420"
             , strm_a->img_data, info.dst_w, info.dst_h);
         if (retcd == -1) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, "Unable to scale image");
+            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO,_("Unable to scale image"));
             memset(strm_a->img_data, 0x80, (size_t)info.dst_sz);
         }
         myfree(all_img);
@@ -297,7 +297,7 @@ void cls_allcam::getsizes_scale()
         p_cam = active_cam[indx].cam;
         getsizes_img(indx);
         MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-            , "Device %d Original Size %dx%d Scale %d New Size %dx%d"
+            ,_("Device %d Original Size %dx%d Scale %d New Size %dx%d")
             , p_cam->cfg->device_id
             , active_cam[indx].src_w, active_cam[indx].src_h
             , active_cam[indx].scale
@@ -388,13 +388,13 @@ void cls_allcam::getsizes_offset_user()
         chk_sz = active_cam[indx].offset_col + active_cam[indx].offset_user_col;
         if (chk_sz < 0) {
            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                , "Device %d invalid image column offset. (%d + %d) less than zero "
+                ,_("Device %d invalid image column offset. (%d + %d) less than zero")
                 , p_cam->cfg->device_id
                 , active_cam[indx].offset_col
                 , active_cam[indx].offset_user_col);
          } else if ((chk_sz + active_cam[indx].dst_w) > info.src_w) {
            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                , "Device %d invalid image column offset. (%d + %d) over image size"
+                ,_("Device %d invalid image column offset. (%d + %d) over image size")
                 , p_cam->cfg->device_id
                 , active_cam[indx].offset_col
                 , active_cam[indx].offset_user_col);
@@ -405,13 +405,13 @@ void cls_allcam::getsizes_offset_user()
         chk_sz = active_cam[indx].offset_row + active_cam[indx].offset_user_row;
         if (chk_sz < 0 ) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                , "Device %d invalid image row offset. (%d + %d) less than zero "
+                ,_("Device %d invalid image row offset. (%d + %d) less than zero")
                 , p_cam->cfg->device_id
                 , active_cam[indx].offset_row
                 , active_cam[indx].offset_user_row);
         } else if ((chk_sz + active_cam[indx].dst_h) > info.src_h) {
             MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                , "Device %d invalid image row offset. (%d + %d) over image size"
+                ,_("Device %d invalid image row offset. (%d + %d) over image size")
                 , p_cam->cfg->device_id
                 , active_cam[indx].offset_row
                 , active_cam[indx].offset_user_row);
@@ -477,7 +477,7 @@ void cls_allcam::getsizes_pct()
     info.dst_sz = (dst_w * dst_h * 3)/2;
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-        , "Combined Image Original Size %dx%d Scale %d New Size %dx%d"
+        ,_("Combined Image Original Size %dx%d Scale %d New Size %dx%d")
         , info.src_w, info.src_h
         , dst_scale
         , info.dst_w, info.dst_h);
@@ -592,7 +592,7 @@ void cls_allcam::init_validate()
             (active_cam[indx].row == -1)) {
             cfg_valid = false;
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "No stream_allcam_params for cam %d"
+                ,_("No stream_allcam_params for cam %d")
                 , p_cam->cfg->device_id);
         } else {
             for (indx1=0; indx1<active_cnt; indx1++) {
@@ -601,8 +601,8 @@ void cls_allcam::init_validate()
                     (active_cam[indx].row == active_cam[indx1].row) &&
                     (indx != indx1)) {
                     MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                        , "Duplicate stream_allcam_params "
-                        " cam %d, cam %d row %d col %d"
+                        ,_("Duplicate stream_allcam_params "
+                        " cam %d, cam %d row %d col %d")
                         , p_cam->cfg->device_id
                         , p_cam1->cfg->device_id
                         , active_cam[indx].row
@@ -613,14 +613,14 @@ void cls_allcam::init_validate()
         }
         if (active_cam[indx].row == 0) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_allcam_params row cam %d, row %d"
+                ,_("Invalid stream_allcam_params row cam %d, row %d")
                 , p_cam->cfg->device_id
                 , active_cam[indx].row);
             cfg_valid = false;
         }
         if (active_cam[indx].col == 0) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_allcam_params col cam %d, col %d"
+                ,_("Invalid stream_allcam_params col cam %d, col %d")
                 , p_cam->cfg->device_id
                 , active_cam[indx].col);
             cfg_valid = false;
@@ -637,8 +637,8 @@ void cls_allcam::init_validate()
         }
         if (chk == false) {
             MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                , "Invalid stream_allcam_params combination. "
-                " Missing row %d", row);
+                ,_("Invalid stream_allcam_params combination."
+                " Missing row %d"), row);
             cfg_valid = false;
         }
         col_chk = 0;
@@ -651,8 +651,8 @@ void cls_allcam::init_validate()
                         col_chk = col;
                     } else {
                         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-                            , "Invalid stream_allcam_params combination. "
-                            " Missing row %d column %d", row, col_chk+1);
+                            ,_("Invalid stream_allcam_params combination. "
+                            " Missing row %d column %d"), row, col_chk+1);
                         cfg_valid = false;
                     }
                 }
@@ -662,7 +662,7 @@ void cls_allcam::init_validate()
 
     if (cfg_valid == false) {
         MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
-            ,"Creating default stream preview values");
+            ,_("Creating default stream preview values"));
         row = 0;
         col = 0;
         for (indx=0; indx<active_cnt; indx++) {
@@ -711,7 +711,7 @@ void cls_allcam::init_cams()
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx].cam;
         MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-            ,"stream_allcam_params values. Device %d row %d col %d"
+            ,_("stream_allcam_params values. Device %d row %d col %d")
             , p_cam->cfg->device_id
             , active_cam[indx].row
             , active_cam[indx].col

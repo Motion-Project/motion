@@ -55,9 +55,9 @@ void cls_algsec::debug_notice(Mat &mat_dst, bool isdetect)
     if (cfg_log_level >= DBG) {
         if (first_pass == true) {
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-                , "Secondary detect and debug enabled.");
+                ,_("Secondary detect and debug enabled."));
             MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
-                , "Saving source and detected images to %s"
+                ,_("Saving source and detected images to %s")
                 , cfg_target_dir.c_str());
             first_pass = false;
         }

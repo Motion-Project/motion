@@ -517,9 +517,9 @@ void cls_camera::init_firstimage()
 
     if ((indx >= 10) || (device_status != STATUS_OPENED)) {
         if (device_status != STATUS_OPENED) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Unable to open camera");
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s",_("Unable to open camera"));
         } else {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s", "Error capturing first image");
+            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "%s",_("Error capturing first image"));
         }
         for (indx = 0; indx<imgs.ring_size; indx++) {
             memset(imgs.image_ring[indx].image_norm

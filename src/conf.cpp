@@ -583,7 +583,7 @@ void cls_config::edit_target_dir(std::string &parm, enum PARM_ACT pact)
             target_dir = ".";
         } else if (parm.substr(parm.length()-1,1) == "/") {
             target_dir = parm.substr(0, parm.length()-1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"Removing trailing '/' from target_dir");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing trailing '/' from target_dir"));
         } else {
             target_dir = parm;
         }
@@ -1467,7 +1467,7 @@ void cls_config::edit_picture_filename(std::string &parm, enum PARM_ACT pact)
             picture_filename = "";
         } else if (parm.substr(0,1) == "/") {
             picture_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"Removing leading '/' from filename");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             picture_filename = parm;
         }
@@ -1502,7 +1502,7 @@ void cls_config::edit_snapshot_filename(std::string &parm, enum PARM_ACT pact)
             snapshot_filename = "";
         } else if (parm.substr(0,1) == "/") {
             snapshot_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"Removing leading '/' from filename");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             snapshot_filename = parm;
         }
@@ -1581,7 +1581,7 @@ void cls_config::edit_movie_filename(std::string &parm, enum PARM_ACT pact)
             movie_filename = "";
         } else if (parm.substr(0,1) == "/") {
             movie_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"Removing leading '/' from filename");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             movie_filename = parm;
         }
@@ -1694,7 +1694,7 @@ void cls_config::edit_timelapse_filename(std::string &parm, enum PARM_ACT pact)
             timelapse_filename = "";
         } else if (parm.substr(0,1) == "/") {
             timelapse_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,"Removing leading '/' from filename");
+            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             timelapse_filename = parm;
         }
@@ -4121,7 +4121,7 @@ int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
     indx = 0;
     while (config_parms_depr[indx].parm_name != "") {
         if (parm_nm ==  config_parms_depr[indx].parm_name) {
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, "%s after version %s"
+            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("%s after version %s")
                 , config_parms_depr[indx].info.c_str()
                 , config_parms_depr[indx].last_version.c_str());
 

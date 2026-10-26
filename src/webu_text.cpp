@@ -147,7 +147,7 @@ void cls_webu_text::connection()
         webua->resp_page += "\n";
     }
     MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
-        , "Action/Detection: >%s< camindx : >%d< "
+        ,_("Action/Detection: >%s< camindx : >%d< ")
         , webua->uri_cmd2.c_str(), webua->camindx);
 
 }

@@ -154,14 +154,14 @@ bool cls_webu_stream::all_ready()
             }
             if (p_cam->passflag == false) {
                 MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-                    , "Camera %d not ready", p_cam->cfg->device_id);
+                    ,_("Camera %d not ready"), p_cam->cfg->device_id);
                 return false;
             }
         }
     }
     if ((webua->webu->allcam->info.dst_h == 0) ||
         (webua->webu->allcam->info.dst_w == 0)) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, "All cameras not ready");
+            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,_("All cameras not ready"));
             return false;
     }
 

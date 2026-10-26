@@ -36,31 +36,31 @@ int cls_libcam::start_mgr()
     int retcd, indx;
     std::string camid;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Starting."));
 
     retcd = cam_mgr->start();
     if (retcd != 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Error starting camera manager.  Return code: %d",retcd);
+            ,_("Error starting camera manager.  Return code: %d"),retcd);
         return retcd;
     }
     started_mgr = true;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "cam_mgr started.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("cam_mgr started."));
     if (cam_mgr->cameras().size() == 0) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "No camera devices found");
+            ,_("No camera devices found"));
         return -1;
     }
 
     for (indx=0;indx<cam_mgr->cameras().size();indx++) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            , "Available libcam_device '%s'."
+            ,_("Available libcam_device '%s'")
             , cam_mgr->cameras()[indx]->id().c_str());
     }
     if (cam->cfg->libcam_device == "camera0"){
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            , "camera0 specified as device.  Using the first device found. %s"
+            ,_("camera0 specified as device.  Using the first device found. %s")
             , cam_mgr->cameras()[0]->id().c_str());
         camid = cam_mgr->cameras()[0]->id();
     } else {
@@ -73,7 +73,7 @@ int cls_libcam::start_mgr()
         }
         if (camid == "") {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "Invalid libcam_device '%s'.  See log message for available devices"
+                ,_("Invalid libcam_device '%s'.  See log message for available devices")
                 ,cam->cfg->libcam_device.c_str());
             return -1;
         }
@@ -82,7 +82,7 @@ int cls_libcam::start_mgr()
     camera->acquire();
     started_aqr = true;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, _("Finished."));
 
     return 0;
 }
@@ -93,7 +93,7 @@ void cls_libcam::config_assign_float(int pctrl, std::string pvalue)
 
     auto fdctrl = camera->controls().find(pctrl);
     if (fdctrl == camera->controls().end()) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Control not found");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Control not found"));
         return;
     }
     f_min = fdctrl->second.min().get<float>();
@@ -105,11 +105,11 @@ void cls_libcam::config_assign_float(int pctrl, std::string pvalue)
     } else {
         f_var = mtof(pvalue);
         if ((f_var < f_min) || (f_var >f_max)) {
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "Invalid %s value %6.4f"
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("Invalid %s value %6.4f")
                 ,fdctrl->first->name().c_str(), f_var);
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "%s Default %6.4f and range %6.4f to %6.4f.  "
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("%s Default %6.4f and range %6.4f to %6.4f.")
                 ,fdctrl->first->name().c_str(), f_def, f_min, f_max);
         } else {
             camctrls->set(pctrl, f_var);
@@ -124,7 +124,7 @@ void cls_libcam::config_assign_int(int pctrl, std::string pvalue)
     auto fdctrl = camera->controls().find(pctrl);
     if (fdctrl == camera->controls().end()) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Control id %d not found. value=%s", pctrl,pvalue.c_str());
+            ,_("Control id %d not found. value=%s"), pctrl,pvalue.c_str());
         return;
     }
 
@@ -137,11 +137,11 @@ void cls_libcam::config_assign_int(int pctrl, std::string pvalue)
     } else {
         i_var = mtoi(pvalue);
         if ((i_var < i_min) || (i_var > i_max)) {
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "Invalid %s value %6.4f"
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("Invalid %s value %6.4f")
                 ,fdctrl->first->name().c_str(), i_var);
-            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,
-                "%s Default %6.4f and range %6.4f to %6.4f.  "
+            MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
+                ,_("%s Default %6.4f and range %6.4f to %6.4f.")
                 ,fdctrl->first->name().c_str(), i_def, i_min, i_max);
         } else {
             camctrls->set(pctrl, i_var);
@@ -278,7 +278,7 @@ void cls_libcam::config_control_item(std::string pnm, std::string pvalue)
         config_assign_int(libcamera::controls::draft::TestPatternMode.id(), pvalue);
     } else {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Unknown libcamera control %s", pnm.c_str());
+            ,_("Unknown libcamera control %s"), pnm.c_str());
     }
 
 }
@@ -312,7 +312,7 @@ void cls_libcam:: config_orientation()
                     libcam_cfg->orientation = Orientation::Rotate270Mirror;
                 } else {
                     MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                        , "Invalid Orientation option: %s."
+                        ,_("Invalid Orientation option: %s.")
                         , itm->param_value.c_str());
                 }
             }
@@ -340,17 +340,17 @@ void cls_libcam:: config_orientation()
                 adjdesc = "unknown";
             }
             MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
-                , "Configuration orientation adjusted to %s."
+                ,_("Configuration orientation adjusted to %s.")
                 , adjdesc.c_str());
         } else if (retcd == CameraConfiguration::Valid) {
             MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                , "Configuration orientation valid");
+                ,_("Configuration orientation valid"));
         } else if (retcd == CameraConfiguration::Invalid) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "Configuration orientation error");
+                ,_("Configuration orientation error"));
         }
     #else
-        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Orientation Not available");
+        MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Orientation Not available"));
     #endif
 
 }
@@ -362,7 +362,7 @@ int cls_libcam::start_config()
     std::string pfmt, tmpfmt;
     StreamFormats allfmts;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Starting."));
 
     libcam_cfg = camera->generateConfiguration({ StreamRole::Viewfinder });
 
@@ -375,7 +375,7 @@ int cls_libcam::start_config()
             , allfmts.pixelformats()[indx].fourcc() >> 16
             , allfmts.pixelformats()[indx].fourcc() >> 24);
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                , "Available pixel format: %s (FourCC %s)"
+                ,_("Available pixel format: %s (FourCC %s)")
                 , tmpfmt.c_str(), tmp4cc);
     }
 
@@ -386,7 +386,7 @@ int cls_libcam::start_config()
             (params->params_array[indx].param_source == PARM_SRC_USER)) {
             pfmt = params->params_array[indx].param_value;
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                , "User specified pixelformat %s."
+                ,_("User specified pixelformat %s.")
                 , pfmt.c_str());
         }
         if (params->params_array[indx].param_name == "buffer_count") {
@@ -402,7 +402,7 @@ int cls_libcam::start_config()
     }
     if (pfmt != tmpfmt) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            , "Did not find pixelformat %s", pfmt.c_str());
+            ,_("Did not find pixelformat %s"), pfmt.c_str());
         pfmt="";
         for (indx=0;indx<allfmts.pixelformats().size();indx++) {
             sprintf(tmp4cc,"%c%c%c%c"
@@ -432,7 +432,7 @@ int cls_libcam::start_config()
     }
 
     MOTION_LOG(INF, TYPE_VIDEO, NO_ERRNO
-        , "Trying pixel format %s", pfmt.c_str());
+        ,_("Trying pixel format %s"), pfmt.c_str());
 
     libcam_cfg->at(0).pixelFormat = PixelFormat::fromString(pfmt);
     libcam_cfg->at(0).size.width = (uint)cam->cfg->width;
@@ -444,25 +444,25 @@ int cls_libcam::start_config()
     if (retcd == CameraConfiguration::Adjusted) {
         if (libcam_cfg->at(0).pixelFormat.toString() != pfmt) {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                , "Pixel format was adjusted to %s."
+                ,_("Pixel format was adjusted to %s.")
                 , libcam_cfg->at(0).pixelFormat.toString().c_str());
         } else {
             MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-                , "Configuration adjusted: %s"
+                ,_("Configuration adjusted: %s")
                 ,libcam_cfg->at(0).toString().c_str());
         }
     } else if (retcd == CameraConfiguration::Valid) {
          MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            , "Configuration is valid");
+            ,_("Configuration is valid"));
     } else if (retcd == CameraConfiguration::Invalid) {
          MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Error setting configuration");
+            ,_("Error setting configuration"));
         return -1;
     }
 
     if (bufcnt != (int)libcam_cfg->at(0).bufferCount) {
         MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-            , "Configuration adjusted: buffer count from %d to %d"
+            ,_("Configuration adjusted: buffer count from %d to %d")
             ,bufcnt, libcam_cfg->at(0).bufferCount);
     }
 
@@ -476,13 +476,13 @@ int cls_libcam::start_config()
     if ((libcam_cfg->at(0).size.width != (uint)cam->cfg->width) ||
         (libcam_cfg->at(0).size.height != (uint)cam->cfg->height)) {
         MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-            , "Image size adjusted from %d x %d to %d x %d"
+            ,_("Image size adjusted from %dx%d to %dx%d")
             , cam->cfg->width, cam->cfg->height
             , libcam_cfg->at(0).size.width, libcam_cfg->at(0).size.height);
     }
 
     MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO
-        , "Pixelformat %s Image size %d x %d"
+        ,_("Pixelformat %s Image size %dx%d")
         , pixfmt.c_str()
         , libcam_cfg->at(0).size.width
         , libcam_cfg->at(0).size.height);
@@ -495,7 +495,7 @@ int cls_libcam::start_config()
     config_orientation();
     camera->configure(libcam_cfg.get());
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Finished."));
 
     return 0;
 }
@@ -530,7 +530,7 @@ int cls_libcam::start_req()
     int retcd, bytes, indx, indx2;
     ctx_imgmap  mbuf;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Starting."));
 
     camera->requestCompleted.connect(this, &cls_libcam::req_complete);
 
@@ -539,20 +539,20 @@ int cls_libcam::start_req()
 
     retcd = frmbuf->allocate(stream);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Buffer allocation error.");
+        MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Buffer allocation error."));
         return -1;
     }
     const std::vector<std::unique_ptr<FrameBuffer>> &buffers = frmbuf->buffers(stream);
     for (indx=0;indx<buffers.size();indx++) {
         std::unique_ptr<Request> request = camera->createRequest(indx);
         if (request == nullptr) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Create request error.");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Create request error."));
             return -1;
         }
         const libcamera::Stream *strm = libcam_cfg->at(0).stream();
         retcd = request->addBuffer(strm, buffers[indx].get());
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Add buffer for request error.");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Add buffer for request error."));
             return -1;
         }
         const FrameBuffer::Plane &plane0 = buffers[indx]->planes()[0];
@@ -560,7 +560,7 @@ int cls_libcam::start_req()
         for (indx2=0; indx2<(int)buffers[indx]->planes().size(); indx2++) {
             bytes += buffers[indx]->planes()[(uint)indx2].length;
             MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                , "Buffer %d plane %d of %d length %d"
+                ,_("Buffer %d plane %d of %d length %d")
                 , indx, indx2, buffers[indx]->planes().size()
                 , buffers[indx]->planes()[(uint)indx2].length);
 
@@ -578,7 +578,7 @@ int cls_libcam::start_req()
 
     started_req = true;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Finished."));
 
     return 0;
 }
@@ -587,7 +587,7 @@ int cls_libcam::start_capture()
 {
     int retcd, indx;
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Starting.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Starting."));
 
     camctrls = new libcamera::ControlList();
     for (indx=0;indx<params->params_cnt;indx++) {
@@ -605,7 +605,7 @@ int cls_libcam::start_capture()
     retcd = camera->start(camctrls);
     if (retcd) {
         MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-            , "Failed to start capture.");
+            ,_("Failed to start capture."));
         mydelete(camctrls);
         return -1;
     }
@@ -615,7 +615,7 @@ int cls_libcam::start_capture()
     for (std::unique_ptr<Request> &request : requests) {
         retcd = req_add(request.get());
         if (retcd < 0) {
-            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Failed to queue request.");
+            MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Failed to queue request."));
             if (started_cam) {
                 camera->stop();
                 started_cam = false;
@@ -623,7 +623,7 @@ int cls_libcam::start_capture()
             return -1;
         }
     }
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Finished.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Finished."));
 
     return 0;
 }
@@ -660,7 +660,7 @@ int cls_libcam::libcam_start()
     cam->watchdog = cam->cfg->watchdog_tmo;
     SLEEP(1,0);
 
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera started");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Camera started"));
 
     return 0;
 }
@@ -705,7 +705,7 @@ void cls_libcam::libcam_stop()
     }
 
     cam->device_status = STATUS_CLOSED;
-    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO, "Camera stopped.");
+    MOTION_LOG(NTC, TYPE_VIDEO, NO_ERRNO,_("Camera stopped."));
 }
 
 #endif
@@ -807,7 +807,7 @@ int cls_libcam::next(ctx_image_data *img_data)
 
         if (started_cam == false) {
             MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO
-                , "Unable to get image.  Camera not started.");
+                ,_("Unable to get image.  Camera not started."));
             return CAPTURE_FAILURE;
         }
 
@@ -819,11 +819,11 @@ int cls_libcam::next(ctx_image_data *img_data)
                 retcd = convert->process(img_data->image_norm
                     , membuf[indx].buf, membuf[indx].bufsz);
                 if (retcd < 0) {
-                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "Unable to process image.");
+                    MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("Unable to process image."));
                     return CAPTURE_FAILURE;
                 }
             } else {
-                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO, "index, ID and cookie mismatch.");
+                MOTION_LOG(ERR, TYPE_VIDEO, NO_ERRNO,_("index, ID and cookie mismatch."));
             }
             this->req_queue.pop();
             request->reuse(Request::ReuseBuffers);
@@ -838,7 +838,7 @@ int cls_libcam::next(ctx_image_data *img_data)
         } else {
             if (chkcnt > 1000) {
                 MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO
-                    , "Excessive empty queue requests: %d", chkcnt);
+                    ,_("Excessive empty queue requests: %d"), chkcnt);
                 chkcnt=0;
             }
             chkcnt++;

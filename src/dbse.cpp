@@ -194,7 +194,7 @@ void cls_dbse::sqlite3db_exec(std::string sql)
         return;
     }
 
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Executing query");
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Executing query"));
     retcd = sqlite3_exec(database_sqlite3db
         , sql.c_str(), nullptr, 0, &errmsg);
     if (retcd != SQLITE_OK ) {
@@ -202,7 +202,7 @@ void cls_dbse::sqlite3db_exec(std::string sql)
             , _("SQLite error was %s"), errmsg);
         sqlite3_free(errmsg);
     }
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "Finished query");
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("Finished query"));
 }
 
 void cls_dbse::sqlite3db_cb (int arg_nb, char **arg_val, char **col_nm)
@@ -724,7 +724,7 @@ void cls_dbse::pgsqldb_exec(std::string sql)
         }
     } else if (!(PQresultStatus(res) == PGRES_COMMAND_OK || PQresultStatus(res) == PGRES_TUPLES_OK)) {
         MOTION_LOG(ERR, TYPE_DB, SHOW_ERRNO
-            , "PGSQL query failed: [%s]  %s %s"
+            ,_("PGSQL query failed: [%s]  %s %s")
             , sql.c_str()
             , PQresStatus(PQresultStatus(res))
             , PQresultErrorMessage(res));
@@ -1075,7 +1075,7 @@ void cls_dbse::exec(cls_camera *cam, std::string fname, std::string cmd)
     if (sql == "") {
         return;
     }
-    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO, "%s query: %s"
+    MOTION_LOG(DBG, TYPE_DB, NO_ERRNO,_("%s query: %s")
         , cmd.c_str(), sql.c_str());
 
     exec_sql(sql);

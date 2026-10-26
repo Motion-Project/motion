@@ -698,11 +698,12 @@ void cls_motapp::camera_delete()
     cam->handler_shutdown();
 
     if (cam->handler_running == true) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO, "Error stopping camera.  Timed out shutting down");
+        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            ,_("Error stopping camera.  Timed out shutting down"));
         cam_delete = -1;
         return;
     }
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Camera stopped");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera stopped"));
     /* Reverse sequence so we can remove elements*/
     for (indx = webu_cnt-1; indx >=0; indx--) {
         webu = webu_list[indx];

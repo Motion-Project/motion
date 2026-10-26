@@ -88,8 +88,8 @@ void cls_sound::edit_alerts()
     }
 
     if (validids == false) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Sound alert ids must be unique.");
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Creating new sound alert ids.");
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Sound alert ids must be unique."));
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Creating new sound alert ids."));
         indx = 0;
         for (it_a0=snd_info->alerts.begin(); it_a0!=snd_info->alerts.end(); it_a0++) {
             it_a0->alert_id = indx;
@@ -104,15 +104,15 @@ void cls_sound::edit_alerts()
         if (it_a0->volume_level < snd_info->vol_min) {
             snd_info->vol_min = it_a0->volume_level;
         }
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Sound Alert Parameters:");
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  alert_id:            %d",it_a0->alert_id);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  alert_nm             %s",it_a0->alert_nm.c_str());
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  freq_low:            %.4f",it_a0->freq_low);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  freq_high:           %.4f",it_a0->freq_high);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_count:        %d",it_a0->volume_count);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  volume_level:        %d",it_a0->volume_level);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_threshold:   %d",it_a0->trigger_threshold);
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "  trigger_duration:    %d",it_a0->trigger_duration);
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "Sound Alert Parameters:"));
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  alert_id:            %d"),it_a0->alert_id);
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  alert_nm             %s"),it_a0->alert_nm.c_str());
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  freq_low:            %.4f"),it_a0->freq_low);
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  freq_high:           %.4f"),it_a0->freq_high);
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  volume_count:        %d"),it_a0->volume_count);
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  volume_level:        %d"),it_a0->volume_level);
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  trigger_threshold:   %d"),it_a0->trigger_threshold);
+        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_( "  trigger_duration:    %d"),it_a0->trigger_duration);
     }
 
 }
@@ -186,7 +186,7 @@ void cls_sound::load_params()
 
     for (indx=0;indx<params->params_cnt;indx++) {
         itm = &params->params_array[indx];
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "%s : %s"
+        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("%s : %s")
             ,itm->param_name.c_str(),itm->param_value.c_str());
     }
 
@@ -484,7 +484,7 @@ void cls_sound::alsa_start()
     memset(snd_info->buffer, 0x00
         , (uint)snd_info->buffer_size * sizeof(int16_t));
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Started."));
     device_status =STATUS_OPENED;
 
 }
@@ -578,7 +578,7 @@ void cls_sound::pulse_init()
     memset(snd_info->buffer, 0x00
         , (uint)snd_info->buffer_size * sizeof(int16_t));
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Started.");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Started."));
     device_status =STATUS_OPENED;
 
 }
@@ -784,7 +784,7 @@ void cls_sound::cleanup()
 
     device_status = STATUS_CLOSED;
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, "Stopped.");
+    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Stopped."));
 
 }
 

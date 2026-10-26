@@ -488,7 +488,7 @@ void cls_webu_json::movies_list()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "movies") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, "Movies via webcontrol disabled");
+                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Movies via webcontrol disabled"));
                 webua->resp_page += "{\"count\" : 0} ";
                 webua->resp_page += ",\"device_id\" : ";
                 webua->resp_page += std::to_string(webua->cam->cfg->device_id);

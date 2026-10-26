@@ -230,7 +230,7 @@ void cls_webu_ans::parms_edit()
     }
 
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-        , "cmd0: >%s< cmd1: >%s< cmd2: >%s< cmd3: >%s< camindx: >%d< "
+        ,_("cmd0: >%s< cmd1: >%s< cmd2: >%s< cmd3: >%s< camindx: >%d< ")
         , uri_cmd0.c_str(), uri_cmd1.c_str()
         , uri_cmd2.c_str(), uri_cmd3.c_str()
         , camindx );
@@ -304,7 +304,7 @@ void cls_webu_ans::failauth_log(bool userid_fail)
     std::list<ctx_webu_clients>::iterator   it;
 
     MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
-            ,_("Failed authentication from %s"), clientip.c_str());
+        ,_("Failed authentication from %s"), clientip.c_str());
 
     clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
 
@@ -408,6 +408,7 @@ mhdrslt cls_webu_ans::failauth_check()
              (webu->cfg->webcontrol_lock_minutes*60)) &&
             (it->authenticated == false) &&
             (it->conn_nbr > webu->cfg->webcontrol_lock_attempts)) {
+            /* DO NOT TRANSLATE THIS MESSAGE UNLESS YOU ALSO CHANGE THE FAIL2BAN CHECK*/
             MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
                 , "Ignoring connection from: %s"
                 , clientip.c_str());
@@ -796,7 +797,7 @@ bool cls_webu_ans::valid_request()
 void cls_webu_ans::answer_get()
 {
     MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
-        ,"processing get: %s",uri_cmd1.c_str());
+        ,_("processing get: %s"),uri_cmd1.c_str());
 
     if (valid_request() == false) {
         bad_request();

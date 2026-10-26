@@ -420,7 +420,7 @@ void cls_webu_mpegts::set_codec()
                 ,itm->param_name.substr(5).c_str()
                 ,itm->param_value.c_str(), 0);
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                , "av_dict_set %s = %s"
+                ,_("av_dict_set %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
         } else if (itm->param_name.substr(0,4) == "opt_") {
@@ -428,7 +428,7 @@ void cls_webu_mpegts::set_codec()
                 ,itm->param_name.substr(4).c_str()
                 ,itm->param_value.c_str(), 0);
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                , "av_opt_set %s = %s"
+                ,_("av_opt_set %s = %s")
                 , itm->param_name.substr(4).c_str()
                 , itm->param_value.c_str());
         } else if (itm->param_name.substr(0,5) == "priv_") {
@@ -436,7 +436,7 @@ void cls_webu_mpegts::set_codec()
                 ,itm->param_name.substr(5).c_str()
                 ,itm->param_value.c_str(), 0);
             MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
-                , "av_opt_set  priv_data %s = %s"
+                ,_("av_opt_set  priv_data %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
         }

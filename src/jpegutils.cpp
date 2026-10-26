@@ -640,7 +640,7 @@ static void jpgutl_emit_message(j_common_ptr cinfo, int msg_level)
     */
     if ((cinfo->err->msg_code != JWRN_EXTRANEOUS_DATA) && (msg_level < 0)) {
         myerr->warning_seen++ ;
-        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, "msg_level: %d, Corrupt JPEG data", msg_level);
+        MOTION_LOG(DBG, TYPE_VIDEO, NO_ERRNO, _("msg_level: %d, Corrupt JPEG data"), msg_level);
     }
 
 }
