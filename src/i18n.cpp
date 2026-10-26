@@ -187,6 +187,7 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","log_type",_("log_type"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","native_language",_("native_language"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","native_language_code",_("native_language_code"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_name",_("device_name"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_id",_("device_id"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","device_tmo",_("device_tmo"));
@@ -197,15 +198,19 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","target_dir",_("target_dir"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","watchdog_tmo",_("watchdog_tmo"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","watchdog_kill",_("watchdog_kill"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_device",_("v4l2_device"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","v4l2_params",_("v4l2_params"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_url",_("netcam_url"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_params",_("netcam_params"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_url",_("netcam_high_url"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_high_params",_("netcam_high_params"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","netcam_userpass",_("netcam_userpass"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","libcam_device",_("libcam_device"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","libcam_params",_("libcam_params"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","width",_("width"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","height",_("height"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","framerate",_("framerate"));
@@ -218,6 +223,7 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_changes",_("text_changes"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_scale",_("text_scale"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","text_event",_("text_event"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold",_("threshold"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","threshold_maximum",_("threshold_maximum"));
@@ -238,6 +244,7 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","event_gap",_("event_gap"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","pre_capture",_("pre_capture"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","post_capture",_("post_capture"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_event_start",_("on_event_start"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_event_end",_("on_event_end"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_picture_save",_("on_picture_save"));
@@ -250,33 +257,36 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_secondary_detect",_("on_secondary_detect"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_action_user",_("on_action_user"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on_sound_alert",_("on_sound_alert"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output",_("picture_output"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_output_motion",_("picture_output_motion"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_type",_("picture_type"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_quality",_("picture_quality"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_exif",_("picture_exif"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","picture_filename",_("picture_filename"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snapshot_interval",_("snapshot_interval"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snapshot_filename",_("snapshot_filename"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_output",_("movie_output"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_output_motion",_("movie_output_motion"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_max_time",_("movie_max_time"));
-    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_bps",_("movie_bps"));
-    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_quality",_("movie_quality"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_container",_("movie_container"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_passthrough",_("movie_passthrough"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_filename",_("movie_filename"));
-    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_retain",_("movie_retain"));
-    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_all_frames",_("movie_all_frames"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_extpipe_use",_("movie_extpipe_use"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_extpipe",_("movie_extpipe"));
+    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","movie_params",_("movie_params"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_interval",_("timelapse_interval"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_mode",_("timelapse_mode"));
-    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_fps",_("timelapse_fps"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_container",_("timelapse_container"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_filename",_("timelapse_filename"));
+    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","timelapse_params",_("timelapse_params"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","video_pipe",_("video_pipe"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","video_pipe_motion",_("video_pipe_motion"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_port",_("webcontrol_port"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_base_path",_("webcontrol_base_path"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_ipv6",_("webcontrol_ipv6"));
@@ -295,11 +305,14 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_minutes",_("webcontrol_lock_minutes"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_attempts",_("webcontrol_lock_attempts"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","webcontrol_lock_script",_("webcontrol_lock_script"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_allcam_params",_("stream_allcam_params"));
+    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_mpegts_params",_("stream_mpegts_params"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_quality",_("stream_quality"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_grey",_("stream_grey"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_motion",_("stream_motion"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","stream_maxrate",_("stream_maxrate"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_type",_("database_type"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_dbname",_("database_dbname"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_host",_("database_host"));
@@ -307,11 +320,13 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_user",_("database_user"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_password",_("database_password"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","database_busy_timeout",_("database_busy_timeout"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_event_start",_("sql_event_start"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_event_end",_("sql_event_end"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_movie_start",_("sql_movie_start"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_movie_end",_("sql_movie_end"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","sql_pic_save",_("sql_pic_save"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_auto_track",_("ptz_auto_track"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_wait",_("ptz_wait"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_move_track",_("ptz_move_track"));
@@ -321,6 +336,7 @@ void i18n_config_names()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_tilt_down",_("ptz_tilt_down"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_zoom_in",_("ptz_zoom_in"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","ptz_zoom_out",_("ptz_zoom_out"));
+
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_device",_("snd_device"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_params",_("snd_params"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","snd_alerts",_("snd_alerts"));
@@ -348,7 +364,7 @@ void i18n_config_options()
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","first",_("first"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","best",_("best"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","center",_("center"));
-    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s",_("on"),_("on"));
+    MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","on",_("on"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","off",_("off"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","roi",_("roi"));
     MOTION_SHT(DBG, TYPE_ALL, NO_ERRNO,"%s:%s","all",_("all"));

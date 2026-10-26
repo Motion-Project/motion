@@ -61,14 +61,14 @@
 
             std::string     device_name;
             int             device_id;
-            std::string     config_dir;
-            std::string     target_dir;
-            int             watchdog_tmo;
-            int             watchdog_kill;
             int             device_tmo;
             std::string     pause;
             std::string     schedule_params;
             std::string     cleandir_params;
+            std::string     config_dir;
+            std::string     target_dir;
+            int             watchdog_tmo;
+            int             watchdog_kill;
 
             /* Capture device configuration parameters */
             std::string     v4l2_device;
