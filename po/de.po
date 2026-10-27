@@ -6,2536 +6,1705 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-04 18:23-0700\n"
-"PO-Revision-Date: 2023-02-04 21:45-0600\n"
+"POT-Creation-Date: 2026-10-26 15:54-0700\n"
+"PO-Revision-Date: 2026-10-26 17:31-0700\n"
 "Last-Translator: MrDave <MotionMrDave@gmail.com>\n"
 "Language-Team: MrDave <MotionMrDave@gmail.com>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 3.6\n"
 
-#: src/alg.cpp
+#: motion/src/alg.cpp
 msgid "Lightswitch detected"
 msgstr "Lichtschalter erkannt"
 
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 #, c-format
 msgid "Error %s"
 msgstr "Fehler %s"
 
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 msgid "Disabling secondary detection"
 msgstr "Sekundärerkennung deaktivieren"
 
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 msgid "No secondary model specified."
 msgstr "Kein sekundäres Modell angegeben."
 
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 #, c-format
 msgid "Failed loading model %s"
 msgstr "Modell %s konnte nicht geladen werden"
 
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 #, c-format
 msgid "Classes file not found: %s"
 msgstr "Klassendatei nicht gefunden: %s"
 
-#: src/alg_sec.cpp
-msgid "Starting."
-msgstr "Beginnend."
-
-#: src/alg_sec.cpp
-msgid "Exiting."
-msgstr "Verlassen."
-
-#: src/alg_sec.cpp
-msgid "Error starting algsec handler thread"
-msgstr "Fehler beim Starten des Algsec-Handler-Threads"
-
-#: src/alg_sec.cpp
-msgid "Graceful shutdown of secondary detector thread failed"
-msgstr ""
-"Ordnungsgemäßes Herunterfahren des sekundären Detektorthreads fehlgeschlagen"
-
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 msgid "Your computer is too slow for these settings."
 msgstr "Ihr Computer ist für diese Einstellungen zu langsam."
 
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 msgid "Missed many frames for secondary detection."
 msgstr "Viele Frames für die sekundäre Erkennung verpasst."
 
-#: src/alg_sec.cpp
+#: motion/src/alg_sec.cpp
 msgid "Your computer is too slow."
 msgstr "Ihr Computer ist zu langsam."
 
-#: src/conf.cpp
-msgid "daemon"
-msgstr "Dämon"
+#: motion/src/camera.cpp
+#, c-format
+msgid "Resizing buffer to %d items"
+msgstr "Größe des Puffers auf %d Elemente ändern"
 
-#: src/conf.cpp
-msgid "setup_mode"
-msgstr "Konfigurations-Modus"
+#: motion/src/camera.cpp
+msgid "Error encoding image"
+msgstr "Fehler beim Codieren des Bildes"
 
-#: src/conf.cpp
-msgid "log_file"
-msgstr "Logdatei"
+#: motion/src/camera.cpp
+#, c-format
+msgid "Motion detected - starting event %d"
+msgstr "Bewegung erkannt - Startereignis %d"
 
-#: src/conf.cpp
-msgid "pid_file"
-msgstr "pid-Datei"
+#: motion/src/camera.cpp
+msgid "No Camera device specified"
+msgstr "Kein Kameragerät angegeben"
 
-#: src/conf.cpp
+#: motion/src/camera.cpp
+msgid "Resetting image buffers"
+msgstr "Zurücksetzen von Bildpuffern"
+
+#: motion/src/camera.cpp
+msgid "Unable to determine camera type"
+msgstr "Kameratyp kann nicht bestimmt werden"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Image width (%d) or height(%d) requested is not modulo 8."
+msgstr "Die angeforderte Bildbreite (%d) oder -höhe (%d) ist nicht Modulo 8."
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
+msgstr "Motion unterstützt nur Breite und Höhe größer oder gleich 64 %dx%d"
+
+#: motion/src/camera.cpp
+msgid "Substream not available.  Image sizes not modulo 16."
+msgstr "Substream nicht verfügbar. Bildgrößen nicht Modulo 16."
+
+#: motion/src/camera.cpp
+msgid "Pass-through processing disabled."
+msgstr "Pass-Through-Verarbeitung deaktiviert."
+
+#: motion/src/camera.cpp
+msgid "Failed to start camera."
+msgstr "Kamera konnte nicht gestartet werden."
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Camera %d started: motion detection %s"
+msgstr "Kamera %d gestartet: Bewegungserkennung %s"
+
+#: motion/src/camera.cpp
+msgid "Emulating motion"
+msgstr "Bewegung emulieren"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Motion in area %d detected."
+msgstr "Bewegung in Bereich %d erkannt."
+
+#: motion/src/camera.cpp
+msgid "Video signal re-acquired"
+msgstr "Videosignal neu erfasst"
+
+#: motion/src/camera.cpp
+msgid "Video signal lost - Adding grey image"
+msgstr "Videosignal verloren - Graues Bild wird hinzugefügt"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "End of event %d"
+msgstr "Ende des Events %d"
+
+#: motion/src/camera.cpp motion/src/netcam.cpp
+msgid "Unable to start camera thread."
+msgstr "Kamera-Thread konnte nicht gestartet werden."
+
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid log_level %d"
 msgstr "Ungültige Protokollebene %d"
 
-#: src/conf.cpp
-msgid "log_level"
-msgstr "Protokollebene"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid log_type %s"
 msgstr "Ungültiger Protokolltyp %s"
 
-#: src/conf.cpp
-msgid "log_type"
-msgstr "Protokolltyp"
-
-#: src/conf.cpp
-msgid "native_language"
-msgstr "Muttersprache"
-
-#: src/conf.cpp
-msgid "camera"
-msgstr "Kamera"
-
-#: src/conf.cpp
-msgid "device_name"
-msgstr "Gerätename"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid device_id %d"
 msgstr "Ungültige Geräte-ID %d"
 
-#: src/conf.cpp
-msgid "device_id"
-msgstr "Geräte ID"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid device_tmo %d"
 msgstr "Ungültiges Geräte-tmo %d"
 
-#: src/conf.cpp
-msgid "device_tmo"
-msgstr "Gerät tmo"
-
-#: src/conf.cpp
-msgid "pause"
-msgstr "Pause"
-
-#: src/conf.cpp
-msgid "config_dir"
-msgstr "Konfigurationsverzeichnis"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid target_dir.  Conversion specifiers not permitted. %s"
-msgstr "Ungültiges Zielverzeichnis. Konvertierungsbezeichner nicht zulässig. %s"
+msgstr ""
+"Ungültiges Zielverzeichnis. Konvertierungsbezeichner nicht zulässig. %s"
 
-#: src/conf.cpp
-msgid "target_dir"
-msgstr "Zielverzeichnis"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid watchdog timeout %d"
 msgstr "Ungültiges Watchdog-Timeout %d"
 
-#: src/conf.cpp
-msgid "watchdog_tmo"
-msgstr "Wachhund tmo"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid watchdog kill timeout %d"
 msgstr "Ungültiges Watchdog-Kill-Timeout %d"
 
-#: src/conf.cpp
-msgid "watchdog_kill"
-msgstr "Wachhund töten"
-
-#: src/conf.cpp
-msgid "v4l2_device"
-msgstr "v4l2-Gerät"
-
-#: src/conf.cpp
-msgid "v4l2_params"
-msgstr "v4l2-Parameter"
-
-#: src/conf.cpp
-msgid "netcam_url"
-msgstr "Netcam-URL"
-
-#: src/conf.cpp
-msgid "netcam_params"
-msgstr "Netcam-Parameter"
-
-#: src/conf.cpp
-msgid "netcam_high_url"
-msgstr "netcam hohe url"
-
-#: src/conf.cpp
-msgid "netcam_high_params"
-msgstr "Netcam hohe Parameter"
-
-#: src/conf.cpp
-msgid "netcam_userpass"
-msgstr "Netcam-Benutzerpass"
-
-#: src/conf.cpp
-msgid "libcam_device"
-msgstr "libcam-Gerät"
-
-#: src/conf.cpp
-msgid "libcam_params"
-msgstr "libcam-Parameter"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid width %d"
 msgstr "Ungültige Breite %d"
 
-#: src/conf.cpp
-#: src/netcam.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Image width (%d) requested is not modulo 8."
 msgstr "Die angeforderte Bildbreite (%d) ist nicht Modulo 8."
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Adjusting width to next higher multiple of 8 (%d)."
 msgstr "Anpassen der Breite an das nächsthöhere Vielfache von 8 (%d)."
 
-#: src/conf.cpp
-msgid "width"
-msgstr "Breite"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid height %d"
 msgstr "Ungültige Höhe %d"
 
-#: src/conf.cpp
-#: src/netcam.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Image height (%d) requested is not modulo 8."
 msgstr "Die angeforderte Bildhöhe (%d) ist nicht Modulo 8."
 
-#: src/conf.cpp
-#: src/netcam.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Adjusting height to next higher multiple of 8 (%d)."
 msgstr "Anpassen der Höhe an das nächsthöhere Vielfache von 8 (%d)."
 
-#: src/conf.cpp
-msgid "height"
-msgstr "Höhe"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid framerate %d"
 msgstr "Ungültige Framerate %d"
 
-#: src/conf.cpp
-msgid "framerate"
-msgstr "Framerate"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid rotate %d"
 msgstr "Ungültige Drehung %d"
 
-#: src/conf.cpp
-msgid "rotate"
-msgstr "drehen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid flip_axis %s"
 msgstr "Ungültige Umkehrachse %s"
 
-#: src/conf.cpp
-msgid "flip_axis"
-msgstr "Drehachse"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid locate_motion_mode %s"
 msgstr "Ungültiger Ortungsbewegungsmodus %s"
 
-#: src/conf.cpp
-msgid "locate_motion_mode"
-msgstr "Bewegungsmodus finden"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid locate_motion_style %s"
 msgstr "Ungültiger Ortungsbewegungsstil %s"
 
-#: src/conf.cpp
-msgid "locate_motion_style"
-msgstr "Bewegungsstil finden"
-
-#: src/conf.cpp
-msgid "text_left"
-msgstr "Text übrig"
-
-#: src/conf.cpp
-msgid "text_right"
-msgstr "Text richtig"
-
-#: src/conf.cpp
-msgid "text_changes"
-msgstr "Textänderungen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid text_scale %d"
 msgstr "Ungültiger Textmaßstab %d"
 
-#: src/conf.cpp
-msgid "text_scale"
-msgstr "Textskala"
-
-#: src/conf.cpp
-msgid "text_event"
-msgstr "Textereignis"
-
-#: src/conf.cpp
-msgid "emulate_motion"
-msgstr "Bewegung nachahmen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid threshold %d"
 msgstr "Ungültiger Schwellenwert %d"
 
-#: src/conf.cpp
-msgid "threshold"
-msgstr "Schwelle"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid threshold_maximum %d"
 msgstr "Ungültiges Schwellenwertmaximum %d"
 
-#: src/conf.cpp
-msgid "threshold_maximum"
-msgstr "Schwellenmaximum"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid threshold_sdevx %d"
-msgstr "Ungültiger Schwellenwert sdevx %d"
-
-#: src/conf.cpp
-msgid "threshold_sdevx"
-msgstr "Schwelle sdevx"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid threshold_sdevy %d"
-msgstr "Ungültiger Schwellenwert sdevy %d"
-
-#: src/conf.cpp
-msgid "threshold_sdevy"
-msgstr "Schwelle sdevy"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid threshold_sdevxy %d"
-msgstr "Ungültiger Schwellenwert sdevxy %d"
-
-#: src/conf.cpp
-msgid "threshold_sdevxy"
-msgstr "Schwelle sdevxy"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid threshold_ratio %d"
-msgstr "Ungültiges Schwellenverhältnis %d"
-
-#: src/conf.cpp
-msgid "threshold_ratio"
-msgstr "Schwellenverhältnis"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid threshold_ratio_change %d"
-msgstr "Ungültige Schwellenverhältnisänderung %d"
-
-#: src/conf.cpp
-msgid "threshold_ratio_change"
-msgstr "Schwellenverhältnis ändern"
-
-#: src/conf.cpp
-msgid "threshold_tune"
-msgstr "Schwellenmelodie"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid secondary_method %s"
 msgstr "Ungültige sekundäre Methode %s"
 
-#: src/conf.cpp
-msgid "secondary_method"
-msgstr "sekundäre Methode"
-
-#: src/conf.cpp
-msgid "secondary_params"
-msgstr "sekundäre Parameter"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid noise_level %d"
 msgstr "Ungültiger Rauschpegel %d"
 
-#: src/conf.cpp
-msgid "noise_level"
-msgstr "Geräuschpegel"
-
-#: src/conf.cpp
-msgid "noise_tune"
-msgstr "Geräusch Melodie"
-
-#: src/conf.cpp
-msgid "despeckle_filter"
-msgstr "Fleckenfilter"
-
-#: src/conf.cpp
-msgid "area_detect"
-msgstr "Bereich erkennen"
-
-#: src/conf.cpp
-msgid "mask_file"
-msgstr "Maskendatei"
-
-#: src/conf.cpp
-msgid "mask_privacy"
-msgstr "Privatsphäre maskieren"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid smart_mask_speed %d"
 msgstr "Ungültige Smart Mask-Geschwindigkeit %d"
 
-#: src/conf.cpp
-msgid "smart_mask_speed"
-msgstr "Geschwindigkeit der intelligenten Maske"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid lightswitch_percent %d"
 msgstr "Ungültiger Lichtschalterprozentsatz %d"
 
-#: src/conf.cpp
-msgid "lightswitch_percent"
-msgstr "Lichtschalter Prozent"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid lightswitch_frames %d"
 msgstr "Ungültige Lichtschalter-Frames %d"
 
-#: src/conf.cpp
-msgid "lightswitch_frames"
-msgstr "Lichtschalterrahmen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid minimum_motion_frames %d"
 msgstr "Ungültige minimale Bewegungsbilder %d"
 
-#: src/conf.cpp
-msgid "minimum_motion_frames"
-msgstr "minimale Bewegungsrahmen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid static_object_time %d"
 msgstr "Ungültige statische Objektzeit %d"
 
-#: src/conf.cpp
-msgid "static_object_time"
-msgstr "statische Objektzeit"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid event_gap %d"
 msgstr "Ungültige Ereignislücke %d"
 
-#: src/conf.cpp
-msgid "event_gap"
-msgstr "Veranstaltung Lücke"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid pre_capture %d"
 msgstr "Ungültige Vorerfassung %d"
 
-#: src/conf.cpp
-msgid "pre_capture"
-msgstr "Pre-Capture"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid post_capture %d"
 msgstr "Ungültige Post-Erfassung %d"
 
-#: src/conf.cpp
-msgid "post_capture"
-msgstr "Postaufnahme"
-
-#: src/conf.cpp
-msgid "on_event_start"
-msgstr "bei Veranstaltungsbeginn"
-
-#: src/conf.cpp
-msgid "on_event_end"
-msgstr "am Veranstaltungsende"
-
-#: src/conf.cpp
-msgid "on_picture_save"
-msgstr "auf Bild speichern"
-
-#: src/conf.cpp
-msgid "on_area_detected"
-msgstr "auf Bereich erkannt"
-
-#: src/conf.cpp
-msgid "on_motion_detected"
-msgstr "bei Bewegung erkannt"
-
-#: src/conf.cpp
-msgid "on_movie_start"
-msgstr "bei Filmstart"
-
-#: src/conf.cpp
-msgid "on_movie_end"
-msgstr "am Filmende"
-
-#: src/conf.cpp
-msgid "on_camera_lost"
-msgstr "vor der Kamera verloren"
-
-#: src/conf.cpp
-msgid "on_camera_found"
-msgstr "auf Kamera gefunden"
-
-#: src/conf.cpp
-msgid "on_secondary_detect"
-msgstr "auf Sekundärerkennung"
-
-#: src/conf.cpp
-msgid "on_action_user"
-msgstr "auf Aktionsbenutzer"
-
-#: src/conf.cpp
-msgid "on_sound_alert"
-msgstr "auf Tonalarm"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid picture_output %s"
 msgstr "Ungültige Bildausgabe %s"
 
-#: src/conf.cpp
-msgid "picture_output"
-msgstr "Bildausgabe"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid picture_output_motion %s"
 msgstr "Ungültige Bildausgabebewegung %s"
 
-#: src/conf.cpp
-msgid "picture_output_motion"
-msgstr "Bildausgabe Bewegung"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid picture_type %s"
 msgstr "Ungültiger Bildtyp %s"
 
-#: src/conf.cpp
-msgid "picture_type"
-msgstr "Bildtyp"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid picture_quality %d"
 msgstr "Ungültige Bildqualität %d"
 
-#: src/conf.cpp
-msgid "picture_quality"
-msgstr "Bildqualität"
-
-#: src/conf.cpp
-msgid "picture_exif"
-msgstr "Bild exif"
-
-#: src/conf.cpp
-msgid "picture_filename"
-msgstr "Dateiname des Bildes"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid snapshot_interval %d"
 msgstr "Ungültiges Snapshot-Intervall %d"
 
-#: src/conf.cpp
-msgid "snapshot_interval"
-msgstr "Snapshot-Intervall"
-
-#: src/conf.cpp
-msgid "snapshot_filename"
-msgstr "Snapshot-Dateiname"
-
-#: src/conf.cpp
-msgid "movie_output"
-msgstr "Filmausgabe"
-
-#: src/conf.cpp
-msgid "movie_output_motion"
-msgstr "Filmausgabe Bewegung"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid movie_max_time %d"
 msgstr "Ungültige Filmmaximalzeit %d"
 
-#: src/conf.cpp
-msgid "movie_max_time"
-msgstr "Film maximale Zeit"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid movie_bps %d"
-msgstr "Ungültige Film-bps %d"
-
-#: src/conf.cpp
-msgid "movie_bps"
-msgstr "Film bps"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid movie_quality %d"
-msgstr "Ungültige Filmqualität %d"
-
-#: src/conf.cpp
-msgid "movie_quality"
-msgstr "Filmqualität"
-
-#: src/conf.cpp
-msgid "movie_container"
-msgstr "Filmcontainer"
-
-#: src/conf.cpp
-msgid "movie_passthrough"
-msgstr "Filmdurchgang"
-
-#: src/conf.cpp
-msgid "movie_filename"
-msgstr "Dateiname des Films"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid movie_retain %s"
-msgstr "Ungültige Filmaufbewahrung %s"
-
-#: src/conf.cpp
-msgid "movie_retain"
-msgstr "Film behalten"
-
-#: src/conf.cpp
-msgid "movie_extpipe_use"
-msgstr "film extpipe verwenden"
-
-#: src/conf.cpp
-msgid "movie_extpipe"
-msgstr "Film Extpipe"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid timelapse_interval %d"
 msgstr "Ungültiges Zeitrafferintervall %d"
 
-#: src/conf.cpp
-msgid "timelapse_interval"
-msgstr "Zeitraffer-Intervall"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid timelapse_mode %s"
 msgstr "Ungültiger Zeitraffermodus %s"
 
-#: src/conf.cpp
-msgid "timelapse_mode"
-msgstr "Zeitraffer-Modus"
-
-#: src/conf.cpp
-#, c-format
-msgid "Invalid timelapse_fps %d"
-msgstr "Ungültige Zeitraffer-fps %d"
-
-#: src/conf.cpp
-msgid "timelapse_fps"
-msgstr "Zeitraffer fps"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid timelapse_container %s"
 msgstr "Ungültiger Zeitraffer-Container %s"
 
-#: src/conf.cpp
-msgid "timelapse_container"
-msgstr "Zeitraffer-Container"
-
-#: src/conf.cpp
-msgid "timelapse_filename"
-msgstr "Zeitraffer-Dateiname"
-
-#: src/conf.cpp
-msgid "video_pipe"
-msgstr "Video-Rohr"
-
-#: src/conf.cpp
-msgid "video_pipe_motion"
-msgstr "Video-Rohrbewegung"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_port %d"
 msgstr "Ungültiger Webcontrol-Port %d"
 
-#: src/conf.cpp
-msgid "webcontrol_port"
-msgstr "Webcontrol-Port"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 msgid "Invalid webcontrol_base_path: Use blank instead of single / "
 msgstr ""
 "Ungültiger Webcontrol-Basispfad: Verwenden Sie ein Leerzeichen anstelle "
-"eines einzelnen /"
+"eines einzelnen / "
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 msgid "Invalid webcontrol_base_path:  Must start with a / "
-msgstr "Ungültiger Webcontrol-Basispfad: Muss mit einem / beginnen"
+msgstr "Ungültiger Webcontrol-Basispfad: Muss mit einem / beginnen "
 
-#: src/conf.cpp
-msgid "webcontrol_base_path"
-msgstr "webcontrol-Basispfad"
-
-#: src/conf.cpp
-msgid "webcontrol_ipv6"
-msgstr "webcontrol ipv6"
-
-#: src/conf.cpp
-msgid "webcontrol_localhost"
-msgstr "webcontrol localhost"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_access %d"
 msgstr "Ungültige Webcontrol-Parameter %d"
 
-#: src/conf.cpp
-msgid "webcontrol_access"
-msgstr "Webcontrol-Parameter"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_interface %s"
 msgstr "Ungültige Webcontrol-Schnittstelle %s"
 
-#: src/conf.cpp
-msgid "webcontrol_interface"
-msgstr "Webcontrol-Schnittstelle"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_auth_method %s"
 msgstr "Ungültige Webcontrol-Authentifizierungsmethode %s"
 
-#: src/conf.cpp
-msgid "webcontrol_auth_method"
-msgstr "Webcontrol-Authentifizierungsmethode"
-
-#: src/conf.cpp
-msgid "webcontrol_authentication"
-msgstr "Webcontrol-Authentifizierung"
-
-#: src/conf.cpp
-msgid "webcontrol_tls"
-msgstr "webcontrol tls"
-
-#: src/conf.cpp
-msgid "webcontrol_cert"
-msgstr "Webcontrol-Zert"
-
-#: src/conf.cpp
-msgid "webcontrol_key"
-msgstr "webcontrol-schlüssel"
-
-#: src/conf.cpp
-msgid "webcontrol_headers"
-msgstr "Webcontrol-Header"
-
-#: src/conf.cpp
-msgid "webcontrol_html"
-msgstr "webcontrol html"
-
-#: src/conf.cpp
-msgid "webcontrol_actions"
-msgstr "Webcontrol-Aktionen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_lock_minutes %d"
 msgstr "Ungültige Webcontrol-Sperrminuten %d"
 
-#: src/conf.cpp
-msgid "webcontrol_lock_minutes"
-msgstr "Webcontrol-Sperrminuten"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid webcontrol_lock_attempts %d"
 msgstr "Ungültige Webcontrol-Sperrversuche %d"
 
-#: src/conf.cpp
-msgid "webcontrol_lock_attempts"
-msgstr "Webcontrol-Sperrversuche"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid stream_quality %d"
 msgstr "Ungültige Streamqualität %d"
 
-#: src/conf.cpp
-msgid "stream_quality"
-msgstr "Stream-Qualität"
-
-#: src/conf.cpp
-msgid "stream_grey"
-msgstr "Strom grau"
-
-#: src/conf.cpp
-msgid "stream_motion"
-msgstr "Strombewegung"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid stream_maxrate %d"
 msgstr "Ungültige Stream-Maximalrate %d"
 
-#: src/conf.cpp
-msgid "stream_maxrate"
-msgstr "maximale Rate streamen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp motion/src/dbse.cpp
 #, c-format
 msgid "Invalid database_type %s"
 msgstr "Ungültiger Datenbanktyp %s"
 
-#: src/conf.cpp
-msgid "database_type"
-msgstr "Datenbanktyp"
-
-#: src/conf.cpp
-msgid "database_dbname"
-msgstr "Datenbank-Datenbankname"
-
-#: src/conf.cpp
-msgid "database_host"
-msgstr "Datenbankhost"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid database_port %d"
 msgstr "Ungültiger Datenbankport %d"
 
-#: src/conf.cpp
-msgid "database_port"
-msgstr "Datenbank-Port"
-
-#: src/conf.cpp
-msgid "database_user"
-msgstr "Datenbankbenutzer"
-
-#: src/conf.cpp
-msgid "database_password"
-msgstr "Datenbank Passwort"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid database_busy_timeout %d"
 msgstr "Ungültige Zeitüberschreitung für Datenbankauslastung %d"
 
-#: src/conf.cpp
-msgid "database_busy_timeout"
-msgstr "Zeitüberschreitung bei Datenbankauslastung"
-
-#: src/conf.cpp
-msgid "sql_event_start"
-msgstr "Start des SQL-Ereignisses"
-
-#: src/conf.cpp
-msgid "sql_event_end"
-msgstr "Ende des SQL-Ereignisses"
-
-#: src/conf.cpp
-msgid "sql_movie_start"
-msgstr "SQL-Film starten"
-
-#: src/conf.cpp
-msgid "sql_movie_end"
-msgstr "Ende des SQL-Films"
-
-#: src/conf.cpp
-msgid "sql_pic_save"
-msgstr "sql bild speichern"
-
-#: src/conf.cpp
-msgid "ptz_auto_track"
-msgstr "ptz autotrack"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid ptz_wait %d"
 msgstr "Ungültige PTZ-Wartezeit %d"
 
-#: src/conf.cpp
-msgid "ptz_wait"
-msgstr "pz warten"
-
-#: src/conf.cpp
-msgid "ptz_move_track"
-msgstr "ptz-Bewegungsspur"
-
-#: src/conf.cpp
-msgid "ptz_pan_left"
-msgstr "PTZ-Pfanne links"
-
-#: src/conf.cpp
-msgid "ptz_pan_right"
-msgstr "PTZ-Pfanne rechts"
-
-#: src/conf.cpp
-msgid "ptz_tilt_up"
-msgstr "ptz nach oben kippen"
-
-#: src/conf.cpp
-msgid "ptz_tilt_down"
-msgstr "ptz nach unten kippen"
-
-#: src/conf.cpp
-msgid "ptz_zoom_in"
-msgstr "ptz vergrößern"
-
-#: src/conf.cpp
-msgid "ptz_zoom_out"
-msgstr "ptz verkleinern"
-
-#: src/conf.cpp
-msgid "snd_device"
-msgstr "snd-Gerät"
-
-#: src/conf.cpp
-msgid "snd_params"
-msgstr "snd-Parameter"
-
-#: src/conf.cpp
-msgid "snd_alerts"
-msgstr "und Warnungen"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Invalid snd_window %s"
 msgstr "Ungültiges Snd-Fenster %s"
 
-#: src/conf.cpp
-msgid "snd_window"
-msgstr "zweites Fenster"
-
-#: src/conf.cpp
-msgid "snd_show"
-msgstr "zweite Show"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Unknown config option \"%s\""
 msgstr "Unbekannte Konfigurationsoption »%s«"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Camera config file %s not found"
 msgstr "Kamerakonfigurationsdatei %s nicht gefunden"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Sound config file %s not found"
 msgstr "Soundkonfigurationsdatei %s nicht gefunden"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Processing config file %s"
 msgstr "Konfigurationsdatei %s wird verarbeitet"
 
-#: src/conf.cpp
-#: src/util.cpp
-#, c-format
-msgid "params_file not found: %s"
-msgstr "Parameterdatei nicht gefunden: %s"
-
-#: src/conf.cpp
-#: src/util.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Unable to parse line: %s"
 msgstr "Zeile kann nicht analysiert werden: %s"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "%-25s <redacted>"
 msgstr "%-25s <geschwärzt>"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 msgid "Logging configuration parameters from all files"
 msgstr "Protokollieren von Konfigurationsparametern aus allen Dateien"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Config file: %s"
 msgstr "Konfigurationsdatei: %s"
 
-#: src/conf.cpp
-#, c-format
-msgid "Camera %d - Config file: %s"
-msgstr "Kamera %d - Konfigurationsdatei: %s"
-
-#: src/conf.cpp
-#, c-format
-msgid "Sound %d - Config file: %s"
-msgstr "Sound %d - Konfigurationsdatei: %s"
-
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Failed to write configuration to %s"
 msgstr "Konfiguration konnte nicht in %s geschrieben werden"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 #, c-format
 msgid "Configuration written to %s"
 msgstr "Konfiguration in %s geschrieben"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 msgid "Error getcwd"
 msgstr "Fehler getcwd"
 
-#: src/conf.cpp
+#: motion/src/conf.cpp
 msgid "Could not open configuration file"
 msgstr "Konfigurationsdatei konnte nicht geöffnet werden"
 
-#: src/dbse.cpp
-msgid "Invalid database name"
-msgstr "Ungültiger Datenbankname"
-
-#: src/dbse.cpp
-msgid "Must specify database port for mariadb/pgsql"
-msgstr "Der Datenbankport für mariadb/pgsql muss angegeben werden"
-
-#: src/dbse.cpp
-msgid "Must specify database name for sqlite3"
-msgstr "Der Datenbankname muss für sqlite3 angegeben werden"
-
-#: src/dbse.cpp
-msgid "Database functionality disabled."
-msgstr "Datenbankfunktion deaktiviert."
-
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "SQLite error was %s"
 msgstr "SQLite-Fehler war %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Error retrieving table columns: %s"
 msgstr "Fehler beim Abrufen der Tabellenspalten: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "SQLite3 Database filename %s"
 msgstr "SQLite3-Datenbankdateiname %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Can't open database %s : %s"
 msgstr "Datenbank %s kann nicht geöffnet werden: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Could not initialize database %s"
 msgstr "Datenbank %s konnte nicht initialisiert werden"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "database_busy_timeout %d msec"
 msgstr "Zeitüberschreitung bei Datenbankauslastung %d ms"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "database_busy_timeout failed %s"
 msgstr "Zeitüberschreitung bei Datenbankauslastung fehlgeschlagen %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Error checking table: %s"
 msgstr "Fehlerprüftabelle: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Error creating table: %s"
 msgstr "Fehler beim Erstellen der Tabelle: %s"
 
-#: src/dbse.cpp
-#, c-format
-msgid "Error counting table: %s"
-msgstr "Fehler in der Zähltabelle: %s"
-
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Error retrieving table: %s"
 msgstr "Fehler beim Abrufen der Tabelle: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "MariaDB query '%s' failed. %s error code %d"
 msgstr "MariaDB-Abfrage %s fehlgeschlagen. %s Fehlercode %d"
 
-#: src/dbse.cpp
-#, c-format
-msgid ""
-"Cannot reconnect to MariaDB database %s on host %s with user %s MariaDB "
-"error was %s"
-msgstr ""
-"Verbindung zur MariaDB-Datenbank %s auf Host %s mit Benutzer %s MariaDB kann "
-"nicht wiederhergestellt werdenFehler war %s"
-
-#: src/dbse.cpp
-#, c-format
-msgid "Re-Connection to MariaDB database '%s' Succeed"
-msgstr "Wiederverbindung mit MariaDB-Datenbank %s erfolgreich"
-
-#: src/dbse.cpp
-#, c-format
-msgid "after re-connection MariaDB query failed %s error code %d"
-msgstr "nach Wiederverbindung MariaDB-Abfrage fehlgeschlagen %s Fehlercode %d"
-
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Query error: %s"
 msgstr "Abfragefehler: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Query store error: %s"
 msgstr "Abfragespeicherfehler: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 msgid "Creating motion table"
-msgstr "motion-Tabelle erstellen"
+msgstr " motion-Tabelle erstellen"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Cannot connect to MariaDB database %s on host %s with user %s"
 msgstr ""
 "Verbindung zur MariaDB-Datenbank %s auf Host %s mit Benutzer %s nicht möglich"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "MariaDB error was %s"
 msgstr "MariaDB-Fehler war %s"
 
-#: src/dbse.cpp
-msgid "Disabling database functionality"
-msgstr "Datenbankfunktionalität deaktivieren"
-
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "%s database opened"
 msgstr "%s-Datenbank geöffnet"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Connection to PostgreSQL database '%s' failed: %s"
 msgstr "Verbindung zur PostgreSQL-Datenbank '%s' fehlgeschlagen: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' failed: %s"
 msgstr "Neuverbindung mit PostgreSQL-Datenbank '%s' fehlgeschlagen: %s"
 
-#: src/dbse.cpp
+#: motion/src/dbse.cpp
 #, c-format
 msgid "Re-Connection to PostgreSQL database '%s' Succeed"
 msgstr "Wiederverbindung mit der PostgreSQL-Datenbank %s erfolgreich"
 
-#: src/dbse.cpp
-msgid "Initializing database"
-msgstr "Datenbank initialisieren"
+#: motion/src/dbse.cpp
+msgid "Invalid database name"
+msgstr "Ungültiger Datenbankname"
 
-#: src/draw.cpp
+#: motion/src/dbse.cpp
+msgid "Must specify database port for mariadb/pgsql"
+msgstr "Der Datenbankport für mariadb/pgsql muss angegeben werden"
+
+#: motion/src/dbse.cpp
+msgid "Must specify database name for sqlite3"
+msgstr "Der Datenbankname muss für sqlite3 angegeben werden"
+
+#: motion/src/dbse.cpp
+msgid "Database functionality disabled."
+msgstr "Datenbankfunktion deaktiviert."
+
+#: motion/src/draw.cpp
 #, c-format
 msgid "Invalid text scale.  Adjusted to %d"
 msgstr "Ungültiger Textmaßstab. An %d angepasst"
 
-#: src/event.cpp
-#, c-format
-msgid "File saved to: %s"
-msgstr "Datei gespeichert in: %s"
+#: motion/src/i18n.cpp
+msgid "Language: English"
+msgstr "Sprache Englisch"
 
-#: src/event.cpp
-msgid "Failed to put image into video pipe"
-msgstr "Bild konnte nicht in Video-Pipe eingefügt werden"
+#: motion/src/i18n.cpp
+msgid "Enabling native language support"
+msgstr "Unterstützung der Muttersprache aktivieren"
 
-#: src/event.cpp
-msgid "Error creating image file name"
-msgstr "Fehler beim Erstellen des Bilddateinamens"
+#: motion/src/i18n.cpp
+msgid "Disabling native language support"
+msgstr "Unterstützung der Muttersprache deaktivieren"
 
-#: src/event.cpp
-msgid "Error creating image motion file name"
-msgstr "Fehler beim Erstellen des Namens der Bildbewegungsdatei"
+#: motion/src/i18n.cpp
+msgid "daemon"
+msgstr "Dämon"
 
-#: src/event.cpp
-msgid "Error creating image motion roi file name"
-msgstr "Fehler beim Erstellen des Bildbewegungs-Roi-Dateinamens"
+#: motion/src/i18n.cpp
+msgid "pid_file"
+msgstr "pid-Datei"
 
-#: src/event.cpp
-msgid "Error option"
-msgstr "Fehleroption"
+#: motion/src/i18n.cpp
+msgid "log_file"
+msgstr "Logdatei"
 
-#: src/event.cpp
-#, c-format
-msgid "Could not create symbolic link [%s]"
-msgstr "Symbolischer Link [%s] konnte nicht erstellt werden"
+#: motion/src/i18n.cpp
+msgid "log_level"
+msgstr "Protokollebene"
 
-#: src/event.cpp
-msgid "Error creating preview file name"
-msgstr "Fehler beim Erstellen des Namens der Vorschaudatei"
+#: motion/src/i18n.cpp
+msgid "log_type"
+msgstr "Protokolltyp"
 
-#: src/event.cpp
-msgid "Event secondary detect"
-msgstr "Ereignis sekundäre Erkennung"
+#: motion/src/i18n.cpp
+msgid "native_language"
+msgstr "Muttersprache"
 
-#: src/event.cpp
-#, c-format
-msgid "CLOSING: extpipe file desc %d, error state %d"
-msgstr "SCHLIESSEN: Extpipe-Datei desc %d, Fehlerstatus %d"
+#: motion/src/i18n.cpp
+msgid "device_name"
+msgstr "Gerätename"
 
-#: src/event.cpp
-#, c-format
-msgid "Unable to remove file %s"
-msgstr "Datei %s kann nicht entfernt werden"
+#: motion/src/i18n.cpp
+msgid "device_id"
+msgstr "Geräte ID"
 
-#: src/event.cpp
-#, c-format
-msgid "no write access to target directory %s"
-msgstr "kein Schreibzugriff auf Zielverzeichnis %s"
+#: motion/src/i18n.cpp
+msgid "device_tmo"
+msgstr "Gerät tmo"
 
-#: src/event.cpp
-#, c-format
-msgid "path not found, trying to create it %s ..."
-msgstr "Pfad nicht gefunden, versuche ihn zu erstellen %s ..."
+#: motion/src/i18n.cpp
+msgid "pause"
+msgstr "Pause"
 
-#: src/event.cpp
-#, c-format
-msgid "error accesing path %s"
-msgstr "Fehler beim Zugriff auf Pfad %s"
+#: motion/src/i18n.cpp
+msgid "config_dir"
+msgstr "Konfigurationsverzeichnis"
 
-#: src/event.cpp
-#, c-format
-msgid "Error specifying command line: %s"
-msgstr "Fehler beim Angeben der Befehlszeile: %s"
+#: motion/src/i18n.cpp
+msgid "target_dir"
+msgstr "Zielverzeichnis"
 
-#: src/event.cpp
-#, c-format
-msgid "pipe: %s"
-msgstr "Rohr: %s"
+#: motion/src/i18n.cpp
+msgid "watchdog_tmo"
+msgstr "Wachhund tmo"
 
-#: src/event.cpp
-msgid "popen failed"
-msgstr "Popen ist gescheitert"
+#: motion/src/i18n.cpp
+msgid "watchdog_kill"
+msgstr "Wachhund töten"
 
-#: src/event.cpp
-msgid "Using extpipe"
-msgstr "Extpipe verwenden"
+#: motion/src/i18n.cpp
+msgid "v4l2_device"
+msgstr "v4l2-Gerät"
 
-#: src/event.cpp
-#, c-format
-msgid "Error writing in pipe , state error %d"
-msgstr "Fehler beim Schreiben in Pipe , Zustandsfehler %d"
+#: motion/src/i18n.cpp
+msgid "v4l2_params"
+msgstr "v4l2-Parameter"
 
-#: src/event.cpp
-#, c-format
-msgid "pipe %s not created or closed already "
-msgstr "Pipe %s nicht erstellt oder bereits geschlossen"
+#: motion/src/i18n.cpp
+msgid "netcam_url"
+msgstr "Netcam-URL"
 
-#: src/event.cpp
-msgid "Error opening ctx_dev for movie output."
-msgstr "Fehler beim Öffnen von ctx dev für die Filmausgabe."
+#: motion/src/i18n.cpp
+msgid "netcam_params"
+msgstr "Netcam-Parameter"
 
-#: src/event.cpp
-#, c-format
-msgid "Error creating motion file [%s]"
-msgstr "Fehler beim Erstellen der Bewegungsdatei [%s]"
+#: motion/src/i18n.cpp
+msgid "netcam_high_url"
+msgstr "netcam hohe url"
 
-#: src/event.cpp
-msgid "Error encoding image"
-msgstr "Fehler beim Codieren des Bildes"
+#: motion/src/i18n.cpp
+msgid "netcam_high_params"
+msgstr "Netcam hohe Parameter"
 
-#: src/event.cpp
-#, c-format
-msgid "Error creating timelapse file [%s]"
-msgstr "Fehler beim Erstellen der Zeitrafferdatei [%s]"
+#: motion/src/i18n.cpp
+msgid "netcam_userpass"
+msgstr "Netcam-Benutzerpass"
 
-#: src/jpegutils.cpp
+#: motion/src/i18n.cpp
+msgid "libcam_device"
+msgstr "libcam-Gerät"
+
+#: motion/src/i18n.cpp
+msgid "libcam_params"
+msgstr "libcam-Parameter"
+
+#: motion/src/i18n.cpp
+msgid "width"
+msgstr "Breite"
+
+#: motion/src/i18n.cpp
+msgid "height"
+msgstr "Höhe"
+
+#: motion/src/i18n.cpp
+msgid "framerate"
+msgstr "Framerate"
+
+#: motion/src/i18n.cpp
+msgid "rotate"
+msgstr "drehen"
+
+#: motion/src/i18n.cpp
+msgid "flip_axis"
+msgstr "Drehachse"
+
+#: motion/src/i18n.cpp
+msgid "locate_motion_mode"
+msgstr "Bewegungsmodus finden"
+
+#: motion/src/i18n.cpp
+msgid "locate_motion_style"
+msgstr "Bewegungsstil finden"
+
+#: motion/src/i18n.cpp
+msgid "text_left"
+msgstr "Text übrig"
+
+#: motion/src/i18n.cpp
+msgid "text_right"
+msgstr "Text richtig"
+
+#: motion/src/i18n.cpp
+msgid "text_changes"
+msgstr "Textänderungen"
+
+#: motion/src/i18n.cpp
+msgid "text_scale"
+msgstr "Textskala"
+
+#: motion/src/i18n.cpp
+msgid "text_event"
+msgstr "Textereignis"
+
+#: motion/src/i18n.cpp
+msgid "emulate_motion"
+msgstr "Bewegung nachahmen"
+
+#: motion/src/i18n.cpp
+msgid "threshold"
+msgstr "Schwelle"
+
+#: motion/src/i18n.cpp
+msgid "threshold_maximum"
+msgstr "Schwellenmaximum"
+
+#: motion/src/i18n.cpp
+msgid "threshold_tune"
+msgstr "Schwellenmelodie"
+
+#: motion/src/i18n.cpp
+msgid "secondary_method"
+msgstr "sekundäre Methode"
+
+#: motion/src/i18n.cpp
+msgid "secondary_params"
+msgstr "sekundäre Parameter"
+
+#: motion/src/i18n.cpp
+msgid "noise_level"
+msgstr "Geräuschpegel"
+
+#: motion/src/i18n.cpp
+msgid "noise_tune"
+msgstr "Geräusch Melodie"
+
+#: motion/src/i18n.cpp
+msgid "despeckle_filter"
+msgstr "Fleckenfilter"
+
+#: motion/src/i18n.cpp
+msgid "area_detect"
+msgstr "Bereich erkennen"
+
+#: motion/src/i18n.cpp
+msgid "mask_file"
+msgstr "Maskendatei"
+
+#: motion/src/i18n.cpp
+msgid "mask_privacy"
+msgstr "Privatsphäre maskieren"
+
+#: motion/src/i18n.cpp
+msgid "smart_mask_speed"
+msgstr "Geschwindigkeit der intelligenten Maske"
+
+#: motion/src/i18n.cpp
+msgid "lightswitch_percent"
+msgstr "Lichtschalter Prozent"
+
+#: motion/src/i18n.cpp
+msgid "lightswitch_frames"
+msgstr "Lichtschalterrahmen"
+
+#: motion/src/i18n.cpp
+msgid "minimum_motion_frames"
+msgstr "minimale Bewegungsrahmen"
+
+#: motion/src/i18n.cpp
+msgid "static_object_time"
+msgstr "statische Objektzeit"
+
+#: motion/src/i18n.cpp
+msgid "event_gap"
+msgstr "Veranstaltung Lücke"
+
+#: motion/src/i18n.cpp
+msgid "pre_capture"
+msgstr "Pre-Capture"
+
+#: motion/src/i18n.cpp
+msgid "post_capture"
+msgstr "Postaufnahme"
+
+#: motion/src/i18n.cpp
+msgid "on_event_start"
+msgstr "bei Veranstaltungsbeginn"
+
+#: motion/src/i18n.cpp
+msgid "on_event_end"
+msgstr "am Veranstaltungsende"
+
+#: motion/src/i18n.cpp
+msgid "on_picture_save"
+msgstr "auf Bild speichern"
+
+#: motion/src/i18n.cpp
+msgid "on_area_detected"
+msgstr "auf Bereich erkannt"
+
+#: motion/src/i18n.cpp
+msgid "on_motion_detected"
+msgstr "bei Bewegung erkannt"
+
+#: motion/src/i18n.cpp
+msgid "on_movie_start"
+msgstr "bei Filmstart"
+
+#: motion/src/i18n.cpp
+msgid "on_movie_end"
+msgstr "am Filmende"
+
+#: motion/src/i18n.cpp
+msgid "on_camera_lost"
+msgstr "vor der Kamera verloren"
+
+#: motion/src/i18n.cpp
+msgid "on_camera_found"
+msgstr "auf Kamera gefunden"
+
+#: motion/src/i18n.cpp
+msgid "on_secondary_detect"
+msgstr "auf Sekundärerkennung"
+
+#: motion/src/i18n.cpp
+msgid "on_action_user"
+msgstr "auf Aktionsbenutzer"
+
+#: motion/src/i18n.cpp
+msgid "on_sound_alert"
+msgstr "auf Tonalarm"
+
+#: motion/src/i18n.cpp
+msgid "picture_output"
+msgstr "Bildausgabe"
+
+#: motion/src/i18n.cpp
+msgid "picture_output_motion"
+msgstr "Bildausgabe Bewegung"
+
+#: motion/src/i18n.cpp
+msgid "picture_type"
+msgstr "Bildtyp"
+
+#: motion/src/i18n.cpp
+msgid "picture_quality"
+msgstr "Bildqualität"
+
+#: motion/src/i18n.cpp
+msgid "picture_exif"
+msgstr "Bild exif"
+
+#: motion/src/i18n.cpp
+msgid "picture_filename"
+msgstr "Dateiname des Bildes"
+
+#: motion/src/i18n.cpp
+msgid "snapshot_interval"
+msgstr "Snapshot-Intervall"
+
+#: motion/src/i18n.cpp
+msgid "snapshot_filename"
+msgstr "Snapshot-Dateiname"
+
+#: motion/src/i18n.cpp
+msgid "movie_output"
+msgstr "Filmausgabe"
+
+#: motion/src/i18n.cpp
+msgid "movie_output_motion"
+msgstr "Filmausgabe Bewegung"
+
+#: motion/src/i18n.cpp
+msgid "movie_max_time"
+msgstr "Film maximale Zeit"
+
+#: motion/src/i18n.cpp
+msgid "movie_container"
+msgstr "Filmcontainer"
+
+#: motion/src/i18n.cpp
+msgid "movie_passthrough"
+msgstr "Filmdurchgang"
+
+#: motion/src/i18n.cpp
+msgid "movie_filename"
+msgstr "Dateiname des Films"
+
+#: motion/src/i18n.cpp
+msgid "movie_extpipe_use"
+msgstr "film extpipe verwenden"
+
+#: motion/src/i18n.cpp
+msgid "movie_extpipe"
+msgstr "Film Extpipe"
+
+#: motion/src/i18n.cpp
+msgid "timelapse_interval"
+msgstr "Zeitraffer-Intervall"
+
+#: motion/src/i18n.cpp
+msgid "timelapse_mode"
+msgstr "Zeitraffer-Modus"
+
+#: motion/src/i18n.cpp
+msgid "timelapse_container"
+msgstr "Zeitraffer-Container"
+
+#: motion/src/i18n.cpp
+msgid "timelapse_filename"
+msgstr "Zeitraffer-Dateiname"
+
+#: motion/src/i18n.cpp
+msgid "video_pipe"
+msgstr "Video-Rohr"
+
+#: motion/src/i18n.cpp
+msgid "video_pipe_motion"
+msgstr "Video-Rohrbewegung"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_port"
+msgstr "Webcontrol-Port"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_base_path"
+msgstr "webcontrol-Basispfad"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_ipv6"
+msgstr "webcontrol ipv6"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_localhost"
+msgstr "webcontrol localhost"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_access"
+msgstr "Webcontrol-Parameter"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_interface"
+msgstr "Webcontrol-Schnittstelle"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_auth_method"
+msgstr "Webcontrol-Authentifizierungsmethode"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_tls"
+msgstr "webcontrol tls"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_cert"
+msgstr "Webcontrol-Zert"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_key"
+msgstr "webcontrol-schlüssel"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_headers"
+msgstr "Webcontrol-Header"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_html"
+msgstr "webcontrol html"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_actions"
+msgstr "Webcontrol-Aktionen"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_lock_minutes"
+msgstr "Webcontrol-Sperrminuten"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_lock_attempts"
+msgstr "Webcontrol-Sperrversuche"
+
+#: motion/src/i18n.cpp
+msgid "stream_quality"
+msgstr "Stream-Qualität"
+
+#: motion/src/i18n.cpp
+msgid "stream_grey"
+msgstr "Strom grau"
+
+#: motion/src/i18n.cpp
+msgid "stream_motion"
+msgstr "Strombewegung"
+
+#: motion/src/i18n.cpp
+msgid "stream_maxrate"
+msgstr "maximale Rate streamen"
+
+#: motion/src/i18n.cpp
+msgid "database_type"
+msgstr "Datenbanktyp"
+
+#: motion/src/i18n.cpp
+msgid "database_dbname"
+msgstr "Datenbank-Datenbankname"
+
+#: motion/src/i18n.cpp
+msgid "database_host"
+msgstr "Datenbankhost"
+
+#: motion/src/i18n.cpp
+msgid "database_port"
+msgstr "Datenbank-Port"
+
+#: motion/src/i18n.cpp
+msgid "database_user"
+msgstr "Datenbankbenutzer"
+
+#: motion/src/i18n.cpp
+msgid "database_password"
+msgstr "Datenbank Passwort"
+
+#: motion/src/i18n.cpp
+msgid "database_busy_timeout"
+msgstr "Zeitüberschreitung bei Datenbankauslastung"
+
+#: motion/src/i18n.cpp
+msgid "sql_event_start"
+msgstr "Start des SQL-Ereignisses"
+
+#: motion/src/i18n.cpp
+msgid "sql_event_end"
+msgstr "Ende des SQL-Ereignisses"
+
+#: motion/src/i18n.cpp
+msgid "sql_movie_start"
+msgstr "SQL-Film starten"
+
+#: motion/src/i18n.cpp
+msgid "sql_movie_end"
+msgstr "Ende des SQL-Films"
+
+#: motion/src/i18n.cpp
+msgid "sql_pic_save"
+msgstr "sql bild speichern"
+
+#: motion/src/i18n.cpp
+msgid "ptz_auto_track"
+msgstr "ptz autotrack"
+
+#: motion/src/i18n.cpp
+msgid "ptz_wait"
+msgstr "pz warten"
+
+#: motion/src/i18n.cpp
+msgid "ptz_move_track"
+msgstr "ptz-Bewegungsspur"
+
+#: motion/src/i18n.cpp
+msgid "ptz_pan_left"
+msgstr "PTZ-Pfanne links"
+
+#: motion/src/i18n.cpp
+msgid "ptz_pan_right"
+msgstr "PTZ-Pfanne rechts"
+
+#: motion/src/i18n.cpp
+msgid "ptz_tilt_up"
+msgstr "ptz nach oben kippen"
+
+#: motion/src/i18n.cpp
+msgid "ptz_tilt_down"
+msgstr "ptz nach unten kippen"
+
+#: motion/src/i18n.cpp
+msgid "ptz_zoom_in"
+msgstr "ptz vergrößern"
+
+#: motion/src/i18n.cpp
+msgid "ptz_zoom_out"
+msgstr "ptz verkleinern"
+
+#: motion/src/i18n.cpp
+msgid "snd_device"
+msgstr "snd-Gerät"
+
+#: motion/src/i18n.cpp
+msgid "snd_params"
+msgstr "snd-Parameter"
+
+#: motion/src/i18n.cpp
+msgid "snd_alerts"
+msgstr "und Warnungen"
+
+#: motion/src/i18n.cpp
+msgid "snd_window"
+msgstr "zweites Fenster"
+
+#: motion/src/i18n.cpp
+msgid "snd_show"
+msgstr "zweite Show"
+
+#: motion/src/jpegutils.cpp
 #, c-format
 msgid "%s: Given jpeg buffer was too small"
 msgstr "%s: Angegebener JPEG-Puffer war zu klein"
 
-#: src/jpegutils.cpp
+#: motion/src/jpegutils.cpp
 msgid "Invalid JPEG image dimensions"
 msgstr "Ungültige JPEG-Bildabmessungen"
 
-#: src/jpegutils.cpp
+#: motion/src/jpegutils.cpp
 #, c-format
 msgid "JPEG image size %dx%d, JPEG was %dx%d"
 msgstr "JPEG-Bildgröße %dx%d, JPEG war %dx%d"
 
-#: src/libcam.cpp
-msgid "Opening libcam"
-msgstr "Öffnen von libcam"
+#: motion/src/libcam.cpp
+msgid "Starting."
+msgstr "Beginnend."
 
-#: src/libcam.cpp
+#: motion/src/libcam.cpp
 msgid "libcam failed to open"
 msgstr "libcam konnte nicht geöffnet werden"
 
-#: src/logger.cpp
-#, c-format
-msgid "Using default log level (%s) (%d)"
-msgstr "Standardprotokollebene verwenden (%s) (%d)"
+#: motion/src/libcam.cpp
+msgid "Opening libcam"
+msgstr "Öffnen von libcam"
 
-#: src/logger.cpp
+#: motion/src/logger.cpp
+msgid "Logging to syslog"
+msgstr "Protokollierung im Syslog"
+
+#: motion/src/logger.cpp
 #, c-format
 msgid "Logging to file (%s)"
 msgstr "Protokollierung in Datei (%s)"
 
-#: src/logger.cpp
-#, c-format
-msgid "Exit motion, cannot create log file %s"
-msgstr "Bewegung beenden, Protokolldatei %s kann nicht erstellt werden"
-
-#: src/logger.cpp
-msgid "Logging to syslog"
-msgstr "Protokollierung im Syslog"
-
-#: src/logger.cpp
-#, c-format
-msgid "Using log type (%s) log level (%s)"
-msgstr "Protokolltyp (%s) Protokollebene (%s) verwenden"
-
-#: src/logger.cpp
-#, c-format
-msgid "Closing logfile (%s)."
-msgstr "Protokolldatei wird geschlossen (%s)."
-
-#: src/camera.cpp
-#, c-format
-msgid "Resizing buffer to %d items"
-msgstr "Größe des Puffers auf %d Elemente ändern"
-
-#: src/camera.cpp
-#, c-format
-msgid "Motion detected - starting event %d"
-msgstr "Bewegung erkannt - Startereignis %d"
-
-#: src/camera.cpp
-msgid "No Camera device cleanup"
-msgstr "Keine Bereinigung des Kamerageräts"
-
-#: src/camera.cpp
-msgid "No Camera device specified"
-msgstr "Kein Kameragerät angegeben"
-
-#: src/camera.cpp
-msgid "Unable to determine camera type"
-msgstr "Kameratyp kann nicht bestimmt werden"
-
-#: src/camera.cpp
-#, c-format
-msgid "Image width (%d) or height(%d) requested is not modulo 8."
-msgstr "Die angeforderte Bildbreite (%d) oder -höhe (%d) ist nicht Modulo 8."
-
-#: src/camera.cpp
-#, c-format
-msgid "Motion only supports width and height greater than or equal to 64 %dx%d"
-msgstr "Motion unterstützt nur Breite und Höhe größer oder gleich 64 %dx%d"
-
-#: src/camera.cpp
-msgid "Substream not available.  Image sizes not modulo 16."
-msgstr "Substream nicht verfügbar. Bildgrößen nicht Modulo 16."
-
-#: src/camera.cpp
-msgid "Pass-through processing disabled."
-msgstr "Pass-Through-Verarbeitung deaktiviert."
-
-#: src/camera.cpp
-msgid "Failed to start camera."
-msgstr "Kamera konnte nicht gestartet werden."
-
-#: src/camera.cpp
-#: src/sound.cpp
-msgid "Initialize"
-msgstr "Initialisieren"
-
-#: src/camera.cpp
-#, c-format
-msgid "Camera %d started: motion detection %s"
-msgstr "Kamera %d gestartet: Bewegungserkennung %s"
-
-#: src/camera.cpp
-msgid "Disabled"
-msgstr "Behinderte"
-
-#: src/camera.cpp
-msgid "Enabled"
-msgstr "Ermöglicht"
-
-#: src/camera.cpp
-msgid "Emulating motion"
-msgstr "Bewegung emulieren"
-
-#: src/camera.cpp
-#, c-format
-msgid "Motion in area %d detected."
-msgstr "Bewegung in Bereich %d erkannt."
-
-#: src/camera.cpp
-msgid "Retrying until successful connection with camera"
-msgstr "Wiederholen bis zur erfolgreichen Verbindung mit der Kamera"
-
-#: src/camera.cpp
-msgid "Resetting image buffers"
-msgstr "Zurücksetzen von Bildpuffern"
-
-#: src/camera.cpp
-msgid "Video signal re-acquired"
-msgstr "Videosignal neu erfasst"
-
-#: src/camera.cpp
-msgid "Video signal lost - Adding grey image"
-msgstr "Videosignal verloren - Graues Bild wird hinzugefügt"
-
-#: src/camera.cpp
-msgid "Video signal still lost - Trying to close video device"
-msgstr "Videosignal immer noch verloren - Versuch, das Videogerät zu schließen"
-
-#: src/camera.cpp
-#, c-format
-msgid "End of event %d"
-msgstr "Ende des Events %d"
-
-#: src/camera.cpp
-#, c-format
-msgid "changes after '%s': %5d"
-msgstr "Änderungen nach '%s': %5d"
-
-#: src/camera.cpp
-#, c-format
-msgid " - labels: %3d"
-msgstr "- Etiketten: %3d"
-
-#: src/camera.cpp
-#, c-format
-msgid "Changes: %5d"
-msgstr "Änderungen: %5d"
-
-#: src/camera.cpp
-#, c-format
-msgid " - noise level: %2d"
-msgstr "- Geräuschpegel: %2d"
-
-#: src/camera.cpp
-#, c-format
-msgid " - threshold: %d"
-msgstr "- Schwelle: %d"
-
-#: src/camera.cpp
-#: src/sound.cpp
-msgid "Exiting"
-msgstr "Verlassen"
-
-#: src/motion.cpp
+#: motion/src/motion.cpp
 #, c-format
 msgid "Created process id file %s. Process ID is %d"
 msgstr "Prozess-ID-Datei %s erstellt. Prozess-ID ist %d"
 
-#: src/motion.cpp
+#: motion/src/motion.cpp
 #, c-format
 msgid "Cannot create process id file (pid file) %s"
 msgstr "Prozess-ID-Datei (PID-Datei) %s kann nicht erstellt werden"
 
-#: src/motion.cpp
-msgid "Removed process id file (pid file)."
-msgstr "Prozess-ID-Datei (PID-Datei) entfernt."
-
-#: src/motion.cpp
-msgid "Error removing pid file"
-msgstr "Fehler beim Entfernen der PID-Datei"
-
-#: src/motion.cpp
-msgid "Motion going to daemon mode"
-msgstr "Motion wechselt in den Daemon-Modus"
-
-#: src/motion.cpp
-msgid "Could not change directory"
-msgstr "Verzeichnis konnte nicht geändert werden"
-
-#: src/motion.cpp
-msgid "Device IDs are not unique."
-msgstr "Geräte-IDs sind nicht eindeutig."
-
-#: src/motion.cpp
-msgid "Falling back to sequence numbers"
-msgstr "Rückgriff auf Sequenznummern"
-
-#: src/motion.cpp
-msgid "v4l2   : available"
-msgstr "v4l2 : verfügbar"
-
-#: src/motion.cpp
-msgid "v4l2   : not available"
-msgstr "v4l2 : nicht verfügbar"
-
-#: src/motion.cpp
-msgid "webp   : available"
-msgstr "webp: verfügbar"
-
-#: src/motion.cpp
-msgid "webp   : not available"
-msgstr "webp: nicht verfügbar"
-
-#: src/motion.cpp
-msgid "libcam : available"
-msgstr "libcam: verfügbar"
-
-#: src/motion.cpp
-msgid "libcam : not available"
-msgstr "libcam: nicht verfügbar"
-
-#: src/motion.cpp
-msgid "mysql  : available"
-msgstr "MySQL: verfügbar"
-
-#: src/motion.cpp
-msgid "mysql  : not available"
-msgstr "MySQL: nicht verfügbar"
-
-#: src/motion.cpp
-msgid "MariaDB: available"
-msgstr "MariaDB: verfügbar"
-
-#: src/motion.cpp
-msgid "MariaDB: not available"
-msgstr "MariaDB: nicht verfügbar"
-
-#: src/motion.cpp
-msgid "sqlite3: available"
-msgstr "sqlite3: verfügbar"
-
-#: src/motion.cpp
-msgid "sqlite3: not available"
-msgstr "sqlite3: nicht verfügbar"
-
-#: src/motion.cpp
-msgid "pgsql  : available"
-msgstr "pgsql: verfügbar"
-
-#: src/motion.cpp
-msgid "pgsql  : not available"
-msgstr "pgsql: nicht verfügbar"
-
-#: src/motion.cpp
-msgid "nls    : available"
-msgstr "NL: verfügbar"
-
-#: src/motion.cpp
-msgid "nls    : not available"
-msgstr "nls : nicht verfügbar"
-
-#: src/motion.cpp
-msgid "alsa   : available"
-msgstr "auch: vorhanden"
-
-#: src/motion.cpp
-msgid "alsa   : not available"
-msgstr "auch: nicht verfügbar"
-
-#: src/motion.cpp
-msgid "fftw3  : available"
-msgstr "fftw3 : verfügbar"
-
-#: src/motion.cpp
-msgid "fftw3  : not available"
-msgstr "fftw3 : nicht verfügbar"
-
-#: src/motion.cpp
-msgid "Motion running as daemon process"
-msgstr "Motion wird als Daemon-Prozess ausgeführt"
-
-#: src/motion.cpp
-msgid "Motion running in setup mode."
-msgstr "Motion läuft im Setup-Modus."
-
-#: src/motion.cpp
-msgid "Unable to start camera thread."
-msgstr "Kamera-Thread konnte nicht gestartet werden."
-
-#: src/motion.cpp
-msgid "Unable to start sound thread."
-msgstr "Sound-Thread kann nicht gestartet werden."
-
-#: src/motion.cpp
-msgid "Restarting Motion."
-msgstr "Motion neu starten."
-
-#: src/motion.cpp
-msgid "Motion restarted"
-msgstr "Motion neu gestartet"
-
-#: src/motion.cpp
-#, c-format
-msgid "Camera %d - Watchdog timeout."
-msgstr "Kamera %d - Watchdog-Timeout."
-
-#: src/motion.cpp
-#, c-format
-msgid "Camera %d - Watchdog netcam kill."
-msgstr "Kamera %d – Watchdog netcam kill."
-
-#: src/motion.cpp
-#, c-format
-msgid "Camera %d - Watchdog netcam_high kill."
-msgstr "Kamera %d - Watchdog netcam high kill."
-
-#: src/motion.cpp
-#, c-format
-msgid "Camera %d - Watchdog kill."
-msgstr "Kamera %d – Watchdog-Kill."
-
-#: src/motion.cpp
-#, c-format
-msgid "Invalid camera specified for deletion. %d"
-msgstr "Ungültige Kamera zum Löschen angegeben. %d"
-
-#: src/motion.cpp
-#, c-format
-msgid "Stopping %s device_id %d"
-msgstr "Stoppt %s Geräte-ID %d"
-
-#: src/motion.cpp
+#: motion/src/motion.cpp
 #, c-format
 msgid "Motion pid: %d"
 msgstr "Motion-PID: %d"
 
-#: src/motion.cpp
-#, c-format
-msgid "Motion camera %d restart"
-msgstr "Motion-Kamera %d neu starten"
+#: motion/src/motion.cpp
+msgid "Removed process id file (pid file)."
+msgstr "Prozess-ID-Datei (PID-Datei) entfernt."
 
-#: src/motion.cpp
-#, c-format
-msgid "Motion sound %d restart"
-msgstr "Motion-Sound %d Neustart"
+#: motion/src/motion.cpp
+msgid "Error removing pid file"
+msgstr "Fehler beim Entfernen der PID-Datei"
 
-#: src/motion.cpp
+#: motion/src/motion.cpp
+msgid "Motion going to daemon mode"
+msgstr "Motion wechselt in den Daemon-Modus"
+
+#: motion/src/motion.cpp
+msgid "Could not change directory"
+msgstr "Verzeichnis konnte nicht geändert werden"
+
+#: motion/src/motion.cpp
+#, c-format
+msgid "libavcodec  version %d.%d.%d"
+msgstr "libavcodec-Version %d.%d.%d"
+
+#: motion/src/motion.cpp
+#, c-format
+msgid "libavformat version %d.%d.%d"
+msgstr "libavformat-Version %d.%d.%d"
+
+#: motion/src/motion.cpp
+msgid "v4l2   : available"
+msgstr "v4l2 : verfügbar"
+
+#: motion/src/motion.cpp
+msgid "v4l2   : not available"
+msgstr "v4l2 : nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "webp   : available"
+msgstr "webp: verfügbar"
+
+#: motion/src/motion.cpp
+msgid "webp   : not available"
+msgstr "webp: nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "libcam : available"
+msgstr "libcam: verfügbar"
+
+#: motion/src/motion.cpp
+msgid "libcam : not available"
+msgstr "libcam: nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "mysql  : available"
+msgstr "MySQL: verfügbar"
+
+#: motion/src/motion.cpp
+msgid "mysql  : not available"
+msgstr "MySQL: nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "MariaDB: available"
+msgstr "MariaDB: verfügbar"
+
+#: motion/src/motion.cpp
+msgid "MariaDB: not available"
+msgstr "MariaDB: nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "sqlite3: available"
+msgstr "sqlite3: verfügbar"
+
+#: motion/src/motion.cpp
+msgid "sqlite3: not available"
+msgstr "sqlite3: nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "pgsql  : available"
+msgstr "pgsql: verfügbar"
+
+#: motion/src/motion.cpp
+msgid "pgsql  : not available"
+msgstr "pgsql: nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "nls    : available"
+msgstr "NL: verfügbar"
+
+#: motion/src/motion.cpp
+msgid "nls    : not available"
+msgstr "nls : nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "alsa   : available"
+msgstr "auch: vorhanden"
+
+#: motion/src/motion.cpp
+msgid "alsa   : not available"
+msgstr "auch: nicht verfügbar"
+
+#: motion/src/motion.cpp
+msgid "fftw3  : available"
+msgstr "fftw3 : verfügbar"
+
+#: motion/src/motion.cpp
+msgid "fftw3  : not available"
+msgstr "fftw3 : nicht verfügbar"
+
+#: motion/src/motion.cpp
+#, c-format
+msgid "Camera %d - Watchdog timeout."
+msgstr "Kamera %d - Watchdog-Timeout."
+
+#: motion/src/motion.cpp
+msgid "Motion running as daemon process"
+msgstr "Motion wird als Daemon-Prozess ausgeführt"
+
+#: motion/src/motion.cpp
+#, c-format
+msgid "Invalid camera specified for deletion. %d"
+msgstr "Ungültige Kamera zum Löschen angegeben. %d"
+
+#: motion/src/motion.cpp
+#, c-format
+msgid "Stopping %s device_id %d"
+msgstr "Stoppt %s Geräte-ID %d"
+
+#: motion/src/motion.cpp
 msgid "Motion devices finished"
 msgstr "Motion-Geräte fertig"
 
-#: src/motion.cpp
+#: motion/src/motion.cpp
 msgid "Motion terminating"
 msgstr "Motion wird beendet"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
+msgid "Movie timed out"
+msgstr "Film abgelaufen"
+
+#: motion/src/movie.cpp
 #, c-format
 msgid "Error setting timelapse append for container %s"
 msgstr "Fehler beim Anhängen des Zeitraffers für Container %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "container option value %s is not supported"
 msgstr "Containeroptionswert %s wird nicht unterstützt"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not get the container"
 msgstr "Der Container konnte nicht abgerufen werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
 #, c-format
 msgid "Error sending frame for encoding:%s"
 msgstr "Fehler beim Senden des Frames für die Codierung: %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
 #, c-format
 msgid "Error receiving encoded packet video:%s"
 msgstr "Fehler beim Empfangen des verschlüsselten Paketvideos: %s"
 
-#: src/movie.cpp
-#, c-format
-msgid "Error encoding video:%s"
-msgstr "Fehler beim Codieren des Videos: %s"
-
-#: src/movie.cpp
-msgid "Error encoding video"
-msgstr "Fehler beim Codieren des Videos"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "PTS %<PRId64> Base PTS %<PRId64> ms interval %<PRId64> timebase %d-%d"
 msgstr ""
 "PTS %<PRId64> Basis PTS %<PRId64> ms Intervall %<PRId64> Zeitbasis %d-%d"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "BAD TIMING!! Frame skipped."
 msgstr "SCHLECHTES TIMING!! Rahmen übersprungen."
 
-#: src/movie.cpp
-#, c-format
-msgid "%s codec vbr/crf/bit_rate: %d"
-msgstr "%s-Codec vbr/crf/Bitrate: %d"
-
-#: src/movie.cpp
-#, c-format
-msgid "Preferred codec %s has been blacklisted: %s"
-msgstr "Der bevorzugte Codec %s wurde auf die schwarze Liste gesetzt: %s"
-
-#: src/movie.cpp
-#, c-format
-msgid "container %s not found"
-msgstr "Container %s nicht gefunden"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "Using codec %s"
 msgstr "Codec %s wird verwendet"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not alloc stream"
 msgstr "Stream konnte nicht zugewiesen werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Failed to allocate codec context!"
 msgstr "Codec-Kontext konnte nicht zugewiesen werden!"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Unable to set quality"
 msgstr "Qualität kann nicht eingestellt werden"
 
-#: src/movie.cpp
-#, c-format
-msgid "Reported FPS Supported %d/%d"
-msgstr "Gemeldete unterstützte FPS %d/%d"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "Could not open codec %s"
 msgstr "Codec %s konnte nicht geöffnet werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
 #, c-format
 msgid "Failed to copy decoder parameters!: %s"
 msgstr "Decoderparameter konnten nicht kopiert werden!: %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "could not alloc frame"
 msgstr "Rahmen konnte nicht zugeordnet werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "could not alloc buffers %s"
 msgstr "Puffer %s konnten nicht zugewiesen werden"
 
-#: src/movie.cpp
-msgid "Movie timed out"
-msgstr "Film abgelaufen"
-
-#: src/movie.cpp
-msgid "Error setting file name"
-msgstr "Fehler beim Festlegen des Dateinamens"
-
-#: src/movie.cpp
-#, c-format
-msgid "avio_open: %s File %s"
-msgstr "avio geöffnet: %s Datei %s"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "error %s opening file %s"
 msgstr "Fehler %s beim Öffnen der Datei %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
-msgid "Error opening file %s"
-msgstr "Fehler beim Öffnen der Datei %s"
+msgid "avio_open: %s File %s"
+msgstr "avio geöffnet: %s Datei %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "Could not write movie header %s"
 msgstr "Filmheader %s konnte nicht geschrieben werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "Error entering draining mode:%s"
 msgstr "Fehler beim Aufrufen des Entleerungsmodus: %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "Error draining codec:%s"
 msgstr "Fehler beim Entleeren des Codec: %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Error writing draining video frame"
 msgstr "Fehler beim Schreiben des leeren Videoframes"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Error while encoding picture"
 msgstr "Fehler beim Codieren des Bildes"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Error while writing video frame"
 msgstr "Fehler beim Schreiben des Videoframes"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "Error while writing video frame: %s"
 msgstr "Fehler beim Schreiben des Videoframes: %s"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not alloc video stream"
 msgstr "Videostream konnte nicht zugeordnet werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Unable to copy video codec parameters"
 msgstr "Video-Codec-Parameter können nicht kopiert werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "video timebase %d/%d fps %d/%d"
 msgstr "Videozeitbasis %d/%d fps %d/%d"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not alloc audio stream"
 msgstr "Audiostream konnte nicht zugeordnet werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Unable to copy audio codec parameters"
 msgstr "Audio-Codec-Parameter können nicht kopiert werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "audio timebase %d/%d"
 msgstr "Audiozeitbasis %d/%d"
 
-#: src/movie.cpp
-msgid "Pass-through disabled.  ffmpeg too old"
-msgstr "Pass-Through deaktiviert. ffmpeg zu alt"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "rtsp camera not ready for pass-through."
 msgstr "rtsp-Kamera nicht bereit für Pass-Through."
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "RTSP context not available."
 msgstr "RTSP-Kontext nicht verfügbar."
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not allocate output context"
 msgstr "Ausgabekontext konnte nicht zugeordnet werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Changing to MP4 container for pass-through."
 msgstr "Umstellung auf MP4-Container für Pass-Through."
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not get output format!"
 msgstr "Ausgabeformat konnte nicht abgerufen werden!"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not get streams!"
 msgstr "Streams konnten nicht abgerufen werden!"
 
-#: src/movie.cpp
-msgid "Could not set the output file"
-msgstr "Die Ausgabedatei konnte nicht festgelegt werden"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 #, c-format
 msgid "Timebase after open audio: %d/%d video: %d/%d"
 msgstr "Zeitbasis nach offenem Audio: %d/%d Video: %d/%d"
 
-#: src/movie.cpp
-#, c-format
-msgid "libavcodec  version %d.%d.%d"
-msgstr "libavcodec-Version %d.%d.%d"
-
-#: src/movie.cpp
-#, c-format
-msgid "libavformat version %d.%d.%d"
-msgstr "libavformat-Version %d.%d.%d"
-
-#: src/movie.cpp
-msgid "av_lockmgr_register reset failed on cleanup"
-msgstr ""
-"Das Zurücksetzen des AV-Lockmgr-Registers ist bei der Bereinigung "
-"fehlgeschlagen"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not setup passthrough!"
 msgstr "Passthrough konnte nicht eingerichtet werden!"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not get codec!"
 msgstr "Codec konnte nicht abgerufen werden!"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Failed to allocate codec!"
 msgstr "Codec konnte nicht zugewiesen werden!"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Could not set the stream"
 msgstr "Der Stream konnte nicht eingestellt werden"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Error flushing codec"
 msgstr "Fehler beim Leeren des Codecs"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
+#, c-format
+msgid "Unable to remove file %s"
+msgstr "Datei %s kann nicht entfernt werden"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Error writing in pipe , state error %d"
+msgstr "Fehler beim Schreiben in Pipe , Zustandsfehler %d"
+
+#: motion/src/movie.cpp
 msgid "Excessive attempts to clear buffered packet"
 msgstr "Übermäßige Versuche, gepufferte Pakete zu löschen"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Buffered packet"
 msgstr "Gepuffertes Paket"
 
-#: src/movie.cpp
-#, c-format
-msgid "Error setting timelapse file name %s"
-msgstr "Fehler beim Festlegen des Namens der Zeitrafferdatei %s"
-
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Timelapse using mpg container."
 msgstr "Zeitraffer mit mpg-Container."
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Events will be appended to file"
 msgstr "Ereignisse werden an die Datei angehängt"
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Timelapse using mkv container."
 msgstr "Zeitraffer mit MKV-Container."
 
-#: src/movie.cpp
+#: motion/src/movie.cpp
 msgid "Events will be trigger new files"
 msgstr "Ereignisse werden neue Dateien auslösen"
 
-#: src/netcam.cpp
+#: motion/src/movie.cpp
+msgid "popen failed"
+msgstr "Popen ist gescheitert"
+
+#: motion/src/netcam.cpp
+msgid "Failed to get vaapi pix format"
+msgstr "Vaapi-Pix-Format konnte nicht abgerufen werden"
+
+#: motion/src/netcam.cpp
 msgid "Invalid URL.  Can not parse values."
 msgstr "Ungültige URL. Werte können nicht analysiert werden."
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 #, c-format
 msgid "Using port number %d"
 msgstr "Portnummer %d wird verwendet"
 
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Resized packet array to %d"
-msgstr "%s: Größe des Paketarrays auf %d geändert"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: av_copy_packet: %s ,Interrupt: %s"
-msgstr "%s: AV-Paket kopieren: %s ,Interrupt: %s"
-
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "true"
 msgstr "WAHR"
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "false"
 msgstr "FALSCH"
 
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Ignoring packet with invalid data"
-msgstr "%s: Paket mit ungültigen Daten wird ignoriert"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Rec frame error: %s"
-msgstr "%s: Rec-Frame-Fehler: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error transferring HW decoded to system memory"
-msgstr "%s: Fehler beim Übertragen der dekodierten HW in den Systemspeicher"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Interrupted or finish on send"
-msgstr "%s: Unterbrochen oder beim Senden beendet"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Send ignoring packet with invalid data"
-msgstr "%s: Ignorierendes Paket mit ungültigen Daten senden"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error sending packet to codec: %s"
-msgstr "%s: Fehler beim Senden des Pakets an Codec: %s"
-
-#: src/netcam.cpp
-msgid "Ignoring packet with invalid data"
-msgstr "Paket mit ungültigen Daten wird ignoriert"
-
-#: src/netcam.cpp
-#, c-format
-msgid "Error decoding packet: %s"
-msgstr "Fehler beim Entschlüsseln des Pakets: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error decoding video packet...it is audio"
-msgstr "%s: Fehler beim Decodieren des Videopakets ... es ist Audio"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error decoding video packet: Copying to buffer"
-msgstr "%s: Fehler beim Decodieren des Videopakets: Kopieren in den Puffer"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: HW Devices: "
-msgstr "%s: HW-Geräte:"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: %s (available)"
-msgstr "%s: %s (verfügbar)"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: %s (not implemented)"
-msgstr "%s: %s (nicht implementiert)"
-
-#: src/netcam.cpp
-msgid "Failed to get vaapi pix format"
-msgstr "Vaapi-Pix-Format konnte nicht abgerufen werden"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Interrupted"
-msgstr "%s: Unterbrochen"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: %s: %s"
-msgstr "%s: %s: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: %s: Failed"
-msgstr "%s: %s: Fehlgeschlagen"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Decoder %s did not work."
-msgstr "%s: Decoder %s hat nicht funktioniert."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Ignoring and removing the user requested decoder %s"
-msgstr ""
-"%s: Der vom Benutzer angeforderte Decoder %s wird ignoriert und entfernt"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Initializing vaapi decoder"
-msgstr "%s: Vaapi-Decoder wird initialisiert"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to find vaapi hw device"
-msgstr "%s: Vaapi-HW-Gerät kann nicht gefunden werden"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Initializing decoder"
-msgstr "%s: Decoder wird initialisiert"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Using decoder %s"
-msgstr "%s: Decoder %s wird verwendet"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Decoder opened"
-msgstr "%s: Decoder geöffnet"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Camera reading (%s) timed out"
-msgstr "%s: Zeitüberschreitung beim Lesen der Kamera (%s)."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Camera (%s) timed out"
-msgstr "%s: Zeitüberschreitung bei Kamera (%s)."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to allocate swsframe_in."
-msgstr "%s: swsframe kann nicht zugeordnet werden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to allocate swsframe_out."
-msgstr "%s: swsframe out kann nicht zugewiesen werden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Pixel format %d will be converted."
-msgstr "%s: Pixelformat %d wird konvertiert."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to allocate scaling context."
-msgstr "%s: Skalierungskontext kann nicht zugewiesen werden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error determining size of frame out"
-msgstr "%s: Fehler beim Bestimmen der Frame-Out-Größe"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error allocating picture in: %s"
-msgstr "%s: Fehler beim Zuordnen des Bildes in: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error allocating picture out: %s"
-msgstr "%s: Fehler beim Zuordnen des Bildes aus: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error resizing/reformatting: %s"
-msgstr "%s: Fehler beim Ändern der Größe/Neuformatierung: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error putting frame into output buffer: %s"
-msgstr "%s: Fehler beim Einfügen des Frames in den Ausgabepuffer: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: av_read_frame: %s"
-msgstr "%s: AV-Frame gelesen: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: capture_rate not specified in netcam_params. Using %d"
-msgstr ""
-"%s: Aufnahmerate nicht in den Netcam-Parametern angegeben. Verwendung von %d"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: capture_rate not specified in netcam_params. Using framerate %d"
-msgstr ""
-"%s: Aufnahmerate nicht in den Netcam-Parametern angegeben. Framerate %d "
-"verwenden"
-
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 #, c-format
 msgid "The network camera is sending pictures at %dx%d"
 msgstr "Die Netzwerkkamera sendet Bilder um %dx%d"
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 #, c-format
 msgid "resolution but config is %dx%d. If possible change"
 msgstr "Auflösung, aber Konfiguration ist %dx%d. Wenn möglich ändern"
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "the netcam or config so that the image height and"
 msgstr "die netcam oder config damit die bildhöhe und"
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "width are the same to lower the CPU usage."
 msgstr "Breite sind gleich, um die CPU-Auslastung zu senken."
 
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Setting rtsp/rtmp"
-msgstr "%s: rtsp/rtmp wird eingestellt"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Setting input_format mjpeg"
-msgstr "%s: Eingabeformat mjpeg einstellen"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Setting input_format video4linux2"
-msgstr "%s: Eingabeformat video4linux2 einstellen"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Setting up movie file"
-msgstr "%s: Filmdatei wird eingerichtet"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Setting up %s"
-msgstr "%s: %s wird eingerichtet"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: option: %s = %s"
-msgstr "%s: Option: %s = %s"
-
-#: src/netcam.cpp
-msgid "Error getting userpass"
-msgstr "Fehler beim Abrufen des Benutzerpasses"
-
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "Setting up v4l2"
-msgstr "v4l2 einrichten"
+msgstr " v4l2 einrichten"
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "Setting up file"
 msgstr "Datei einrichten"
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 #, c-format
 msgid "Setting up %s "
-msgstr "%s einrichten"
+msgstr "%s einrichten "
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "High"
 msgstr "Hoch"
 
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "Norm"
 msgstr "Norm"
 
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Setting up camera."
-msgstr "%s: Kamera einrichten."
-
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Adjusting width to next higher multiple of 8 (%d)."
-msgstr "%s: Anpassen der Breite an das nächsthöhere Vielfache von 8 (%d)."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to copy codec parameters"
-msgstr "%s: Codec-Parameter können nicht kopiert werden"
-
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "Stream copied for pass-through"
 msgstr "Stream für Pass-Through kopiert"
 
-#: src/netcam.cpp
-msgid "ffmpeg too old"
-msgstr "ffmpeg zu alt"
-
-#: src/netcam.cpp
-msgid "Null path passed to connect"
-msgstr "Nullpfad zum Verbinden übergeben"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to open camera(%s): %s"
-msgstr "%s: Kamera kann nicht geöffnet werden (%s): %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Opened camera(%s)"
-msgstr "%s: Kamera geöffnet (%s)"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to find stream info: %s"
-msgstr "%s: Stream-Info kann nicht gefunden werden: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to open codec context: %s"
-msgstr "%s: Codec-Kontext kann nicht geöffnet werden: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Connected and unable to open codec context: %s"
-msgstr "%s: Verbunden und Codec-Kontext kann nicht geöffnet werden: %s"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Camera image size is invalid"
-msgstr "%s: Kamerabildgröße ist ungültig"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to allocate frame."
-msgstr "%s: Frame kann nicht zugewiesen werden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Failed to copy stream for pass-through."
-msgstr "%s: Stream konnte nicht für Pass-Through kopiert werden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Failed to read first image"
-msgstr "%s: Erstes Bild konnte nicht gelesen werden"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Camera (%s) connected"
-msgstr "%s: Kamera (%s) verbunden"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Netcam capture FPS is %d."
-msgstr "%s: Netcam-Aufnahme FPS ist %d."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Camera source is %d FPS"
-msgstr "%s: Kameraquelle ist %d FPS"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Unable to determine the camera source FPS."
-msgstr "%s: FPS der Kameraquelle kann nicht bestimmt werden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Capture FPS less than camera FPS. Decoding errors will occur."
-msgstr ""
-"%s: Nimm weniger FPS als Kamera-FPS auf. Es treten Decodierungsfehler auf."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Capture FPS should be greater than camera FPS."
-msgstr "%s: Aufnahme-FPS sollte größer sein als Kamera-FPS."
-
-#: src/netcam.cpp
-#, c-format
-msgid ""
-"%s: An audio stream was detected.  Capture_rate increased to compensate."
-msgstr ""
-"%s: Ein Audiostream wurde erkannt. Die Erfassungsrate wurde zum Ausgleich "
-"erhöht."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Reconnecting with camera...."
-msgstr "%s: Verbindung zur Kamera wird wiederhergestellt...."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Camera did not reconnect."
-msgstr "%s: Kamera hat sich nicht wieder verbunden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Checking for camera every 10 seconds."
-msgstr "%s: Überprüfung der Kamera alle 10 Sekunden."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Checking for camera every 10 minutes."
-msgstr "%s: Überprüfung der Kamera alle 10 Minuten."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Camera handler thread [%d] started"
-msgstr "%s: Kamera-Handler-Thread [%d] gestartet"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Loop finished."
-msgstr "%s: Schleife beendet."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Exiting"
-msgstr "%s: Beendet"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Error starting handler thread"
-msgstr "%s: Fehler beim Starten des Handler-Threads"
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Waiting for first image from the handler."
-msgstr "%s: Warten auf erstes Bild vom Handler."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: Shutting down network camera."
-msgstr "%s: Netzwerkkamera wird heruntergefahren."
-
-#: src/netcam.cpp
-#, c-format
-msgid "%s: No response from handler thread."
-msgstr "%s: Keine Antwort vom Handler-Thread."
-
-#: src/netcam.cpp
-msgid "Norm: Shut down complete."
-msgstr "Norm: Komplett heruntergefahren."
-
-#: src/netcam.cpp
-msgid "High: Shut down complete."
-msgstr "Hoch: Vollständig heruntergefahren."
-
-#: src/netcam.cpp
-msgid "Opening Netcam"
-msgstr "Öffnen von Netcam"
-
-#: src/netcam.cpp
-msgid "unable to create rtsp context"
-msgstr "RSP-Kontext kann nicht erstellt werden"
-
-#: src/netcam.cpp
-msgid "unable to create rtsp high context"
-msgstr "RTSP High-Kontext kann nicht erstellt werden"
-
-#: src/netcam.cpp
+#: motion/src/netcam.cpp
 msgid "Failed trying to read first image"
 msgstr "Fehler beim Versuch, das erste Bild zu lesen"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
+#, c-format
+msgid "File saved to: %s"
+msgstr "Datei gespeichert in: %s"
+
+#: motion/src/picture.cpp
+#, c-format
+msgid "Could not create symbolic link [%s]"
+msgstr "Symbolischer Link [%s] konnte nicht erstellt werden"
+
+#: motion/src/picture.cpp
 msgid "Unable to set set EXIF to webp chunk"
 msgstr "Exif kann nicht auf webp-Chunk gesetzt werden"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "libwebp version error"
 msgstr "libwebp-Versionsfehler"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "libwebp image buffer allocation error"
 msgstr "Fehler bei der Zuordnung des libwebp-Bildpuffers"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "libwebp image compression error"
 msgstr "libwebp-Bildkomprimierungsfehler"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "unable to assemble webp image"
 msgstr "Webp-Image kann nicht zusammengestellt werden"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "unable to save webp image to file"
 msgstr "Webp-Bild kann nicht in Datei gespeichert werden"
 
-#: src/picture.cpp
-#, c-format
-msgid ""
-"Can't write picture to file %s - check access rights to target directory\n"
-"Thread is going to finish due to this fatal error"
-msgstr ""
-"Bild kann nicht in Datei %s geschrieben werden - Zugriffsrechte auf "
-"Zielverzeichnis prüfen\n"
-"Der Thread wird aufgrund dieses schwerwiegenden Fehlers beendet"
-
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "Can't write picture to file %s"
 msgstr "Bild kann nicht in Datei %s geschrieben werden"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Could not read from pgm file"
 msgstr "PGM-Datei konnte nicht gelesen werden"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "This is not a pgm file, starts with '%s'"
 msgstr "Dies ist keine pgm-Datei, beginnt mit '%s'"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Failed reading size in pgm file"
 msgstr "Fehler beim Lesen der Größe in der PGM-Datei"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Failed reading maximum value in pgm file"
 msgstr "Fehler beim Lesen des Maximalwerts in der PGM-Datei"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "The mask file specified is not the same size as image from camera."
 msgstr ""
 "Die angegebene Maskendatei hat nicht dieselbe Größe wie das Bild von der "
 "Kamera."
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "Attempting to resize mask image from %dx%d to %dx%d"
 msgstr ""
 "Es wird versucht, die Größe des Maskenbilds von %dx%d auf %dx%d zu ändern"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "can't write mask file %s - check access rights to target directory"
 msgstr ""
 "Maskendatei %s kann nicht geschrieben werden - Zugriffsrechte auf "
 "Zielverzeichnis prüfen"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "can't write mask file %s"
 msgstr "Maskendatei %s kann nicht geschrieben werden"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Failed writing default mask as pgm file"
 msgstr "Fehler beim Schreiben der Standardmaske als pgm-Datei"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid ""
 "Creating empty mask %s\n"
@@ -2545,440 +1714,356 @@ msgstr ""
 "Bitte bearbeiten Sie diese Datei und führen Sie die Bewegung erneut aus, um "
 "die Maskenfunktion zu aktivieren"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Opening privacy mask file"
 msgstr "Datenschutzmaskendatei öffnen"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Opening high resolution privacy mask file"
 msgstr "Öffnen einer hochauflösenden Privatzonenmaskendatei"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "Error opening mask file %s"
 msgstr "Fehler beim Öffnen der Maskendatei %s"
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Failed to read mask privacy image. Mask privacy feature disabled."
 msgstr ""
 "Datenschutzbild der Maske konnte nicht gelesen werden. Die Funktion "
 "rivatsphäre maskieren ist deaktiviert."
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "Mask privacy file \"%s\" loaded."
 msgstr "Maskieren Sie die Datenschutzdatei %s geladen."
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 msgid "Failed to read mask image. Mask feature disabled."
 msgstr "Maskenbild konnte nicht gelesen werden. Maskenfunktion deaktiviert."
 
-#: src/picture.cpp
+#: motion/src/picture.cpp
 #, c-format
 msgid "Maskfile \"%s\" loaded."
 msgstr "Maskendatei »%s« geladen."
 
-#: src/rotate.cpp
+#: motion/src/rotate.cpp
 #, c-format
 msgid "Config option \"rotate\" not a multiple of 90: %d"
 msgstr "Konfigurationsoption \"rotate\" kein Vielfaches von 90: %d"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "Card %i(%s): %s [%s]"
 msgstr "Karte %i(%s): %s [%s]"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "  Device %i (%s,%d): %s [%s]"
-msgstr "Gerät %i (%s,%d): %s [%s]"
+msgstr " Gerät %i (%s,%d): %s [%s]"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "  Subdevices: %i/%i"
-msgstr "Untergeräte: %i/%i"
+msgstr " Untergeräte: %i/%i"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "control digital audio playback info (%i): %s"
 msgstr "Informationen zur digitalen Audiowiedergabe steuern (%i): %s"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "  Subdevice #%i: %s"
-msgstr "Untergerät #%i: %s"
+msgstr " Untergerät #%i: %s"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "control hardware info (%i): %s"
 msgstr "Hardwareinformationen steuern (%i): %s"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 msgid "snd_ctl_pcm_next_device"
 msgstr "snd ctl pcm nächstes Gerät"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "control digital audio info (%i): %s"
 msgstr "digitale Audioinformationen steuern (%i): %s"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 msgid "no soundcards found..."
 msgstr "Keine Soundkarte gefunden..."
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 msgid "Devices"
 msgstr "Geräte"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "control open (%i): %s"
 msgstr "Steuerung geöffnet (%i): %s"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_open device %s (%s)"
 msgstr "Fehler: snd pcm öffne Gerät %s (%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_malloc(%s)"
 msgstr "Fehler: snd pcm hw params malloc(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_any(%s)"
 msgstr "Fehler: snd pcm hw params any(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_set_access(%s)"
 msgstr "Fehler: snd pcm hw params set access(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_set_format(%s)"
 msgstr "Fehler: snd pcm hw params set format(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_set_rate_near(%s)"
 msgstr "error: snd pcm hw params set rate near(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_set_channels(%s)"
 msgstr "Fehler: snd pcm hw params setzt Kanäle (%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_set_period_size_near(%s)"
 msgstr "error: snd pcm hw params set period size near(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params(%s)"
 msgstr "Fehler: snd pcm hw params(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_prepare(%s)"
 msgstr "Fehler: Snd PCM vorbereiten (%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_get_format(%s)"
 msgstr "Fehler: snd pcm hw params get format(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_get_rate(%s)"
 msgstr "Fehler: snd pcm hw params get rate(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: snd_pcm_hw_params_get_period_size(%s)"
 msgstr "error: snd pcm hw params get period size(%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "Actual rate %hu"
 msgstr "Tatsächlicher Kurs %hu"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "Actual frames per %lu"
 msgstr "Tatsächliche Frames pro %lu"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 msgid "Sound format 16"
 msgstr "Tonformat 16"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 msgid "Sound format 24"
 msgstr "Tonformat 24"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 msgid "Sound format 32"
 msgstr "Tonformat 32"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "error: read from audio interface failed (%s)"
 msgstr "Fehler: Lesen vom Audiointerface fehlgeschlagen (%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "Error opening pulse (%s)"
 msgstr "Fehler Öffnungsimpuls (%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "Error capturing PulseAudio (%s)"
 msgstr "Fehler beim Erfassen von PulseAudio (%s)"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 msgid "Opening FFTW plan"
 msgstr "Eröffnung des FFTW-Plans"
 
-#: src/sound.cpp
-msgid "Invalid sound source."
-msgstr "Ungültige Tonquelle."
-
-#: src/sound.cpp
-msgid "Detecting"
-msgstr "Erkennen"
-
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "Freq: %.4f threshold: %d count: %d maximum: %d"
 msgstr "Freq: %.4f Schwelle: %d Anzahl: %d Maximum: %d"
 
-#: src/sound.cpp
+#: motion/src/sound.cpp
 #, c-format
 msgid "Sound Alert %d-%s : level %d count %d max vol %d"
 msgstr "Tonalarm %d-%s : Level %d Zählung %d max vol %d"
 
-#: src/sound.cpp
-msgid "Capture loop finished"
-msgstr "Aufnahmeschleife beendet"
+#: motion/src/sound.cpp
+msgid "Invalid sound source."
+msgstr "Ungültige Tonquelle."
 
-#: src/sound.cpp
-msgid "Sound detection functionality not supported"
-msgstr "Geräuscherkennungsfunktion wird nicht unterstützt"
+#: motion/src/sound.cpp
+msgid "Detecting"
+msgstr "Erkennen"
 
-#: src/util.cpp
+#: motion/src/util.cpp
 #, c-format
 msgid "Could not allocate %llu bytes of memory!"
 msgstr "%llu Byte Speicher konnten nicht zugewiesen werden!"
 
-#: src/util.cpp
-#, c-format
-msgid "Warning! Function %s tries to resize memoryblock at %p to 0 bytes!"
-msgstr ""
-"Warnung! Die Funktion %s versucht, den Speicherblock bei %p auf 0 Bytes zu "
-"ändern!"
-
-#: src/util.cpp
+#: motion/src/util.cpp
 #, c-format
 msgid "Could not resize memory-block at offset %p to %llu bytes (function %s)!"
 msgstr ""
 "Die Größe des Speicherblocks am Offset %p konnte nicht auf %llu Bytes "
 "geändert werden (Funktion %s)!"
 
-#: src/util.cpp
+#: motion/src/util.cpp
 #, c-format
 msgid "Creating %s"
 msgstr "%s wird erstellt"
 
-#: src/util.cpp
+#: motion/src/util.cpp
 #, c-format
 msgid "Problem creating directory %s"
 msgstr "Problem beim Erstellen des Verzeichnisses %s"
 
-#: src/util.cpp
+#: motion/src/util.cpp
 #, c-format
 msgid "Error opening file %s with mode %s"
 msgstr "Fehler beim Öffnen der Datei %s mit Modus %s"
 
-#: src/util.cpp
+#: motion/src/util.cpp
 msgid "Error closing file"
 msgstr "Fehler beim Schließen der Datei"
 
-#: src/util.cpp
-#, c-format
-msgid "invalid format specifier keyword %*.*s"
-msgstr "Ungültiges Formatbezeichner-Schlüsselwort %*.*s"
-
-#: src/util.cpp
+#: motion/src/util.cpp
 #, c-format
 msgid "Unable to set thread name %s"
 msgstr "Thread-Name %s kann nicht festgelegt werden"
 
-#: src/util.cpp
-msgid "FFMPEG version too old. Disabling pass-through processing."
-msgstr "FFMPEG-Version zu alt. Pass-Through-Verarbeitung deaktivieren."
-
-#: src/util.cpp
-msgid "Language: English"
-msgstr "Sprache Englisch"
-
-#: src/util.cpp
-msgid "Disabling native language support"
-msgstr "Unterstützung der Muttersprache deaktivieren"
-
-#: src/util.cpp
-msgid "Enabling native language support"
-msgstr "Unterstützung der Muttersprache aktivieren"
-
-#: src/util.cpp
-#, c-format
-msgid "parse file: %s"
-msgstr "Parse-Datei: %s"
-
-#: src/util.cpp
+#: motion/src/util.cpp
 msgid "Only one params_file specification is permitted."
 msgstr "Es ist nur eine Params-Dateispezifikation zulässig."
 
-#: src/util.cpp
-#, c-format
-msgid "Parsed: >%s< >%s<"
-msgstr "Geparst: >%s< >%s<"
-
-#: src/util.cpp
-#, c-format
-msgid "Parsing: >%s< >%ld %ld %ld %ld<"
-msgstr "Parsing: >%s< >%ld %ld %ld %ld<"
-
-#: src/util.cpp
-msgid "Starting parsing parameters"
-msgstr "Parsing-Parameter starten"
-
-#: src/util.cpp
-#, c-format
-msgid "New config: %s"
-msgstr "Neue Konfiguration: %s"
-
-#: src/util.cpp
-#, c-format
-msgid "Unable to start external command '%s'"
-msgstr "Externer Befehl '%s' kann nicht gestartet werden"
-
-#: src/util.cpp
-#, c-format
-msgid "Executing external command '%s'"
-msgstr "Ausführen des externen Befehls '%s'"
-
-#: src/video_common.cpp
+#: motion/src/video_convert.cpp
 msgid "Corrupt image ... continue"
 msgstr "Beschädigtes Bild ... weiter"
 
-#: src/video_common.cpp
+#: motion/src/video_convert.cpp
 #, c-format
 msgid "SOI position adjusted by %d bytes."
 msgstr "SOI-Position um %d Bytes angepasst."
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 #, c-format
 msgid "Failed to open '%s'"
 msgstr "'%s' konnte nicht geöffnet werden"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 #, c-format
 msgid "Error specifying buffer: %s"
 msgstr "Fehler beim Angeben des Puffers: %s"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 #, c-format
 msgid "Opening buffer: %s"
 msgstr "Puffer öffnen: %s"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 #, c-format
 msgid "Read buffer: %s"
 msgstr "Lesepuffer: %s"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 #, c-format
 msgid "found video device '%s' %d"
 msgstr "Videogerät '%s' %d gefunden"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 #, c-format
 msgid "Opened %s as pipe output"
 msgstr "%s als Pipe-Ausgabe geöffnet"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 #, c-format
 msgid "Opening %s as pipe output failed"
 msgstr "Öffnen von %s als Pipe-Ausgabe fehlgeschlagen"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 msgid "Original pipe specifications"
 msgstr "Original-Pfeifenspezifikationen"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 msgid "Proposed pipe specifications"
 msgstr "Vorgeschlagene Rohrspezifikationen"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 msgid "Final pipe specifications"
 msgstr "Endgültige Rohrspezifikationen"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
+msgid "Failed to put image into video pipe"
+msgstr "Bild konnte nicht in Video-Pipe eingefügt werden"
+
+#: motion/src/video_loopback.cpp
 msgid "Opening video loopback device for normal pictures"
 msgstr "Öffnen des Video-Loopback-Geräts für normale Bilder"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 msgid "Failed to open video loopback for normal pictures"
 msgstr "Video-Loopback für normale Bilder konnte nicht geöffnet werden"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 msgid "Opening video loopback device for motion pictures"
 msgstr "Öffnen eines Video-Loopback-Geräts für Filme"
 
-#: src/video_loopback.cpp
+#: motion/src/video_loopback.cpp
 msgid "Failed to open video loopback for motion pictures"
 msgstr "Video-Loopback für Filme konnte nicht geöffnet werden"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "---------Controls---------"
 msgstr "---------Steuerungen---------"
 
-#: src/video_v4l2.cpp
-msgid "  V4L2 ID :  Name : Range"
-msgstr "V4L2-ID: Name: Bereich"
-
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "No Controls found for device"
 msgstr "Keine Steuerelemente für Gerät gefunden"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "setting control %s \"%s\" to %d failed with return code %d"
 msgstr ""
 "Setzen des Steuerelements %s »%s« auf %d fehlgeschlagen mit Rückkehrcode %d"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Set control \"%s\" to value %d"
 msgstr "Setzen Sie das Steuerelement \"%s\" auf den Wert %d"
 
-#: src/video_v4l2.cpp
-#, c-format
-msgid "%s control option value %s is below minimum.  Skipping..."
-msgstr "%s Kontrolloptionswert %s liegt unter dem Minimum. Überspringen..."
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "%s control option value %s is above maximum.  Skipping..."
-msgstr "%s Kontrolloptionswert %s liegt über dem Maximum. Überspringen..."
-
-#: src/video_v4l2.cpp
-msgid "control type not supported yet"
-msgstr "Steuerungstyp wird noch nicht unterstützt"
-
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Unable to query input %d. VIDIOC_ENUMINPUT, if you use a WEBCAM change input "
@@ -2987,445 +2072,3644 @@ msgstr ""
 "Eingabe %d kann nicht abgefragt werden. VIDIOC ENUMINPUT, wenn Sie einen "
 "WEBCAM-Änderungseingang verwendenWert in conf um -1"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\", type 0x%08X, status %08x"
 msgstr "Name = %s, geben Sie 0x%08X ein, Status %08x"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\",- TUNER"
 msgstr "Name = \"%s\",- TUNER"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Name = \"%s\"- CAMERA"
 msgstr "Name = \"%s\"- KAMERA"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting input %d VIDIOC_S_INPUT"
 msgstr "Fehler beim Auswählen des Eingangs %d VIDIOC S INPUT"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Device does not support specifying PAL/NTSC norm"
 msgstr "Das Gerät unterstützt die Angabe der PAL/NTSC-Norm nicht"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "- video standard %s"
 msgstr "- Videostandard %s"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Error selecting standard method %d VIDIOC_S_STD"
 msgstr "Fehler bei der Auswahl der Standardmethode %d VIDIOC S STD"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Video standard set to NTSC"
 msgstr "Videostandard auf NTSC eingestellt"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Video standard set to SECAM"
 msgstr "Videostandard auf SECAM eingestellt"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Video standard set to PAL"
 msgstr "Videostandard auf PAL eingestellt"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "tuner %d VIDIOC_G_TUNER"
 msgstr "Tuner %d VIDIOC G TUNER"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Set tuner %d"
 msgstr "Tuner %d einstellen"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "freq %ul VIDIOC_S_FREQUENCY"
 msgstr "freq %ul VIDIOC S FREQUENZ"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Set Frequency to %ul"
 msgstr "Setzen Sie die Frequenz auf %ul"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Unable to use palette %c%c%c%c (%dx%d)"
 msgstr "Palette %c%c%c%c (%dx%d) kann nicht verwendet werden"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Testing palette %c%c%c%c (%dx%d)"
 msgstr "Testpalette %c%c%c%c (%dx%d)"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Checking image size %dx%d with stride %d"
 msgstr "Bildgröße %dx%d wird mit Schritt %d überprüft"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "No stride value provided from device."
 msgstr "Kein Schrittwert vom Gerät bereitgestellt."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Width(%d) must be less than stride(%d)"
 msgstr "Die Breite (%d) muss kleiner sein als die Schrittweite (%d)"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "The image width(%d) is not multiple of the stride(%d)"
 msgstr "Die Bildbreite (%d) ist kein Vielfaches der Schrittweite (%d)"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Impossible condition: Width(%d), Stride(%d), Per stride(%d)"
 msgstr "Unmögliche Bedingung: Breite(%d), Schritt(%d), Pro Schritt(%d)"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Image width will be padded %d bytes"
 msgstr "Die Bildbreite wird mit %d Bytes aufgefüllt"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting resolution from %ix%i to %ix%i."
 msgstr "Auflösung von %ix%i auf %ix%i anpassen."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Adjusted resolution not modulo 8."
 msgstr "Angepasste Auflösung nicht Modulo 8."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Specify different palette or width/height in config file."
 msgstr ""
 "Geben Sie eine andere Palette oder Breite/Höhe in der Konfigurationsdatei an."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Error setting pixel format."
 msgstr "Fehler beim Festlegen des Pixelformats."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Using palette %c%c%c%c (%dx%d)"
 msgstr "Palette %c%c%c%c (%dx%d) verwenden"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "config image width (%d) is not modulo 8"
 msgstr "Konfigurationsbildbreite (%d) ist nicht Modulo 8"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to width (%d)"
 msgstr "Anpassung an Breite (%d)"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "config image height (%d) is not modulo 8"
 msgstr "Konfigurationsbildhöhe (%d) ist nicht Modulo 8"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Adjusting to height (%d)"
 msgstr "Höhenanpassung (%d)"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Invalid palette.  Changing to default"
 msgstr "Ungültige Palette. Auf Standard ändern"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Supported palettes:"
 msgstr "Unterstützte Paletten:"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Configuration palette index %d (%s) for %dx%d doesn't work."
 msgstr "Konfigurationspalettenindex %d (%s) für %dx%d funktioniert nicht."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Unable to find a compatible palette format."
 msgstr "Es kann kein kompatibles Palettenformat gefunden werden."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Palette selection failed for format %s"
 msgstr "Palettenauswahl für Format %s fehlgeschlagen"
 
-#: src/video_v4l2.cpp
-#, c-format
-msgid "Selected palette %s"
-msgstr "Ausgewählte Palette %s"
-
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Error requesting buffers %d for memory map. VIDIOC_REQBUFS"
 msgstr ""
 "Fehler beim Anfordern der Puffer %d für die Speicherkarte. VIDIOC REQBUFS"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "mmap information: frames=%d"
 msgstr "mmap-Informationen: Frames=%d"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Insufficient buffer memory %d < MIN_MMAP_BUFFERS."
 msgstr "Unzureichender Pufferspeicher %d < MIN MMAP BUFFERS."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Out of memory."
 msgstr "Aus dem Gedächtnis."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid ""
 "Error querying buffer %i\n"
 "VIDIOC_QUERYBUF: "
 msgstr ""
 "Fehler beim Abfragen des Puffers %i\n"
-"VIDIOC-ABFRAGEBUF:"
+"VIDIOC-ABFRAGEBUF: "
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Error mapping buffer %i mmap"
 msgstr "Fehler beim Zuordnungspuffer %i mmap"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "%i length=%d Address (%x)"
 msgstr "%i Länge=%d Adresse (%x)"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Error starting stream. VIDIOC_STREAMON"
 msgstr "Fehler beim Starten des Streams. VIDIOC STREAMON"
 
-#: src/video_v4l2.cpp
-msgid "Error setting device controls"
-msgstr "Fehler beim Festlegen der Gerätesteuerung"
-
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Opening video device %s"
 msgstr "Videogerät %s wird geöffnet"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Failed to open video device %s"
 msgstr "Videogerät %s konnte nicht geöffnet werden"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Not a V4L2 device?"
 msgstr "Kein V4L2-Gerät?"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Device does not support capturing."
 msgstr "Das Gerät unterstützt keine Erfassung."
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Supported palette %s (%c%c%c%c)"
 msgstr "Unterstützte Palette %s (%c%c%c%c)"
 
-#: src/video_v4l2.cpp
-#, c-format
-msgid "  Width: %d, Height %d"
-msgstr "Breite: %d, Höhe %d"
-
-#: src/video_v4l2.cpp
-#, c-format
-msgid "    Framerate %d/%d"
-msgstr "Bildrate %d/%d"
-
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Trying to set fps to %d"
 msgstr "Versuch, fps auf %d zu setzen"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Error setting fps. Return code %d"
 msgstr "Fehler beim Einstellen der fps. Rückkehrcode %d"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Device set fps to %d"
 msgstr "Gerät hat fps auf %d gesetzt"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 #, c-format
 msgid "Closing video device %s"
 msgstr "Videogerät %s wird geschlossen"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "Opening V4L2 device"
 msgstr "Öffnen des V4L2-Geräts"
 
-#: src/video_v4l2.cpp
+#: motion/src/video_v4l2.cpp
 msgid "V4L2 device failed to open"
 msgstr "V4L2-Gerät konnte nicht geöffnet werden"
 
-#: src/webu.cpp
-#, c-format
-msgid "Sent url: %s"
-msgstr "Gesendete URL: %s"
-
-#: src/webu.cpp
-#, c-format
-msgid "Decoded url: %s"
-msgstr "Entschlüsselte URL: %s"
-
-#: src/webu.cpp
-#, c-format
-msgid "Full Host:  %s"
-msgstr "Vollständiger Host: %s"
-
-#: src/webu.cpp
-#, c-format
-msgid "Failed authentication from %s"
-msgstr "Authentifizierung von %s fehlgeschlagen"
-
-#: src/webu.cpp
-#, c-format
-msgid "Connection from: %s"
-msgstr "Verbindung von: %s"
-
-#: src/webu.cpp
-#, c-format
-msgid "Ignoring connection from: %s"
-msgstr "Verbindung wird ignoriert von: %s"
-
-#: src/webu.cpp
-msgid "No webcontrol user:pass provided"
-msgstr "Kein webcontrol user:pass bereitgestellt"
-
-#: src/webu.cpp
-#: src/webu_stream.cpp
-msgid "Invalid response"
-msgstr "Ungültige Antwort"
-
-#: src/webu.cpp
-msgid "send page failed."
-msgstr "Seite senden fehlgeschlagen."
-
-#: src/webu.cpp
-msgid "Shutting down camera"
-msgstr "Kamera herunterfahren"
-
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "Basic authentication: available"
 msgstr "Basisauthentifizierung: verfügbar"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "Basic authentication: disabled"
 msgstr "Basisauthentifizierung: deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "Digest authentication: available"
 msgstr "Digest-Authentifizierung: verfügbar"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "Digest authentication: disabled"
 msgstr "Digest-Authentifizierung: deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "libmicrohttpd libary too old ipv6 disabled"
 msgstr "libmicrohttpd Bibliothek zu alt IPv6 deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "IPV6: available"
 msgstr "IPV6: verfügbar"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "IPV6: disabled"
 msgstr "IPV6: deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "libmicrohttpd libary too old SSL/TLS disabled"
 msgstr "libmicrohttpd Bibliothek zu alt SSL/TLS deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "SSL/TLS: available"
 msgstr "SSL/TLS: verfügbar"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "SSL/TLS: disabled"
 msgstr "SSL/TLS: deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "Error reading file for SSL/TLS support."
 msgstr "Fehler beim Lesen der Datei für die SSL/TLS-Unterstützung."
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "SSL/TLS requested but no cert file provided.  SSL/TLS disabled"
 msgstr ""
 "SSL/TLS angefordert, aber keine Zertifikatsdatei bereitgestellt. SSL/TLS "
 "deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 msgid "SSL/TLS requested but no key file provided.  SSL/TLS disabled"
 msgstr ""
 "SSL/TLS angefordert, aber keine Schlüsseldatei bereitgestellt. SSL/TLS "
 "deaktiviert"
 
-#: src/webu.cpp
+#: motion/src/webu.cpp
 #, c-format
 msgid "Starting webcontrol on port %d"
 msgstr "Webcontrol auf Port %d starten"
 
-#: src/webu.cpp
-msgid "Unable to start MHD"
-msgstr "MHD kann nicht gestartet werden"
-
-#: src/webu.cpp
+#: motion/src/webu_ans.cpp
 #, c-format
-msgid "Started webcontrol on port %d"
-msgstr "Webcontrol auf Port %d gestartet"
+msgid "Sent url: %s"
+msgstr "Gesendete URL: %s"
 
-#: src/webu_html.cpp
+#: motion/src/webu_ans.cpp
 #, c-format
-msgid "Invalid user html file: %s"
-msgstr "Ungültige Benutzer-HTML-Datei: %s"
+msgid "Decoded url: %s"
+msgstr "Entschlüsselte URL: %s"
 
-#: src/webu_post.cpp
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "Full Host:  %s"
+msgstr "Vollständiger Host: %s"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "Failed authentication from %s"
+msgstr "Authentifizierung von %s fehlgeschlagen"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "Connection from: %s"
+msgstr "Verbindung von: %s"
+
+#: motion/src/webu_ans.cpp
+msgid "No webcontrol user:pass provided"
+msgstr "Kein webcontrol user:pass bereitgestellt"
+
+#: motion/src/webu_ans.cpp motion/src/webu_mpegts.cpp
+#: motion/src/webu_stream.cpp
+msgid "Invalid response"
+msgstr "Ungültige Antwort"
+
+#: motion/src/webu_ans.cpp
+msgid "send page failed."
+msgstr "Seite senden fehlgeschlagen."
+
+#: motion/src/webu_ans.cpp
+msgid "Shutting down camera"
+msgstr "Kamera herunterfahren"
+
+#: motion/src/webu_post.cpp
 msgid "Restarting all cameras"
 msgstr "Neustart aller Kameras"
 
-#: src/webu_post.cpp
+#: motion/src/webu_post.cpp
 #, c-format
 msgid "Restarting camera %d"
 msgstr "Kamera %d wird neu gestartet"
 
-#: src/webu_post.cpp
+#: motion/src/webu_post.cpp
 #, c-format
 msgid "Stopping cam %d"
 msgstr "Nocke %d wird gestoppt"
 
-#: src/webu_post.cpp
+#: motion/src/webu_post.cpp
 #, c-format
 msgid "Invalid character included in action user \"%c\""
 msgstr "Ungültiges Zeichen in Aktion Benutzer %c enthalten"
 
-#: src/webu_post.cpp
+#: motion/src/webu_post.cpp
 #, c-format
 msgid "Executing user action on cam %d"
 msgstr "Benutzeraktion auf Kamera %d wird ausgeführt"
 
-#: src/webu_post.cpp
-#, c-format
-msgid "Invalid action requested: command: >%s< threadnbr : >%d< "
-msgstr "Ungültige Aktion angefordert: Befehl: >%s< Threadnbr : >%d<"
-
-#: src/webu_stream.cpp
-#, c-format
-msgid "Invalid thread specified: %s"
-msgstr "Ungültiger Thread angegeben: %s"
-
-#: src/webu_stream.cpp
+#: motion/src/webu_stream.cpp
 msgid "Could not get image to stream."
 msgstr "Bild konnte nicht zum Streamen abgerufen werden."
+
+#: motion/src/alg_sec.cpp
+msgid "Secondary detect and debug enabled."
+msgstr "Sekundäre Erkennung und Fehlersuche aktiviert."
+
+#: motion/src/alg_sec.cpp
+#, c-format
+msgid "Saving source and detected images to %s"
+msgstr "Speichere Quell- und erkannte Bilder unter %s"
+
+#: motion/src/alg_sec.cpp
+msgid "Secondary detection starting."
+msgstr "Sekundäre Erkennung wird gestartet."
+
+#: motion/src/alg_sec.cpp
+msgid "Secondary detection stopped."
+msgstr "Sekundäre Erkennung gestoppt."
+
+#: motion/src/alg_sec.cpp
+msgid "Unable to start secondary detection"
+msgstr "Sekundäre Erkennung konnte nicht gestartet werden"
+
+#: motion/src/alg_sec.cpp
+msgid "Normal shutdown failed"
+msgstr "Normales Herunterfahren fehlgeschlagen"
+
+#: motion/src/alg_sec.cpp motion/src/camera.cpp motion/src/dbse.cpp
+#: motion/src/netcam.cpp motion/src/schedule.cpp motion/src/sound.cpp
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Waiting additional %d seconds (watchdog_kill)."
+msgstr "Warte weitere %d Sekunden (Watchdog-Kill)."
+
+#: motion/src/alg_sec.cpp motion/src/camera.cpp motion/src/dbse.cpp
+#: motion/src/netcam.cpp motion/src/schedule.cpp motion/src/sound.cpp
+#: motion/src/webu_allcam.cpp
+msgid "No response to shutdown.  Killing it."
+msgstr "Keine Reaktion auf das Herunterfahren. Prozess wird beendet."
+
+#: motion/src/alg_sec.cpp motion/src/camera.cpp motion/src/dbse.cpp
+#: motion/src/netcam.cpp motion/src/schedule.cpp motion/src/sound.cpp
+#: motion/src/webu_allcam.cpp
+msgid "Memory leaks will occur."
+msgstr "Es werden Speicherlecks auftreten."
+
+#: motion/src/alg_sec.cpp motion/src/camera.cpp motion/src/dbse.cpp
+#: motion/src/netcam.cpp motion/src/schedule.cpp motion/src/sound.cpp
+#: motion/src/webu_allcam.cpp
+msgid "watchdog_kill set to terminate application."
+msgstr "watchdog kill ist so eingestellt, dass die Anwendung beendet wird."
+
+#: motion/src/camera.cpp
+msgid "Unable to open camera"
+msgstr "Kamera konnte nicht geöffnet werden"
+
+#: motion/src/camera.cpp
+msgid "Error capturing first image"
+msgstr "Fehler beim Erfassen des ersten Bildes"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid clean directory action : %s"
+msgstr "Ungültige Aktion zum Bereinigen des Verzeichnisses: %s"
+
+#: motion/src/camera.cpp
+msgid "Setting default clean directory action to delete."
+msgstr ""
+"Standardaktion zum Bereinigen von Verzeichnissen auf Löschen festgelegt."
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid clean directory freq : %s"
+msgstr "Ungültige Häufigkeit für das Bereinigungsverzeichnis: %s"
+
+#: motion/src/camera.cpp
+msgid "Setting default clean directory frequency to weekly."
+msgstr ""
+"Standardmäßige Reinigungsfrequenz des Verzeichnisses auf wöchentlich "
+"eingestellt."
+
+#: motion/src/camera.cpp
+msgid "Setting default clean directory runtime to 15."
+msgstr "Standard-Laufzeit für sauberes Verzeichnis auf 15 gesetzt."
+
+#: motion/src/camera.cpp
+msgid "Setting default clean directory runtime to 0115."
+msgstr "Standard-Laufzeit für sauberes Verzeichnis auf 0115 gesetzt."
+
+#: motion/src/camera.cpp
+msgid "Setting default clean directory runtime to mon-0115."
+msgstr "Standard-Laufzeit für saubere Verzeichnisse auf mon-0115 gesetzt."
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid clean directory duration unit : %s"
+msgstr "Ungültige Zeiteinheit für die Bereinigung des Verzeichnisses: %s"
+
+#: motion/src/camera.cpp
+msgid "Setting default clean directory duration unit to d."
+msgstr ""
+"Standardmäßige Zeiteinheit für die Bereinigung des Verzeichnisses auf d "
+"gesetzt."
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid clean directory duration number : %d"
+msgstr "Ungültige Anzahl der bereinigten Verzeichnisdauern: %d"
+
+#: motion/src/camera.cpp
+msgid "Setting default clean directory duration value to 7."
+msgstr ""
+"Standardwert für die Dauer des Bereinigungsvorgangs im Verzeichnis auf 7 "
+"gesetzt."
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid clean directory hourly runtime : %s"
+msgstr "Ungültige stündliche Laufzeit für das Bereinigungsverzeichnis: %s"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid clean directory daily runtime : %s"
+msgstr "Ungültige Laufzeit für die tägliche Bereinigung des Verzeichnisses: %s"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid clean directory weekly runtime : %s"
+msgstr ""
+"Ungültige wöchentliche Laufzeit für die Bereinigung des Verzeichnisses: %s"
+
+#: motion/src/camera.cpp motion/src/schedule.cpp
+#, c-format
+msgid "Cleandir next run:%04d-%02d-%02d %02d:%02d Criteria:%d%s RemoveDir:%s"
+msgstr ""
+"Cleandir nächster Lauf:%04d-%02d-%02d %02d:%02d Kriterien:%d%s RemoveDir:%s"
+
+#: motion/src/camera.cpp motion/src/schedule.cpp
+#, c-format
+msgid "Clean directory set to run script at %04d-%02d-%02d %02d:%02d"
+msgstr ""
+"Bereinigen Sie das Verzeichnis, in dem das Skript ausgeführt werden soll, "
+"unter %04d-%02d-%02d %02d:%02d"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Invalid schedule parameter: %s %s"
+msgstr "Ungültiger Zeitplanparameter: %s %s"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Schedule: %s %02d:%02d to %02d:%02d %s"
+msgstr "Zeitplan: %s %02d:%02d bis %02d:%02d %s"
+
+#: motion/src/camera.cpp
+msgid "Initialize Camera"
+msgstr "Kamera initialisieren"
+
+#: motion/src/camera.cpp
+msgid "disabled"
+msgstr "deaktiviert"
+
+#: motion/src/camera.cpp
+msgid "enabled"
+msgstr "aktiviert"
+
+#: motion/src/camera.cpp
+msgid "Unknown camera type"
+msgstr "Unbekannter Kameratyp"
+
+#: motion/src/camera.cpp
+msgid "Secondary detect"
+msgstr "Sekundäre Erkennung"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Scheduled action. Motion detection %s"
+msgstr "Geplante Aktion. Bewegungserkennung %s"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "%s:%s applied"
+msgstr "%s:%s angewendet"
+
+#: motion/src/camera.cpp
+#, c-format
+msgid "Programming error for changes to parameter %s"
+msgstr "Programmierfehler bei Änderungen am Parameter %s"
+
+#: motion/src/camera.cpp
+msgid "check config"
+msgstr "Konfiguration prüfen"
+
+#: motion/src/camera.cpp
+msgid "Camera closed"
+msgstr "Kamera geschlossen"
+
+#: motion/src/camera.cpp motion/src/netcam.cpp
+msgid "Normal shutdown of camera failed"
+msgstr "Normales Herunterfahren der Kamera fehlgeschlagen"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Invalid log_fflevel %d"
+msgstr "Ungültiges Protokoll fflevel %d"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Invalid native_language_code %s"
+msgstr "Ungültiger nativer Sprachcode %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Duplicate device_id %d not permitted"
+msgstr "Doppelte Geräte-ID %d nicht zulässig"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Old type specified for pause %s. Use 'on' instead"
+msgstr "Alter Typ für Pause %s angegeben. Verwenden Sie stattdessen 'on'"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Old type specified for pause %s.  Use 'off' instead"
+msgstr "Alter Typ für Pause %s angegeben. Verwenden Sie stattdessen 'off'"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Invalid pause %s"
+msgstr "Ungültige Pause %s"
+
+#: motion/src/conf.cpp
+msgid "Removing trailing '/' from target_dir"
+msgstr "Entferne abschließendes '/' aus dem Zielverzeichnis"
+
+#: motion/src/conf.cpp
+msgid "Removing leading '/' from filename"
+msgstr "Entferne führendes '/' aus dem Dateinamen"
+
+#: motion/src/conf.cpp
+msgid "Invalid webcontrol_auth_admin.  No colon separator found"
+msgstr ""
+"Ungültige WebControl-Authentifizierung (Administrator). Kein Doppelpunkt als "
+"Trennzeichen gefunden."
+
+#: motion/src/conf.cpp
+msgid "Invalid webcontrol_auth_admin.  No username found"
+msgstr ""
+"Ungültige WebControl-Authentifizierung (Administrator). Kein Benutzername "
+"gefunden."
+
+#: motion/src/conf.cpp
+msgid "Invalid webcontrol_auth_admin.  No password found"
+msgstr ""
+"Ungültige WebControl-Authentifizierung (Administrator). Kein Passwort "
+"gefunden."
+
+#: motion/src/conf.cpp
+msgid "Invalid webcontrol_auth_user.  No colon separator found"
+msgstr ""
+"Ungültiger WebControl-Authentifizierungsbenutzer. Kein Doppelpunkt als "
+"Trennzeichen gefunden."
+
+#: motion/src/conf.cpp
+msgid "Invalid webcontrol_auth_user.  No username found"
+msgstr ""
+"Ungültiger WebControl-Authentifizierungsbenutzer. Kein Benutzername gefunden."
+
+#: motion/src/conf.cpp
+msgid "Invalid webcontrol_auth_user.  No password found"
+msgstr ""
+"Ungültiger WebControl-Authentifizierungsbenutzer. Kein Passwort gefunden."
+
+#: motion/src/conf.cpp motion/src/webu_post.cpp
+msgid "Bad programming"
+msgstr "Schlechte Programmierung"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "%s %s changed to v4l2_params option %s=%s"
+msgstr "%s %s geändert in v4l2 params option %s=%s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "%s %s changed to movie_params option %s=%s"
+msgstr "%s %s geändert in Filmparameteroption %s=%s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "%s %s changed to timelapse_params option %s=%s"
+msgstr "%s %s geändert in Zeitraffer-Parameteroption %s=%s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "%s after version %s"
+msgstr "%s nach Version %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "coding error %d"
+msgstr "Codierungsfehler %d"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Processing as camera config file %s"
+msgstr "Verarbeitung als Kamerakonfigurationsdatei %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Processing as sound config file %s"
+msgstr "Verarbeitung als Soundkonfigurationsdatei %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Unable to open configuration file: %s"
+msgstr "Konfigurationsdatei konnte nicht geöffnet werden: %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Tabs should not be used in configuration file.:%s"
+msgstr ""
+"Tabulatoren sollten in der Konfigurationsdatei nicht verwendet werden.:%s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Camera config file: %s"
+msgstr "Kamerakonfigurationsdatei: %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Sound config file: %s"
+msgstr "Soundkonfigurationsdatei: %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Coding error with %s"
+msgstr "Codierungsfehler bei %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "Failed to open for writing %s params_file %s"
+msgstr "Fehler beim Öffnen der Parameterdatei %s zum Schreiben. %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "%s values written to params_file: %s"
+msgstr "%s Werte in die Parameterdatei geschrieben: %s"
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "The configuration file location '%s' is deprecated."
+msgstr "Der Speicherort der Konfigurationsdatei '%s' ist veraltet."
+
+#: motion/src/conf.cpp
+#, c-format
+msgid "The new default configuration file location is '%s'"
+msgstr "Der neue Standardspeicherort für die Konfigurationsdatei ist '%s'"
+
+#: motion/src/conf.cpp motion/src/motion.cpp
+msgid "No camera or sound configuration files specified."
+msgstr "Es wurden keine Kamera- oder Tonkonfigurationsdateien angegeben."
+
+#: motion/src/conf.cpp
+msgid "Adding a camera configuration file."
+msgstr "Hinzufügen einer Kamerakonfigurationsdatei."
+
+#: motion/src/dbse.cpp
+msgid "Executing query"
+msgstr "Abfrage wird ausgeführt"
+
+#: motion/src/dbse.cpp
+msgid "Finished query"
+msgstr "Abfrage abgeschlossen"
+
+#: motion/src/dbse.cpp
+#, c-format
+msgid "MariaDB query commit failed. %s error code %d"
+msgstr "MariaDB-Abfrage-Commit fehlgeschlagen. %s Fehlercode %d"
+
+#: motion/src/dbse.cpp
+#, c-format
+msgid "PGSQL query failed: [%s]  %s %s"
+msgstr "PGSQL-Abfrage fehlgeschlagen: [%s] %s %s"
+
+#: motion/src/dbse.cpp
+msgid "Opening database"
+msgstr "Datenbank wird geöffnet"
+
+#: motion/src/dbse.cpp
+#, c-format
+msgid "%s query: %s"
+msgstr "%s Anfrage: %s"
+
+#: motion/src/dbse.cpp
+msgid "Database handler closed"
+msgstr "Datenbank-Handler geschlossen"
+
+#: motion/src/dbse.cpp
+msgid "Unable to start database handler thread."
+msgstr "Der Datenbank-Handler-Thread konnte nicht gestartet werden."
+
+#: motion/src/dbse.cpp
+msgid "Normal shutdown of database handler failed"
+msgstr "Normales Herunterfahren des Datenbank-Handlers fehlgeschlagen"
+
+#: motion/src/i18n.cpp
+#, c-format
+msgid "setting language code to %s"
+msgstr "Sprachcode auf %s gesetzt"
+
+#: motion/src/i18n.cpp
+#, c-format
+msgid "language code %s not supported for override"
+msgstr "Sprachcode %s wird für Überschreibung nicht unterstützt"
+
+#: motion/src/i18n.cpp
+#, c-format
+msgid "unable to set locale for %s"
+msgstr "Gebietsschema für %s konnte nicht festgelegt werden"
+
+#: motion/src/i18n.cpp
+#, c-format
+msgid "set locale to %s"
+msgstr "set locale to %s"
+
+#: motion/src/i18n.cpp
+msgid "log_fflevel"
+msgstr "log fflevel"
+
+#: motion/src/i18n.cpp
+msgid "native_language_code"
+msgstr "Muttersprachlicher Code"
+
+#: motion/src/i18n.cpp
+msgid "schedule_params"
+msgstr "Zeitplanparameter"
+
+#: motion/src/i18n.cpp
+msgid "cleandir_params"
+msgstr "cleandir params"
+
+#: motion/src/i18n.cpp
+msgid "movie_params"
+msgstr "Filmparameter"
+
+#: motion/src/i18n.cpp
+msgid "timelapse_params"
+msgstr "Zeitraffer-Parameter"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_auth_admin"
+msgstr "webcontrol auth admin"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_auth_user"
+msgstr "webcontrol auth user"
+
+#: motion/src/i18n.cpp
+msgid "webcontrol_lock_script"
+msgstr "WebControl-Sperrskript"
+
+#: motion/src/i18n.cpp
+msgid "stream_allcam_params"
+msgstr "stream allcam params"
+
+#: motion/src/i18n.cpp
+msgid "stream_mpegts_params"
+msgstr "stream mpegts params"
+
+#: motion/src/i18n.cpp
+msgid "schedule"
+msgstr "Zeitplan"
+
+#: motion/src/i18n.cpp
+msgid "on"
+msgstr "am"
+
+#: motion/src/i18n.cpp
+msgid "off"
+msgstr "aus"
+
+#: motion/src/i18n.cpp
+msgid "none"
+msgstr "keine"
+
+#: motion/src/i18n.cpp
+msgid "vertical"
+msgstr "vertikal"
+
+#: motion/src/i18n.cpp
+msgid "horizontal"
+msgstr "horizontal"
+
+#: motion/src/i18n.cpp
+msgid "preview"
+msgstr "Vorschau"
+
+#: motion/src/i18n.cpp
+msgid "box"
+msgstr "Box"
+
+#: motion/src/i18n.cpp
+msgid "redbox"
+msgstr "redbox"
+
+#: motion/src/i18n.cpp
+msgid "cross"
+msgstr "Kreuz"
+
+#: motion/src/i18n.cpp
+msgid "redcross"
+msgstr "Rotes Kreuz"
+
+#: motion/src/i18n.cpp
+msgid "first"
+msgstr "erste"
+
+#: motion/src/i18n.cpp
+msgid "best"
+msgstr "beste"
+
+#: motion/src/i18n.cpp
+msgid "center"
+msgstr "Zentrum"
+
+#: motion/src/i18n.cpp
+msgid "roi"
+msgstr "roi"
+
+#: motion/src/i18n.cpp
+msgid "all"
+msgstr "alle"
+
+#: motion/src/i18n.cpp
+msgid "secondary"
+msgstr "sekundär"
+
+#: motion/src/i18n.cpp
+msgid "hourly"
+msgstr "stündlich"
+
+#: motion/src/i18n.cpp
+msgid "daily"
+msgstr "täglich"
+
+#: motion/src/i18n.cpp
+msgid "weekly-sunday"
+msgstr "wöchentlich-sonntag"
+
+#: motion/src/i18n.cpp
+msgid "weekly-monday"
+msgstr "wöchentlich-Montag"
+
+#: motion/src/i18n.cpp
+msgid "monthly"
+msgstr "monatlich"
+
+#: motion/src/i18n.cpp
+msgid "manual"
+msgstr "Handbuch"
+
+#: motion/src/i18n.cpp
+msgid "default"
+msgstr "Standard"
+
+#: motion/src/i18n.cpp
+msgid "stream"
+msgstr "Stream"
+
+#: motion/src/i18n.cpp
+msgid "basic"
+msgstr "Basic"
+
+#: motion/src/i18n.cpp
+msgid "digest"
+msgstr "Digest"
+
+#: motion/src/i18n.cpp
+msgid "params_file"
+msgstr "Parameterdatei"
+
+#: motion/src/i18n.cpp
+msgid "detection"
+msgstr "Erkennung"
+
+#: motion/src/i18n.cpp
+msgid "Detection on/off(checked/unchecked)"
+msgstr "Erkennung ein/aus (aktiviert/deaktiviert)"
+
+#: motion/src/i18n.cpp
+msgid "action"
+msgstr "Aktion"
+
+#: motion/src/i18n.cpp
+msgid "stop"
+msgstr "Stopp"
+
+#: motion/src/i18n.cpp
+msgid "sun"
+msgstr "Sonne"
+
+#: motion/src/i18n.cpp
+msgid "Sunday"
+msgstr "Sonntag"
+
+#: motion/src/i18n.cpp
+msgid "mon"
+msgstr "mon"
+
+#: motion/src/i18n.cpp
+msgid "Monday"
+msgstr "Montag"
+
+#: motion/src/i18n.cpp
+msgid "tue"
+msgstr "Di"
+
+#: motion/src/i18n.cpp
+msgid "Tuesday"
+msgstr "Dienstag"
+
+#: motion/src/i18n.cpp
+msgid "wed"
+msgstr "Mi"
+
+#: motion/src/i18n.cpp
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+#: motion/src/i18n.cpp
+msgid "thu"
+msgstr "Do"
+
+#: motion/src/i18n.cpp
+msgid "Thursday"
+msgstr "Donnerstag"
+
+#: motion/src/i18n.cpp
+msgid "fri"
+msgstr "Fr"
+
+#: motion/src/i18n.cpp
+msgid "Friday"
+msgstr "Freitag"
+
+#: motion/src/i18n.cpp
+msgid "sat"
+msgstr "Sa"
+
+#: motion/src/i18n.cpp
+msgid "Saturday"
+msgstr "Samstag"
+
+#: motion/src/i18n.cpp
+msgid "delete"
+msgstr "löschen"
+
+#: motion/src/i18n.cpp
+msgid "script"
+msgstr "Skript"
+
+#: motion/src/i18n.cpp
+msgid "freq"
+msgstr "freq"
+
+#: motion/src/i18n.cpp
+msgid "weekly"
+msgstr "wöchentlich"
+
+#: motion/src/i18n.cpp
+msgid "runtime"
+msgstr "Laufzeit"
+
+#: motion/src/i18n.cpp
+msgid "dur_unit"
+msgstr "Dauereinheit"
+
+#: motion/src/i18n.cpp
+msgid "m"
+msgstr "m"
+
+#: motion/src/i18n.cpp
+msgid "h"
+msgstr "h"
+
+#: motion/src/i18n.cpp
+msgid "d"
+msgstr "d"
+
+#: motion/src/i18n.cpp
+msgid "w"
+msgstr "w"
+
+#: motion/src/i18n.cpp
+msgid "duration units(minutes,hours,days,weeks)"
+msgstr "Dauereinheiten (Minuten, Stunden, Tage, Wochen)"
+
+#: motion/src/i18n.cpp
+msgid "dur_val"
+msgstr "dur val"
+
+#: motion/src/i18n.cpp
+msgid "duration value (expressed in duration units)"
+msgstr "Dauerwert (ausgedrückt in Dauereinheiten)"
+
+#: motion/src/i18n.cpp
+msgid "removedir"
+msgstr "removedir"
+
+#: motion/src/i18n.cpp
+msgid "Remove directory"
+msgstr "Verzeichnis entfernen"
+
+#: motion/src/i18n.cpp
+msgid "script to execute"
+msgstr "Auszuführendes Skript"
+
+#: motion/src/i18n.cpp
+msgid "input"
+msgstr "Eingabe"
+
+#: motion/src/i18n.cpp
+msgid "palette"
+msgstr "Palette"
+
+#: motion/src/i18n.cpp
+msgid "norm"
+msgstr "Norm"
+
+#: motion/src/i18n.cpp
+msgid "frequency"
+msgstr "Frequenz"
+
+#: motion/src/i18n.cpp
+msgid "decoder"
+msgstr "Decoder"
+
+#: motion/src/i18n.cpp
+msgid "capture_rate"
+msgstr "Erfassungsrate"
+
+#: motion/src/i18n.cpp
+msgid "interrupt"
+msgstr "Unterbrechung"
+
+#: motion/src/i18n.cpp
+msgid "pixelformat"
+msgstr "Pixelformat"
+
+#: motion/src/i18n.cpp
+msgid "Orientation"
+msgstr "Orientierung"
+
+#: motion/src/i18n.cpp
+msgid "Rotate0"
+msgstr "Drehen0"
+
+#: motion/src/i18n.cpp
+msgid "Rotate0Mirror"
+msgstr "Rotate0Mirror"
+
+#: motion/src/i18n.cpp
+msgid "Rotate180"
+msgstr "Drehung um 180°"
+
+#: motion/src/i18n.cpp
+msgid "Rotate180Mirror"
+msgstr "Drehen180Spiegeln"
+
+#: motion/src/i18n.cpp
+msgid "Rotate90"
+msgstr "Rotate90"
+
+#: motion/src/i18n.cpp
+msgid "Rotate90Mirror"
+msgstr "Rotate90Mirror"
+
+#: motion/src/i18n.cpp
+msgid "Rotate270"
+msgstr "Rotate270"
+
+#: motion/src/i18n.cpp
+msgid "Rotate270Mirror"
+msgstr "Rotate270Mirror"
+
+#: motion/src/i18n.cpp
+msgid "AeConstraintMode"
+msgstr "AeConstraintMode"
+
+#: motion/src/i18n.cpp
+msgid "0-Normal"
+msgstr "0-Normal"
+
+#: motion/src/i18n.cpp
+msgid "1-Highlight"
+msgstr "1-Highlight"
+
+#: motion/src/i18n.cpp
+msgid "2-Shadows"
+msgstr "2-Schatten"
+
+#: motion/src/i18n.cpp
+msgid "3-Custom"
+msgstr "3-Benutzerdefiniert"
+
+#: motion/src/i18n.cpp
+msgid "AeEnable"
+msgstr "AeEnable"
+
+#: motion/src/i18n.cpp
+msgid "AeExposureMode"
+msgstr "AeExposureMode"
+
+#: motion/src/i18n.cpp
+msgid "1-Short"
+msgstr "1-Kurz"
+
+#: motion/src/i18n.cpp
+msgid "2-Long"
+msgstr "2-Lang"
+
+#: motion/src/i18n.cpp
+msgid "AeFlickerMode"
+msgstr "AeFlickerMode"
+
+#: motion/src/i18n.cpp
+msgid "0-Off"
+msgstr "0-Aus"
+
+#: motion/src/i18n.cpp
+msgid "1-Manual"
+msgstr "1-Manuell"
+
+#: motion/src/i18n.cpp
+msgid "2-Auto"
+msgstr "2-Auto"
+
+#: motion/src/i18n.cpp
+msgid "AeFlickerPeriod"
+msgstr "AeFlickerPeriod"
+
+#: motion/src/i18n.cpp
+msgid "AeMeteringMode"
+msgstr "AeMeteringMode"
+
+#: motion/src/i18n.cpp
+msgid "0-CentreWeighted"
+msgstr "0-Mittengewichtet"
+
+#: motion/src/i18n.cpp
+msgid "1-Spot"
+msgstr "1-Spot"
+
+#: motion/src/i18n.cpp
+msgid "2-Matrix"
+msgstr "2-Matrix"
+
+#: motion/src/i18n.cpp
+msgid "AeState"
+msgstr "AeState"
+
+#: motion/src/i18n.cpp
+msgid "0-Idle"
+msgstr "0-Leerlauf"
+
+#: motion/src/i18n.cpp
+msgid "1-Searching"
+msgstr "1-Suche"
+
+#: motion/src/i18n.cpp
+msgid "2-Converged"
+msgstr "2-Konvergiert"
+
+#: motion/src/i18n.cpp
+msgid "AfMetering"
+msgstr "AfMetering"
+
+#: motion/src/i18n.cpp
+msgid "0-Auto"
+msgstr "0-Auto"
+
+#: motion/src/i18n.cpp
+msgid "1-Windows"
+msgstr "1-Windows"
+
+#: motion/src/i18n.cpp
+msgid "AfMode"
+msgstr "AfMode"
+
+#: motion/src/i18n.cpp
+msgid "0-Manual"
+msgstr "0-Manuell"
+
+#: motion/src/i18n.cpp
+msgid "1-Auto"
+msgstr "1-Auto"
+
+#: motion/src/i18n.cpp
+msgid "2-Continuous"
+msgstr "2-Kontinuierlich"
+
+#: motion/src/i18n.cpp
+msgid "AfPause"
+msgstr "AfPause"
+
+#: motion/src/i18n.cpp
+msgid "0-Immediate"
+msgstr "0-Sofort"
+
+#: motion/src/i18n.cpp
+msgid "1-Deferred"
+msgstr "1-Verschoben"
+
+#: motion/src/i18n.cpp
+msgid "2-Resume"
+msgstr "2-Lebenslauf"
+
+#: motion/src/i18n.cpp
+msgid "AfPauseState"
+msgstr "AfPauseState"
+
+#: motion/src/i18n.cpp
+msgid "0-Running"
+msgstr "0-Läuft"
+
+#: motion/src/i18n.cpp
+msgid "1-Pausing"
+msgstr "1-Pause"
+
+#: motion/src/i18n.cpp
+msgid "2-Paused"
+msgstr "2-Pausiert"
+
+#: motion/src/i18n.cpp
+msgid "AfRange"
+msgstr "AfRange"
+
+#: motion/src/i18n.cpp
+msgid "1-Macro"
+msgstr "1-Makro"
+
+#: motion/src/i18n.cpp
+msgid "2-Full"
+msgstr "2-Voll"
+
+#: motion/src/i18n.cpp
+msgid "AfSpeed"
+msgstr "AfSpeed"
+
+#: motion/src/i18n.cpp
+msgid "1-Fast"
+msgstr "1-Fast"
+
+#: motion/src/i18n.cpp
+msgid "AfState"
+msgstr "AfState"
+
+#: motion/src/i18n.cpp
+msgid "1-Scanning"
+msgstr "1-Scanning"
+
+#: motion/src/i18n.cpp
+msgid "2-Focused"
+msgstr "2-Fokussiert"
+
+#: motion/src/i18n.cpp
+msgid "3-Failed"
+msgstr "3-Fehlgeschlagen"
+
+#: motion/src/i18n.cpp
+msgid "AfTrigger"
+msgstr "AfTrigger"
+
+#: motion/src/i18n.cpp
+msgid "0-Start"
+msgstr "0-Start"
+
+#: motion/src/i18n.cpp
+msgid "1-Cancel"
+msgstr "1-Abbrechen"
+
+#: motion/src/i18n.cpp
+msgid "AfWindows"
+msgstr "AfWindows"
+
+#: motion/src/i18n.cpp
+msgid "Pipe delimited as x|y|h|w"
+msgstr "Pipe begrenzt durch x|y|h|w"
+
+#: motion/src/i18n.cpp
+msgid "AnalogueGain"
+msgstr "AnalogeVerstärkung"
+
+#: motion/src/i18n.cpp
+msgid "AnalogueGainMode"
+msgstr "Analoger Verstärkungsmodus"
+
+#: motion/src/i18n.cpp
+msgid "AwbEnable"
+msgstr "AwbEnable"
+
+#: motion/src/i18n.cpp
+msgid "AwbLocked"
+msgstr "AwbLocked"
+
+#: motion/src/i18n.cpp
+msgid "AwbMode"
+msgstr "AwbMode"
+
+#: motion/src/i18n.cpp
+msgid "1-Incandescent"
+msgstr "1-Glühlampe"
+
+#: motion/src/i18n.cpp
+msgid "2-Tungsten"
+msgstr "2-Wolfram"
+
+#: motion/src/i18n.cpp
+msgid "3-Fluorescent"
+msgstr "3-Fluoreszierend"
+
+#: motion/src/i18n.cpp
+msgid "4-Indoor"
+msgstr "4-Innenbereich"
+
+#: motion/src/i18n.cpp
+msgid "5-Daylight"
+msgstr "5-Tageslicht"
+
+#: motion/src/i18n.cpp
+msgid "6-Cloudy"
+msgstr "6-Bewölkt"
+
+#: motion/src/i18n.cpp
+msgid "7-Custom"
+msgstr "7-Benutzerdefiniert"
+
+#: motion/src/i18n.cpp
+msgid "Brightness"
+msgstr "Helligkeit"
+
+#: motion/src/i18n.cpp
+msgid "ColourCorrectionMatrix"
+msgstr "Farbkorrekturmatrix"
+
+#: motion/src/i18n.cpp
+msgid "Pipe delimited as var1|var2|...|var8|var9"
+msgstr "Pipe-Zeichen als var1|var2|...|var8|var9 getrennt"
+
+#: motion/src/i18n.cpp
+msgid "ColourGains"
+msgstr "ColourGains"
+
+#: motion/src/i18n.cpp
+msgid "Pipe delimited as Red|Blue)"
+msgstr "Pipe (rot|blau abgegrenzt)"
+
+#: motion/src/i18n.cpp
+msgid "ColourTemperature"
+msgstr "Farbtemperatur"
+
+#: motion/src/i18n.cpp
+msgid "Contrast"
+msgstr "Kontrast"
+
+#: motion/src/i18n.cpp
+msgid "DigitalGain"
+msgstr "DigitalGain"
+
+#: motion/src/i18n.cpp
+msgid "ExposureTime"
+msgstr "Belichtungszeit"
+
+#: motion/src/i18n.cpp
+msgid "ExposureTimeMode"
+msgstr "Belichtungszeitmodus"
+
+#: motion/src/i18n.cpp
+msgid "ExposureValue"
+msgstr "Belichtungswert"
+
+#: motion/src/i18n.cpp
+msgid "FocusFoM"
+msgstr "FocusFoM"
+
+#: motion/src/i18n.cpp
+msgid "FrameDuration"
+msgstr "FrameDuration"
+
+#: motion/src/i18n.cpp
+msgid "FrameDurationLimits"
+msgstr "FrameDurationLimits"
+
+#: motion/src/i18n.cpp
+msgid "Pipe delimited as min|max"
+msgstr "Pipe-Begrenzung als min|max"
+
+#: motion/src/i18n.cpp
+msgid "Gamma"
+msgstr "Gamma"
+
+#: motion/src/i18n.cpp
+msgid "HdrChannel"
+msgstr "HdrChannel"
+
+#: motion/src/i18n.cpp
+msgid "0-None"
+msgstr "0-Keine"
+
+#: motion/src/i18n.cpp
+msgid "2-Medium"
+msgstr "2-Mittel"
+
+#: motion/src/i18n.cpp
+msgid "3-Long"
+msgstr "3-Lang"
+
+#: motion/src/i18n.cpp
+msgid "HdrMode"
+msgstr "HDR-Modus"
+
+#: motion/src/i18n.cpp
+msgid "1-MultiExposureUnmerged"
+msgstr "1-MehrfachbelichtungUnzusammengeführt"
+
+#: motion/src/i18n.cpp
+msgid "2-MultiExposure"
+msgstr "2-Mehrfachbelichtung"
+
+#: motion/src/i18n.cpp
+msgid "3-SingleExposure"
+msgstr "3-Einzelbelichtung"
+
+#: motion/src/i18n.cpp
+msgid "4-Night"
+msgstr "4 Nächte"
+
+#: motion/src/i18n.cpp
+msgid "Hue"
+msgstr "Farbton"
+
+#: motion/src/i18n.cpp
+msgid "LensPosition"
+msgstr "Linsenposition"
+
+#: motion/src/i18n.cpp
+msgid "Lux"
+msgstr "Lux"
+
+#: motion/src/i18n.cpp
+msgid "Saturation"
+msgstr "Sättigung"
+
+#: motion/src/i18n.cpp
+msgid "ScalerCrop"
+msgstr "ScalerCrop"
+
+#: motion/src/i18n.cpp
+msgid "SensorBlackLevels"
+msgstr "SensorBlackLevels"
+
+#: motion/src/i18n.cpp
+msgid "Pipe delimited as var1|var2|var3|var4"
+msgstr "Pipe-Begrenzung als var1|var2|var3|var4"
+
+#: motion/src/i18n.cpp
+msgid "SensorTemperature"
+msgstr "SensorTemperature"
+
+#: motion/src/i18n.cpp
+msgid "SensorTimestamp"
+msgstr "SensorTimestamp"
+
+#: motion/src/i18n.cpp
+msgid "Sharpness"
+msgstr "Schärfe"
+
+#: motion/src/i18n.cpp
+msgid "WdrMode"
+msgstr "WdrMode"
+
+#: motion/src/i18n.cpp
+msgid "1-Linear"
+msgstr "1-Linear"
+
+#: motion/src/i18n.cpp
+msgid "2-Power"
+msgstr "2-Power"
+
+#: motion/src/i18n.cpp
+msgid "3-Exponential"
+msgstr "3-Exponential"
+
+#: motion/src/i18n.cpp
+msgid "4-HistogramEqualization"
+msgstr "4-Histogrammausgleich"
+
+#: motion/src/i18n.cpp
+msgid "frame_interval"
+msgstr "Frame-Intervall"
+
+#: motion/src/i18n.cpp
+msgid "model_file"
+msgstr "Modelldatei"
+
+#: motion/src/i18n.cpp
+msgid "image_type"
+msgstr "Bildtyp"
+
+#: motion/src/i18n.cpp
+msgid "full"
+msgstr "vollständig"
+
+#: motion/src/i18n.cpp
+msgid "grey"
+msgstr "grau"
+
+#: motion/src/i18n.cpp
+msgid "scalefactor"
+msgstr "Skalierungsfaktor"
+
+#: motion/src/i18n.cpp
+msgid "minsize"
+msgstr "minsize"
+
+#: motion/src/i18n.cpp
+msgid "maxsize"
+msgstr "maxsize"
+
+#: motion/src/i18n.cpp
+msgid "padding"
+msgstr "Polsterung"
+
+#: motion/src/i18n.cpp
+msgid "threshold_model"
+msgstr "Schwellenwertmodell"
+
+#: motion/src/i18n.cpp
+msgid "winstride"
+msgstr "Winstride"
+
+#: motion/src/i18n.cpp
+msgid "flags"
+msgstr "Flaggen"
+
+#: motion/src/i18n.cpp
+msgid "minneighbors"
+msgstr "Nachbarn"
+
+#: motion/src/i18n.cpp
+msgid "config"
+msgstr "Konfiguration"
+
+#: motion/src/i18n.cpp
+msgid "classes_file"
+msgstr "Klassendatei"
+
+#: motion/src/i18n.cpp
+msgid "framework"
+msgstr "Rahmenwerk"
+
+#: motion/src/i18n.cpp
+msgid "backend"
+msgstr "Backend"
+
+#: motion/src/i18n.cpp
+msgid "target"
+msgstr "Ziel"
+
+#: motion/src/i18n.cpp
+msgid "scale"
+msgstr "Skala"
+
+#: motion/src/i18n.cpp
+msgid "row"
+msgstr "Zeile"
+
+#: motion/src/i18n.cpp
+msgid "col"
+msgstr "Spalte"
+
+#: motion/src/i18n.cpp
+msgid "offset_row"
+msgstr "Offsetzeile"
+
+#: motion/src/i18n.cpp
+msgid "offset_col"
+msgstr "Offset Spalte"
+
+#: motion/src/i18n.cpp
+msgid "event"
+msgstr "Ereignis"
+
+#: motion/src/i18n.cpp
+msgid "snapshot"
+msgstr "Snapshot"
+
+#: motion/src/i18n.cpp
+msgid "camera_add"
+msgstr "Kamera hinzufügen"
+
+#: motion/src/i18n.cpp
+msgid "camera_delete"
+msgstr "Kamera löschen"
+
+#: motion/src/i18n.cpp
+msgid "ptz"
+msgstr "ptz"
+
+#: motion/src/i18n.cpp
+msgid "restart"
+msgstr "Neustart"
+
+#: motion/src/i18n.cpp
+msgid "action_user"
+msgstr "Aktion Benutzer"
+
+#: motion/src/i18n.cpp
+msgid "config_write"
+msgstr "Konfiguration schreiben"
+
+#: motion/src/i18n.cpp
+msgid "movies"
+msgstr "Filme"
+
+#: motion/src/jpegutils.cpp
+#, c-format
+msgid "msg_level: %d, Corrupt JPEG data"
+msgstr "Meldungsstufe: %d, Beschädigte JPEG-Daten"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Error starting camera manager.  Return code: %d"
+msgstr "Fehler beim Starten des Kameramanagers. Rückgabecode: %d"
+
+#: motion/src/libcam.cpp
+msgid "cam_mgr started."
+msgstr "CAM-Manager gestartet."
+
+#: motion/src/libcam.cpp
+msgid "No camera devices found"
+msgstr "Keine Kamerageräte gefunden"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Available libcam_device '%s'"
+msgstr "Verfügbares libcam-Gerät '%s'"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "camera0 specified as device.  Using the first device found. %s"
+msgstr ""
+"camera0 wurde als Gerät angegeben. Verwende das erste gefundene Gerät. %s"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Invalid libcam_device '%s'.  See log message for available devices"
+msgstr ""
+"Ungültiges libcam-Gerät '%s'. Informationen zu verfügbaren Geräten finden "
+"Sie in der Protokollmeldung"
+
+#: motion/src/libcam.cpp
+msgid "Finished."
+msgstr "Fertig."
+
+#: motion/src/libcam.cpp
+msgid "Control not found"
+msgstr "Steuerung nicht gefunden"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Invalid %s value %6.4f"
+msgstr "Ungültiger %s-Wert %6.4f"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "%s Default %6.4f and range %6.4f to %6.4f."
+msgstr "%s Standard %6.4f und Bereich %6.4f bis %6.4f."
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Control id %d not found. value=%s"
+msgstr "Steuerelement-ID %d nicht gefunden. Wert=%s"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Unknown libcamera control %s"
+msgstr "Unbekannte libcamera-Steuerung %s"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Invalid Orientation option: %s."
+msgstr "Ungültige Orientierungsoption: %s."
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Configuration orientation adjusted to %s."
+msgstr "Konfigurationsausrichtung auf %s angepasst."
+
+#: motion/src/libcam.cpp
+msgid "Configuration orientation valid"
+msgstr "Konfigurationsausrichtung gültig"
+
+#: motion/src/libcam.cpp
+msgid "Configuration orientation error"
+msgstr "Konfigurationsorientierungsfehler"
+
+#: motion/src/libcam.cpp
+msgid "Orientation Not available"
+msgstr "Orientierung nicht verfügbar"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Available pixel format: %s (FourCC %s)"
+msgstr "Verfügbares Pixelformat: %s (FourCC %s)"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "User specified pixelformat %s."
+msgstr "Vom Benutzer angegebenes Pixelformat %s."
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Did not find pixelformat %s"
+msgstr "Pixelformat %s nicht gefunden"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Trying pixel format %s"
+msgstr "Versuche Pixelformat %s"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Pixel format was adjusted to %s."
+msgstr "Das Pixelformat wurde auf %s angepasst."
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Configuration adjusted: %s"
+msgstr "Konfiguration angepasst: %s"
+
+#: motion/src/libcam.cpp
+msgid "Configuration is valid"
+msgstr "Konfiguration ist gültig"
+
+#: motion/src/libcam.cpp
+msgid "Error setting configuration"
+msgstr "Fehler beim Einstellen der Konfiguration"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Configuration adjusted: buffer count from %d to %d"
+msgstr "Konfiguration angepasst: Pufferanzahl von %d auf %d erhöht"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Image size adjusted from %dx%d to %dx%d"
+msgstr "Bildgröße von %dx%d auf %dx%d angepasst"
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Pixelformat %s Image size %dx%d"
+msgstr "Pixelformat %s Bildgröße %dx%d"
+
+#: motion/src/libcam.cpp
+msgid "Buffer allocation error."
+msgstr "Pufferzuordnungsfehler."
+
+#: motion/src/libcam.cpp
+msgid "Create request error."
+msgstr "Fehler beim Erstellen der Anfrage."
+
+#: motion/src/libcam.cpp
+msgid "Add buffer for request error."
+msgstr "Puffer für Anforderungsfehler hinzufügen."
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Buffer %d plane %d of %d length %d"
+msgstr "Puffer %d Ebene %d der Länge %d %d"
+
+#: motion/src/libcam.cpp
+msgid "Failed to start capture."
+msgstr "Aufzeichnung konnte nicht gestartet werden."
+
+#: motion/src/libcam.cpp
+msgid "Failed to queue request."
+msgstr "Fehler beim Einreihen der Anfrage in die Warteschlange."
+
+#: motion/src/libcam.cpp
+msgid "Camera started"
+msgstr "Kamera gestartet"
+
+#: motion/src/libcam.cpp
+msgid "Camera stopped."
+msgstr "Kamera angehalten."
+
+#: motion/src/libcam.cpp
+msgid "Updating libcam config"
+msgstr "Aktualisiere libcam-Konfiguration"
+
+#: motion/src/libcam.cpp motion/src/video_v4l2.cpp
+#, c-format
+msgid "Restarting camera. Parameter %s changed to %s"
+msgstr "Kamera wird neu gestartet. Parameter %s geändert in %s"
+
+#: motion/src/libcam.cpp motion/src/netcam.cpp motion/src/video_v4l2.cpp
+msgid "Camera did not reconnect."
+msgstr "Die Kamera konnte keine Verbindung wiederherstellen."
+
+#: motion/src/libcam.cpp motion/src/netcam.cpp motion/src/video_v4l2.cpp
+msgid "Checking for camera every 2 hours."
+msgstr "Kamera wird alle 2 Stunden überprüft."
+
+#: motion/src/libcam.cpp motion/src/netcam.cpp motion/src/video_v4l2.cpp
+msgid "Checking for camera every 10 minutes."
+msgstr "Kamera wird alle 10 Minuten überprüft."
+
+#: motion/src/libcam.cpp motion/src/netcam.cpp motion/src/video_v4l2.cpp
+msgid "Checking for camera every 30 seconds."
+msgstr "Kamera wird alle 30 Sekunden überprüft."
+
+#: motion/src/libcam.cpp
+msgid "Unable to get image.  Camera not started."
+msgstr "Bild konnte nicht abgerufen werden. Kamera nicht gestartet."
+
+#: motion/src/libcam.cpp
+msgid "Unable to process image."
+msgstr "Bildverarbeitung fehlgeschlagen."
+
+#: motion/src/libcam.cpp
+msgid "index, ID and cookie mismatch."
+msgstr "Index-, ID- und Cookie-Fehler."
+
+#: motion/src/libcam.cpp
+#, c-format
+msgid "Excessive empty queue requests: %d"
+msgstr "Zu viele leere Warteschlangenanfragen: %d"
+
+#: motion/src/libcam.cpp
+msgid "libcam not available"
+msgstr "libcam nicht verfügbar"
+
+#: motion/src/logger.cpp
+#, c-format
+msgid "Cannot create log file %s"
+msgstr "Protokolldatei %s konnte nicht erstellt werden"
+
+#: motion/src/motion.cpp
+msgid "Reloading parameters"
+msgstr "Parameter werden neu geladen"
+
+#: motion/src/motion.cpp
+msgid "Restarting log"
+msgstr "Neustart des Protokolls"
+
+#: motion/src/motion.cpp
+msgid "Restarted log"
+msgstr "Neustartprotokoll"
+
+#: motion/src/motion.cpp
+msgid "Restarting database"
+msgstr "Datenbank wird neu gestartet"
+
+#: motion/src/motion.cpp
+msgid "Restarted database"
+msgstr "Datenbank neu gestartet"
+
+#: motion/src/motion.cpp
+#, c-format
+msgid "Restarting webcontrol on port %d"
+msgstr "Webcontrol wird auf Port %d neu gestartet"
+
+#: motion/src/motion.cpp
+#, c-format
+msgid "Restarted webcontrol on port %d"
+msgstr "Webcontrol auf Port %d neu gestartet"
+
+#: motion/src/motion.cpp
+msgid "Waiting for camera or sound configuration to be added via web control."
+msgstr ""
+"Warten auf die Hinzufügung der Kamera- oder Tonkonfiguration über die "
+"Websteuerung."
+
+#: motion/src/motion.cpp motion/src/webu_post.cpp
+msgid "Error stopping camera.  Timed out shutting down"
+msgstr "Fehler beim Stoppen der Kamera. Zeitüberschreitung beim Herunterfahren"
+
+#: motion/src/motion.cpp
+msgid "Camera stopped"
+msgstr "Kamera angehalten"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Invalid quality %d. Permitted range 5-90"
+msgstr "Ungültige Qualität %d. Zulässiger Bereich: 5–90"
+
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
+#, c-format
+msgid "av_dict_set %s = %s"
+msgstr "av dict set %s = %s"
+
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
+#, c-format
+msgid "av_opt_set %s = %s"
+msgstr "av opt set %s = %s"
+
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
+#, c-format
+msgid "av_opt_set  priv_data %s = %s"
+msgstr "av opt set priv data %s = %s"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Unknown movie profile: %s"
+msgstr "Unbekanntes Filmprofil: %s"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "codec profile = %s"
+msgstr "Codec-Profil = %s"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "av_opt_set priv_data profile = %s"
+msgstr "av opt set priv data profile = %s"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "av_opt_set priv_data crf = %s"
+msgstr "av opt set priv data crf = %s"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "%s codec quality: %d crf: %s bit_rate: %d gblqual: %d"
+msgstr "%s Codec-Qualität: %d CRF: %s Bitrate: %d GBL-Qualität: %d"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Failed to find user requested codec %s"
+msgstr "Der angeforderte Codec %s konnte nicht gefunden werden"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "codec for container %s not found"
+msgstr "Codec für Container %s nicht gefunden"
+
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
+#, c-format
+msgid "Set codec flags %s<<%s"
+msgstr "Setze Codec-Flags %s<<%s"
+
+#: motion/src/movie.cpp motion/src/webu_mpegts.cpp
+#, c-format
+msgid "Set codec flags2 %s<<%s"
+msgstr "Setze Codec-Flags2 %s<<%s"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Low fps. Encoding %d frames into a %d frames container."
+msgstr ""
+"Niedrige Bildrate. %d Frames werden in einen %d Frames Container kodiert."
+
+#: motion/src/movie.cpp
+msgid "Unable to open codec.  Trying alternate FPS values"
+msgstr "Codec konnte nicht geöffnet werden. Versuche alternative FPS-Werte"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Opened codec with %d fps."
+msgstr "Codec mit %d fps geöffnet."
+
+#: motion/src/movie.cpp
+msgid "Ensure audio codec is permitted with a MP4 container."
+msgstr ""
+"Stellen Sie sicher, dass der Audio-Codec für einen MP4-Container zugelassen "
+"ist."
+
+#: motion/src/movie.cpp
+msgid "Invalid pkt->pts"
+msgstr "Ungültiges Paket->Punkte"
+
+#: motion/src/movie.cpp
+msgid "pkt->pts is AV_NOPTS_VALUE"
+msgstr "pkt->pts ist AV NOPTS VALUE"
+
+#: motion/src/movie.cpp
+msgid "pkt->dts is invalid"
+msgstr "pkt->dts ist ungültig"
+
+#: motion/src/movie.cpp
+msgid "pkt->dts is AV_NOPTS_VALUE"
+msgstr "pkt->dts ist AV NOPTS VALUE"
+
+#: motion/src/movie.cpp
+msgid "pkt->dts or pkt->pts is AV_NOPTS_VALUE"
+msgstr "pkt->dts oder pkt->pts ist AV NOPTS VALUE"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "av_copy_packet: %s"
+msgstr "AV-Kopierpaket: %s"
+
+#: motion/src/movie.cpp
+msgid "Could not create output file"
+msgstr "Ausgabedatei konnte nicht erstellt werden"
+
+#: motion/src/movie.cpp
+msgid "Pass-through stream opened"
+msgstr "Durchleitungsstream geöffnet"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Creating movie: %s"
+msgstr "Film wird erstellt: %s"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Finished movie: %s"
+msgstr "Film beendet: %s"
+
+#: motion/src/movie.cpp
+msgid "Could not set the picture"
+msgstr "Bild konnte nicht festgelegt werden"
+
+#: motion/src/movie.cpp
+msgid "Could not open output file"
+msgstr "Ausgabedatei konnte nicht geöffnet werden"
+
+#: motion/src/movie.cpp
+msgid "Invalid movie type"
+msgstr "Ungültiger Filmtyp"
+
+#: motion/src/movie.cpp
+msgid "Running test of the various output formats."
+msgstr "Testlauf der verschiedenen Ausgabeformate."
+
+#: motion/src/movie.cpp
+msgid ""
+"Setting preferred codec using container no longer supported.  Use "
+"movie_params"
+msgstr ""
+"Die Festlegung des bevorzugten Codecs über den Container wird nicht mehr "
+"unterstützt. Verwenden SieFilmparameter"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "Movie fps %d"
+msgstr "Film fps %d"
+
+#: motion/src/movie.cpp
+msgid "Error getting movie_params"
+msgstr "Fehler beim Abrufen der Filmparameter"
+
+#: motion/src/movie.cpp
+msgid "Error initializing movie."
+msgstr "Fehler beim Initialisieren des Films."
+
+#: motion/src/movie.cpp
+msgid "Error getting timelapse_params"
+msgstr "Fehler beim Abrufen der Zeitrafferparameter"
+
+#: motion/src/movie.cpp
+msgid "Invalid fps provided in timelapse_params.  Using 30"
+msgstr ""
+"Ungültige Bildrate in den Zeitrafferparametern angegeben. Verwende 30 fps"
+
+#: motion/src/movie.cpp
+msgid "Error initializing timelapse."
+msgstr "Fehler beim Initialisieren des Zeitraffers."
+
+#: motion/src/movie.cpp
+msgid "Requested extpipe in addition to movie_output."
+msgstr "Zusätzlich zur Filmausgabe wurde extpipe angefordert."
+
+#: motion/src/movie.cpp
+msgid "Adjusting file name of extpipe output."
+msgstr "Dateinamen der extpipe-Ausgabe anpassen."
+
+#: motion/src/movie.cpp
+msgid "create path failed"
+msgstr "Pfad erstellen fehlgeschlagen"
+
+#: motion/src/movie.cpp
+#, c-format
+msgid "extpipe cmd: %s"
+msgstr "extpipe cmd: %s"
+
+#: motion/src/netcam.cpp
+msgid "Failed to get cuda pix format"
+msgstr "Fehler beim Abrufen des CUDA-PIX-Formats"
+
+#: motion/src/netcam.cpp
+msgid "Failed to get drm pix format"
+msgstr "Fehler beim Abrufen des DRM-PIX-Formats"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera reading (%s) timed out"
+msgstr "%s:Kameramessung (%s) hat Zeitüberschreitung verursacht"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera (%s) timed out"
+msgstr "%s:Kamera (%s) hat Zeitüberschreitung gemeldet"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "File specified: %s"
+msgstr "Angegebene Datei: %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "Directory specified: %s"
+msgstr "Angegebenes Verzeichnis: %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "Directory did not open: %s"
+msgstr "Verzeichnis konnte nicht geöffnet werden: %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "Directory/file not found: %s"
+msgstr "Verzeichnis/Datei nicht gefunden: %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "Netcam Path: %s"
+msgstr "Netcam-Pfad: %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Resized packet array to %d"
+msgstr "%s: Paketarray auf %d vergrößert"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:av_copy_packet:%s ,Interrupt:%s"
+msgstr "%s:av copy packet:%s ,Interrupt:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Ignoring packet with invalid data"
+msgstr "%s:Paket mit ungültigen Daten wird ignoriert"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Rec frame error:%s"
+msgstr "%s:Rec frame error:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error getting hw frame buffer"
+msgstr "%s:Fehler beim Abrufen des Hardware-Framebuffers"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error transferring HW decoded to system memory"
+msgstr "%s:Fehler beim Übertragen der HW-Dekodierung in den Systemspeicher"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Interrupted or handler_stop on send"
+msgstr "%s:Unterbrochen oder Handler beim Senden gestoppt"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Send ignoring packet with invalid data"
+msgstr "%s:Sende Paket mit ungültigen Daten, wobei das Paket ignoriert wird"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error sending packet to codec:%s"
+msgstr "%s:Fehler beim Senden des Pakets an den Codec:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error decoding video packet...it is audio"
+msgstr "%s:Fehler beim Dekodieren des Videopakets...es handelt sich um Audio"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error decoding video packet:Copying to buffer"
+msgstr "%s:Fehler beim Dekodieren des Videopakets:Kopieren in den Puffer"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Testing for hardware decoders"
+msgstr "%s:Test für Hardware-Decoder"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:vaapi hardware decoding is not available"
+msgstr "%s:vaapi Hardware-Dekodierung ist nicht verfügbar"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:cuda hardware decoding is not available"
+msgstr "%s: Die CUDA-Hardware-Dekodierung ist nicht verfügbar"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:drm hardware decoding is not available"
+msgstr "%s: Die DRM-Hardware-Dekodierung ist nicht verfügbar"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:No hardware decoders available.  Using software decoding"
+msgstr ""
+"%s: Keine Hardware-Decoder verfügbar. Software-Decodierung wird verwendet"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Using %s hardware decoder."
+msgstr "%s:Verwendung des Hardware-Decoders %s."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Interrupted"
+msgstr "%s:Unterbrochen"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:%s:%s"
+msgstr "%s:%s:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:%s:Failed"
+msgstr "%s:%s:Fehlgeschlagen"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Decoder %s did not work."
+msgstr "%s:Decoder %s hat nicht funktioniert."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Ignoring requested decoder %s"
+msgstr "%s:Ignoriere angeforderten Decoder %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Initializing vaapi decoder"
+msgstr "%s: Initialisiere VAAPI-Decoder"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to find vaapi hw device"
+msgstr "%s: Das VAAPI-Hardwaregerät konnte nicht gefunden werden"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error enumerating HW pixel types"
+msgstr "%s:Fehler beim Auflisten der HW-Pixeltypen"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Available HW pixel type:%s"
+msgstr "%s:Verfügbarer HW-Pixeltyp:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Initializing cuda decoder"
+msgstr "%s: Initialisiere CUDA-Decoder"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to find cuda hw device"
+msgstr "%s:CUDA-Hardwaregerät konnte nicht gefunden werden"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Initializing drm decoder"
+msgstr "%s: Initialisiere DRM-Decoder"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to find drm hw device"
+msgstr "%s: DRM-Hardwaregerät konnte nicht gefunden werden"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Initializing decoder %s"
+msgstr "%s:Decoder %s wird initialisiert"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Using decoder %s"
+msgstr "%s:Verwende Decoder %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Initializing decoder for %s"
+msgstr "%s:Decoder für %s wird initialisiert"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Decoder opened"
+msgstr "%s:Decoder geöffnet"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to allocate swsframe_in."
+msgstr "%s:Swsframe konnte nicht zugewiesen werden."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to allocate swsframe_out."
+msgstr "%s:Swsframe konnte nicht zugewiesen werden."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Pixel format %s will be converted."
+msgstr "%s:Pixelformat %s wird konvertiert."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to allocate scaling context."
+msgstr "%s:Skalierungskontext konnte nicht zugewiesen werden."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error determining size of frame out"
+msgstr "%s:Fehler beim Ermitteln der Ausgabegröße des Rahmens"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error allocating picture in:%s"
+msgstr "%s:Fehler beim Zuweisen des Bildes in:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error allocating picture out:%s"
+msgstr "%s:Fehler beim Zuweisen des Bildspeichers:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error resizing/reformatting:%s"
+msgstr "%s:Fehler beim Ändern der Größe/Formatierung:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Error putting frame into output buffer:%s"
+msgstr "%s:Fehler beim Einfügen des Frames in den Ausgabepuffer:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Latency calculation error "
+msgstr "%s: Fehler bei der Latenzberechnung "
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:av_read_frame:%s"
+msgstr "%s:av gelesener Frame:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:capture_rate not specified in params. Using %d"
+msgstr "%s: Aufnahmerate nicht in den Parametern angegeben. Verwende %d"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:capture_rate not specified."
+msgstr "%s:Aufnahmerate nicht angegeben."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Using framerate %d"
+msgstr "%s:Verwende Bildrate %d"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:%s = %s"
+msgstr "%s:%s = %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:%s null prm_s pointer"
+msgstr "%s:%s Null-Prm-S-Zeiger"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Setting up camera(%s)."
+msgstr "%s:Kamera(%s) wird eingerichtet."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to copy codec parameters"
+msgstr "%s:Codec-Parameter konnten nicht kopiert werden"
+
+#: motion/src/netcam.cpp
+msgid "No path passed to connect"
+msgstr "Kein Pfad zum Verbinden übergeben"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Opening camera"
+msgstr "%s:Kamera wird geöffnet"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to open camera(%s):%s"
+msgstr "%s:Kamera(%s) konnte nicht geöffnet werden:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to open camera(%s):timeout"
+msgstr "%s:Kamera(%s) konnte nicht geöffnet werden: Zeitüberschreitung"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Opened camera(%s)"
+msgstr "%s:Kamera geöffnet(%s)"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to find stream info:%s"
+msgstr "%s:Streaminformationen konnten nicht gefunden werden:%s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to find stream info"
+msgstr "%s:Streaminformationen konnten nicht gefunden werden"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to open codec context"
+msgstr "%s:Codec-Kontext konnte nicht geöffnet werden"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Connected and unable to open codec context"
+msgstr "%s:Verbunden, aber Codec-Kontext kann nicht geöffnet werden"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera image size is invalid"
+msgstr "%s:Die Kamerabildgröße ist ungültig"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to allocate frame."
+msgstr "%s:Frame konnte nicht zugewiesen werden."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Failed to copy stream for pass-through."
+msgstr "%s:Fehler beim Kopieren des Datenstroms für die Durchleitung."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Failed to read first image"
+msgstr "%s:Fehler beim Lesen des ersten Bildes"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera (%s) connected"
+msgstr "%s:Kamera (%s) verbunden"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Netcam capture FPS is %d."
+msgstr "%s:Netcam-Aufnahme FPS beträgt %d."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera source is %d FPS"
+msgstr "%s:Kameraquelle ist %d FPS"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Unable to determine the camera source FPS."
+msgstr ""
+"%s:Die Bildwiederholfrequenz (FPS) der Kameraquelle konnte nicht ermittelt "
+"werden."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Capture FPS less than camera FPS. Decoding errors will occur."
+msgstr ""
+"%s: Die Aufnahme-FPS ist niedriger als die Kamera-FPS. Es treten "
+"Dekodierungsfehler auf."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Capture FPS should be greater than camera FPS."
+msgstr "%s:Die Aufnahme-FPS sollte höher sein als die Kamera-FPS."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:An audio stream was detected.  Capture_rate increased to compensate."
+msgstr ""
+"%s: Es wurde ein Audiostream erkannt. Die Aufnahmerate wurde zur "
+"Kompensation erhöht."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Processing file: %s"
+msgstr "%s:Verarbeite Datei: %s"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Reconnecting with camera...."
+msgstr "%s:Verbindung zur Kamera wird wiederhergestellt...."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera did not reconnect."
+msgstr "%s:Kamera konnte nicht wieder verbunden werden."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Checking for camera every 2 hours."
+msgstr "%s:Überprüfe die Kamera alle 2 Stunden."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Checking for camera every 10 minutes."
+msgstr "%s:Überprüfe die Kamera alle 10 Minuten."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Checking for camera every 10 seconds."
+msgstr "%s:Überprüfe alle 10 Sekunden, ob die Kamera aktiv ist."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera handler started"
+msgstr "%s:Kamera-Handler gestartet"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Camera handler stopped"
+msgstr "%s:Kamera-Handler gestoppt"
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Waiting for first image from the handler."
+msgstr "%s:Warte auf das erste Bild vom Handler."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Shutting down network camera."
+msgstr "%s:Netzwerkkamera wird heruntergefahren."
+
+#: motion/src/netcam.cpp
+#, c-format
+msgid "%s:Shut down complete."
+msgstr "%s: Herunterfahren abgeschlossen."
+
+#: motion/src/netcam.cpp
+msgid "Norm: Opening Netcam"
+msgstr "Norm: Netcam wird geöffnet"
+
+#: motion/src/netcam.cpp
+msgid "High: Opening Netcam"
+msgstr "Hoch: Netcam wird geöffnet"
+
+#: motion/src/picture.cpp
+msgid "Error creating picture file name"
+msgstr "Fehler beim Erstellen des Bilddateinamens"
+
+#: motion/src/picture.cpp
+msgid "Failed reading image data from pgm file"
+msgstr "Fehler beim Lesen der Bilddaten aus der PGM-Datei"
+
+#: motion/src/schedule.cpp
+#, c-format
+msgid "Removing empty directory %s"
+msgstr "Entferne leeres Verzeichnis %s"
+
+#: motion/src/schedule.cpp
+#, c-format
+msgid "Removing %s"
+msgstr "Entferne %s"
+
+#: motion/src/schedule.cpp
+#, c-format
+msgid "Invalid clean directory duration units %s"
+msgstr ""
+"Ungültige Einheiten für die Dauer der Bereinigung des Verzeichnisses %s"
+
+#: motion/src/schedule.cpp
+#, c-format
+msgid "Invalid clean directory duration %d%s"
+msgstr "Ungültige Dauer der Verzeichnisbereinigung %d%s"
+
+#: motion/src/schedule.cpp
+msgid "Schedule process closed"
+msgstr "Terminplanungsprozess abgeschlossen"
+
+#: motion/src/schedule.cpp
+msgid "Unable to start schedule thread."
+msgstr "Der Thread zur Planung konnte nicht gestartet werden."
+
+#: motion/src/schedule.cpp
+msgid "Normal shutdown of schedule thread failed"
+msgstr "Normales Herunterfahren des geplanten Threads fehlgeschlagen"
+
+#: motion/src/sound.cpp
+msgid "Sound alert ids must be unique."
+msgstr "Die IDs der Tonalarme müssen eindeutig sein."
+
+#: motion/src/sound.cpp
+msgid "Creating new sound alert ids."
+msgstr "Neue Soundalarm-IDs werden erstellt."
+
+#: motion/src/sound.cpp
+msgid "Sound Alert Parameters:"
+msgstr "Parameter für akustische Alarme:"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  alert_id:            %d"
+msgstr " Alarm-ID: %d"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  alert_nm             %s"
+msgstr " alert nm %s"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  freq_low:            %.4f"
+msgstr " Frequenz niedrig: %.4f"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  freq_high:           %.4f"
+msgstr " Frequenz hoch: %.4f"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  volume_count:        %d"
+msgstr " Volumenanzahl: %d"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  volume_level:        %d"
+msgstr " Lautstärkepegel: %d"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  trigger_threshold:   %d"
+msgstr " Auslöseschwelle: %d"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "  trigger_duration:    %d"
+msgstr " Triggerdauer: %d"
+
+#: motion/src/sound.cpp
+#, c-format
+msgid "%s : %s"
+msgstr "%s : %s"
+
+#: motion/src/sound.cpp
+msgid "Started."
+msgstr "Gestartet."
+
+#: motion/src/sound.cpp
+msgid "Stopped."
+msgstr "Angehalten."
+
+#: motion/src/sound.cpp
+msgid "Initialize sound frequency"
+msgstr "Tonfrequenz initialisieren"
+
+#: motion/src/sound.cpp
+msgid "Sound exiting"
+msgstr "Ton wird beendet"
+
+#: motion/src/sound.cpp
+msgid "Required packages not installed"
+msgstr "Erforderliche Pakete nicht installiert"
+
+#: motion/src/sound.cpp
+msgid "Unable to start sound frequency detection loop."
+msgstr "Die Schallfrequenzerkennungsschleife konnte nicht gestartet werden."
+
+#: motion/src/sound.cpp
+msgid "Normal shutdown of sound frequency detection failed"
+msgstr "Normales Abschalten der Schallfrequenzerkennung fehlgeschlagen"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Warning! Function %s tries to resize 0 bytes!"
+msgstr "Warnung! Funktion %s versucht, 0 Bytes zu vergrößern!"
+
+#: motion/src/util.cpp
+msgid "Adjusting the path provided since webcontrol is open"
+msgstr "Der angegebene Pfad wird angepasst, da WebControl geöffnet ist"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Original >%s<"
+msgstr "Original >%s<"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "New >%s<"
+msgstr "Neu >%s<"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Adjusted >%s<"
+msgstr "Angepasst >%s<"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Unable to start external command >%s %s<"
+msgstr "Externer Befehl konnte nicht gestartet werden >%s %s<"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Executing external command >%s %s<"
+msgstr "Führe externen Befehl aus >%s %s<"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "parse file:%s"
+msgstr "Datei analysieren:%s"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Unable to open params_file: %s"
+msgstr "Parameterdatei konnte nicht geöffnet werden: %s"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Unable to parse line:%s"
+msgstr "Zeile %s konnte nicht analysiert werden"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "%s:>%s< >%s<"
+msgstr "%s:>%s< >%s<"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Unsupported pixel format >%s<"
+msgstr "Nicht unterstütztes Pixelformat >%s<"
+
+#: motion/src/util.cpp
+msgid "Find corresponding AVPIXELFORMAT and adjust code"
+msgstr "Entsprechendes AVPIXELFORMAT finden und Code anpassen"
+
+#: motion/src/util.cpp
+msgid "Unable to allocate frm_in."
+msgstr "Fehler beim Zuweisen von frm in."
+
+#: motion/src/util.cpp
+msgid "Unable to allocate frm_out."
+msgstr "Speicherzuweisung von ausgehend nicht möglich."
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Error filling arrays: %s"
+msgstr "Fehler beim Füllen der Arrays: %s"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Error Filling array 2: %s"
+msgstr "Fehler beim Füllen von Array 2: %s"
+
+#: motion/src/util.cpp
+msgid "Unable to allocate scaling context."
+msgstr "Skalierungskontext konnte nicht zugewiesen werden."
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Error resizing/reformatting: %s"
+msgstr "Fehler beim Ändern der Größe/Formatierung: %s"
+
+#: motion/src/util.cpp
+#, c-format
+msgid "Error putting frame into output buffer: %s"
+msgstr "Fehler beim Einfügen des Frames in den Ausgabepuffer: %s"
+
+#: motion/src/video_loopback.cpp
+msgid "Pipe Device"
+msgstr "Rohrvorrichtung"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "cap.driver:   %s"
+msgstr "cap.driver: %s"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "cap.card:     %s"
+msgstr "cap.card: %s"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "cap.bus_info: %s"
+msgstr "cap.bus info: %s"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "cap.card:     %u.%u.%u"
+msgstr "cap.card: %u.%u.%u"
+
+#: motion/src/video_loopback.cpp
+msgid "Device capabilities"
+msgstr "Gerätefunktionen"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "%s"
+msgstr "%s"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "type: type:           %d"
+msgstr "Typ: Typ: %d"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "fmt.pix.width:        %d"
+msgstr "fmt.pix.width: %d"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "fmt.pix.height:       %d"
+msgstr "fmt.pix.height: %d"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "fmt.pix.pixelformat:  %d"
+msgstr "fmt.pix.pixelformat: %d"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "fmt.pix.sizeimage:    %d"
+msgstr "fmt.pix.sizeimage: %d"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "fmt.pix.field:        %d"
+msgstr "fmt.pix.field: %d"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "fmt.pix.bytesperline: %d"
+msgstr "fmt.pix.bytesperline: %d"
+
+#: motion/src/video_loopback.cpp
+#, c-format
+msgid "fmt.pix.colorspace:   %d"
+msgstr "fmt.pix.colorspace: %d"
+
+#: motion/src/video_loopback.cpp
+msgid "ioctl (VIDIOC_QUERYCAP)"
+msgstr "ioctl (VIDIOC QUERYCAP)"
+
+#: motion/src/video_loopback.cpp
+msgid "ioctl (VIDIOC_G_FMT)"
+msgstr "ioctl (VIDIOC G FMT)"
+
+#: motion/src/video_loopback.cpp
+msgid "ioctl (VIDIOC_S_FMT)"
+msgstr "ioctl (VIDIOC S FMT)"
+
+#: motion/src/video_loopback.cpp
+msgid "Failed to put image into motion video pipe"
+msgstr "Fehler beim Übertragen des Bildes in die Videoleitung"
+
+#: motion/src/video_v4l2.cpp
+msgid "  V4L2 ID :  Name : Standardized Name : Default : Range "
+msgstr " V4L2 ID : Name : Standardisierter Name : Standard : Bereich"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "  %s : %s : %s : %d"
+msgstr " %s : %s : %s : %d"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "%s : %s : %s : %d: %d to %d"
+msgstr "%s : %s : %s : %d: %d bis %d"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "%s control option value %s is below minimum %d.  Skipping..."
+msgstr ""
+"Der Wert der Steuerungsoption %s %s liegt unter dem Mindestwert %d. "
+"Überspringen..."
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "%s control option value %s is above maximum %d.  Skipping..."
+msgstr ""
+"Der Wert der Steuerungsoption %s %s liegt über dem Maximalwert %d. "
+"Überspringen..."
+
+#: motion/src/video_v4l2.cpp
+msgid "control type not supported"
+msgstr "Steuerungstyp nicht unterstützt"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "Requested v4l2 control \"%s\" not found."
+msgstr "Angeforderte v4l2-Steuerung \"%s\" nicht gefunden."
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "(%i) %c%c%c%c (%s)"
+msgstr "(%i) %c%c%c%c (%s)"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "Selected palette index %d (%s)"
+msgstr "Ausgewählter Palettenindex %d (%s)"
+
+#: motion/src/video_v4l2.cpp
+msgid "VIDIOC_QBUF"
+msgstr "VIDIOC QBUF"
+
+#: motion/src/video_v4l2.cpp
+msgid "Error converting fourcc string"
+msgstr "Fehler beim Konvertieren der fourcc-Zeichenkette"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "Pixel conversion of %s"
+msgstr "Pixelkonvertierung von %s"
+
+#: motion/src/video_v4l2.cpp
+msgid "VIDIOC_DQBUF"
+msgstr "VIDIOC DQBUF"
+
+#: motion/src/video_v4l2.cpp
+msgid "------------------------"
+msgstr "------------------------"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "cap.driver: \"%s\""
+msgstr "cap.driver: \"%s\""
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "cap.card: \"%s\""
+msgstr "cap.card: \"%s\""
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "cap.bus_info: \"%s\""
+msgstr "cap.bus info: \"%s\""
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "cap.capabilities=0x%08X"
+msgstr "cap.capabilities=0x%08X"
+
+#: motion/src/video_v4l2.cpp
+msgid "- VIDEO_CAPTURE"
+msgstr "- VIDEOAUFNAHME"
+
+#: motion/src/video_v4l2.cpp
+msgid "- VIDEO_OUTPUT"
+msgstr "- VIDEOAUSGABE"
+
+#: motion/src/video_v4l2.cpp
+msgid "- VIDEO_OVERLAY"
+msgstr "- VIDEO-OVERLAY"
+
+#: motion/src/video_v4l2.cpp
+msgid "- VBI_CAPTURE"
+msgstr "- VBI-Aufnahme"
+
+#: motion/src/video_v4l2.cpp
+msgid "- VBI_OUTPUT"
+msgstr "- VBI-AUSGABE"
+
+#: motion/src/video_v4l2.cpp
+msgid "- RDS_CAPTURE"
+msgstr "- RDS-Aufnahme"
+
+#: motion/src/video_v4l2.cpp
+msgid "- TUNER"
+msgstr "- TUNER"
+
+#: motion/src/video_v4l2.cpp
+msgid "- AUDIO"
+msgstr "- AUDIO"
+
+#: motion/src/video_v4l2.cpp
+msgid "- READWRITE"
+msgstr "- READWRITE"
+
+#: motion/src/video_v4l2.cpp
+msgid "- ASYNCIO"
+msgstr "- ASYNCIO"
+
+#: motion/src/video_v4l2.cpp
+msgid "- STREAMING"
+msgstr "- STREAMING"
+
+#: motion/src/video_v4l2.cpp
+msgid "- TIMEPERFRAME"
+msgstr "- TIMEPERFRAME"
+
+#: motion/src/video_v4l2.cpp
+#, c-format
+msgid "  %dx%d fps %s"
+msgstr " %dx%d fps %s"
+
+#: motion/src/webu.cpp
+#, c-format
+msgid "Unable to start webserver on port %d"
+msgstr "Webserver konnte nicht auf Port %d gestartet werden"
+
+#: motion/src/webu.cpp
+#, c-format
+msgid "Validate no other applications/instances are using port %d"
+msgstr ""
+"Sicherstellen, dass keine anderen Anwendungen/Instanzen Port %d verwenden"
+
+#: motion/src/webu.cpp
+#, c-format
+msgid "Started webserver on port %d"
+msgstr "Webserver auf Port %d gestartet"
+
+#: motion/src/webu.cpp
+#, c-format
+msgid "Closing webcontrol on port %d"
+msgstr "Webcontrol auf Port %d wird geschlossen"
+
+#: motion/src/webu.cpp
+#, c-format
+msgid "Excessive wait closing webcontrol on port %d"
+msgstr "Zu lange Wartezeit beim Schließen der Websteuerung auf Port %d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Image has changed. Device: %d %dx%d to %dx%d"
+msgstr "Das Bild hat sich geändert. Gerät: %d %dx%d zu %dx%d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Could not get image for device %d"
+msgstr "Bild für Gerät %d konnte nicht abgerufen werden"
+
+#: motion/src/webu_allcam.cpp
+msgid "Unable to scale image"
+msgstr "Bild konnte nicht skaliert werden"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Device %d Original Size %dx%d Scale %d New Size %dx%d"
+msgstr "Gerät %d Originalgröße %dx%d Skalierung %d Neue Größe %dx%d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Device %d invalid image column offset. (%d + %d) less than zero"
+msgstr "Gerät %d ungültiger Bildspalten-Offset. (%d + %d) kleiner als Null"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Device %d invalid image column offset. (%d + %d) over image size"
+msgstr ""
+"Gerät %d ungültiger Bildspalten-Offset. (%d + %d) überschreitet die Bildgröße"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Device %d invalid image row offset. (%d + %d) less than zero"
+msgstr "Gerät %d ungültiger Bildzeilen-Offset. (%d + %d) kleiner als Null"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Device %d invalid image row offset. (%d + %d) over image size"
+msgstr ""
+"Gerät %d ungültiger Bildzeilen-Offset. (%d + %d) überschreitet die Bildgröße"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Combined Image Original Size %dx%d Scale %d New Size %dx%d"
+msgstr "Kombiniertes Bild Originalgröße %dx%d Skalierung %d Neue Größe %dx%d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "No stream_allcam_params for cam %d"
+msgstr "Keine Stream-Allcam-Parameter für Kamera %d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Duplicate stream_allcam_params  cam %d, cam %d row %d col %d"
+msgstr "Stream duplizieren allcam params cam %d, cam %d row %d col %d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Invalid stream_allcam_params row cam %d, row %d"
+msgstr "Ungültige Stream-Parameter für alle Kameras, Zeile Kamera %d, Zeile %d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Invalid stream_allcam_params col cam %d, col %d"
+msgstr "Ungültige Stream-Parameter für allcam Spalte Kamera %d, Spalte %d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Invalid stream_allcam_params combination. Missing row %d"
+msgstr "Ungültige Kombination der Stream-Allcam-Parameter. Fehlende Zeile %d"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "Invalid stream_allcam_params combination.  Missing row %d column %d"
+msgstr ""
+"Ungültige Kombination der Stream-Allcam-Parameter. Fehlende Zeile %d, Spalte "
+"%d"
+
+#: motion/src/webu_allcam.cpp
+msgid "Creating default stream preview values"
+msgstr "Erstellen von Standard-Stream-Vorschauwerten"
+
+#: motion/src/webu_allcam.cpp
+#, c-format
+msgid "stream_allcam_params values. Device %d row %d col %d"
+msgstr "Stream allcam params values. Gerät %d Zeile %d Spalte %d"
+
+#: motion/src/webu_allcam.cpp
+msgid "All camera closed"
+msgstr "Alle Kameras geschlossen"
+
+#: motion/src/webu_allcam.cpp
+msgid "Unable to start all camera thread."
+msgstr "Der gesamte Kamerathread konnte nicht gestartet werden."
+
+#: motion/src/webu_allcam.cpp
+msgid "Normal shutdown of all camera failed"
+msgstr "Normales Herunterfahren aller Kameras fehlgeschlagen"
+
+#: motion/src/webu_ans.cpp
+msgid "Webcontrol files have changed.  Restarting webcontrol"
+msgstr "Die Webcontrol-Dateien wurden geändert. Webcontrol wird neu gestartet"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "cmd0: >%s< cmd1: >%s< cmd2: >%s< cmd3: >%s< camindx: >%d< "
+msgstr "cmd0: >%s< cmd1: >%s< cmd2: >%s< cmd3: >%s< camindx: >%d< "
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "deflate failed: %d"
+msgstr "Deflate fehlgeschlagen: %d"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "deflateEnd failed: %d"
+msgstr "deflateEnd fehlgeschlagen: %d"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "deflate failed avail in: %d"
+msgstr "Deflate fehlgeschlagen verfügbar in: %d"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "Invalid camera specified: %s"
+msgstr "Ungültige Kamera angegeben: %s"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "Invalid camera device specified: %s"
+msgstr "Ungültiges Kameragerät angegeben: %s"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "processing get: %s"
+msgstr "Verarbeitung von GET: %s"
+
+#: motion/src/webu_ans.cpp
+#, c-format
+msgid "Camera device %d is not available on port %d"
+msgstr "Kameragerät %d ist an Port %d nicht verfügbar"
+
+#: motion/src/webu_ans.cpp motion/src/webu_text.cpp
+msgid "Actions not permitted on webcontrol_interface stream"
+msgstr "Aktionen auf dem WebControl-Schnittstellenstream nicht zulässig"
+
+#: motion/src/webu_file.cpp motion/src/webu_json.cpp
+msgid "Movies via webcontrol disabled"
+msgstr "Filme über Websteuerung deaktiviert"
+
+#: motion/src/webu_file.cpp
+#, c-format
+msgid "Security warning: Client IP %s requested file: %s"
+msgstr "Sicherheitswarnung: Client-IP %s hat die Datei %s angefordert"
+
+#: motion/src/webu_file.cpp
+msgid "Error processing file request"
+msgstr "Fehler bei der Verarbeitung der Dateianforderung"
+
+#: motion/src/webu_file.cpp
+#, c-format
+msgid "Unable to determine base path for: %s"
+msgstr "Basispfad für %s konnte nicht ermittelt werden"
+
+#: motion/src/webu_file.cpp
+#, c-format
+msgid "File names are restricted to -_ and alpha numeric characters: %s"
+msgstr ""
+"Dateinamen sind auf Bindestriche und alphanumerische Zeichen beschränkt: %s"
+
+#: motion/src/webu_file.cpp
+#, c-format
+msgid "Invalid file extension.  Extension must be json,js,css or html. : %s"
+msgstr ""
+"Ungültige Dateierweiterung. Die Erweiterung muss json, js, css oder html "
+"lauten. : %s"
+
+#: motion/src/webu_file.cpp
+#, c-format
+msgid "Retrieving file: %s type/extension: %d/%s"
+msgstr "Datei wird abgerufen: %s Typ/Erweiterung: %d/%s"
+
+#: motion/src/webu_file.cpp
+#, c-format
+msgid "Invalid user requested file: %s"
+msgstr "Ungültige Benutzeranfrage: %s"
+
+#: motion/src/webu_json.cpp
+msgid "Show/Hide"
+msgstr "Anzeigen/Ausblenden"
+
+#: motion/src/webu_json.cpp
+msgid "Start Event"
+msgstr "Ereignis starten"
+
+#: motion/src/webu_json.cpp
+msgid "End Event"
+msgstr "Ereignis beenden"
+
+#: motion/src/webu_json.cpp
+msgid "Snapshot"
+msgstr "Momentaufnahme"
+
+#: motion/src/webu_json.cpp
+msgid "Pause"
+msgstr "Pause"
+
+#: motion/src/webu_json.cpp
+msgid "UnPause"
+msgstr "UnPause"
+
+#: motion/src/webu_json.cpp
+msgid "Start/Restart"
+msgstr "Starten/Neustart"
+
+#: motion/src/webu_json.cpp
+msgid "Stop"
+msgstr "Stopp"
+
+#: motion/src/webu_json.cpp
+msgid "Save Config"
+msgstr "Konfiguration speichern"
+
+#: motion/src/webu_json.cpp
+msgid "Add Camera"
+msgstr "Kamera hinzufügen"
+
+#: motion/src/webu_json.cpp
+msgid "Delete Camera"
+msgstr "Kamera löschen"
+
+#: motion/src/webu_json.cpp
+msgid "User Action"
+msgstr "Benutzeraktion"
+
+#: motion/src/webu_json.cpp
+msgid "Show/Hide Log"
+msgstr "Protokoll ein-/ausblenden"
+
+#: motion/src/webu_json.cpp
+msgid "Submit"
+msgstr "Absenden"
+
+#: motion/src/webu_json.cpp
+msgid "Cameras"
+msgstr "Kameras"
+
+#: motion/src/webu_json.cpp
+msgid "Camera"
+msgstr "Kamera"
+
+#: motion/src/webu_json.cpp
+msgid "All Cameras"
+msgstr "Alle Kameras"
+
+#: motion/src/webu_json.cpp
+msgid "Scan Cameras"
+msgstr "Scan-Kameras"
+
+#: motion/src/webu_json.cpp
+msgid "Actions"
+msgstr "Aktionen"
+
+#: motion/src/webu_json.cpp
+msgid "Configuration"
+msgstr "Konfiguration"
+
+#: motion/src/webu_json.cpp
+msgid "Recordings"
+msgstr "Aufnahmen"
+
+#: motion/src/webu_json.cpp
+msgid "Parameters"
+msgstr "Parameter"
+
+#: motion/src/webu_json.cpp
+msgid "Select Camera"
+msgstr "Kamera auswählen"
+
+#: motion/src/webu_json.cpp
+msgid "Default"
+msgstr "Standard"
+
+#: motion/src/webu_mpegts.cpp
+#, c-format
+msgid "Error while writing video frame. %s"
+msgstr "Fehler beim Schreiben des Videoframes. %s"
+
+#: motion/src/webu_mpegts.cpp
+#, c-format
+msgid "resp_image reallocated %d %d %d"
+msgstr "Antwortbild neu zugewiesen %d %d %d"
+
+#: motion/src/webu_mpegts.cpp
+msgid "Failed to get consolidated image."
+msgstr "Fehler beim Abrufen des konsolidierten Images."
+
+#: motion/src/webu_mpegts.cpp
+#, c-format
+msgid "Failed to open codec context for transport stream: %s"
+msgstr "Fehler beim Öffnen des Codec-Kontexts für den Transportstrom: %s"
+
+#: motion/src/webu_mpegts.cpp
+#, c-format
+msgid "Failed to write header!: %s"
+msgstr "Fehler beim Schreiben des Headers!: %s"
+
+#: motion/src/webu_mpegts.cpp
+msgid "Unable to open mpegts"
+msgstr "MPEG-Dateien konnten nicht geöffnet werden"
+
+#: motion/src/webu_mpegts.cpp
+#, c-format
+msgid "WB Header: %s = %s"
+msgstr "WB-Header: %s = %s"
+
+#: motion/src/webu_mpegts.cpp
+#, c-format
+msgid "TS Header: %s = %s"
+msgstr "TS-Header: %s = %s"
+
+#: motion/src/webu_mpegts.cpp
+msgid "Coding error: Null stream_mpegts_params"
+msgstr "Codierungsfehler: Null-Stream-MPEGTS-Parameter"
+
+#: motion/src/webu_post.cpp
+msgid "Camera add action disabled"
+msgstr "Kamera-Hinzufügungsaktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Adding camera."
+msgstr "Kamera wird hinzugefügt."
+
+#: motion/src/webu_post.cpp
+msgid "Error adding camera.  Timed out"
+msgstr "Fehler beim Hinzufügen der Kamera. Zeitüberschreitung"
+
+#: motion/src/webu_post.cpp
+msgid "New camera added."
+msgstr "Neue Kamera hinzugefügt."
+
+#: motion/src/webu_post.cpp
+msgid "Camera delete action disabled"
+msgstr "Kamera-Löschaktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Deleting camera."
+msgstr "Kamera wird gelöscht."
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "key: %s  value: %s"
+msgstr "Schlüssel: %s Wert: %s"
+
+#: motion/src/webu_post.cpp
+msgid "Invalid post request.  No command"
+msgstr "Ungültige POST-Anfrage. Kein Befehl."
+
+#: motion/src/webu_post.cpp
+msgid "Invalid post request.  No camera id provided"
+msgstr "Ungültige POST-Anfrage. Keine Kamera-ID angegeben"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Invalid request.  Device id %d not found"
+msgstr "Ungültige Anfrage. Geräte-ID %d nicht gefunden."
+
+#: motion/src/webu_post.cpp
+msgid "Event end action disabled"
+msgstr "Aktion am Ereignisende deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Event start action disabled"
+msgstr "Ereignisstartaktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Snapshot action disabled"
+msgstr "Snapshot-Aktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Pause action disabled"
+msgstr "Pause-Aktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Restart action disabled"
+msgstr "Neustartaktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Stop action disabled"
+msgstr "Stoppaktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "User action disabled"
+msgstr "Benutzeraktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Config write action disabled"
+msgstr "Konfigurationsschreibaktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Config default category %d edit set %s:%s"
+msgstr "Standardkategorie der Konfiguration %d bearbeiten Satz %s:%s"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Config device_id %d category %d edit set  %s:%s"
+msgstr "Konfigurationsgeräte-ID %d Kategorie %d Bearbeitungssatz %s:%s"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Util parms add %s:%s"
+msgstr "Util parms add %s:%s"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Config edit set. %s:%s"
+msgstr "Konfigurationsbearbeitungssatz. %s:%s"
+
+#: motion/src/webu_post.cpp
+msgid "Restart request for log"
+msgstr "Neustartanforderung für Protokoll"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Restart request for webcontrol on port %d"
+msgstr "Neustartanforderung für Webcontrol auf Port %d"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Changing nls to: %s"
+msgstr "Ändere nls zu: %s"
+
+#: motion/src/webu_post.cpp
+msgid "Restart request for database"
+msgstr "Neustartanforderung für Datenbank"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Restart request for camera %d"
+msgstr "Neustartanforderung für Kamera %d"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Apply config change requested for camera %d"
+msgstr "Angeforderte Konfigurationsänderung für Kamera %d anwenden"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Restart request for sound %d"
+msgstr "Neustartanforderung für Ton %d"
+
+#: motion/src/webu_post.cpp
+msgid "Config save action disabled"
+msgstr "Konfigurationsspeicheraktion deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "PTZ actions disabled"
+msgstr "PTZ-Aktionen deaktiviert"
+
+#: motion/src/webu_post.cpp
+msgid "Actions not permitted for user"
+msgstr "Aktionen für Benutzer nicht zulässig"
+
+#: motion/src/webu_post.cpp
+msgid "pause action deprecated.  Use pause_on"
+msgstr "Die Aktion Pause ist veraltet. Verwenden Sie stattdessen Pause bei"
+
+#: motion/src/webu_post.cpp
+msgid "unpause action deprecated.  Use pause_off"
+msgstr ""
+"Die Aktion Fortsetzen ist veraltet. Verwenden Sie stattdessen Pause aus"
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Invalid action requested: command: >%s< camindx : >%d< "
+msgstr "Ungültige Aktion angefordert: Befehl: >%s< camindx : >%d< "
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Index: %d Key: >%s< val: >%s< "
+msgstr "Index: %d Key: >%s< val: >%s< "
+
+#: motion/src/webu_post.cpp
+#, c-format
+msgid "Indx: %d Key: >%s< val: >%s< "
+msgstr "Indx: %d Key: >%s< val: >%s< "
+
+#: motion/src/webu_post.cpp
+msgid "Error processing post data"
+msgstr "Fehler bei der Verarbeitung der POST-Daten"
+
+#: motion/src/webu_stream.cpp
+#, c-format
+msgid "Camera %d not ready"
+msgstr "Kamera %d nicht bereit"
+
+#: motion/src/webu_stream.cpp
+msgid "All cameras not ready"
+msgstr "Alle Kameras nicht bereit"
+
+#: motion/src/webu_text.cpp
+#, c-format
+msgid "Action/Detection: >%s< camindx : >%d< "
+msgstr "Aktion/Erkennung: >%s< camindx : >%d< "
+
+#: motion/src/webu_text.cpp
+#, c-format
+msgid "Invalid request: cmd1: >%s< cmd2: >%s< camindx : >%d<  is admin >%s<"
+msgstr "Ungültige Anfrage: cmd1: >%s< cmd2: >%s< camindx : >%d< ist Admin >%s<"
