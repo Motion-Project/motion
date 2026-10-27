@@ -152,7 +152,6 @@
             std::string     movie_container;
             bool            movie_passthrough;
             std::string     movie_filename;
-            bool            movie_all_frames;
             bool            movie_extpipe_use;
             std::string     movie_extpipe;
             std::string     movie_params;
