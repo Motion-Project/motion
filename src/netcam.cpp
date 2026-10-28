@@ -1859,7 +1859,10 @@ void cls_netcam::set_parms ()
             cfg_idur = mtoi(params->params_array[indx].param_value);
         }
     }
-
+    if (cfg_idur < 1) {
+        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO, _("Invalid interrupt %d"),cfg_idur);
+        cfg_idur = 3;
+    }
     /* If this is the norm and we have a highres, then disable passthru on the norm */
     if ((high_resolution == false) &&
         (cam->cfg->netcam_high_url != "")) {
@@ -1937,11 +1940,11 @@ int cls_netcam::open_context()
     format_context->interrupt_callback.opaque = this;
     interrupted = false;
 
+    set_options();
+
     clock_gettime(CLOCK_MONOTONIC, &ist_tm);
 
     idur = cfg_idur * 3; /*3 is arbritrary multiplier to give connect more time than other steps*/
-
-    set_options();
 
     MOTION_LOG(DBG, TYPE_NETCAM, NO_ERRNO
         , _("%s:Opening camera"), cameratype.c_str());

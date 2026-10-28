@@ -2927,7 +2927,7 @@ void cls_config::params_load_netcam()
         , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
     prm->params_array.push_back(
-        {"interrupt","",PARM_SRC_SYS
+        {"interrupt","3",PARM_SRC_SYS
         , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
 
@@ -2963,7 +2963,7 @@ void cls_config::params_load_netcam_high()
         , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
     prm->params_array.push_back(
-        {"interrupt","",PARM_SRC_SYS
+        {"interrupt","3",PARM_SRC_SYS
         , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
 
