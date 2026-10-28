@@ -2732,6 +2732,7 @@ void cls_config::params_load_schedule()
     prm->app = app;
     prm->params_desc = "schedule_params";
     prm->params_pcat = PARM_PCAT_SCH;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -2791,6 +2792,7 @@ void cls_config::params_load_cleandir()
     prm->app = app;
     prm->params_desc = "cleandir_params";
     prm->params_pcat = PARM_PCAT_CLN;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -2843,6 +2845,7 @@ void cls_config::params_load_v4l2()
     prm->app = app;
     prm->params_desc = "v4l2_params";
     prm->params_pcat = PARM_PCAT_V4L2;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -2887,6 +2890,7 @@ void cls_config::params_load_netcam()
     prm->app = app;
     prm->params_desc = "netcam_params";
     prm->params_pcat = PARM_PCAT_NET;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -2923,6 +2927,7 @@ void cls_config::params_load_netcam_high()
     prm->app = app;
     prm->params_desc = "netcam_high_params";
     prm->params_pcat = PARM_PCAT_NETH;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -2959,6 +2964,7 @@ void cls_config::params_load_libcamera()
     prm->app = app;
     prm->params_desc = "libcam_params";
     prm->params_pcat = PARM_PCAT_LIB;
+    prm->params_changed = false;
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
     prm->params_array.push_back(
@@ -3183,6 +3189,7 @@ void cls_config::params_load_secondary()
     prm->app = app;
     prm->params_desc = "secondary_params";
     prm->params_pcat = PARM_PCAT_SEC;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -3291,6 +3298,7 @@ void cls_config::params_load_allcam()
     prm->app = app;
     prm->params_desc = "stream_allcam_params";
     prm->params_pcat = PARM_PCAT_ACAM;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -3342,6 +3350,7 @@ void cls_config::params_load_actions()
     prm->app = app;
     prm->params_desc = "webcontrol_actions";
     prm->params_pcat = PARM_PCAT_ACTS;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -3413,6 +3422,7 @@ void cls_config::params_load_headers()
     prm->app = app;
     prm->params_desc = "webcontrol_headers";
     prm->params_pcat = PARM_PCAT_HDR;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -3436,6 +3446,7 @@ void cls_config::params_load_sound()
     prm->app = app;
     prm->params_desc = "snd_params";
     prm->params_pcat = PARM_PCAT_SND;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -3459,6 +3470,7 @@ void cls_config::params_load_movie()
     prm->app = app;
     prm->params_desc = "movie_params";
     prm->params_pcat = PARM_PCAT_MOVIE;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -3553,6 +3565,7 @@ void cls_config::params_load_mpegts()
     prm->app = app;
     prm->params_desc = "stream_mpegts_params";
     prm->params_pcat = PARM_PCAT_MPEGTS;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -3652,6 +3665,7 @@ void cls_config::params_load_timelapse()
     prm->app = app;
     prm->params_desc = "timelapse_params";
     prm->params_pcat = PARM_PCAT_TLSP;
+    prm->params_changed = false;
 
     /*param_name,param_value,param_source*/
     /*param_type,param_lvl,param_chg,param_lst,desc*/
@@ -5164,8 +5178,11 @@ void cls_config::config_copy(cls_config *src)
     for (indx1=0;indx1<src->params.size();indx1++) {
         prmsrc = src->params[indx1];
         prm = new ctx_params;
+        prm->app = prmsrc->app;
+        prm->params_changed=prmsrc->params_changed;
         prm->params_pcat = prmsrc->params_pcat;
         prm->params_desc = prmsrc->params_desc;
+
         for (indx2=0;indx2<prmsrc->params_array.size();indx2++) {
             prm->params_array.push_back(prmsrc->params_array[indx2]);
         }
@@ -5180,6 +5197,8 @@ void cls_config::config_copy(cls_config *src)
     for (indx1=0;indx1<src->depr_params.size();indx1++) {
         prmsrc = src->depr_params[indx1];
         prm = new ctx_params;
+        prm->app = prmsrc->app;
+        prm->params_changed = prmsrc->app;
         prm->params_pcat = prmsrc->params_pcat;
         prm->params_desc = prmsrc->params_desc;
         for (indx2=0;indx2<prmsrc->params_array.size();indx2++) {
