@@ -3793,6 +3793,7 @@ void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_para
     } else if (prmd->params_pcat == PARM_PCAT_SND) {    ptmp=cfgs->snd_params;
     } else if (prmd->params_pcat == PARM_PCAT_MOVIE) {  ptmp=cfgs->movie_params;
     } else if (prmd->params_pcat == PARM_PCAT_MPEGTS) { ptmp=cfgs->stream_mpegts_params;
+    } else if (prmd->params_pcat == PARM_PCAT_TLSP)   { ptmp=cfgs->timelapse_params;
     } else {  return;
     }
     params_load_dpritm(cfgs, prmd, prmd->params_pcat);
@@ -3962,6 +3963,13 @@ void cls_config::defaults_depr()
     prm->app = app;
     prm->params_desc = "v4l2_params";
     prm->params_pcat = PARM_PCAT_V4L2;
+    prm->params_cnt = 0;
+    depr_params.push_back(prm);
+
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "timelapse_params";
+    prm->params_pcat = PARM_PCAT_TLSP;
     prm->params_cnt = 0;
     depr_params.push_back(prm);
 
