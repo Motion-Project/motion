@@ -3823,10 +3823,10 @@ void cls_config::params_load_listcam()
     ctx_params *prm_a, *prm_d;
     cls_camera *dev;
 
-    for (ica=0;ica<app->conf_src->params.size();ica++) {
-        prm_a = app->conf_src->params[ica];
-        for (idev=0; idev<app->cam_cnt; idev++) {
-            dev = app->cam_list[idev];
+    for (idev=0; idev<app->cam_cnt; idev++) {
+        dev = app->cam_list[idev];
+        for (ica=0;ica<app->conf_src->params.size();ica++) {
+            prm_a = app->conf_src->params[ica];
             prm_d = nullptr;
             for (icd=0;icd<dev->conf_src->params.size();icd++) {
                 if (prm_a->params_pcat ==dev->conf_src->params[icd]->params_pcat) {
@@ -3846,7 +3846,9 @@ void cls_config::params_load_listcam()
             }
             params_load_listitm(dev->conf_src, prm_a, prm_d);
         }
+        dev->cfg->config_copy(dev->conf_src);
     }
+
 }
 /* ToDo:  Optimize code by consolidating with params_load_camlist*/
 void cls_config::params_load_listsnd()
@@ -3855,10 +3857,10 @@ void cls_config::params_load_listsnd()
     ctx_params *prm_a, *prm_d;
     cls_sound *dev;
 
-    for (ica=0;ica<app->conf_src->params.size();ica++) {
-        prm_a = app->conf_src->params[ica];
-        for (idev=0; idev<app->snd_cnt; idev++) {
-            dev =app->snd_list[idev];
+    for (idev=0; idev<app->snd_cnt; idev++) {
+        dev =app->snd_list[idev];
+        for (ica=0;ica<app->conf_src->params.size();ica++) {
+            prm_a = app->conf_src->params[ica];
             prm_d = nullptr;
             for (icd=0;icd<dev->conf_src->params.size();icd++) {
                 if (prm_a->params_pcat == prm_d->params_pcat) {
@@ -3878,6 +3880,7 @@ void cls_config::params_load_listsnd()
             }
             params_load_listitm(dev->conf_src, prm_a, prm_d);
         }
+        dev->cfg->config_copy(dev->conf_src);
     }
 }
 
