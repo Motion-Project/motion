@@ -39,7 +39,7 @@ void cls_picture::picname(char* fullname, std::string fmtstr
     retcd = snprintf(fullname, PATH_MAX, fmtstr.c_str()
         , cam->cfg->target_dir.c_str(), filename, extname.c_str());
     if ((retcd < 0) || (retcd >= PATH_MAX)) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error creating picture file name"));
         return;
     }
@@ -51,7 +51,7 @@ void cls_picture::picname(char* fullname, std::string fmtstr
 
 void cls_picture::on_picture_save_command(char *fname)
 {
-    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("File saved to: %s"), fname);
+    MOTION_LOG(NTC, NO_ERRNO, _("File saved to: %s"), fname);
 
     if (cam->cfg->on_picture_save != "") {
         util_exec_command(cam, cam->cfg->on_picture_save.c_str(), fname);
@@ -132,7 +132,7 @@ void cls_picture::process_snapshot()
             , "lastsnap", cam->cfg->picture_type);
         remove(linkpath);
         if (symlink(filename, linkpath)) {
-            MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+            MOTION_LOG(ERR, SHOW_ERRNO
                 ,_("Could not create symbolic link [%s]"), filename);
             return;
         }
@@ -203,7 +203,7 @@ void cls_picture::webp_exif(WebPMux* webp_mux
 
         WebPMuxError err = WebPMuxSetChunk(webp_mux, "EXIF", &webp_exif, 1);
         if (err != WEBP_MUX_OK) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 , _("Unable to set set EXIF to webp chunk"));
         }
         free(exif);
@@ -220,14 +220,14 @@ void cls_picture::save_webp(FILE *fp, u_char *image, int width, int height
         WebPConfig webp_config;
         if (!WebPConfigPreset(&webp_config, WEBP_PRESET_DEFAULT
             , (float) cam->cfg->picture_quality)) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO, _("libwebp version error"));
+            MOTION_LOG(ERR, NO_ERRNO, _("libwebp version error"));
             return;
         }
 
         /* Create the input data structure and check for compatible library version */
         WebPPicture webp_image;
         if (!WebPPictureInit(&webp_image)) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp version error"));
+            MOTION_LOG(ERR, NO_ERRNO,_("libwebp version error"));
             return;
         }
 
@@ -235,7 +235,7 @@ void cls_picture::save_webp(FILE *fp, u_char *image, int width, int height
         webp_image.width = width;
         webp_image.height = height;
         if (!WebPPictureAlloc(&webp_image)) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("libwebp image buffer allocation error"));
+            MOTION_LOG(ERR, NO_ERRNO,_("libwebp image buffer allocation error"));
             return;
         }
 
@@ -252,7 +252,7 @@ void cls_picture::save_webp(FILE *fp, u_char *image, int width, int height
 
         /* Encode the YUV image as webp */
         if (!WebPEncode(&webp_config, &webp_image)) {
-            MOTION_LOG(WRN, TYPE_CORE, NO_ERRNO,_("libwebp image compression error"));
+            MOTION_LOG(WRN, NO_ERRNO,_("libwebp image compression error"));
         }
         /* A bitstream object is needed for the muxing proces */
         WebPData webp_bitstream;
@@ -267,12 +267,12 @@ void cls_picture::save_webp(FILE *fp, u_char *image, int width, int height
         WebPData webp_output;
         WebPMuxError err = WebPMuxAssemble(webp_mux, &webp_output);
         if (err != WEBP_MUX_OK) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to assemble webp image"));
+            MOTION_LOG(ERR, NO_ERRNO,_("unable to assemble webp image"));
         }
 
         /* Write the webp final bitstream to the file */
         if (fwrite(webp_output.bytes, sizeof(uint8_t), webp_output.size, fp) != webp_output.size) {
-            MOTION_LOG(ERR, TYPE_CORE, NO_ERRNO,_("unable to save webp image to file"));
+            MOTION_LOG(ERR, NO_ERRNO,_("unable to save webp image to file"));
         }
 
         #if WEBP_ENCODER_ABI_VERSION > 0x0202
@@ -452,7 +452,7 @@ void cls_picture::save_norm(char *file, u_char *image)
 
     picture = myfopen(file, "wbe");
     if (!picture) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, SHOW_ERRNO
             ,_("Can't write picture to file %s"), file);
         return;
     }
@@ -478,7 +478,7 @@ void cls_picture::save_roi(char *file, u_char *image)
 
     picture = myfopen(file, "wbe");
     if (!picture) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, SHOW_ERRNO
             ,_("Can't write picture to file %s"), file);
         return;
     }
@@ -517,12 +517,12 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
     line[255] = 0;
 
     if (!fgets(line, 255, picture)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO,_("Could not read from pgm file"));
+        MOTION_LOG(ERR, SHOW_ERRNO,_("Could not read from pgm file"));
         return NULL;
     }
 
     if (strncmp(line, "P5", 2)) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, SHOW_ERRNO
             ,_("This is not a pgm file, starts with '%s'"), line);
         return NULL;
     }
@@ -536,7 +536,7 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
 
     /* Read image size */
     if (sscanf(line, "%d %d", &mask_width, &mask_height) != 2) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, SHOW_ERRNO
             ,_("Failed reading size in pgm file"));
         return NULL;
     }
@@ -549,7 +549,7 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
         }
 
     if (sscanf(line, "%d", &maxval) != 1) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, SHOW_ERRNO
             ,_("Failed reading maximum value in pgm file"));
         return NULL;
     }
@@ -563,7 +563,7 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
 
     for (y = 0; y < mask_height; y++) {
         if ((int)fread(&image[y * mask_width], 1, (uint)mask_width, picture) != mask_width) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(ERR, SHOW_ERRNO
                 ,_("Failed reading image data from pgm file"));
         }
 
@@ -575,9 +575,9 @@ u_char *cls_picture::load_pgm(FILE *picture, int width, int height)
 
     /* Resize mask if required */
     if (mask_width != width || mask_height != height) {
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, NO_ERRNO
             ,_("The mask file specified is not the same size as image from camera."));
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, NO_ERRNO
             ,_("Attempting to resize mask image from %dx%d to %dx%d")
             ,mask_width, mask_height, width, height);
 
@@ -606,12 +606,12 @@ void cls_picture::write_mask(const char *file)
     if (!picture) {
         /* Report to syslog - suggest solution if the problem is access rights to target dir. */
         if (errno ==  EACCES) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(ERR, SHOW_ERRNO
                 ,_("can't write mask file %s - check access rights to target directory")
                 ,file);
         } else {
             /* If target dir is temporarily unavailable we may survive. */
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(ERR, SHOW_ERRNO
                 ,_("can't write mask file %s"), file);
         }
         return;
@@ -625,14 +625,14 @@ void cls_picture::write_mask(const char *file)
 
     /* Write pgm image data at once. */
     if ((int)fwrite(cam->imgs.image_motion.image_norm, (uint)cam->cfg->width, (uint)cam->cfg->height, picture) != cam->cfg->height) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, SHOW_ERRNO
             ,_("Failed writing default mask as pgm file"));
         return;
     }
 
     myfclose(picture);
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(ERR, NO_ERRNO
         ,_("Creating empty mask %s\nPlease edit this file and "
         "re-run motion to enable mask feature"), cam->cfg->mask_file.c_str());
 }
@@ -710,7 +710,7 @@ void cls_picture::init_privacy()
 
     if (cam->cfg->mask_privacy != "") {
         if ((picture = myfopen(cam->cfg->mask_privacy.c_str(), "rbe"))) {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO, _("Opening privacy mask file"));
+            MOTION_LOG(INF, NO_ERRNO, _("Opening privacy mask file"));
             /*
              * NOTE: The mask is expected to have the output dimensions. I.e., the mask
              * applies to the already rotated image, not the capture image. Thus, use
@@ -722,7 +722,7 @@ void cls_picture::init_privacy()
             cam->imgs.mask_privacy_uv =(u_char*) mymalloc((uint)
                 ((cam->imgs.height * cam->imgs.width) / 2));
             if (cam->imgs.size_high > 0) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(INF, NO_ERRNO
                     ,_("Opening high resolution privacy mask file"));
                 rewind(picture);
                 cam->imgs.mask_privacy_high = load_pgm(picture, cam->imgs.width_high, cam->imgs.height_high);
@@ -732,17 +732,17 @@ void cls_picture::init_privacy()
 
             myfclose(picture);
         } else {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(ERR, SHOW_ERRNO
                 ,_("Error opening mask file %s"), cam->cfg->mask_privacy.c_str());
             /* Try to write an empty mask file to make it easier for the user to edit it */
             write_mask(cam->cfg->mask_privacy.c_str() );
         }
 
         if (!cam->imgs.mask_privacy) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Failed to read mask privacy image. Mask privacy feature disabled."));
         } else {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, NO_ERRNO
             ,_("Mask privacy file \"%s\" loaded."), cam->cfg->mask_privacy.c_str());
 
             indx_img = 1;
@@ -816,7 +816,7 @@ void cls_picture::init_mask()
             cam->imgs.mask = load_pgm(picture, cam->imgs.width, cam->imgs.height);
             myfclose(picture);
         } else {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(ERR, SHOW_ERRNO
                 ,_("Error opening mask file %s")
                 ,cam->cfg->mask_file.c_str());
             /*
@@ -827,10 +827,10 @@ void cls_picture::init_mask()
         }
 
         if (!cam->imgs.mask) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Failed to read mask image. Mask feature disabled."));
         } else {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, NO_ERRNO
                 ,_("Maskfile \"%s\" loaded.")
                 ,cam->cfg->mask_file.c_str());
         }

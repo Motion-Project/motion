@@ -85,7 +85,7 @@ int cls_webu_mpegts::pic_send(unsigned char *img)
     retcd = avcodec_send_frame(ctx_codec, picture);
     if (retcd < 0 ) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Error sending frame for encoding:%s"), errstr);
         av_frame_free(&picture);
         picture = NULL;
@@ -112,7 +112,7 @@ int cls_webu_mpegts::pic_get()
     }
     if (retcd < 0 ) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error receiving encoded packet video:%s"), errstr);
         //Packet is freed upon failure of encoding
         return -1;
@@ -123,7 +123,7 @@ int cls_webu_mpegts::pic_get()
     retcd =  av_interleaved_write_frame(fmtctx, pkt);
     if (retcd < 0 ) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error while writing video frame. %s"), errstr);
         return -1;
     }
@@ -228,7 +228,7 @@ int cls_webu_mpegts::avio_buf(myuint *buf, int buf_size)
         webus->resp_size = (size_t)buf_size + webus->resp_used;
         webus->resp_image = (unsigned char*)realloc(
             webus->resp_image, webus->resp_size);
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("resp_image reallocated %d %d %d")
             ,webus->resp_size
             ,webus->resp_used
@@ -324,7 +324,7 @@ void cls_webu_mpegts::set_flags()
             ctx_codec->flags |=
                mtoi(sflg.substr(0,chkloc)) <<
                mtoi(sflg.substr(chkloc+2));
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("Set codec flags %s<<%s")
                 ,sflg.substr(0,chkloc).c_str()
                 ,sflg.substr(chkloc+2).c_str());
@@ -345,7 +345,7 @@ void cls_webu_mpegts::set_flags()
             ctx_codec->flags2 |=
                mtoi(sflg.substr(0,chkloc)) <<
                mtoi(sflg.substr(chkloc+2));
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("Set codec flags2 %s<<%s")
                 ,sflg.substr(0,chkloc).c_str()
                 ,sflg.substr(chkloc+2).c_str());
@@ -419,7 +419,7 @@ void cls_webu_mpegts::set_codec()
             av_dict_set(&opts
                 ,itm->param_name.substr(5).c_str()
                 ,itm->param_value.c_str(), 0);
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("av_dict_set %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
@@ -427,7 +427,7 @@ void cls_webu_mpegts::set_codec()
             av_opt_set(ctx_codec
                 ,itm->param_name.substr(4).c_str()
                 ,itm->param_value.c_str(), 0);
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("av_opt_set %s = %s")
                 , itm->param_name.substr(4).c_str()
                 , itm->param_value.c_str());
@@ -435,7 +435,7 @@ void cls_webu_mpegts::set_codec()
             av_opt_set(ctx_codec->priv_data
                 ,itm->param_name.substr(5).c_str()
                 ,itm->param_value.c_str(), 0);
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("av_opt_set  priv_data %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
@@ -457,7 +457,7 @@ int cls_webu_mpegts::open_mpegts()
             indx++;
         }
         if (indx == 4){
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Failed to get consolidated image."));
             return -1;
         }
@@ -476,7 +476,7 @@ int cls_webu_mpegts::open_mpegts()
     retcd = avcodec_open2(ctx_codec, codec, &opts);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Failed to open codec context for transport stream: %s")
             , errstr);
         av_dict_free(&opts);
@@ -487,7 +487,7 @@ int cls_webu_mpegts::open_mpegts()
     retcd = avcodec_parameters_from_context(strm->codecpar, ctx_codec);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Failed to copy decoder parameters!: %s"), errstr);
         av_dict_free(&opts);
         return -1;
@@ -508,7 +508,7 @@ int cls_webu_mpegts::open_mpegts()
     retcd = avformat_write_header(fmtctx, &opts);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Failed to write header!: %s"), errstr);
         av_dict_free(&opts);
         return -1;
@@ -530,7 +530,7 @@ mhdrslt cls_webu_mpegts::main()
     std::string pnm, pvl;
 
     if (open_mpegts() < 0 ) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Unable to open mpegts"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Unable to open mpegts"));
         return MHD_NO;
     }
 
@@ -539,7 +539,7 @@ mhdrslt cls_webu_mpegts::main()
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 4096
         ,&webu_mpegts_response, this, NULL);
     if (!response) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
@@ -549,7 +549,7 @@ mhdrslt cls_webu_mpegts::main()
             pvl=webu->wb_headers->params_array[indx].param_value;
             if (pnm != "params_file") {
                 MHD_add_response_header (response,pnm.c_str(),pvl.c_str());
-                MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(DBG, NO_ERRNO
                     , _("WB Header: %s = %s"),pnm.c_str(),pvl.c_str());
             }
         }
@@ -561,7 +561,7 @@ mhdrslt cls_webu_mpegts::main()
         if (pnm.substr(0,4)=="hdr_") {
             pnm=pnm.substr(4);
             MHD_add_response_header (response,pnm.c_str(),pvl.c_str());
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 , _("TS Header: %s = %s"),pnm.c_str(),pvl.c_str());
         }
     }
@@ -592,7 +592,7 @@ cls_webu_mpegts::cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus
         }
     }
     if (params == nullptr) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Coding error: Null stream_mpegts_params"));
+        MOTION_LOG(ERR, NO_ERRNO,_("Coding error: Null stream_mpegts_params"));
         abort();
     }
 

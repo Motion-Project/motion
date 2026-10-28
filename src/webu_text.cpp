@@ -146,7 +146,7 @@ void cls_webu_text::connection()
         }
         webua->resp_page += "\n";
     }
-    MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(ERR, NO_ERRNO
         ,_("Action/Detection: >%s< camindx : >%d< ")
         , webua->uri_cmd2.c_str(), webua->camindx);
 
@@ -164,7 +164,7 @@ void cls_webu_text::main()
             connection();
         } else {
             if (webu->cfg->webcontrol_interface == "stream") {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(NTC, NO_ERRNO
                     ,_("Actions not permitted on webcontrol_interface stream"));
                 webua->resp_type = WEBUI_RESP_TEXT;
                 webua->resp_page = "Bad Request";
@@ -205,7 +205,7 @@ void cls_webu_text::main()
                 (webua->is_admin == true)) {
                 webu_post->action_stop();
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(INF, NO_ERRNO
                     , _("Invalid request: cmd1: >%s<"
                         " cmd2: >%s< camindx : >%d< "
                         " is admin >%s<")

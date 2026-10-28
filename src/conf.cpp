@@ -32,7 +32,6 @@ ctx_parm config_parms[] = {
     {"log_file",                  PARM_TYP_STRING, PARM_CAT_00, PARM_LVL_02, PARM_CHG_RESTART },
     {"log_level",                 PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_COPY },
     {"log_fflevel",               PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_COPY },
-    {"log_type",                  PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_COPY },
     {"native_language",           PARM_TYP_BOOL,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_CODE },
     {"native_language_code",      PARM_TYP_LIST,   PARM_CAT_00, PARM_LVL_01, PARM_CHG_CODE },
 
@@ -254,6 +253,8 @@ ctx_parm_depr config_parms_depr[] = {
         ,"\"movie_retain\" replaced with \"movie_params\" parameter \"secdetect_only\""}
     ,{"timelapse_fps", "5.0.0","timelapse_params option"
         ,"\"timelapse_fps\" replaced with \"timelapse_params\" parameter \"fps\""}
+    ,{"log_type", "5.0.0","removed"
+        ,"\"log_type\" removed"}
 
     ,{ "","","",""}
 };
@@ -335,7 +336,7 @@ void cls_config::edit_log_level(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 9)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_level %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid log_level %d"),parm_in);
         } else {
             log_level = parm_in;
         }
@@ -357,7 +358,7 @@ void cls_config::edit_log_fflevel(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 9)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_fflevel %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid log_fflevel %d"),parm_in);
         } else {
             log_fflevel = parm_in;
         }
@@ -367,30 +368,6 @@ void cls_config::edit_log_fflevel(std::string &parm, enum PARM_ACT pact)
         parm = "[";
         parm = parm + "\"1\",\"2\",\"3\",\"4\",\"5\"";
         parm = parm + ",\"6\",\"7\",\"8\",\"9\"";
-        parm = parm + "]";
-    }
-}
-
-void cls_config::edit_log_type(std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        log_type_str = "ALL";
-    } else if (pact == PARM_ACT_SET) {
-        if ((parm == "ALL") || (parm == "COR") ||
-            (parm == "STR") || (parm == "ENC") ||
-            (parm == "NET") || (parm == "DBL") ||
-            (parm == "EVT") || (parm == "TRK") ||
-            (parm == "VID") || (parm == "ALL")) {
-            log_type_str = parm;
-        } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid log_type %s"),parm.c_str());
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = log_type_str;
-    } else if (pact == PARM_ACT_LIST) {
-        parm = "[";
-        parm = parm + "\"ALL\",\"COR\",\"STR\",\"ENC\",\"NET\"";
-        parm = parm + ",\"DBL\",\"EVT\",\"TRK\",\"VID\"";
         parm = parm + "]";
     }
 }
@@ -418,7 +395,7 @@ void cls_config::edit_native_language_code(std::string &parm, enum PARM_ACT pact
             (parm == "pt") || (parm == "sv") || (parm == "zh")) {
             native_language_code = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid native_language_code %s"),parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid native_language_code %s"),parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = native_language_code;
@@ -457,14 +434,14 @@ void cls_config::edit_device_id(std::string &parm, enum PARM_ACT pact)
                 return;
             }
             if (parm_in < 1) {
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_id %d"),parm_in);
+                MOTION_LOG(NTC, NO_ERRNO, _("Invalid device_id %d"),parm_in);
             } else if (parm_in > 32000) {
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_id %d"),parm_in);
+                MOTION_LOG(NTC, NO_ERRNO, _("Invalid device_id %d"),parm_in);
             } else {
                 for (indx=0;indx<app->cam_list.size();indx++){
                     if ((app->cam_list[indx]->conf_src->device_id == parm_in) &&
                         (app->cam_list[indx]->cfg != this)) {
-                        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                        MOTION_LOG(NTC, NO_ERRNO
                             , _("Duplicate device_id %d not permitted"),parm_in);
                         return;
                     }
@@ -472,7 +449,7 @@ void cls_config::edit_device_id(std::string &parm, enum PARM_ACT pact)
                 for (indx=0;indx<app->snd_list.size();indx++){
                     if ((app->snd_list[indx]->conf_src->device_id == parm_in) &&
                         (app->snd_list[indx]->cfg != this)) {
-                        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                        MOTION_LOG(NTC, NO_ERRNO
                             , _("Duplicate device_id %d not permitted"),parm_in);
                         return;
                     }
@@ -493,7 +470,7 @@ void cls_config::edit_device_tmo(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid device_tmo %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid device_tmo %d"),parm_in);
         } else {
             device_tmo = parm_in;
         }
@@ -515,18 +492,18 @@ void cls_config::edit_pause(std::string &parm, enum PARM_ACT pact)
             if ((parm == "schedule") || (parm == "on") || (parm == "off")) {
                 pause = parm;
             } else if ((parm == "1") || (parm == "yes") || (parm == "true")) {
-                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(WRN, NO_ERRNO
                     , _("Old type specified for pause %s. Use 'on' instead")
                     ,parm.c_str());
                 pause = "on";
             } else if ((parm == "0") || (parm == "no") || (parm == "false")) {
-                MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(WRN, NO_ERRNO
                     , _("Old type specified for pause %s.  Use 'off' instead")
                     ,parm.c_str());
                 pause = "off";
             }
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid pause %s"),parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid pause %s"),parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = pause;
@@ -576,14 +553,14 @@ void cls_config::edit_target_dir(std::string &parm, enum PARM_ACT pact)
         target_dir = std::string( configdir ) + std::string("/media");
     } else if (pact == PARM_ACT_SET) {
         if (parm.find("%", 0) != std::string::npos) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid target_dir.  Conversion specifiers not permitted. %s")
                 , parm.c_str());
         } else if (parm == "") {
             target_dir = ".";
         } else if (parm.substr(parm.length()-1,1) == "/") {
             target_dir = parm.substr(0, parm.length()-1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing trailing '/' from target_dir"));
+            MOTION_LOG(NTC, NO_ERRNO,_("Removing trailing '/' from target_dir"));
         } else {
             target_dir = parm;
         }
@@ -600,7 +577,7 @@ void cls_config::edit_watchdog_tmo(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid watchdog timeout %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid watchdog timeout %d"),parm_in);
         } else {
             watchdog_tmo = parm_in;
         }
@@ -617,7 +594,7 @@ void cls_config::edit_watchdog_kill(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid watchdog kill timeout %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid watchdog kill timeout %d"),parm_in);
         } else {
             watchdog_kill = parm_in;
         }
@@ -733,12 +710,12 @@ void cls_config::edit_width(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 64) || (parm_in > 9999)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid width %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid width %d"),parm_in);
         } else if (parm_in % 8) {
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Image width (%d) requested is not modulo 8."), parm_in);
             parm_in = parm_in - (parm_in % 8) + 8;
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Adjusting width to next higher multiple of 8 (%d)."), parm_in);
             width = parm_in;
         } else {
@@ -757,12 +734,12 @@ void cls_config::edit_height(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 64) || (parm_in > 9999)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid height %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid height %d"),parm_in);
         } else if (parm_in % 8) {
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Image height (%d) requested is not modulo 8."), parm_in);
             parm_in = parm_in - (parm_in % 8) + 8;
-            MOTION_LOG(NTC, TYPE_NETCAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Adjusting height to next higher multiple of 8 (%d)."), parm_in);
             height = parm_in;
         } else {
@@ -781,7 +758,7 @@ void cls_config::edit_framerate(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 2) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid framerate %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid framerate %d"),parm_in);
         } else {
             framerate = parm_in;
         }
@@ -799,7 +776,7 @@ void cls_config::edit_rotate(std::string &parm, enum PARM_ACT pact)
         parm_in = atoi(parm.c_str());
         if ((parm_in != 0) && (parm_in != 90) &&
             (parm_in != 180) && (parm_in != 270) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid rotate %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid rotate %d"),parm_in);
         } else {
             rotate = parm_in;
         }
@@ -820,7 +797,7 @@ void cls_config::edit_flip_axis(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             flip_axis = "none";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid flip_axis %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid flip_axis %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = flip_axis;
@@ -839,7 +816,7 @@ void cls_config::edit_locate_motion_mode(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             locate_motion_mode = "off";
         } else {
-          MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_mode %s"), parm.c_str());
+          MOTION_LOG(NTC, NO_ERRNO, _("Invalid locate_motion_mode %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = locate_motion_mode;
@@ -859,7 +836,7 @@ void cls_config::edit_locate_motion_style(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             locate_motion_style = "box";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid locate_motion_style %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid locate_motion_style %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = locate_motion_style;
@@ -909,7 +886,7 @@ void cls_config::edit_text_scale(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 10)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid text_scale %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid text_scale %d"),parm_in);
         } else {
             text_scale = parm_in;
         }
@@ -953,7 +930,7 @@ void cls_config::edit_threshold(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid threshold %d"),parm_in);
         } else {
             threshold = parm_in;
         }
@@ -970,7 +947,7 @@ void cls_config::edit_threshold_maximum(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) ) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid threshold_maximum %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid threshold_maximum %d"),parm_in);
         } else {
             threshold_maximum = parm_in;
         }
@@ -1001,7 +978,7 @@ void cls_config::edit_secondary_method(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             secondary_method = "none";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid secondary_method %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid secondary_method %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = secondary_method;
@@ -1029,7 +1006,7 @@ void cls_config::edit_noise_level(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 255)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid noise_level %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid noise_level %d"),parm_in);
         } else {
             noise_level = parm_in;
         }
@@ -1101,7 +1078,7 @@ void cls_config::edit_smart_mask_speed(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 10)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid smart_mask_speed %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid smart_mask_speed %d"),parm_in);
         } else {
             smart_mask_speed = parm_in;
         }
@@ -1123,7 +1100,7 @@ void cls_config::edit_lightswitch_percent(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid lightswitch_percent %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid lightswitch_percent %d"),parm_in);
         } else {
             lightswitch_percent = parm_in;
         }
@@ -1140,7 +1117,7 @@ void cls_config::edit_lightswitch_frames(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 1000)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid lightswitch_frames %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid lightswitch_frames %d"),parm_in);
         } else {
             lightswitch_frames = parm_in;
         }
@@ -1157,7 +1134,7 @@ void cls_config::edit_minimum_motion_frames(std::string &parm, enum PARM_ACT pac
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 10000)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid minimum_motion_frames %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid minimum_motion_frames %d"),parm_in);
         } else {
             minimum_motion_frames = parm_in;
         }
@@ -1174,7 +1151,7 @@ void cls_config::edit_static_object_time(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 1) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid static_object_time %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid static_object_time %d"),parm_in);
         } else {
             static_object_time = parm_in;
         }
@@ -1191,7 +1168,7 @@ void cls_config::edit_event_gap(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid event_gap %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid event_gap %d"),parm_in);
         } else {
             event_gap = parm_in;
         }
@@ -1208,7 +1185,7 @@ void cls_config::edit_pre_capture(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 1000)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid pre_capture %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid pre_capture %d"),parm_in);
         } else {
             pre_capture = parm_in;
         }
@@ -1225,7 +1202,7 @@ void cls_config::edit_post_capture(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid post_capture %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid post_capture %d"),parm_in);
         } else {
             post_capture = parm_in;
         }
@@ -1377,7 +1354,7 @@ void cls_config::edit_picture_output(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             picture_output = "off";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid picture_output %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = picture_output;
@@ -1398,7 +1375,7 @@ void cls_config::edit_picture_output_motion(std::string &parm, enum PARM_ACT pac
         } else if (parm == "") {
             picture_output_motion = "off";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_output_motion %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid picture_output_motion %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = picture_output_motion;
@@ -1419,7 +1396,7 @@ void cls_config::edit_picture_type(std::string &parm, enum PARM_ACT pact)
         } else if ((parm == "") ||(parm == "jpeg"))  {
             picture_type = "jpg";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_type %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid picture_type %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = picture_type;
@@ -1438,7 +1415,7 @@ void cls_config::edit_picture_quality(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid picture_quality %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid picture_quality %d"),parm_in);
         } else {
             picture_quality = parm_in;
         }
@@ -1467,7 +1444,7 @@ void cls_config::edit_picture_filename(std::string &parm, enum PARM_ACT pact)
             picture_filename = "";
         } else if (parm.substr(0,1) == "/") {
             picture_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
+            MOTION_LOG(NTC, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             picture_filename = parm;
         }
@@ -1484,7 +1461,7 @@ void cls_config::edit_snapshot_interval(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid snapshot_interval %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid snapshot_interval %d"),parm_in);
         } else {
             snapshot_interval = parm_in;
         }
@@ -1502,7 +1479,7 @@ void cls_config::edit_snapshot_filename(std::string &parm, enum PARM_ACT pact)
             snapshot_filename = "";
         } else if (parm.substr(0,1) == "/") {
             snapshot_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
+            MOTION_LOG(NTC, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             snapshot_filename = parm;
         }
@@ -1541,7 +1518,7 @@ void cls_config::edit_movie_max_time(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid movie_max_time %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid movie_max_time %d"),parm_in);
         } else {
             movie_max_time = parm_in;
         }
@@ -1581,7 +1558,7 @@ void cls_config::edit_movie_filename(std::string &parm, enum PARM_ACT pact)
             movie_filename = "";
         } else if (parm.substr(0,1) == "/") {
             movie_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
+            MOTION_LOG(NTC, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             movie_filename = parm;
         }
@@ -1631,7 +1608,7 @@ void cls_config::edit_timelapse_interval(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_interval %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid timelapse_interval %d"),parm_in);
         } else {
             timelapse_interval = parm_in;
         }
@@ -1652,7 +1629,7 @@ void cls_config::edit_timelapse_mode(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             timelapse_mode = "daily";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_mode %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid timelapse_mode %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = timelapse_mode;
@@ -1674,7 +1651,7 @@ void cls_config::edit_timelapse_container(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             timelapse_container = "mpg";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid timelapse_container %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid timelapse_container %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = timelapse_container;
@@ -1694,7 +1671,7 @@ void cls_config::edit_timelapse_filename(std::string &parm, enum PARM_ACT pact)
             timelapse_filename = "";
         } else if (parm.substr(0,1) == "/") {
             timelapse_filename = parm.substr(1);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Removing leading '/' from filename"));
+            MOTION_LOG(NTC, NO_ERRNO,_("Removing leading '/' from filename"));
         } else {
             timelapse_filename = parm;
         }
@@ -1744,7 +1721,7 @@ void cls_config::edit_webcontrol_port(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 65535)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_port %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid webcontrol_port %d"),parm_in);
         } else {
             webcontrol_port = parm_in;
         }
@@ -1759,12 +1736,12 @@ void cls_config::edit_webcontrol_base_path(std::string &parm, enum PARM_ACT pact
         webcontrol_base_path = "";
     } else if (pact == PARM_ACT_SET) {
         if (parm == "/") {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid webcontrol_base_path: Use blank instead of single / "));
             webcontrol_base_path = "";
         } else if (parm.length() >= 1) {
             if (parm.substr(0, 1) != "/") {
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(NTC, NO_ERRNO
                     , _("Invalid webcontrol_base_path:  Must start with a / "));
                 webcontrol_base_path = "/" + parm;
             } else {
@@ -1808,7 +1785,7 @@ void cls_config::edit_webcontrol_access(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < PARM_LVL_00) || (parm_in > PARM_LVL_04)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_access %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid webcontrol_access %d"),parm_in);
         } else {
             webcontrol_access = parm_in;
         }
@@ -1835,7 +1812,7 @@ void cls_config::edit_webcontrol_interface(std::string &parm, enum PARM_ACT pact
         } else if (parm == "") {
             webcontrol_interface = "default";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_interface %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid webcontrol_interface %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_interface;
@@ -1856,7 +1833,7 @@ void cls_config::edit_webcontrol_auth_method(std::string &parm, enum PARM_ACT pa
         } else if (parm == "") {
             webcontrol_auth_method = "none";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_auth_method %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid webcontrol_auth_method %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = webcontrol_auth_method;
@@ -1875,13 +1852,13 @@ void cls_config::edit_webcontrol_auth_admin(std::string &parm, enum PARM_ACT pac
         if (parm == "") {
             webcontrol_auth_admin = parm;
         } else if (parm.find(":",0) == std::string::npos) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid webcontrol_auth_admin.  No colon separator found"));
         } else if (parm.find(":",0) == 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid webcontrol_auth_admin.  No username found"));
         } else if (parm.find(":",0) == parm.length()-1) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid webcontrol_auth_admin.  No password found"));
         } else {
             webcontrol_auth_admin = parm;
@@ -1899,13 +1876,13 @@ void cls_config::edit_webcontrol_auth_user(std::string &parm, enum PARM_ACT pact
         if (parm == "") {
             webcontrol_auth_user = parm;
         } else if (parm.find(":",0) == std::string::npos) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid webcontrol_auth_user.  No colon separator found"));
         } else if (parm.find(":",0) == 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid webcontrol_auth_user.  No username found"));
         } else if (parm.find(":",0) == parm.length()-1) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Invalid webcontrol_auth_user.  No password found"));
         } else {
             webcontrol_auth_user = parm;
@@ -1989,7 +1966,7 @@ void cls_config::edit_webcontrol_lock_minutes(std::string &parm, enum PARM_ACT p
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_lock_minutes %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid webcontrol_lock_minutes %d"),parm_in);
         } else {
             webcontrol_lock_minutes = parm_in;
         }
@@ -2006,7 +1983,7 @@ void cls_config::edit_webcontrol_lock_attempts(std::string &parm, enum PARM_ACT 
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if (parm_in < 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid webcontrol_lock_attempts %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid webcontrol_lock_attempts %d"),parm_in);
         } else {
             webcontrol_lock_attempts = parm_in;
         }
@@ -2056,7 +2033,7 @@ void cls_config::edit_stream_quality(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_quality %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid stream_quality %d"),parm_in);
         } else {
             stream_quality = parm_in;
         }
@@ -2095,7 +2072,7 @@ void cls_config::edit_stream_maxrate(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 1) || (parm_in > 100)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid stream_maxrate %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid stream_maxrate %d"),parm_in);
         } else {
             stream_maxrate = parm_in;
         }
@@ -2113,7 +2090,7 @@ void cls_config::edit_database_type(std::string &parm, enum PARM_ACT pact)
             (parm == "postgresql") || (parm == "sqlite3")) {
             database_type = parm;
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_type %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid database_type %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = database_type;
@@ -2154,7 +2131,7 @@ void cls_config::edit_database_port(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 65535)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_port %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid database_port %d"),parm_in);
         } else {
             database_port = parm_in;
         }
@@ -2193,7 +2170,7 @@ void cls_config::edit_database_busy_timeout(std::string &parm, enum PARM_ACT pac
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 10000)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid database_busy_timeout %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid database_busy_timeout %d"),parm_in);
         } else {
             database_busy_timeout = parm_in;
         }
@@ -2276,7 +2253,7 @@ void cls_config::edit_ptz_wait(std::string &parm, enum PARM_ACT pact)
     } else if (pact == PARM_ACT_SET) {
         parm_in = atoi(parm.c_str());
         if ((parm_in < 0) || (parm_in > 2147483647)) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid ptz_wait %d"),parm_in);
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid ptz_wait %d"),parm_in);
         } else {
             ptz_wait = parm_in;
         }
@@ -2430,7 +2407,7 @@ void cls_config::edit_snd_window(std::string &parm, enum PARM_ACT pact)
         } else if (parm == "") {
             snd_window = "hamming";
         } else {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Invalid snd_window %s"), parm.c_str());
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid snd_window %s"), parm.c_str());
         }
     } else if (pact == PARM_ACT_GET) {
         parm = snd_window;
@@ -2458,7 +2435,6 @@ void cls_config::edit_cat00(std::string cmd, std::string &parm_val, enum PARM_AC
     } else if (cmd == "log_file") {                edit_log_file(parm_val, pact);
     } else if (cmd == "log_level") {               edit_log_level(parm_val, pact);
     } else if (cmd == "log_fflevel") {             edit_log_fflevel(parm_val, pact);
-    } else if (cmd == "log_type") {                edit_log_type(parm_val, pact);
     } else if (cmd == "native_language") {         edit_native_language(parm_val, pact);
     } else if (cmd == "native_language_code") {    edit_native_language_code(parm_val, pact);
     }
@@ -4009,13 +3985,13 @@ void cls_config::edit_depr_vid(std::string parm_nm, std::string parm_val)
         }
     }
     if (prm == nullptr) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Bad programming"));
         return;
     }
 
     util_parms_add(prm, parm_nm, parm_val, false);
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(INF, NO_ERRNO
         ,_("%s %s changed to v4l2_params option %s=%s")
         ,parm_nm.c_str(),parm_val.c_str()
         ,parm_nm.c_str(),parm_val.c_str());
@@ -4059,7 +4035,7 @@ void cls_config::edit_depr_movie(std::string parm_nm, std::string parm_val)
         }
     }
     if (prm == nullptr) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Bad programming"));
         return;
     }
@@ -4086,7 +4062,7 @@ void cls_config::edit_depr_movie(std::string parm_nm, std::string parm_val)
         return;
     }
     util_parms_add(prm, pnew_nm, pnew_val, false);
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(INF, NO_ERRNO
         ,_("%s %s changed to movie_params option %s=%s")
         ,parm_nm.c_str(),parm_val.c_str()
         ,pnew_nm.c_str(),pnew_val.c_str());
@@ -4106,7 +4082,7 @@ void cls_config::edit_depr_timelapse(std::string parm_nm, std::string parm_val)
         }
     }
     if (prm == nullptr) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Bad programming"));
         return;
     }
@@ -4118,7 +4094,7 @@ void cls_config::edit_depr_timelapse(std::string parm_nm, std::string parm_val)
         return;
     }
     util_parms_add(prm, pnew_nm, pnew_val, false);
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(INF, NO_ERRNO
         ,_("%s %s changed to timelapse_params option %s=%s")
         ,parm_nm.c_str(),parm_val.c_str()
         ,pnew_nm.c_str(),pnew_val.c_str());
@@ -4132,7 +4108,7 @@ int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
     indx = 0;
     while (config_parms_depr[indx].parm_name != "") {
         if (parm_nm ==  config_parms_depr[indx].parm_name) {
-            MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("%s after version %s")
+            MOTION_LOG(ALR, NO_ERRNO, _("%s after version %s")
                 , config_parms_depr[indx].info.c_str()
                 , config_parms_depr[indx].last_version.c_str());
 
@@ -4184,7 +4160,7 @@ void cls_config::edit_set(std::string parm_nm, std::string parm_val)
         return;
     }
 
-    MOTION_LOG(ALR, TYPE_ALL, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
+    MOTION_LOG(ALR, NO_ERRNO, _("Unknown config option \"%s\""), parm_nm.c_str());
 }
 
 void cls_config::edit_list(std::string parm_nm, std::string &parm_val, enum PARM_PCAT pcat)
@@ -4201,7 +4177,7 @@ void cls_config::edit_list(std::string parm_nm, std::string &parm_val, enum PARM
         }
     }
     if (prm == nullptr) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("coding error %d"), pcat);
         parm_val = "[\"\"]";
         return;
@@ -4323,7 +4299,7 @@ void cls_config::cmdline()
 {
     int c;
 
-    while ((c = getopt(app->argc, app->argv, "bc:d:hmn?p:k:l:")) != EOF)
+    while ((c = getopt(app->argc, app->argv, "bc:d:hmn?p:l:")) != EOF)
         switch (c) {
         case 'c':
             edit_set("conf_filename", optarg);
@@ -4336,9 +4312,6 @@ void cls_config::cmdline()
             break;
         case 'd':
             edit_set("log_level", optarg);
-            break;
-        case 'k':
-            edit_set("log_type", optarg);
             break;
         case 'p':
             edit_set("pid_file", optarg);
@@ -4446,7 +4419,7 @@ void cls_config::camera_add(std::string fname, bool srcdir)
     if (fname == "") {
         cam_cls->conf_src->camera_filenm();
     } else if (stat(fname.c_str(), &statbuf) != 0) {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ALR, SHOW_ERRNO
             ,_("Camera config file %s not found"), fname.c_str());
     } else {
         cam_cls->conf_src->process();
@@ -4522,7 +4495,7 @@ void cls_config::sound_add(std::string fname, bool srcdir)
     if (fname == "") {
         snd_cls->conf_src->sound_filenm();
     } else if (stat(fname.c_str(), &statbuf) != 0) {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ALR, SHOW_ERRNO
             ,_("Sound config file %s not found"), fname.c_str());
     } else {
         snd_cls->conf_src->process();
@@ -4549,13 +4522,13 @@ void cls_config::config_dir_item(std::string confdir)
                 if (file.substr(file.length()-5,5) == ".conf") {
                     if (file.find("sound") == std::string::npos) {
                         file = confdir + "/" + file;
-                        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                        MOTION_LOG(NTC, NO_ERRNO
                             ,_("Processing as camera config file %s")
                             , file.c_str() );
                         camera_add(file, true);
                     } else {
                         file = confdir + "/" + file;
-                        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                        MOTION_LOG(NTC, NO_ERRNO
                             ,_("Processing as sound config file %s")
                             , file.c_str() );
                         sound_add(file, true);
@@ -4578,13 +4551,13 @@ void cls_config::process()
 
     ifs.open(conf_filename);
         if (ifs.is_open() == false) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 , _("Unable to open configuration file: %s")
                 , conf_filename.c_str());
             return;
         }
 
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Processing config file %s")
             , conf_filename.c_str());
 
@@ -4599,7 +4572,7 @@ void cls_config::process()
             if (line.find('\t') != std::string::npos) {
                 if (line.find('\t') < stpos) {
                     stpos =line.find('\t');
-                    MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(WRN, NO_ERRNO
                         , _("Tabs should not be used in configuration file.:%s")
                         , line.c_str());
                 }
@@ -4624,7 +4597,7 @@ void cls_config::process()
                 }
 
             } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, NO_ERRNO
                     , _("Unable to parse line: %s"), line.c_str());
                 continue;
             }
@@ -4657,15 +4630,15 @@ void cls_config::config_log_item(std::string parm_nm, std::string parm_vl)
         (parm_nm == "database_user") ||
         (parm_nm == "database_password"))
     {
-        MOTION_SHT(INF, TYPE_ALL, NO_ERRNO
+        MOTION_SHT(INF, NO_ERRNO
             ,_("%-25s <redacted>"), parm_nm.c_str());
     } else {
         if ((parm_nm.compare(0,4,"text") == 0) ||
             (parm_vl.compare(0,1, " ") != 0)) {
-            MOTION_SHT(INF, TYPE_ALL, NO_ERRNO
+            MOTION_SHT(INF, NO_ERRNO
                 , "%-25s %s", parm_nm.c_str(), parm_vl.c_str());
         } else {
-            MOTION_SHT(INF, TYPE_ALL, NO_ERRNO
+            MOTION_SHT(INF, NO_ERRNO
                 , "%-25s \"%s\"", parm_nm.c_str(), parm_vl.c_str());
         }
     }
@@ -4684,10 +4657,10 @@ void cls_config::config_log()
     ctx_params_item *itma, *itmc;
     bool chk, chklbl;
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(INF, NO_ERRNO
         ,_("Logging configuration parameters from all files"));
 
-    MOTION_SHT(INF, TYPE_ALL, NO_ERRNO
+    MOTION_SHT(INF, NO_ERRNO
         , _("Config file: %s"), app->conf_src->conf_filename.c_str());
 
     i = 0;
@@ -4724,7 +4697,7 @@ void cls_config::config_log()
     }
 
     for (indx=0; indx<app->cam_cnt; indx++) {
-        MOTION_SHT(INF, TYPE_ALL, NO_ERRNO
+        MOTION_SHT(INF, NO_ERRNO
             , _("Camera config file: %s")
             , app->cam_list[indx]->conf_src->conf_filename.c_str());
         i = 0;
@@ -4773,7 +4746,7 @@ void cls_config::config_log()
                         }
                         if (chk == false) {
                             if (chklbl == false) {
-                                MOTION_SHT(INF, TYPE_ALL, NO_ERRNO, "%-25s ", parm_nm.c_str());
+                                MOTION_SHT(INF, NO_ERRNO, "%-25s ", parm_nm.c_str());
                                 chklbl = true;
                             }
                             config_log_item("  "+itmc->param_name,itmc->param_value);
@@ -4787,7 +4760,7 @@ void cls_config::config_log()
     }
 
     for (indx=0; indx<app->snd_cnt; indx++) {
-        MOTION_SHT(INF, TYPE_ALL, NO_ERRNO
+        MOTION_SHT(INF, NO_ERRNO
             , _("Sound config file: %s")
             , app->snd_list[indx]->conf_src->conf_filename.c_str());
         i = 0;
@@ -4834,7 +4807,7 @@ void cls_config::config_write_params(FILE *conffile, cls_config *cfg
         }
     }
     if (prm == nullptr) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Coding error with %s"), parm_nm.c_str());
         return;
     }
@@ -4863,7 +4836,7 @@ void cls_config::config_write_params(FILE *conffile, cls_config *cfg
         }
         prmfile = myfopen(fnm_chk.c_str(), "we");
         if (prmfile == NULL) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Failed to open for writing %s params_file %s")
                 , parm_nm.c_str(), fnm_chk.c_str());
             return;
@@ -4888,7 +4861,7 @@ void cls_config::config_write_params(FILE *conffile, cls_config *cfg
         }
         fprintf(prmfile, "\n");
         myfclose(prmfile);
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("%s values written to params_file: %s")
             , parm_nm.c_str(), fnm_chk.c_str());
 
@@ -4941,7 +4914,7 @@ void cls_config::config_write_app()
 
     conffile = myfopen(app->conf_src->conf_filename.c_str(), "we");
     if (conffile == NULL) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Failed to write configuration to %s")
             , app->conf_src->conf_filename.c_str());
         return;
@@ -5001,7 +4974,7 @@ void cls_config::config_write_app()
     fprintf(conffile, "\n");
     myfclose(conffile);
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(NTC, NO_ERRNO
         , _("Configuration written to %s")
         , app->conf_src->conf_filename.c_str());
 
@@ -5027,7 +5000,7 @@ void cls_config::config_write_cam(int camindx)
     cfgc = app->cam_list[camindx]->conf_src;
     conffile = myfopen(cfgc->conf_filename.c_str(), "we");
     if (conffile == NULL) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Failed to write configuration to %s")
             , cfgc->conf_filename.c_str());
         return;
@@ -5080,7 +5053,7 @@ void cls_config::config_write_cam(int camindx)
     fprintf(conffile, "\n");
     myfclose(conffile);
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(NTC, NO_ERRNO
         , _("Configuration written to %s")
         , cfgc->conf_filename.c_str());
 
@@ -5103,7 +5076,7 @@ void cls_config::config_write_snd()
     for (indx=0; indx<app->snd_cnt; indx++) {
         conffile = myfopen(app->snd_list[indx]->conf_src->conf_filename.c_str(), "we");
         if (conffile == NULL) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Failed to write configuration to %s")
                 , app->snd_list[indx]->conf_src->conf_filename.c_str());
             return;
@@ -5139,7 +5112,7 @@ void cls_config::config_write_snd()
         fprintf(conffile, "\n");
         myfclose(conffile);
 
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Configuration written to %s")
             , app->snd_list[indx]->conf_src->conf_filename.c_str());
     }
@@ -5256,7 +5229,7 @@ void cls_config::init()
 
     if (filename == "") {
         if (getcwd(path, sizeof(path)) == NULL) {
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error getcwd"));
+            MOTION_LOG(ERR, SHOW_ERRNO, _("Error getcwd"));
             exit(-1);
         }
         filename = path + std::string("/motion.conf");
@@ -5285,17 +5258,17 @@ void cls_config::init()
             filename = "";
         }
         if (filename != "") {
-            MOTION_LOG(WRN, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(WRN, SHOW_ERRNO
                 ,_("The configuration file location '%s' is deprecated.")
                 , sysconfdir );
-            MOTION_LOG(WRN, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(WRN, SHOW_ERRNO
                 ,_("The new default configuration file location is '%s'")
                 , configdir );
         }
     }
 
     if (filename == "") {
-        MOTION_LOG(ALR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ALR, SHOW_ERRNO
             ,_("Could not open configuration file"));
         exit(-1);
     }
@@ -5305,9 +5278,9 @@ void cls_config::init()
     app->conf_src->process();
 
     if ((app->cam_cnt == 0) && (app->snd_cnt == 0)) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("No camera or sound configuration files specified."));
-                MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(NTC, NO_ERRNO
             , _("Adding a camera configuration file."));
         app->conf_src->camera_add("", false);
     }

@@ -23,7 +23,6 @@
 
 cls_log *motlog;
 
-const char *log_type_str[]  = {NULL, "COR", "STR", "ENC", "NET", "DBS", "EVT", "TRK", "VID", "ALL"};
 const char *log_level_str[] = {NULL, "EMG", "ALR", "CRT", "ERR", "WRN", "NTC", "INF", "DBG", "ALL"};
 
 void ff_log(void *var1, int errnbr, const char *fmt, va_list vlist)
@@ -55,7 +54,7 @@ void ff_log(void *var1, int errnbr, const char *fmt, va_list vlist)
     fflvl = ((motlog->log_fflevel -2) * 8);
 
     if (errnbr <= fflvl ) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,"%s",buff );
+        MOTION_LOG(INF, NO_ERRNO,"%s",buff );
     }
 }
 
@@ -187,7 +186,7 @@ void cls_log::set_log_file(std::string pname)
         if (log_file_name == "") {
             set_mode(LOGMODE_SYSLOG);
             log_file_name = "syslog";
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Logging to syslog"));
+            MOTION_LOG(NTC, NO_ERRNO,_("Logging to syslog"));
         }
 
     } else if ((pname != log_file_name) || (log_file_ptr == nullptr)) {
@@ -199,19 +198,19 @@ void cls_log::set_log_file(std::string pname)
         if (log_file_ptr != nullptr) {
             log_file_name = pname;
             set_mode(LOGMODE_SYSLOG);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Logging to file (%s)")
+            MOTION_LOG(NTC, NO_ERRNO,_("Logging to file (%s)")
                 ,pname.c_str());
             set_mode(LOGMODE_FILE);
         } else {
             log_file_name = "syslog";
             set_mode(LOGMODE_SYSLOG);
-            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO,_("Cannot create log file %s")
+            MOTION_LOG(EMG, SHOW_ERRNO,_("Cannot create log file %s")
                 , pname.c_str());
         }
     }
 }
 
-void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
+void cls_log::write_msg(int loglvl, int flgerr, int flgfnc, ...)
 {
     int err_save, n;
     uint prefixlen;
@@ -248,12 +247,12 @@ void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
 
     if (log_mode == LOGMODE_FILE) {
         n = snprintf(msg_full, sizeof(msg_full)
-            , "%s [%s][%s][%s] ", msg_time
-            , log_level_str[loglvl],log_type_str[msg_type], threadname );
+            , "%s [%s][%s] ", msg_time
+            , log_level_str[loglvl], threadname );
     } else {
         n = snprintf(msg_full, sizeof(msg_full)
-        , "[%s][%s][%s] "
-        , log_level_str[loglvl],log_type_str[msg_type], threadname );
+        , "[%s][%s] "
+        , log_level_str[loglvl], threadname );
     }
     prefixlen = (uint)n;
 

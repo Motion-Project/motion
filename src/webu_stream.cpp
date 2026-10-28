@@ -153,7 +153,7 @@ bool cls_webu_stream::all_ready()
                 indx1++;
             }
             if (p_cam->passflag == false) {
-                MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(DBG, NO_ERRNO
                     ,_("Camera %d not ready"), p_cam->cfg->device_id);
                 return false;
             }
@@ -161,7 +161,7 @@ bool cls_webu_stream::all_ready()
     }
     if ((webua->webu->allcam->info.dst_h == 0) ||
         (webua->webu->allcam->info.dst_w == 0)) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO,_("All cameras not ready"));
+            MOTION_LOG(DBG, NO_ERRNO,_("All cameras not ready"));
             return false;
     }
 
@@ -575,7 +575,7 @@ mhdrslt cls_webu_stream::stream_mjpeg()
     response = MHD_create_response_from_callback (MHD_SIZE_UNKNOWN, 1024
         , &webu_mjpeg_response, (void *)this, NULL);
     if (response == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 
@@ -605,7 +605,7 @@ mhdrslt cls_webu_stream::stream_static()
     int indx;
 
     if (resp_used == 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Could not get image to stream."));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not get image to stream."));
         return MHD_NO;
     }
 
@@ -613,7 +613,7 @@ mhdrslt cls_webu_stream::stream_static()
             resp_size,(void *)resp_image
             , MHD_RESPMEM_MUST_COPY);
     if (response == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Invalid response"));
         return MHD_NO;
     }
 

@@ -52,10 +52,8 @@
             bool            daemon;
             std::string     pid_file;
             std::string     log_file;
-            std::string     log_type_str;
             int             log_level;
             int             log_fflevel;
-            int             log_type;
             bool            native_language;
             std::string     native_language_code;
 

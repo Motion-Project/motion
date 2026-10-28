@@ -140,7 +140,7 @@ void *mymalloc(size_t nbytes)
     void *dummy = calloc(nbytes, 1);
 
     if (!dummy) {
-        MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(EMG, SHOW_ERRNO
             , _("Could not allocate %llu bytes of memory!")
             , (unsigned long long)nbytes);
         exit(1);
@@ -156,12 +156,12 @@ void *myrealloc(void *ptr, size_t size, const char *desc)
 
     if (size == 0) {
         free(ptr);
-        MOTION_LOG(WRN, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(WRN, NO_ERRNO
             ,_("Warning! Function %s tries to resize 0 bytes!"),desc);
     } else {
         dummy = realloc(ptr, size);
         if (!dummy) {
-            MOTION_LOG(EMG, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(EMG, NO_ERRNO
                 ,_("Could not resize memory-block at offset %p to %llu bytes (function %s)!")
                 ,ptr, (unsigned long long)size, desc);
             exit(1);
@@ -195,11 +195,11 @@ int mycreate_path(const char *path)
 
     while (indx_pos != std::string::npos) {
         if (stat(tmp.substr(0, indx_pos + 1).c_str(), &statbuf) != 0) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Creating %s"), tmp.substr(0, indx_pos + 1).c_str());
             retcd = mkdir(tmp.substr(0, indx_pos + 1).c_str(), mode);
             if (retcd == -1 && errno != EEXIST) {
-                MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+                MOTION_LOG(ERR, SHOW_ERRNO
                     ,_("Problem creating directory %s")
                     , tmp.substr(0, indx_pos + 1).c_str());
                 return -1;
@@ -233,7 +233,7 @@ FILE *myfopen(const char *path, const char *mode)
         fp = fopen(path, mode);
     }
     if (!fp) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO
+        MOTION_LOG(ERR, SHOW_ERRNO
             ,_("Error opening file %s with mode %s"), path, mode);
         return NULL;
     }
@@ -247,7 +247,7 @@ int myfclose(FILE* fh)
     int rval = fclose(fh);
 
     if (rval != 0) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error closing file"));
+        MOTION_LOG(ERR, SHOW_ERRNO, _("Error closing file"));
     }
 
     return rval;
@@ -507,7 +507,7 @@ void mythreadname_set(const char *abbr, int threadnbr, const char *threadname)
     #elif HAVE_PTHREAD_SETNAME_NP
         pthread_setname_np(pthread_self(), tname);
     #else
-        MOTION_LOG(INF, TYPE_NETCAM, NO_ERRNO, _("Unable to set thread name %s"), tname);
+        MOTION_LOG(INF, NO_ERRNO, _("Unable to set thread name %s"), tname);
     #endif
 
 }
@@ -627,13 +627,13 @@ void util_exec_base(cls_motapp *p_app, std::string rslt)
             , p_app->cfg->conf_filename.find_last_of("/"));
         cmd_tmp += "/scripts/" + cmd_nm;
         if (cmd_tmp != cmd_full) {
-            MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Adjusting the path provided since webcontrol is open"));
         }
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("Original >%s<"),cmd_full.c_str());
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("New >%s<"),cmd_tmp.c_str());
+        MOTION_LOG(DBG, NO_ERRNO,_("Original >%s<"),cmd_full.c_str());
+        MOTION_LOG(DBG, NO_ERRNO,_("New >%s<"),cmd_tmp.c_str());
         cmd_full = cmd_tmp;
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("Adjusted >%s<"),cmd_full.c_str());
+        MOTION_LOG(DBG, NO_ERRNO,_("Adjusted >%s<"),cmd_full.c_str());
     }
 
     /* The vector is being used for ease of programming
@@ -672,7 +672,7 @@ void util_exec_base(cls_motapp *p_app, std::string rslt)
         setsid();
         execv(cmd_full.c_str(), (char **)parmv);
         /* if above function succeeds the program never reaches here */
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTION_LOG(ALR, SHOW_ERRNO
             ,_("Unable to start external command >%s %s<")
             , cmd_full.c_str(), parm_log.c_str());
 
@@ -680,11 +680,11 @@ void util_exec_base(cls_motapp *p_app, std::string rslt)
     }
 
     if (pid == 0) {
-        MOTION_LOG(ALR, TYPE_EVENTS, SHOW_ERRNO
+        MOTION_LOG(ALR, SHOW_ERRNO
             ,_("Unable to start external command >%s %s<")
             , cmd_full.c_str(), parm_log.c_str());
     } else {
-        MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(DBG, NO_ERRNO
             ,_("Executing external command >%s %s<")
             , cmd_full.c_str(), parm_log.c_str());
     }
@@ -734,7 +734,7 @@ static void util_parms_file(ctx_params *params, std::string params_file, bool sh
     std::ifstream ifs;
 
     if (showmsg == true){
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             ,_("parse file:%s"), params_file.c_str());
     }
     chk = 0;
@@ -744,7 +744,7 @@ static void util_parms_file(ctx_params *params, std::string params_file, bool sh
         }
     }
     if (chk > 1){
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Only one params_file specification is permitted."));
         return;
     }
@@ -758,7 +758,7 @@ static void util_parms_file(ctx_params *params, std::string params_file, bool sh
 
     ifs.open(params_file.c_str());
         if (ifs.is_open() == false) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Unable to open params_file: %s"), params_file.c_str());
             return;
         }
@@ -789,7 +789,7 @@ static void util_parms_file(ctx_params *params, std::string params_file, bool sh
                     parm_vl = line.substr(stpos, line.length()-stpos);
                 }
             } else {
-                MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(ERR, NO_ERRNO
                     ,_("Unable to parse line:%s"), line.c_str());
                 continue;
             }
@@ -808,7 +808,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     ctx_params_item parm_itm;
 
     if (showmsg == true) {
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("%s:>%s< >%s<")
+        MOTION_LOG(DBG, NO_ERRNO,_("%s:>%s< >%s<")
             ,params->params_desc.c_str(), parm_nm.c_str(),parm_val.c_str());
     }
 
@@ -993,7 +993,7 @@ static void util_parms_parse_qte(ctx_params *params, std::string &parmline)
             }
         }
 
-        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        //MOTION_LOG(DBG, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1024,7 +1024,7 @@ static void util_parms_parse_comma(ctx_params *params, std::string &parmline)
             indxvl_en = parmline.find(",",indxvl_st) - 1;
         }
 
-        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        //MOTION_LOG(DBG, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1044,7 +1044,7 @@ static void util_parms_parse_comma(ctx_params *params, std::string &parmline)
         }
         indxvl_en = parmline.length() - 1;
 
-        //MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
+        //MOTION_LOG(DBG, NO_ERRNO,_("Parsing: >%s< >%ld %ld %ld %ld<")
         //    ,parmline.c_str(), indxnm_st, indxnm_en, indxvl_st, indxvl_en);
 
         util_parms_extract(params, parmline, indxnm_st, indxnm_en, indxvl_st, indxvl_en);
@@ -1249,23 +1249,23 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
     } else {src_fmt = AV_PIX_FMT_NONE;}
 
     if (src_fmt == AV_PIX_FMT_NONE) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Unsupported pixel format >%s<"),src_4cc.c_str());
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Find corresponding AVPIXELFORMAT and adjust code"));
         return -1;
     }
 
     frm_in = av_frame_alloc();
     if (frm_in == NULL) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Unable to allocate frm_in."));
         return -1;
     }
 
     frm_out = av_frame_alloc();
     if (frm_out == NULL) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Unable to allocate frm_out."));
         av_frame_free(&frm_in);
         return -1;
@@ -1277,7 +1277,7 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
         , src_w, src_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error filling arrays: %s"), errstr);
         av_frame_free(&frm_in);
         av_frame_free(&frm_out);
@@ -1292,7 +1292,7 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
         , dst_w, dst_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error Filling array 2: %s"), errstr);
         free(buf);
         av_frame_free(&frm_in);
@@ -1305,7 +1305,7 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
             ,dst_w, dst_h, AV_PIX_FMT_YUV420P
             ,SWS_BICUBIC, NULL, NULL, NULL);
     if (swsctx == NULL) {
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Unable to allocate scaling context."));
         free(buf);
         av_frame_free(&frm_in);
@@ -1318,7 +1318,7 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
         , 0, src_h, frm_out->data, frm_out->linesize);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error resizing/reformatting: %s"), errstr);
         free(buf);
         av_frame_free(&frm_in);
@@ -1334,7 +1334,7 @@ int util_resize(uint8_t *src, int src_w, int src_h, std::string src_4cc
         , AV_PIX_FMT_YUV420P, dst_w, dst_h, 1);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_NETCAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error putting frame into output buffer: %s"), errstr);
         free(buf);
         av_frame_free(&frm_in);

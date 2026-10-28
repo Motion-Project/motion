@@ -33,7 +33,7 @@ int movie_interrupt(void *ctx)
 
     clock_gettime(CLOCK_MONOTONIC, &movie->cb_cr_ts);
     if ((movie->cb_cr_ts.tv_sec - movie->cb_st_ts.tv_sec ) > movie->cb_dur) {
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO,_("Movie timed out"));
+        MOTION_LOG(INF, NO_ERRNO,_("Movie timed out"));
         return 1;
     }
     return 0;
@@ -150,7 +150,7 @@ int cls_movie::set_oformat()
         full_nm += ".mpg";
         file_nm += ".mpg";
         if (oc->oformat == nullptr) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Error setting timelapse append for container %s")
                 , container.c_str());
             free_context();
@@ -210,7 +210,7 @@ int cls_movie::set_oformat()
     }
 
     if (oc->oformat == nullptr) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("container option value %s is not supported")
             , container.c_str());
         free_context();
@@ -218,7 +218,7 @@ int cls_movie::set_oformat()
     }
 
     if (oc->oformat->video_codec == AV_CODEC_ID_NONE) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get the container"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not get the container"));
         free_context();
         return -1;
     }
@@ -234,7 +234,7 @@ int cls_movie::encode_video()
     retcd = avcodec_send_frame(ctx_codec, picture);
     if (retcd < 0 ) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error sending frame for encoding:%s"),errstr);
         return -1;
     }
@@ -246,7 +246,7 @@ int cls_movie::encode_video()
     }
     if (retcd < 0 ) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error receiving encoded packet video:%s"),errstr);
         //Packet is freed upon failure of encoding
         return -1;
@@ -283,7 +283,7 @@ int cls_movie::set_pts(const struct timespec *ts1)
                     , strm_video->time_base);
         }
         if (test_mode == true) {
-            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(INF, NO_ERRNO
                 ,_("PTS %" PRId64 " Base PTS %" PRId64 " ms interval %" PRId64 " timebase %d-%d")
                 ,picture->pts,base_pts,pts_interval
                 ,strm_video->time_base.num,strm_video->time_base.den);
@@ -292,7 +292,7 @@ int cls_movie::set_pts(const struct timespec *ts1)
         if (picture->pts <= last_pts) {
             //We have a problem with our motion loop timing and sending frames or the rounding into the PTS.
             if (test_mode == true) {
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO, _("BAD TIMING!! Frame skipped."));
+                MOTION_LOG(INF, NO_ERRNO, _("BAD TIMING!! Frame skipped."));
             }
             return -1;
         }
@@ -318,7 +318,7 @@ int cls_movie::set_quality()
         if (itm->param_name == "quality") {
             quality=mtoi(itm->param_value);
             if ((quality > 90) || (quality < 5)) {
-                MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+                MOTION_LOG(INF, NO_ERRNO
                 ,_("Invalid quality %d. Permitted range 5-90"), quality);
                 quality = 60;
                 itm->param_value="60";
@@ -334,7 +334,7 @@ int cls_movie::set_quality()
             if (itm->param_name.substr(5) == "crf") {
                 crf=itm->param_value;
             }
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("av_dict_set %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
@@ -345,7 +345,7 @@ int cls_movie::set_quality()
             if (itm->param_name.substr(4) == "crf") {
                 crf=itm->param_value;
             }
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("av_opt_set %s = %s")
                 , itm->param_name.substr(4).c_str()
                 , itm->param_value.c_str());
@@ -353,7 +353,7 @@ int cls_movie::set_quality()
             av_opt_set(ctx_codec->priv_data
                 ,itm->param_name.substr(5).c_str()
                 ,itm->param_value.c_str(), 0);
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("av_opt_set  priv_data %s = %s")
                 , itm->param_name.substr(5).c_str()
                 , itm->param_value.c_str());
@@ -382,21 +382,21 @@ int cls_movie::set_quality()
             ctx_codec->profile = MY_PROFILE_H264_HIGH;
         } else {
             prfl="main";
-            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(INF, NO_ERRNO
                 ,_("Unknown movie profile: %s")
                 , prfl.c_str());
             ctx_codec->profile = MY_PROFILE_H264_MAIN;
         }
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(DBG, NO_ERRNO
             ,_("codec profile = %s"), prfl.c_str());
         av_opt_set(ctx_codec->priv_data, "profile", prfl.c_str(), 0);
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(DBG, NO_ERRNO
             ,_("av_opt_set priv_data profile = %s"), prfl.c_str());
 
         if (crf == "") {
             crf = std::to_string(((100-quality) * 51)/100);
             av_opt_set(ctx_codec->priv_data, "crf", crf.c_str(), 0);
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("av_opt_set priv_data crf = %s"), crf.c_str());
         }
     } else {
@@ -406,7 +406,7 @@ int cls_movie::set_quality()
         }
         ctx_codec->global_quality=gblqual;
     }
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+    MOTION_LOG(INF, NO_ERRNO
         ,_("%s codec quality: %d crf: %s bit_rate: %d gblqual: %d")
         , codec->name, quality, crf.c_str(), bitrate, gblqual);
 
@@ -427,7 +427,7 @@ int cls_movie::set_codec_preferred()
     if (preferred_codec != "") {
         codec = avcodec_find_encoder_by_name(preferred_codec.c_str());
         if (codec == nullptr) {
-            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Failed to find user requested codec %s")
                 , preferred_codec.c_str());
             preferred_codec = "";
@@ -438,14 +438,14 @@ int cls_movie::set_codec_preferred()
             }
             codec = avcodec_find_encoder(oc->video_codec_id);
         } else {
-            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Using codec %s"), preferred_codec.c_str());
         }
     } else {
         codec = avcodec_find_encoder(oc->video_codec_id);
     }
     if (codec == nullptr) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("codec for container %s not found"), container.c_str());
         free_context();
         return -1;
@@ -486,7 +486,7 @@ void cls_movie::set_flags()
             ctx_codec->flags |=
                mtoi(sflg.substr(0,chkloc)) <<
                mtoi(sflg.substr(chkloc+2));
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("Set codec flags %s<<%s")
                 ,sflg.substr(0,chkloc).c_str()
                 ,sflg.substr(chkloc+2).c_str());
@@ -507,7 +507,7 @@ void cls_movie::set_flags()
             ctx_codec->flags2 |=
                mtoi(sflg.substr(0,chkloc)) <<
                mtoi(sflg.substr(chkloc+2));
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("Set codec flags2 %s<<%s")
                 ,sflg.substr(0,chkloc).c_str()
                 ,sflg.substr(chkloc+2).c_str());
@@ -528,13 +528,13 @@ int cls_movie::set_codec()
 
     strm_video = avformat_new_stream(oc, codec);
     if (!strm_video) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc stream"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not alloc stream"));
         free_context();
         return -1;
     }
     ctx_codec = avcodec_alloc_context3(codec);
     if (ctx_codec == nullptr) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec context!"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Failed to allocate codec context!"));
         free_context();
         return -1;
     }
@@ -575,7 +575,7 @@ int cls_movie::set_codec()
         if ((container == "flv") ||
             (container == "mp4") ||
             (container == "hevc")) {
-            MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Low fps. Encoding %d frames into a %d frames container.")
                 , fps, 10);
             fps = 10;
@@ -593,13 +593,13 @@ int cls_movie::set_codec()
     set_flags();
 
     if (set_quality() < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to set quality"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Unable to set quality"));
         return -1;
     }
 
     retcd = avcodec_open2(ctx_codec, codec, &opts);
     if (retcd < 0) {
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(INF, NO_ERRNO
             ,_("Unable to open codec.  Trying alternate FPS values"));
         chkrate = 1;
         while ((chkrate < 36) && (retcd != 0)) {
@@ -609,12 +609,12 @@ int cls_movie::set_codec()
         }
         if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not open codec %s"),errstr);
+            MOTION_LOG(ERR, NO_ERRNO, _("Could not open codec %s"),errstr);
             av_dict_free(&opts);
             free_context();
             return -1;
         } else {
-            MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(INF, NO_ERRNO
             ,_("Opened codec with %d fps."), chkrate);
         }
     }
@@ -631,7 +631,7 @@ int cls_movie::set_stream()
     retcd = avcodec_parameters_from_context(strm_video->codecpar,ctx_codec);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Failed to copy decoder parameters!: %s"), errstr);
         free_context();
         return -1;
@@ -718,7 +718,7 @@ int cls_movie::set_picture()
 
     picture = av_frame_alloc();
     if (!picture) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc frame"));
+        MOTION_LOG(ERR, NO_ERRNO, _("could not alloc frame"));
         free_context();
         return -1;
     }
@@ -738,7 +738,7 @@ int cls_movie::set_picture()
         retcd = alloc_video_buffer(picture, 32);
         if (retcd) {
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("could not alloc buffers %s"), errstr);
+            MOTION_LOG(ERR, NO_ERRNO, _("could not alloc buffers %s"), errstr);
             free_context();
             return -1;
         }
@@ -768,7 +768,7 @@ int cls_movie::set_outputfile()
                 retcd = avio_open(&oc->pb, full_nm.c_str(), AVIO_FLAG_WRITE| AVIO_FLAG_NONBLOCK);
                 if (retcd < 0) {
                     av_strerror(retcd, errstr, sizeof(errstr));
-                    MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
+                    MOTION_LOG(ERR, SHOW_ERRNO
                         ,_("error %s opening file %s")
                         , errstr, full_nm.c_str());
                     remove(full_nm.c_str());
@@ -777,7 +777,7 @@ int cls_movie::set_outputfile()
                 }
             } else {
                 av_strerror(retcd, errstr, sizeof(errstr));
-                MOTION_LOG(ERR, TYPE_ENCODER, SHOW_ERRNO
+                MOTION_LOG(ERR, SHOW_ERRNO
                     ,_("avio_open: %s File %s")
                     , errstr, full_nm.c_str());
                 remove(full_nm.c_str());
@@ -790,10 +790,10 @@ int cls_movie::set_outputfile()
         retcd = avformat_write_header(oc, nullptr);
         if (retcd < 0) {
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Could not write movie header %s"),errstr);
             if ((container == "mp4") && (strm_audio != nullptr)) {
-                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                MOTION_LOG(ERR, NO_ERRNO
                     , _("Ensure audio codec is permitted with a MP4 container."));
             }
             remove(full_nm.c_str());
@@ -828,7 +828,7 @@ int cls_movie::flush_codec()
         retcd = avcodec_send_frame(ctx_codec, nullptr);
         if (retcd < 0 ) {
             av_strerror(retcd, errstr, sizeof(errstr));
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Error entering draining mode:%s"),errstr);
             return -1;
         }
@@ -838,7 +838,7 @@ int cls_movie::flush_codec()
             if (recv_cd != AVERROR_EOF) {
                 if (recv_cd < 0) {
                     av_strerror(recv_cd, errstr, sizeof(errstr));
-                    MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                    MOTION_LOG(ERR, NO_ERRNO
                         ,_("Error draining codec:%s"),errstr);
                     free_pkt();
                     return -1;
@@ -851,7 +851,7 @@ int cls_movie::flush_codec()
                 }
                 retcd = av_write_frame(oc, pkt);
                 if (retcd < 0) {
-                    MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                    MOTION_LOG(ERR, NO_ERRNO
                         ,_("Error writing draining video frame"));
                     return -1;
                 }
@@ -878,7 +878,7 @@ int cls_movie::put_frame(const struct timespec *ts1)
     retcd = encode_video();
     if (retcd != 0) {
         if (retcd != -2) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while encoding picture"));
+            MOTION_LOG(ERR, NO_ERRNO, _("Error while encoding picture"));
         }
         free_pkt();
         return retcd;
@@ -892,7 +892,7 @@ int cls_movie::put_frame(const struct timespec *ts1)
     free_pkt();
 
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error while writing video frame"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Error while writing video frame"));
         return -1;
     }
     return retcd;
@@ -930,7 +930,7 @@ int cls_movie::passthru_pktpts()
 
     if (pkt->pts != AV_NOPTS_VALUE) {
         if (pkt->pts < base_pdts) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("Invalid pkt->pts"));
+            MOTION_LOG(ERR, NO_ERRNO,_("Invalid pkt->pts"));
             return -1;
         } else {
             ts_interval = pkt->pts - base_pdts;
@@ -938,13 +938,13 @@ int cls_movie::passthru_pktpts()
         pkt->pts = av_rescale_q(ts_interval
             , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
     } else {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->pts is AV_NOPTS_VALUE"));
+        MOTION_LOG(ERR, NO_ERRNO,_("pkt->pts is AV_NOPTS_VALUE"));
         return -1;
     }
 
     if (pkt->dts != AV_NOPTS_VALUE) {
         if (pkt->dts < base_pdts) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->dts is invalid"));
+            MOTION_LOG(ERR, NO_ERRNO,_("pkt->dts is invalid"));
             return -1;
         } else {
             ts_interval = pkt->dts - base_pdts;
@@ -952,7 +952,7 @@ int cls_movie::passthru_pktpts()
         pkt->dts = av_rescale_q(ts_interval
             , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
     } else {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->dts is AV_NOPTS_VALUE"));
+        MOTION_LOG(ERR, NO_ERRNO,_("pkt->dts is AV_NOPTS_VALUE"));
         return -1;
     }
 
@@ -961,12 +961,12 @@ int cls_movie::passthru_pktpts()
         , netcam_data->transfer_format->streams[indx]->time_base, tmpbase);
 
     if ((pkt->pts == AV_NOPTS_VALUE) || (pkt->dts == AV_NOPTS_VALUE)) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO,_("pkt->dts or pkt->pts is AV_NOPTS_VALUE"));
+        MOTION_LOG(ERR, NO_ERRNO,_("pkt->dts or pkt->pts is AV_NOPTS_VALUE"));
         return -1;
     }
 
     /*
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO
+    MOTION_LOG(INF, NO_ERRNO
         ,_("base PTS %" PRId64 " new PTS %" PRId64 " srcbase %d-%d newbase %d-%d")
         ,ts_interval, pkt->duration
         ,netcam_data->transfer_format->streams[indx]->time_base.num
@@ -989,7 +989,7 @@ void cls_movie::passthru_write(int indx)
     retcd = av_packet_ref(pkt, netcam_data->pktarray[indx].packet);
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO,_("av_copy_packet: %s"),errstr);
+        MOTION_LOG(INF, NO_ERRNO,_("av_copy_packet: %s"),errstr);
         free_pkt();
         return;
     }
@@ -1004,7 +1004,7 @@ void cls_movie::passthru_write(int indx)
     free_pkt();
     if (retcd < 0) {
         av_strerror(retcd, errstr, sizeof(errstr));
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(DBG, NO_ERRNO
             ,_("Error while writing video frame: %s"),errstr);
         return;
     }
@@ -1152,13 +1152,13 @@ int cls_movie::passthru_streams_video(AVStream *stream_in)
 
     strm_video = avformat_new_stream(oc, nullptr);
     if (strm_video == nullptr) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc video stream"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not alloc video stream"));
         return -1;
     }
 
     retcd = avcodec_parameters_copy(strm_video->codecpar, stream_in->codecpar);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy video codec parameters"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Unable to copy video codec parameters"));
         return -1;
     }
 
@@ -1166,7 +1166,7 @@ int cls_movie::passthru_streams_video(AVStream *stream_in)
     strm_video->time_base = stream_in->time_base;
     strm_video->avg_frame_rate = stream_in->avg_frame_rate;
 
-    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         , _("video timebase %d/%d fps %d/%d")
         , strm_video->time_base.num
         , strm_video->time_base.den
@@ -1182,13 +1182,13 @@ int cls_movie::passthru_streams_audio( AVStream *stream_in)
 
     strm_audio = avformat_new_stream(oc, nullptr);
     if (!strm_audio) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not alloc audio stream"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not alloc audio stream"));
         return -1;
     }
 
     retcd = avcodec_parameters_copy(strm_audio->codecpar, stream_in->codecpar);
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Unable to copy audio codec parameters"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Unable to copy audio codec parameters"));
         return -1;
     }
 
@@ -1200,7 +1200,7 @@ int cls_movie::passthru_streams_audio( AVStream *stream_in)
     strm_audio->codecpar->sample_rate = stream_in->codecpar->sample_rate;
     strm_audio->avg_frame_rate = stream_in->avg_frame_rate;
 
-    MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         , _("audio timebase %d/%d")
         , strm_audio->time_base.num
         , strm_audio->time_base.den);
@@ -1238,13 +1238,13 @@ int cls_movie::passthru_check()
 {
     if ((netcam_data->status == NETCAM_NOTCONNECTED  ) ||
         (netcam_data->status == NETCAM_RECONNECTING  )) {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             ,_("rtsp camera not ready for pass-through."));
         return -1;
     }
 
     if (netcam_data == nullptr) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("RTSP context not available."));
+        MOTION_LOG(ERR, NO_ERRNO, _("RTSP context not available."));
         return -1;
     }
 
@@ -1264,7 +1264,7 @@ int cls_movie::passthru_open()
 
     oc = avformat_alloc_context();
     if (!oc) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not allocate output context"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not allocate output context"));
         free_context();
         return -1;
     }
@@ -1275,7 +1275,7 @@ int cls_movie::passthru_open()
     if ((container != "mp4") &&
         (container != "mov") &&
         (container != "mkv")) {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             ,_("Changing to MP4 container for pass-through."));
         container = "mp4";
     }
@@ -1284,24 +1284,24 @@ int cls_movie::passthru_open()
 
     retcd = set_oformat();
     if (retcd < 0 ) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get output format!"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not get output format!"));
         return -1;
     }
 
     retcd = passthru_streams();
     if (retcd < 0 ) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get streams!"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not get streams!"));
         return -1;
     }
 
     retcd = set_outputfile();
     if (retcd < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not create output file"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not create output file"));
         return -1;
     }
 
     if (strm_audio != nullptr) {
-        MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO
+        MOTION_LOG(DBG, NO_ERRNO
             , _("Timebase after open audio: %d/%d video: %d/%d")
             , strm_audio->time_base.num
             , strm_audio->time_base.den
@@ -1309,7 +1309,7 @@ int cls_movie::passthru_open()
             , strm_video->time_base.den);
     }
 
-    MOTION_LOG(INF, TYPE_ENCODER, NO_ERRNO,_("Pass-through stream opened"));
+    MOTION_LOG(INF, NO_ERRNO,_("Pass-through stream opened"));
 
     return 0;
 }
@@ -1332,7 +1332,7 @@ void cls_movie::put_pix_yuv420(ctx_image_data *img_data)
 
 void cls_movie::on_movie_start()
 {
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Creating movie: %s"),full_nm.c_str());
+    MOTION_LOG(DBG, NO_ERRNO, _("Creating movie: %s"),full_nm.c_str());
     if (cam->cfg->on_movie_start != "") {
         util_exec_command(cam, cam->cfg->on_movie_start.c_str(), full_nm.c_str());
     }
@@ -1340,7 +1340,7 @@ void cls_movie::on_movie_start()
 
 void cls_movie::on_movie_end()
 {
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO, _("Finished movie: %s"),full_nm.c_str());
+    MOTION_LOG(DBG, NO_ERRNO, _("Finished movie: %s"),full_nm.c_str());
     if (cam->cfg->on_movie_end != "") {
         util_exec_command(cam, cam->cfg->on_movie_end.c_str(), full_nm.c_str());
     }
@@ -1350,7 +1350,7 @@ int cls_movie::movie_open()
 {
     if (passthrough) {
         if (passthru_open() < 0 ) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not setup passthrough!"));
+            MOTION_LOG(ERR, NO_ERRNO, _("Could not setup passthrough!"));
             free_context();
             return -1;
         }
@@ -1359,7 +1359,7 @@ int cls_movie::movie_open()
 
     oc = avformat_alloc_context();
     if (oc == nullptr) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not allocate output context"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not allocate output context"));
         free_context();
         return -1;
     }
@@ -1371,28 +1371,28 @@ int cls_movie::movie_open()
     set_params();
 
     if (set_oformat() < 0 ) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not get codec!"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not get codec!"));
         free_context();
         return -1;
     }
 
     if (set_codec() < 0 ) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Failed to allocate codec!"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Failed to allocate codec!"));
         return -1;
     }
 
     if (set_stream() < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the stream"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not set the stream"));
         return -1;
     }
 
     if (set_picture() < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not set the picture"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not set the picture"));
         return -1;
     }
 
     if (set_outputfile() < 0) {
-        MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Could not open output file"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not open output file"));
         return -1;
     }
 
@@ -1417,7 +1417,7 @@ void cls_movie::stop()
         }
     } else {
         if (flush_codec() < 0) {
-            MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO, _("Error flushing codec"));
+            MOTION_LOG(ERR, NO_ERRNO, _("Error flushing codec"));
         }
         if (oc != nullptr) {
             if (oc->pb != nullptr) {
@@ -1449,7 +1449,7 @@ void cls_movie::stop()
             (cam->algsec->detected == false) &&
             (cam->algsec->method != "none")) {
             if (remove(full_nm.c_str()) != 0) {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTION_LOG(ERR, SHOW_ERRNO
                     , _("Unable to remove file %s"), full_nm.c_str());
             } else {
                 cam->app->dbse->filelist_add(cam, ts, "movie"
@@ -1463,7 +1463,7 @@ void cls_movie::stop()
         on_movie_end();
         cam->app->dbse->exec(cam, full_nm, "movie_end");
     } else {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Invalid movie type"));
+        MOTION_LOG(ERR, NO_ERRNO,_("Invalid movie type"));
     }
 
     is_running = false;
@@ -1479,7 +1479,7 @@ int cls_movie::extpipe_put()
         if ((cam->imgs.size_high > 0) && (cam->movie_passthrough == false)) {
             if (!fwrite(cam->current_image->image_high
                     , (uint)cam->imgs.size_high, 1, extpipe_stream)) {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTION_LOG(ERR, SHOW_ERRNO
                     , _("Error writing in pipe , state error %d")
                     , ferror(extpipe_stream));
                 retcd = -1;
@@ -1487,7 +1487,7 @@ int cls_movie::extpipe_put()
         } else {
             if (!fwrite(cam->current_image->image_norm
                     , (uint)cam->imgs.size_norm, 1, extpipe_stream)) {
-                MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO
+                MOTION_LOG(ERR, SHOW_ERRNO
                   ,_("Error writing in pipe , state error %d")
                   , ferror(extpipe_stream));
                 retcd = -1;
@@ -1541,7 +1541,7 @@ int cls_movie::put_image(ctx_image_data *img_data, const struct timespec *ts1)
             retcd = put_frame(ts1);
             cnt++;
             if (cnt > 50) {
-                MOTION_LOG(ERR, TYPE_ENCODER, NO_ERRNO
+                MOTION_LOG(ERR, NO_ERRNO
                     ,_("Excessive attempts to clear buffered packet"));
                 retcd = -1;
             }
@@ -1549,7 +1549,7 @@ int cls_movie::put_image(ctx_image_data *img_data, const struct timespec *ts1)
         //non timelapse buffered is ok
         if (retcd == -2) {
             retcd = 0;
-            MOTION_LOG(DBG, TYPE_ENCODER, NO_ERRNO, _("Buffered packet"));
+            MOTION_LOG(DBG, NO_ERRNO, _("Buffered packet"));
         }
     }
 
@@ -1575,7 +1575,7 @@ void cls_movie::init_container()
     size_t col_pos;
 
     if (cam->cfg->movie_container == "test") {
-        MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO,_("Running test of the various output formats."));
+        MOTION_LOG(NTC, NO_ERRNO,_("Running test of the various output formats."));
         codenbr = cam->event_curr_nbr % 10;
         if (codenbr == 1) {
             container = "flv";
@@ -1606,7 +1606,7 @@ void cls_movie::init_container()
     if (col_pos == std::string::npos) {
         preferred_codec = "";
     } else {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Setting preferred codec using container no longer supported.  Use movie_params"));
         preferred_codec = container.substr(col_pos+1);
         container = container.substr(0,col_pos);
@@ -1665,7 +1665,7 @@ void cls_movie::start_norm()
     motion_images = false;
     passthrough = cam->movie_passthrough;
 
-    MOTION_LOG(DBG, TYPE_EVENTS, NO_ERRNO,_("Movie fps %d"),fps);
+    MOTION_LOG(DBG, NO_ERRNO,_("Movie fps %d"),fps);
 
     params = nullptr;
     for (indx=0;indx<cam->cfg->params.size();indx++) {
@@ -1674,13 +1674,13 @@ void cls_movie::start_norm()
         }
     }
     if (params == nullptr) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error getting movie_params"));
         return;
     }
 
     if (movie_open() < 0) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error initializing movie."));
         return;
     }
@@ -1748,13 +1748,13 @@ void cls_movie::start_motion()
         }
     }
     if (params == nullptr) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error getting movie_params"));
         return;
     }
 
     if (movie_open() < 0) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error initializing movie."));
         return;
     }
@@ -1797,13 +1797,13 @@ void cls_movie::start_timelapse()
     netcam_data = nullptr;
 
     if (cam->cfg->timelapse_container == "mpg") {
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mpg container."));
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be appended to file"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Timelapse using mpg container."));
+        MOTION_LOG(NTC, NO_ERRNO, _("Events will be appended to file"));
         tlapse = TIMELAPSE_APPEND;
         container = "mpg";
     } else {
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Timelapse using mkv container."));
-        MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("Events will be trigger new files"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Timelapse using mkv container."));
+        MOTION_LOG(NTC, NO_ERRNO, _("Events will be trigger new files"));
         tlapse = TIMELAPSE_NEW;
         container = "mkv";
     }
@@ -1815,7 +1815,7 @@ void cls_movie::start_timelapse()
         }
     }
     if (params == nullptr) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error getting timelapse_params"));
         return;
     }
@@ -1826,13 +1826,13 @@ void cls_movie::start_timelapse()
         }
     }
     if ((fps<2) || (fps>100)){
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Invalid fps provided in timelapse_params.  Using 30"));
         fps=30;
     }
 
     if (movie_open() < 0) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error initializing timelapse."));
         return;
     }
@@ -1860,7 +1860,7 @@ void cls_movie::start_extpipe()
         }
     }
     if (params == nullptr) {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error getting movie_params"));
         return;
     }
@@ -1869,9 +1869,9 @@ void cls_movie::start_extpipe()
 
     file_nm = tmp;
     if (cam->cfg->movie_output) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Requested extpipe in addition to movie_output."));
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Adjusting file name of extpipe output."));
         full_nm = cam->cfg->target_dir + "/"  + file_nm + "p";
     } else {
@@ -1881,7 +1881,7 @@ void cls_movie::start_extpipe()
     file_nm = full_nm.substr(file_dir.length()+1);
 
     if (mycreate_path(full_nm.c_str()) == -1) {
-        MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("create path failed"));
+        MOTION_LOG(ERR, SHOW_ERRNO, _("create path failed"));
         return;
     }
 
@@ -1889,11 +1889,11 @@ void cls_movie::start_extpipe()
     mystrftime(cam, tmp, sizeof(tmp)
         , cam->cfg->movie_extpipe.c_str(), full_nm.c_str());
 
-    MOTION_LOG(NTC, TYPE_EVENTS, NO_ERRNO, _("extpipe cmd: %s"), tmp);
+    MOTION_LOG(NTC, NO_ERRNO, _("extpipe cmd: %s"), tmp);
 
     extpipe_stream = popen(tmp, "we");
     if (extpipe_stream == nullptr) {
-        MOTION_LOG(ERR, TYPE_EVENTS, SHOW_ERRNO, _("popen failed"));
+        MOTION_LOG(ERR, SHOW_ERRNO, _("popen failed"));
         return;
     }
 
@@ -1920,7 +1920,7 @@ void cls_movie::start()
     } else if (movie_type == "extpipe") {
         start_extpipe();
     } else {
-        MOTION_LOG(ERR, TYPE_EVENTS, NO_ERRNO,_("Invalid movie type"));
+        MOTION_LOG(ERR, NO_ERRNO,_("Invalid movie type"));
     }
 }
 

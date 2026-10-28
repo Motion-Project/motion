@@ -86,7 +86,7 @@ int cls_webu_ans::check_tls()
     }
 
     if (file_chk != webu->info_tls) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(INF, NO_ERRNO
             , _("Webcontrol files have changed.  Restarting webcontrol"));
         webu->restart = true;
         return -1;
@@ -108,7 +108,7 @@ int cls_webu_ans::parseurl()
     uri_cmd2 = "";
     uri_cmd3 = "";
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Sent url: %s"),url.c_str());
+    MOTION_LOG(DBG, NO_ERRNO, _("Sent url: %s"),url.c_str());
 
     tmpurl = (char*)mymalloc(url.length()+1);
     memcpy(tmpurl, url.c_str(), url.length());
@@ -118,7 +118,7 @@ int cls_webu_ans::parseurl()
     url.assign(tmpurl);
     free(tmpurl);
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO, _("Decoded url: %s"),url.c_str());
+    MOTION_LOG(DBG, NO_ERRNO, _("Decoded url: %s"),url.c_str());
 
     baselen = webu->cfg->webcontrol_base_path.length();
 
@@ -229,7 +229,7 @@ void cls_webu_ans::parms_edit()
         }
     }
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         ,_("cmd0: >%s< cmd1: >%s< cmd2: >%s< cmd3: >%s< camindx: >%d< ")
         , uri_cmd0.c_str(), uri_cmd1.c_str()
         , uri_cmd2.c_str(), uri_cmd3.c_str()
@@ -291,7 +291,7 @@ void cls_webu_ans::hostname_get()
             webu->cfg->webcontrol_base_path;
     }
 
-    MOTION_LOG(DBG,TYPE_ALL, NO_ERRNO, _("Full Host:  %s"), hostfull.c_str());
+    MOTION_LOG(DBG,NO_ERRNO, _("Full Host:  %s"), hostfull.c_str());
 
     return;
 }
@@ -303,7 +303,7 @@ void cls_webu_ans::failauth_log(bool userid_fail)
     ctx_webu_clients    clients;
     std::list<ctx_webu_clients>::iterator   it;
 
-    MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(ALR, NO_ERRNO
         ,_("Failed authentication from %s"), clientip.c_str());
 
     clock_gettime(CLOCK_MONOTONIC, &tm_cnct);
@@ -364,7 +364,7 @@ void cls_webu_ans::client_connect()
     while (it != webu->wb_clients.end()) {
         if (it->clientip == clientip) {
             if (it->authenticated == false) {
-                MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),clientip.c_str());
+                MOTION_LOG(INF,NO_ERRNO, _("Connection from: %s"),clientip.c_str());
             }
             it->authenticated = true;
             it->conn_nbr = 1;
@@ -383,7 +383,7 @@ void cls_webu_ans::client_connect()
     clients.authenticated = true;
     webu->wb_clients.push_back(clients);
 
-    MOTION_LOG(INF,TYPE_ALL, NO_ERRNO, _("Connection from: %s"),clientip.c_str());
+    MOTION_LOG(INF,NO_ERRNO, _("Connection from: %s"),clientip.c_str());
 
     return;
 
@@ -409,7 +409,7 @@ mhdrslt cls_webu_ans::failauth_check()
             (it->authenticated == false) &&
             (it->conn_nbr > webu->cfg->webcontrol_lock_attempts)) {
             /* DO NOT TRANSLATE THIS MESSAGE UNLESS YOU ALSO CHANGE THE FAIL2BAN CHECK*/
-            MOTION_LOG(EMG, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(EMG, NO_ERRNO
                 , "Ignoring connection from: %s"
                 , clientip.c_str());
             it->conn_time = tm_cnct;
@@ -625,7 +625,7 @@ mhdrslt cls_webu_ans::mhd_auth()
         (webu->cfg->webcontrol_auth_user == "")) {
         authenticated = true;
         if (webu->cfg->webcontrol_auth_method != "none") {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("No webcontrol user:pass provided"));
+            MOTION_LOG(NTC, NO_ERRNO ,_("No webcontrol user:pass provided"));
         }
         return MHD_YES;
     }
@@ -678,7 +678,7 @@ void cls_webu_ans::gzip_deflate()
 
     retcd = deflate(&zs, Z_FINISH);
     if (retcd < Z_OK) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("deflate failed: %d") ,retcd);
         gzip_size = 0;
     } else {
@@ -687,13 +687,13 @@ void cls_webu_ans::gzip_deflate()
 
     retcd = deflateEnd(&zs);
     if (retcd < Z_OK) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("deflateEnd failed: %d"), retcd);
         gzip_size = 0;
     }
 
     if (zs.avail_in != 0) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("deflate failed avail in: %d"), zs.avail_in);
         gzip_size = 0;
     }
@@ -724,7 +724,7 @@ void cls_webu_ans::mhd_send()
             ,(void *)resp_page.c_str(), MHD_RESPMEM_PERSISTENT);
     }
     if (response == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO, _("Invalid response"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Invalid response"));
         return;
     }
 
@@ -756,7 +756,7 @@ void cls_webu_ans::mhd_send()
     MHD_destroy_response (response);
 
     if (retcd == MHD_NO) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("send page failed."));
+        MOTION_LOG(NTC, NO_ERRNO ,_("send page failed."));
     }
 }
 
@@ -777,13 +777,13 @@ bool cls_webu_ans::valid_request()
 {
     pthread_mutex_lock(&app->mutex_camlst);
         if (device_id < 0) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 , _("Invalid camera specified: %s"), url.c_str());
             pthread_mutex_unlock(&app->mutex_camlst);
             return false;
         }
         if ((device_id > 0) && (cam == NULL)) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 , _("Invalid camera device specified: %s"), url.c_str());
             pthread_mutex_unlock(&app->mutex_camlst);
             return false;
@@ -796,7 +796,7 @@ bool cls_webu_ans::valid_request()
 /* Answer the get request from the user */
 void cls_webu_ans::answer_get()
 {
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         ,_("processing get: %s"),uri_cmd1.c_str());
 
     if (valid_request() == false) {
@@ -864,7 +864,7 @@ bool cls_webu_ans::camport_check()
             }
         }
     }
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(NTC, NO_ERRNO
         , _("Camera device %d is not available on port %d")
         , device_id, webu->cfg->webcontrol_port);
     return false;
@@ -889,7 +889,7 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
 
     if (cam != NULL) {
         if (cam->finish) {
-           MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Shutting down camera"));
+           MOTION_LOG(NTC, NO_ERRNO ,_("Shutting down camera"));
            return MHD_NO;
         }
     }
@@ -924,7 +924,7 @@ mhdrslt cls_webu_ans::answer_main(struct MHD_Connection *p_connection
 
         if (mystreq(method,"POST")) {
             if (webu->cfg->webcontrol_interface == "stream") {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(NTC, NO_ERRNO
                     ,_("Actions not permitted on webcontrol_interface stream"));
                 bad_request();
                 return MHD_YES;

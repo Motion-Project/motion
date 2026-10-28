@@ -38,21 +38,8 @@
     #define ALL                     9
     #define LEVEL_DEFAULT           NTC
 
-    /* Log types */
-    #define TYPE_CORE               1             /* Core logs         */
-    #define TYPE_STREAM             2             /* Stream logs       */
-    #define TYPE_ENCODER            3             /* Encoder logs      */
-    #define TYPE_NETCAM             4             /* Netcam logs       */
-    #define TYPE_DB                 5             /* Database logs     */
-    #define TYPE_EVENTS             6             /* Events logs       */
-    #define TYPE_TRACK              7             /* Track logs        */
-    #define TYPE_VIDEO              8             /* V4L1/2 Bktr logs  */
-    #define TYPE_ALL                9             /* All type logs     */
-    #define TYPE_DEFAULT            TYPE_ALL      /* Default type      */
-    #define TYPE_DEFAULT_STR        "ALL"         /* Default name logs */
-
-    #define MOTION_LOG(x, y, z, ...) motlog->write_msg(x, y, z, 1, __FUNCTION__, __VA_ARGS__)
-    #define MOTION_SHT(x, y, z, ...) motlog->write_msg(x, y, z, 0, __VA_ARGS__)
+    #define MOTION_LOG(x, y, ...) motlog->write_msg(x, y, 1, __FUNCTION__, __VA_ARGS__)
+    #define MOTION_SHT(x, y, ...) motlog->write_msg(x, y, 0, __VA_ARGS__)
 
     struct ctx_log_item {
         uint64_t    log_nbr;
@@ -66,7 +53,7 @@
             int     log_level;
             int     log_fflevel;
             void set_log_file(std::string pname);
-            void write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...);
+            void write_msg(int loglvl, int flgerr, int flgfnc, ...);
             pthread_mutex_t     mutex_log;
             void shutdown();
             void startup();

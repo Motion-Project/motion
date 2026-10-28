@@ -54,7 +54,7 @@ void cls_webu_file::movies() {
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "movies") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Movies via webcontrol disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Movies via webcontrol disabled"));
                 webua->bad_request();
                 return;
             } else {
@@ -83,7 +83,7 @@ void cls_webu_file::movies() {
         webua->req_file = myfopen(full_nm.c_str(), "rbe");
     } else {
         webua->req_file = nullptr;
-        MOTION_LOG(ALR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ALR, NO_ERRNO
             ,_("Security warning: Client IP %s requested file: %s")
             ,webua->clientip.c_str(), webua->uri_cmd2.c_str());
     }
@@ -111,7 +111,7 @@ void cls_webu_file::movies() {
         MHD_destroy_response (response);
     }
     if (retcd == MHD_NO) {
-        MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Error processing file request"));
+        MOTION_LOG(INF, NO_ERRNO,_("Error processing file request"));
     }
 
 }
@@ -127,7 +127,7 @@ void cls_webu_file::user_page()
 
     pos = app->cfg->conf_filename.find("/",0);
     if (pos == std::string::npos) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Unable to determine base path for: %s")
             , app->cfg->conf_filename.c_str());
         return;
@@ -156,7 +156,7 @@ void cls_webu_file::user_page()
         if ((std::isalnum(fname[indx]) == false) &&
             (fname[indx] != '_') &&
             (fname[indx] != '-')) {
-            MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 , _("File names are restricted to -_ and alpha numeric characters: %s")
                 , fname.c_str());
             return;
@@ -172,7 +172,7 @@ void cls_webu_file::user_page()
     } else if (ext == "html") {
         webua->resp_type = WEBUI_RESP_HTML;
     } else {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Invalid file extension.  Extension must be json,js,css or html. : %s")
             , ext.c_str());
         return;
@@ -180,13 +180,13 @@ void cls_webu_file::user_page()
 
     fullname += fname + "." + ext;
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         , _("Retrieving file: %s type/extension: %d/%s")
         , fullname.c_str(), webua->resp_type, ext.c_str());
 
     fp = myfopen(fullname.c_str(), "re");
     if (fp == NULL) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             , _("Invalid user requested file: %s")
             , fullname.c_str());
         webua->resp_type = WEBUI_RESP_HTML;

@@ -56,7 +56,7 @@ void cls_webu_post::cam_add()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "camera_add") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Camera add action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Camera add action disabled"));
                 return;
             } else {
                 break;
@@ -64,7 +64,7 @@ void cls_webu_post::cam_add()
         }
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Adding camera."));
+    MOTION_LOG(INF, NO_ERRNO,_("Adding camera."));
 
     maxcnt = 100;
 
@@ -77,11 +77,11 @@ void cls_webu_post::cam_add()
 
     if (indx == maxcnt) {
         app->cam_add = false;
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Error adding camera.  Timed out"));
+        MOTION_LOG(ERR, NO_ERRNO,_("Error adding camera.  Timed out"));
         return;
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("New camera added."));
+    MOTION_LOG(INF, NO_ERRNO,_("New camera added."));
 
 }
 
@@ -93,7 +93,7 @@ void cls_webu_post::cam_delete()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "camera_delete") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Camera delete action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Camera delete action disabled"));
                 return;
             } else {
                 break;
@@ -101,7 +101,7 @@ void cls_webu_post::cam_delete()
         }
     }
 
-    MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Deleting camera."));
+    MOTION_LOG(INF, NO_ERRNO,_("Deleting camera."));
 
     app->cam_delete = webua->camindx;
 
@@ -112,7 +112,7 @@ void cls_webu_post::cam_delete()
         indx++;
     }
     if (indx == maxcnt) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error stopping camera.  Timed out shutting down"));
         app->cam_delete = -1;
         return;
@@ -138,19 +138,19 @@ void cls_webu_post::parse_cmd()
             webua->device_id = atoi(post_info[indx].key_val);
         }
 
-        MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("key: %s  value: %s")
+        MOTION_LOG(DBG, NO_ERRNO ,_("key: %s  value: %s")
             , post_info[indx].key_nm
             , post_info[indx].key_val
         );
     }
 
     if (post_cmd == "") {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Invalid post request.  No command"));
         return;
     }
     if (webua->device_id == -1) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Invalid post request.  No camera id provided"));
         return;
     }
@@ -163,7 +163,7 @@ void cls_webu_post::parse_cmd()
             }
         }
         if (webua->camindx == -1) {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(ERR, NO_ERRNO
                 ,_("Invalid request.  Device id %d not found")
                 , webua->device_id);
             webua->device_id = -1;
@@ -180,7 +180,7 @@ void cls_webu_post::action_eventend()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "event") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Event end action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Event end action disabled"));
                 return;
             } else {
                 break;
@@ -206,7 +206,7 @@ void cls_webu_post::action_eventstart()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "event") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Event start action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Event start action disabled"));
                 return;
             } else {
                 break;
@@ -233,7 +233,7 @@ void cls_webu_post::action_snapshot()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "snapshot") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Snapshot action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Snapshot action disabled"));
                 return;
             } else {
                 break;
@@ -259,7 +259,7 @@ void cls_webu_post::action_pause_on()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "pause") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Pause action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Pause action disabled"));
                 return;
             } else {
                 break;
@@ -284,7 +284,7 @@ void cls_webu_post::action_pause_off()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "pause") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Pause action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Pause action disabled"));
                 return;
             } else {
                 break;
@@ -309,7 +309,7 @@ void cls_webu_post::action_pause_schedule()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "pause") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Pause action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Pause action disabled"));
                 return;
             } else {
                 break;
@@ -335,7 +335,7 @@ void cls_webu_post::action_restart()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "restart") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Restart action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Restart action disabled"));
                 return;
             } else {
                 break;
@@ -344,13 +344,13 @@ void cls_webu_post::action_restart()
     }
 
     if (webua->device_id == 0) {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Restarting all cameras"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<app->cam_cnt; indx++) {
             app->cam_list[indx]->handler_stop = false;
             app->cam_list[indx]->restart = true;
         }
     } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Restarting camera %d")
             , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->handler_stop = false;
@@ -366,7 +366,7 @@ void cls_webu_post::action_stop()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "stop") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Stop action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Stop action disabled"));
                 return;
             } else {
                 break;
@@ -376,7 +376,7 @@ void cls_webu_post::action_stop()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Stopping cam %d")
                 , app->cam_list[indx]->cfg->device_id);
             app->cam_list[indx]->restart = false;
@@ -385,7 +385,7 @@ void cls_webu_post::action_stop()
             app->cam_list[indx]->handler_stop = true;
         }
     } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Stopping cam %d")
             , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->restart = false;
@@ -406,7 +406,7 @@ void cls_webu_post::action_user()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "action_user") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("User action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("User action disabled"));
                 return;
             } else {
                 break;
@@ -425,14 +425,14 @@ void cls_webu_post::action_user()
             }
             for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
                 if (isalnum(tmp.at((uint)indx2)) == false) {
-                    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                    MOTION_LOG(NTC, NO_ERRNO
                         , _("Invalid character included in action user \"%c\"")
                         , tmp.at((uint)indx2));
                     return;
                 }
             }
             snprintf(cam->action_user, 40, "%s", tmp.c_str());
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Executing user action on cam %d")
                 , cam->cfg->device_id);
             util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
@@ -447,7 +447,7 @@ void cls_webu_post::action_user()
         }
         for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
             if (isalnum(tmp.at((uint)indx2)) == false) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+                MOTION_LOG(NTC, NO_ERRNO
                     , _("Invalid character included in action user \"%c\"")
                     , tmp.at((uint)indx2));
                 return;
@@ -455,7 +455,7 @@ void cls_webu_post::action_user()
         }
         snprintf(cam->action_user, 40, "%s", tmp.c_str());
 
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Executing user action on cam %d")
             , cam->cfg->device_id);
         util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
@@ -471,7 +471,7 @@ void cls_webu_post::write_config()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "config_write") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Config write action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Config write action disabled"));
                 return;
             } else {
                 break;
@@ -505,12 +505,12 @@ void cls_webu_post::config_set(
     }
     for (indx=st; indx<en; indx++) {
         if (indx == -1) {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, NO_ERRNO
                 ,_("Config default category %d edit set %s:%s")
                 ,pcat, pnm.c_str(), pval.c_str());
             cfg_s = app->conf_src;
         } else {
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(INF, NO_ERRNO
                 ,_("Config device_id %d category %d edit set  %s:%s")
                 ,app->cam_list[indx]->cfg->device_id
                 ,pcat,pnm.c_str(), pval.c_str());
@@ -531,7 +531,7 @@ void cls_webu_post::config_set(
                     }
                 }
                 if (chgnew == true) {
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(DBG, NO_ERRNO
                         ,_("Util parms add %s:%s"), pnm.c_str(), pval.c_str());
                     util_parms_add(prm, pnm, pval);
                     prm->params_changed = true;
@@ -613,7 +613,7 @@ void cls_webu_post::config_set(
         }
     } else {    /* (webua->device_id != 0) */
         if ((pcat == PARM_CAT_00) || (pcat == PARM_CAT_15)) {
-            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(DBG, NO_ERRNO
                 ,_("Parameter can not be applied for single device. Device id %d pcat %d %s:%s")
                 , webua->device_id, pcat, pnm.c_str(), pval.c_str());
             return;
@@ -622,7 +622,7 @@ void cls_webu_post::config_set(
             if (pcur == pval) {
                 return;
             }
-            MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Config edit set. %s:%s")
+            MOTION_LOG(INF, NO_ERRNO,_("Config edit set. %s:%s")
                 ,pnm.c_str(), pval.c_str());
             app->cam_list[webua->camindx]->conf_src->edit_set(pnm, pval);
             if (app->cam_list[webua->camindx]->handler_running == true) {
@@ -696,17 +696,17 @@ void cls_webu_post::config_ra_process()
         if (ra_list[indx].comp_type == "log") {
             if (ra_list[indx].restart == true) {
                 motlog->restart = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(DBG, NO_ERRNO
                     ,_("Restart request for log"));
             } else if (ra_list[indx].apply == true) {
                 motlog->conf_chg = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for log"));
+                MOTION_LOG(DBG, NO_ERRNO,_("Apply change for log"));
             }
         } else if (ra_list[indx].comp_type == "webu") {
             if (ra_list[indx].restart == true) {
                 for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
                     app->webu_list[indx2]->restart = true;
-                    MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                    MOTION_LOG(DBG, NO_ERRNO
                         ,_("Restart request for webcontrol on port %d")
                         ,app->webu_list[indx2]->cfg->webcontrol_port);
                 }
@@ -714,7 +714,7 @@ void cls_webu_post::config_ra_process()
                 for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
                     app->webu_list[indx2]->conf_chg = true;
                 }
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for webu"));
+                MOTION_LOG(DBG, NO_ERRNO,_("Apply change for webu"));
             }
         } else if (ra_list[indx].comp_type == "allcam") {
             if (ra_list[indx].apply == true) {
@@ -724,7 +724,7 @@ void cls_webu_post::config_ra_process()
             }
         } else if (ra_list[indx].comp_type == "nls") {
             if (ra_list[indx].apply == true) {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Changing nls to: %s")
+                MOTION_LOG(INF, NO_ERRNO,_("Changing nls to: %s")
                     ,app->conf_src->native_language_code.c_str());
                 i18n_init(app->conf_src->native_language_code);
                 i18n_set(app->conf_src->native_language);
@@ -734,20 +734,20 @@ void cls_webu_post::config_ra_process()
         } else if (ra_list[indx].comp_type == "dbse") {
             if (ra_list[indx].restart == true) {
                 app->dbse->restart = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(DBG, NO_ERRNO
                     ,_("Restart request for database"));
             } else if (ra_list[indx].apply == true) {
                 app->dbse->conf_chg = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for database"));
+                MOTION_LOG(DBG, NO_ERRNO,_("Apply change for database"));
             }
         } else if (ra_list[indx].comp_type == "cam") {
             if (ra_list[indx].restart == true) {
                 app->cam_list[ra_list[indx].comp_indx]->restart = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(DBG, NO_ERRNO
                     ,_("Restart request for camera %d")
                     , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
             } else if (ra_list[indx].apply == true) {
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(DBG, NO_ERRNO
                     ,_("Apply config change requested for camera %d")
                     , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
                 app->cam_list[ra_list[indx].comp_indx]->conf_chg = true;
@@ -755,15 +755,15 @@ void cls_webu_post::config_ra_process()
         } else if (ra_list[indx].comp_type == "snd") {
             if (ra_list[indx].restart == true) {
                 app->snd_list[ra_list[indx].comp_indx]->restart = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                MOTION_LOG(DBG, NO_ERRNO
                     ,_("Restart request for sound %d")
                     , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
             } else if (ra_list[indx].apply == true) {
                 app->snd_list[ra_list[indx].comp_indx]->conf_chg = true;
-                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for sound"));
+                MOTION_LOG(DBG, NO_ERRNO,_("Apply change for sound"));
             }
         } else {
-            MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Bad programming"));
+            MOTION_LOG(ERR, NO_ERRNO,_("Bad programming"));
         }
     }
 
@@ -829,7 +829,7 @@ void cls_webu_post::config()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "config") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("Config save action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Config save action disabled"));
                 return;
             } else {
                 break;
@@ -880,7 +880,7 @@ void cls_webu_post::ptz()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "ptz") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, TYPE_ALL, NO_ERRNO,_("PTZ actions disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("PTZ actions disabled"));
                 return;
             } else {
                 break;
@@ -930,7 +930,7 @@ void cls_webu_post::ptz()
 void cls_webu_post::process_actions()
 {
     if (webua->is_admin == false) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             ,_("Actions not permitted for user"));
         return;
     }
@@ -951,12 +951,12 @@ void cls_webu_post::process_actions()
         action_snapshot();
 
     } else if (post_cmd == "pause") {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("pause action deprecated.  Use pause_on"));
         action_pause_on();
 
     } else if (post_cmd == "unpause") {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("unpause action deprecated.  Use pause_off"));
         action_pause_off();
 
@@ -1000,7 +1000,7 @@ void cls_webu_post::process_actions()
         ptz();
 
     } else {
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(INF, NO_ERRNO
             , _("Invalid action requested: command: >%s< camindx : >%d< ")
             , post_cmd.c_str(), webua->camindx);
     }
@@ -1024,7 +1024,7 @@ void cls_webu_post::iterate_post_append(int indx
     }
 
     post_info[indx].key_sz += datasz;
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         ,_("Index: %d Key: >%s< val: >%s< ")
         , indx, post_info[indx].key_nm, post_info[indx].key_val);
 }
@@ -1054,14 +1054,14 @@ void cls_webu_post::iterate_post_new(const char *key
 
     post_info[post_sz-1].key_sz = datasz;
 
-    MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         ,_("Indx: %d Key: >%s< val: >%s< ")
         , post_sz-1
         , post_info[post_sz-1].key_nm
         , post_info[post_sz-1].key_val);
 
     if (retcd < 0) {
-        MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO, _("Error processing post data"));
+        MOTION_LOG(INF, NO_ERRNO, _("Error processing post data"));
     }
 }
 

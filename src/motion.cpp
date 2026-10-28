@@ -126,7 +126,7 @@ void cls_motapp::signal_process()
         }
         break;
     case MOTION_SIGNAL_SIGHUP:      /* Reload the parameters and restart*/
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
                 ,_("Reloading parameters"));
         reload_all = true;
         /*FALLTHROUGH*/
@@ -182,17 +182,17 @@ void cls_motapp::pid_write()
         if (pidf) {
             (void)fprintf(pidf, "%d\n", getpid());
             myfclose(pidf);
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("Created process id file %s. Process ID is %d")
                 ,cfg->pid_file.c_str(), getpid());
         } else {
-            MOTION_LOG(EMG, TYPE_ALL, SHOW_ERRNO
+            MOTION_LOG(EMG, SHOW_ERRNO
                 , _("Cannot create process id file (pid file) %s")
                 , cfg->pid_file.c_str());
         }
     }
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Motion pid: %d"), getpid());
+    MOTION_LOG(NTC, NO_ERRNO,_("Motion pid: %d"), getpid());
 
 }
 
@@ -202,9 +202,9 @@ void cls_motapp::pid_remove()
     if ((cfg->pid_file != "") &&
         (reload_all == false)) {
         if (!unlink(cfg->pid_file.c_str())) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Removed process id file (pid file)."));
+            MOTION_LOG(NTC, NO_ERRNO, _("Removed process id file (pid file)."));
         } else{
-            MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Error removing pid file"));
+            MOTION_LOG(ERR, SHOW_ERRNO, _("Error removing pid file"));
         }
     }
 }
@@ -224,7 +224,7 @@ void cls_motapp::daemon()
     sigemptyset(&sig_ign_action.sa_mask);
 
     if (fork()) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion going to daemon mode"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Motion going to daemon mode"));
         exit(0);
     }
 
@@ -233,7 +233,7 @@ void cls_motapp::daemon()
      * without having to stop Motion
      */
     if (chdir("/")) {
-        MOTION_LOG(ERR, TYPE_ALL, SHOW_ERRNO, _("Could not change directory"));
+        MOTION_LOG(ERR, SHOW_ERRNO, _("Could not change directory"));
     }
 
     #if (defined(BSD) && !defined(__APPLE__))
@@ -269,9 +269,9 @@ void cls_motapp::daemon()
 
 void cls_motapp::av_init()
 {
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavcodec  version %d.%d.%d")
+    MOTION_LOG(NTC, NO_ERRNO, _("libavcodec  version %d.%d.%d")
         , LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
-    MOTION_LOG(NTC, TYPE_ENCODER, NO_ERRNO, _("libavformat version %d.%d.%d")
+    MOTION_LOG(NTC, NO_ERRNO, _("libavformat version %d.%d.%d")
         , LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
 
     #if (MYFFVER < 58000)
@@ -291,63 +291,63 @@ void cls_motapp::av_deinit()
 void cls_motapp::ntc()
 {
     #ifdef HAVE_V4L2
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("v4l2   : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("v4l2   : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("v4l2   : not available"));
     #endif
 
     #ifdef HAVE_WEBP
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("webp   : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("webp   : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("webp   : not available"));
     #endif
 
     #ifdef HAVE_LIBCAM
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("libcam : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("libcam : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("libcam : not available"));
     #endif
 
     #ifdef HAVE_MYSQL
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("mysql  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("mysql  : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("mysql  : not available"));
     #endif
 
     #ifdef HAVE_MARIADB
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("MariaDB: available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("MariaDB: not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("MariaDB: not available"));
     #endif
 
     #ifdef HAVE_SQLITE3
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("sqlite3: available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("sqlite3: not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("sqlite3: not available"));
     #endif
 
     #ifdef HAVE_PGSQL
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("pgsql  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("pgsql  : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("pgsql  : not available"));
     #endif
 
     #ifdef ENABLE_NLS
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("nls    : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("nls    : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("nls    : not available"));
     #endif
 
     #ifdef HAVE_ALSA
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("alsa   : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("alsa   : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("alsa   : not available"));
     #endif
 
     #ifdef HAVE_FFTW3
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("fftw3  : available"));
     #else
-        MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("fftw3  : not available"));
+        MOTION_LOG(DBG, NO_ERRNO,_("fftw3  : not available"));
     #endif
 
 }
@@ -366,7 +366,7 @@ void cls_motapp::watchdog(uint camindx)
         return;
     }
 
-    MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+    MOTION_LOG(ERR, NO_ERRNO
         , _("Camera %d - Watchdog timeout.")
         , cam_list[camindx]->cfg->device_id);
 
@@ -408,7 +408,7 @@ void cls_motapp::check_restart()
 
     pthread_mutex_lock(&mutex_post);
     if (motlog->restart == true) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting log"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Restarting log"));
 
         cfg->edit_get("pid_file",parm_pid_org, PARM_CAT_00);
         conf_src->edit_get("pid_file",parm_pid_new, PARM_CAT_00);
@@ -425,23 +425,23 @@ void cls_motapp::check_restart()
             pid_write();
         }
         motlog->restart = false;
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarted log"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Restarted log"));
     }
 
     if (dbse->restart == true) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarting database"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Restarting database"));
         pthread_mutex_lock(&dbse->mutex_dbse);
             dbse->shutdown();
             cfg->config_copy(conf_src, PARM_CAT_15);
             dbse->startup();
         pthread_mutex_lock(&dbse->mutex_dbse);
         dbse->restart = false;
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Restarted database"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Restarted database"));
     }
 
     for (indx1=0; indx1<webu_cnt; indx1++) {
         if (webu_list[indx1]->restart == true) {
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Restarting webcontrol on port %d")
                 , webu_list[indx1]->cfg->webcontrol_port);
             webu_list[indx1]->shutdown();
@@ -460,7 +460,7 @@ void cls_motapp::check_restart()
             webu_list[indx1]->webuindx = indx1;
             webu_list[indx1]->startup();
             webu_list[indx1]->restart = false;
-            MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 , _("Restarted webcontrol on port %d")
                 , webu_list[indx1]->cfg->webcontrol_port);
         }
@@ -589,7 +589,7 @@ void cls_motapp::init(int p_argc, char *p_argv[])
 
     if (cfg->daemon) {
         daemon();
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion running as daemon process"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Motion running as daemon process"));
     }
 
     cfg->config_log();
@@ -612,9 +612,9 @@ void cls_motapp::init(int p_argc, char *p_argv[])
             snd_list[indx]->handler_startup();
         }
     } else {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("No camera or sound configuration files specified."));
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Waiting for camera or sound configuration to be added via web control."));
     }
 
@@ -683,7 +683,7 @@ void cls_motapp::camera_delete()
     }
 
     if ((cam_delete >= cam_cnt) || (cam_cnt == 0)) {
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Invalid camera specified for deletion. %d"), cam_delete);
         cam_delete = -1;
         return;
@@ -691,19 +691,19 @@ void cls_motapp::camera_delete()
 
     cam = cam_list[cam_delete];
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO, _("Stopping %s device_id %d")
+    MOTION_LOG(NTC, NO_ERRNO, _("Stopping %s device_id %d")
         , cam->cfg->device_name.c_str(), cam->cfg->device_id);
 
     cam->finish = true;
     cam->handler_shutdown();
 
     if (cam->handler_running == true) {
-        MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Error stopping camera.  Timed out shutting down"));
         cam_delete = -1;
         return;
     }
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO,_("Camera stopped"));
+    MOTION_LOG(NTC, NO_ERRNO,_("Camera stopped"));
     /* Reverse sequence so we can remove elements*/
     for (indx = webu_cnt-1; indx >=0; indx--) {
         webu = webu_list[indx];
@@ -774,7 +774,7 @@ int main (int p_argc, char **p_argv)
             app->camera_delete();
             app->check_restart();
         }
-        MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion devices finished"));
+        MOTION_LOG(NTC, NO_ERRNO, _("Motion devices finished"));
         if (app->reload_all) {
             app->deinit();
             app->reload_all = false;
@@ -785,7 +785,7 @@ int main (int p_argc, char **p_argv)
 
     app->deinit();
 
-    MOTION_LOG(NTC, TYPE_ALL, NO_ERRNO, _("Motion terminating"));
+    MOTION_LOG(NTC, NO_ERRNO, _("Motion terminating"));
 
     mydelete(motlog);
     mydelete(app);

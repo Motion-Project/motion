@@ -90,13 +90,13 @@ void cls_webu::mhd_features_basic()
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_BASIC_AUTH);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: available"));
+            MOTION_LOG(DBG, NO_ERRNO ,_("Basic authentication: available"));
         } else {
             if (cfg->webcontrol_auth_method == "basic") {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                MOTION_LOG(NTC, NO_ERRNO ,_("Basic authentication: disabled"));
                 cfg->webcontrol_auth_method = "none";
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Basic authentication: disabled"));
+                MOTION_LOG(INF, NO_ERRNO ,_("Basic authentication: disabled"));
             }
         }
     #endif
@@ -111,13 +111,13 @@ void cls_webu::mhd_features_digest()
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_DIGEST_AUTH);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: available"));
+            MOTION_LOG(DBG, NO_ERRNO ,_("Digest authentication: available"));
         } else {
             if (cfg->webcontrol_auth_method == "digest") {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                MOTION_LOG(NTC, NO_ERRNO ,_("Digest authentication: disabled"));
                 cfg->webcontrol_auth_method = "none";
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("Digest authentication: disabled"));
+                MOTION_LOG(INF, NO_ERRNO ,_("Digest authentication: disabled"));
             }
         }
     #endif
@@ -128,7 +128,7 @@ void cls_webu::mhd_features_ipv6()
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->ipv6) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
+            MOTION_LOG(INF, NO_ERRNO ,_("libmicrohttpd libary too old ipv6 disabled"));
             if (mhdst->ipv6) {
                 mhdst->ipv6 = 0;
             }
@@ -137,9 +137,9 @@ void cls_webu::mhd_features_ipv6()
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_IPv6);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("IPV6: available"));
+            MOTION_LOG(DBG, NO_ERRNO ,_("IPV6: available"));
         } else {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("IPV6: disabled"));
+            MOTION_LOG(NTC, NO_ERRNO ,_("IPV6: disabled"));
             if (mhdst->ipv6) {
                 mhdst->ipv6 = 0;
             }
@@ -152,20 +152,20 @@ void cls_webu::mhd_features_tls()
 {
     #if MHD_VERSION < 0x00094400
         if (mhdst->tls_use) {
-            MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
+            MOTION_LOG(INF, NO_ERRNO ,_("libmicrohttpd libary too old SSL/TLS disabled"));
             mhdst->tls_use = false;
         }
     #else
         mhdrslt retcd;
         retcd = MHD_is_feature_supported (MHD_FEATURE_SSL);
         if (retcd == MHD_YES) {
-            MOTION_LOG(DBG, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: available"));
+            MOTION_LOG(DBG, NO_ERRNO ,_("SSL/TLS: available"));
         } else {
             if (mhdst->tls_use) {
-                MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                MOTION_LOG(NTC, NO_ERRNO ,_("SSL/TLS: disabled"));
                 mhdst->tls_use = false;
             } else {
-                MOTION_LOG(INF, TYPE_STREAM, NO_ERRNO ,_("SSL/TLS: disabled"));
+                MOTION_LOG(INF, NO_ERRNO ,_("SSL/TLS: disabled"));
             }
         }
     #endif
@@ -206,7 +206,7 @@ void cls_webu::mhd_loadfile(std::string fname, std::string &filestr)
                     file_char[file_size] = 0;
                     filestr.assign(file_char, file_size);
                 } else {
-                    MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+                    MOTION_LOG(ERR, NO_ERRNO
                         ,_("Error reading file for SSL/TLS support."));
                 }
                 free(file_char);
@@ -230,12 +230,12 @@ void cls_webu::mhd_checktls()
 {
     if (mhdst->tls_use) {
         if ((cfg->webcontrol_cert == "") || (mhdst->tls_cert == "")) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("SSL/TLS requested but no cert file provided.  SSL/TLS disabled"));
             mhdst->tls_use = false;
         }
         if ((cfg->webcontrol_key == "") || (mhdst->tls_key == "")) {
-            MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+            MOTION_LOG(NTC, NO_ERRNO
                 ,_("SSL/TLS requested but no key file provided.  SSL/TLS disabled"));
             mhdst->tls_use = false;
         }
@@ -426,14 +426,14 @@ void cls_webu::start_daemon()
 
     free(mhdst->mhd_ops);
     if (wb_daemon == nullptr) {
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Unable to start webserver on port %d")
             ,cfg->webcontrol_port);
-        MOTION_LOG(ERR, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(ERR, NO_ERRNO
             ,_("Validate no other applications/instances are using port %d")
             ,cfg->webcontrol_port);
     } else {
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             ,_("Started webserver on port %d")
             ,cfg->webcontrol_port);
     }
@@ -457,7 +457,7 @@ void cls_webu::startup() {
 
     portnbr = cfg->webcontrol_port;
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(NTC, NO_ERRNO
         , _("Starting webcontrol on port %d"),portnbr);
 
     allcam = new cls_allcam(this, webuindx);
@@ -500,7 +500,7 @@ void cls_webu::shutdown()
     finish = true;
     shutdown_in_progress = true;
 
-    MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+    MOTION_LOG(NTC, NO_ERRNO
         , _("Closing webcontrol on port %d"), portnbr);
 
     chkcnt = 0;
@@ -510,7 +510,7 @@ void cls_webu::shutdown()
     }
 
     if (chkcnt>=1000){
-        MOTION_LOG(NTC, TYPE_STREAM, NO_ERRNO
+        MOTION_LOG(NTC, NO_ERRNO
             , _("Excessive wait closing webcontrol on port %d"),portnbr);
     }
 
