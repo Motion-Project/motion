@@ -612,8 +612,10 @@ void cls_webu_post::config_set(
             }
         }
     } else {    /* (webua->device_id != 0) */
-        if ((pcat == PARM_CAT_00) ||
-            (pcat == PARM_CAT_15)) {
+        if ((pcat == PARM_CAT_00) || (pcat == PARM_CAT_15)) {
+            MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO
+                ,_("Parameter can not be applied for single device. Device id %d pcat %d %s:%s")
+                , webua->device_id, pcat, pnm.c_str(), pval.c_str());
             return;
         } else {
             app->cam_list[webua->camindx]->conf_src->edit_get(pnm, pcur, pcat);
@@ -698,6 +700,7 @@ void cls_webu_post::config_ra_process()
                     ,_("Restart request for log"));
             } else if (ra_list[indx].apply == true) {
                 motlog->conf_chg = true;
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for log"));
             }
         } else if (ra_list[indx].comp_type == "webu") {
             if (ra_list[indx].restart == true) {
@@ -711,6 +714,7 @@ void cls_webu_post::config_ra_process()
                 for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
                     app->webu_list[indx2]->conf_chg = true;
                 }
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for webu"));
             }
         } else if (ra_list[indx].comp_type == "allcam") {
             if (ra_list[indx].apply == true) {
@@ -734,6 +738,7 @@ void cls_webu_post::config_ra_process()
                     ,_("Restart request for database"));
             } else if (ra_list[indx].apply == true) {
                 app->dbse->conf_chg = true;
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for database"));
             }
         } else if (ra_list[indx].comp_type == "cam") {
             if (ra_list[indx].restart == true) {
@@ -755,6 +760,7 @@ void cls_webu_post::config_ra_process()
                     , app->cam_list[ra_list[indx].comp_indx]->cfg->device_id);
             } else if (ra_list[indx].apply == true) {
                 app->snd_list[ra_list[indx].comp_indx]->conf_chg = true;
+                MOTION_LOG(DBG, TYPE_ALL, NO_ERRNO,_("Apply change for sound"));
             }
         } else {
             MOTION_LOG(ERR, TYPE_ALL, NO_ERRNO,_("Bad programming"));

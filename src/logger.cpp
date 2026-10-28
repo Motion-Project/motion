@@ -221,6 +221,16 @@ void cls_log::write_msg(int loglvl, int msg_type, int flgerr, int flgfnc, ...)
     va_list ap;
     time_t now;
 
+    if (conf_chg == true) {
+        app->cfg->log_level = app->conf_src->log_level;
+        app->cfg->log_fflevel = app->conf_src->log_fflevel;
+
+        log_level = app->cfg->log_level;
+        log_fflevel = app->cfg->log_fflevel;
+
+        conf_chg = false;
+    }
+
     if (loglvl > log_level) {
         return;
     }
@@ -300,6 +310,7 @@ cls_log::cls_log(cls_motapp *p_app)
     log_file_name = "";
     flood_cnt = 0;
     restart = false;
+    conf_chg = false;
     set_mode(LOGMODE_SYSLOG);
     pthread_mutex_init(&mutex_log, NULL);
     memset(msg_prefix,0,sizeof(msg_prefix));
