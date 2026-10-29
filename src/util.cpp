@@ -829,6 +829,7 @@ void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_va
     parm_itm.param_value.assign(parm_val);
     parm_itm.param_source = PARM_SRC_USER;
     parm_itm.param_lvl = PARM_LVL_01;
+    parm_itm.param_type = PARM_TYP_STRING;
     params->params_array.push_back(parm_itm);
     params->params_cnt = (int)params->params_array.size();
 
