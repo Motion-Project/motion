@@ -56,6 +56,8 @@ class cls_movie {
         int encode_video();
         int timelapse_append(AVPacket *pkt);
         void free_context();
+        void log_containers();
+        void set_context();
         int set_oformat();
         void set_params();
         int set_pts(const struct timespec *ts1);
@@ -112,6 +114,9 @@ class cls_movie {
         int64_t             pass_video_base;
         bool                test_mode;
         int                 gop_cnt;
+        int                 gop_size;
+        int                 bframe;
+
         struct timespec     start_time;
         bool                high_resolution;
         bool                motion_images;

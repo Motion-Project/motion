@@ -131,6 +131,8 @@ void cls_movie::set_params()
 
     secdetect_only = false;
     all_frames = false;
+    gop_size = 0;
+    bframe = 0;
     for (indx=0;indx<params->params_array.size();indx++){
         itm = &params->params_array[indx];
         if (itm->param_name == "secdetect_only") {
@@ -139,11 +141,91 @@ void cls_movie::set_params()
         if (itm->param_name == "all_frames") {
             all_frames=mtob(itm->param_value);
         }
+        if (params->params_array[indx].param_name == "gop_size") {
+            gop_size=mtoi(params->params_array[indx].param_value);
+        }
+        if (params->params_array[indx].param_name == "max_b_frames") {
+            bframe=mtoi(params->params_array[indx].param_value);
+        }
+    }
+
+    if (gop_size == 0) {
+        if (tlapse != TIMELAPSE_NONE) {
+            gop_size = 1;
+        } else {
+            if (fps <= 5) {
+                gop_size = 1;
+            } else if (fps > 30) {
+                gop_size = 15;
+            } else {
+                gop_size = (fps / 2);
+            }
+        }
+    }
+    gop_cnt = gop_size - 1;
+
+}
+
+void cls_movie::set_context()
+{
+    ctx_codec = avcodec_alloc_context3(codec);
+    if (ctx_codec == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO, _("Failed to allocate codec context!"));
+        free_context();
+        return;
+    }
+    ctx_codec->codec_id         = codec->id;
+    ctx_codec->codec_type       = AVMEDIA_TYPE_VIDEO;
+    ctx_codec->width            = width;
+    ctx_codec->height           = height;
+    ctx_codec->time_base.num    = 1;
+    ctx_codec->time_base.den    = fps;
+    ctx_codec->pix_fmt          = AV_PIX_FMT_YUV420P;
+    ctx_codec->max_b_frames     = bframe;
+    ctx_codec->gop_size         = gop_size;
+}
+
+void cls_movie::log_containers()
+{
+    int retcd;
+    void *opaque = nullptr;
+    const AVOutputFormat *fmt = nullptr;
+
+    MOTION_LOG(INF, NO_ERRNO,_("Available container options"));
+    MOTION_LOG(INF, NO_ERRNO,_("Name | Extension(s) | Long Name"));
+    opts = nullptr;
+    while ((fmt = av_muxer_iterate(&opaque))) {
+        if ((fmt->video_codec != AV_CODEC_ID_NONE ) &&
+            (fmt->extensions != nullptr)) {
+            codec = avcodec_find_encoder(fmt->video_codec);
+            if (fmt->video_codec == AV_CODEC_ID_HEVC) {
+                av_dict_set(&opts, "x265-params","log_level=none",0);
+            }
+            if (codec != nullptr) {
+                set_context();
+                if (ctx_codec == nullptr) {
+                    return;
+                }
+                retcd = avcodec_open2(ctx_codec, codec, &opts);
+                if (retcd == 0) {
+                    MOTION_LOG(INF, NO_ERRNO,_(" %s | %s | %s")
+                        ,fmt->name, fmt->extensions, fmt->long_name);
+                }
+                if (ctx_codec != nullptr) {
+                    avcodec_free_context(&ctx_codec);
+                    ctx_codec = nullptr;
+                }
+            }
+            av_dict_free(&opts);
+            opts = nullptr;
+        }
     }
 }
 
 int cls_movie::set_oformat()
 {
+    oc->video_codec_id = AV_CODEC_ID_NONE;
+
     if (tlapse == TIMELAPSE_APPEND) {
         oc->oformat = av_guess_format("mpeg2video", nullptr, nullptr);
         oc->video_codec_id = AV_CODEC_ID_MPEG2VIDEO;
@@ -159,69 +241,47 @@ int cls_movie::set_oformat()
         return 0;
     }
 
-    if (container == "mov") {
-        oc->oformat = av_guess_format("mov", nullptr, nullptr);
-        full_nm += ".mov";
-        file_nm += ".mov";
-        oc->video_codec_id = AV_CODEC_ID_H264;
-    }
-
-    if (container == "flv") {
-        oc->oformat = av_guess_format("flv", nullptr, nullptr);
-        full_nm += ".flv";
-        file_nm += ".flv";
-        oc->video_codec_id = AV_CODEC_ID_FLV1;
-    }
-
-    if (container == "ogg") {
-        oc->oformat = av_guess_format("ogg", nullptr, nullptr);
-        full_nm += ".ogg";
-        file_nm += ".ogg";
-        oc->video_codec_id = AV_CODEC_ID_THEORA;
-    }
-
-    if (container == "webm") {
-        oc->oformat = av_guess_format("webm", nullptr, nullptr);
-        full_nm += ".webm";
-        file_nm += ".webm";
-        oc->video_codec_id = AV_CODEC_ID_VP8;
-    }
-
-    if (container == "mp4") {
-        oc->oformat = av_guess_format("mp4", nullptr, nullptr);
-        full_nm += ".mp4";
-        file_nm += ".mp4";
-        oc->video_codec_id = AV_CODEC_ID_H264;
-    }
-
-    if (container == "mkv") {
+    if ((container == "mov") || (container == "flv") ||
+        (container == "ogg") || (container == "webm") ||
+        (container == "mp4") || (container == "webm")) {
+        oc->oformat = av_guess_format(container.c_str(), nullptr, nullptr);
+        full_nm += "." + container;
+        file_nm += "." + container;
+        if (oc->oformat != nullptr) {
+            oc->video_codec_id= oc->oformat->video_codec;
+        }
+    } else if ((container == "mkv") || (container == "matroska")) {
         oc->oformat = av_guess_format("matroska", nullptr, nullptr);
         full_nm += ".mkv";
         file_nm += ".mkv";
         oc->video_codec_id = AV_CODEC_ID_H264;
-    }
-
-    if (container == "hevc") {
+    } else if (container == "hevc") {
         oc->video_codec_id = AV_CODEC_ID_HEVC;
         oc->oformat = av_guess_format("mp4", nullptr, nullptr);
         full_nm += ".mp4";
         file_nm += ".mp4";
         oc->video_codec_id = AV_CODEC_ID_HEVC;
+    } else {
+        oc->oformat = av_guess_format(container.c_str(), nullptr, nullptr);
+        full_nm += "." + container;
+        file_nm += "." + container;
+        if (oc->oformat != nullptr) {
+            oc->video_codec_id = oc->oformat->video_codec;
+        }
     }
 
-    if (oc->oformat == nullptr) {
+    if ((oc->video_codec_id == AV_CODEC_ID_NONE) ||
+        (oc->oformat == nullptr)) {
         MOTION_LOG(ERR, NO_ERRNO
             ,_("container option value %s is not supported")
             , container.c_str());
+        log_containers();
         free_context();
         return -1;
     }
-
-    if (oc->oformat->video_codec == AV_CODEC_ID_NONE) {
-        MOTION_LOG(ERR, NO_ERRNO, _("Could not get the container"));
-        free_context();
-        return -1;
-    }
+    MOTION_LOG(DBG, NO_ERRNO
+        ,_("Container set to %s | %s")
+        ,oc->oformat->name,oc->oformat->long_name);
 
     return 0;
 }
@@ -307,7 +367,7 @@ int cls_movie::set_quality()
     std::string prfl, crf;
     ctx_params_item *itm;
 
-    opts = NULL;
+    opts = nullptr;
     quality = 60;
     bitrate = 0;
     prfl="";
@@ -406,7 +466,7 @@ int cls_movie::set_quality()
         }
         ctx_codec->global_quality=gblqual;
     }
-    MOTION_LOG(INF, NO_ERRNO
+    MOTION_LOG(DBG, NO_ERRNO
         ,_("%s codec quality: %d crf: %s bit_rate: %d gblqual: %d")
         , codec->name, quality, crf.c_str(), bitrate, gblqual);
 
@@ -438,8 +498,7 @@ int cls_movie::set_codec_preferred()
             }
             codec = avcodec_find_encoder(oc->video_codec_id);
         } else {
-            MOTION_LOG(NTC, NO_ERRNO
-                ,_("Using codec %s"), preferred_codec.c_str());
+            oc->video_codec_id = codec->id;
         }
     } else {
         codec = avcodec_find_encoder(oc->video_codec_id);
@@ -450,6 +509,9 @@ int cls_movie::set_codec_preferred()
         free_context();
         return -1;
     }
+
+    MOTION_LOG(DBG, NO_ERRNO,_("Using codec %s :(%s)")
+        , codec->name, codec->long_name);
 
     return 0;
 }
@@ -518,9 +580,8 @@ void cls_movie::set_flags()
 
 int cls_movie::set_codec()
 {
-    int retcd, indx, chkrate, gopsz;
+    int retcd, chkrate;
     char errstr[128];
-
 
     if (set_codec_preferred() != 0) {
         return -1;
@@ -532,40 +593,11 @@ int cls_movie::set_codec()
         free_context();
         return -1;
     }
-    ctx_codec = avcodec_alloc_context3(codec);
+
+    set_context();
     if (ctx_codec == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO, _("Failed to allocate codec context!"));
-        free_context();
         return -1;
     }
-
-    gopsz=0;
-    ctx_codec->max_b_frames=0;
-    for (indx=0;indx<params->params_array.size();indx++){
-        if (params->params_array[indx].param_name == "gop_size") {
-            gopsz=mtoi(params->params_array[indx].param_value);
-        }
-        if (params->params_array[indx].param_name == "max_b_frames") {
-            ctx_codec->max_b_frames=mtoi(params->params_array[indx].param_value);
-        }
-    }
-
-    if (gopsz == 0) {
-        if (tlapse != TIMELAPSE_NONE) {
-            ctx_codec->gop_size = 1;
-        } else {
-            if (fps <= 5) {
-                ctx_codec->gop_size = 1;
-            } else if (fps > 30) {
-                ctx_codec->gop_size = 15;
-            } else {
-                ctx_codec->gop_size = (fps / 2);
-            }
-        }
-    } else {
-        ctx_codec->gop_size = gopsz;
-    }
-    gop_cnt = ctx_codec->gop_size - 1;
 
     /*  For certain containers, setting the fps to very low numbers results in
     **  a very poor quality playback.  We can set the FPS to a higher number and
@@ -579,16 +611,9 @@ int cls_movie::set_codec()
                 ,_("Low fps. Encoding %d frames into a %d frames container.")
                 , fps, 10);
             fps = 10;
+            ctx_codec->time_base.den = fps;
         }
     }
-
-    ctx_codec->codec_id      = codec->id;
-    ctx_codec->codec_type    = AVMEDIA_TYPE_VIDEO;
-    ctx_codec->width         = width;
-    ctx_codec->height        = height;
-    ctx_codec->time_base.num = 1;
-    ctx_codec->time_base.den = fps;
-    ctx_codec->pix_fmt   = AV_PIX_FMT_YUV420P;
 
     set_flags();
 
@@ -1281,6 +1306,7 @@ int cls_movie::passthru_open()
     }
 
     passthru_minpts();
+    set_params();
 
     retcd = set_oformat();
     if (retcd < 0 ) {
@@ -1332,7 +1358,7 @@ void cls_movie::put_pix_yuv420(ctx_image_data *img_data)
 
 void cls_movie::on_movie_start()
 {
-    MOTION_LOG(DBG, NO_ERRNO, _("Creating movie: %s"),full_nm.c_str());
+    MOTION_LOG(NTC, NO_ERRNO, _("Creating movie: %s"),full_nm.c_str());
     if (cam->cfg->on_movie_start != "") {
         util_exec_command(cam, cam->cfg->on_movie_start.c_str(), full_nm.c_str());
     }
@@ -1371,7 +1397,7 @@ int cls_movie::movie_open()
     set_params();
 
     if (set_oformat() < 0 ) {
-        MOTION_LOG(ERR, NO_ERRNO, _("Could not get codec!"));
+        MOTION_LOG(ERR, NO_ERRNO, _("Could not get container!"));
         free_context();
         return -1;
     }
@@ -1682,6 +1708,9 @@ void cls_movie::start_norm()
     if (movie_open() < 0) {
         MOTION_LOG(ERR, NO_ERRNO
             ,_("Error initializing movie."));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("Turning off movie_output."));
+        cam->cfg->movie_output = false;
         return;
     }
 
@@ -1756,6 +1785,9 @@ void cls_movie::start_motion()
     if (movie_open() < 0) {
         MOTION_LOG(ERR, NO_ERRNO
             ,_("Error initializing movie."));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("Turning off movie_output_motion."));
+        cam->cfg->movie_output_motion = false;
         return;
     }
 

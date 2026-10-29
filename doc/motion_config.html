@@ -2195,8 +2195,11 @@
 
         <h3><a name="movie_container"></a> movie_container </h3>
         <ul>
-          <li> Values: flv, ogg, webm, mp4, mkv, hevc, mov | Default: mkv</li>
-          Container/Codec to be used for the video.  Preferred codec can be appended e.g. <code>mkv:libx265</code>
+          <li> Values:string  | Default: mkv</li>
+          Container to be used for the video. Common values include :
+          flv, ogg, webm, mp4, mkv, hevc, mov, etc.  The valid containers are
+          those available from ffmpeg.  If an invalid option is specified, the
+          log will report many of the available options.
         </ul>
         <p></p>
 
