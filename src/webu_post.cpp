@@ -190,12 +190,14 @@ void cls_webu_post::action_eventend()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->event_stop = true;
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                app->cam_list[indx]->event_stop = true;
+            }
         }
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         app->cam_list[webua->camindx]->event_stop = true;
     }
-
 }
 
 /* Process the event start action */
@@ -214,12 +216,14 @@ void cls_webu_post::action_eventstart()
         }
     }
 
-
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->event_user = true;
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                app->cam_list[indx]->event_user = true;
+            }
         }
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         app->cam_list[webua->camindx]->event_user = true;
     }
 
@@ -241,12 +245,14 @@ void cls_webu_post::action_snapshot()
         }
     }
 
-
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->action_snapshot = true;
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                app->cam_list[indx]->action_snapshot = true;
+            }
         }
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         app->cam_list[webua->camindx]->action_snapshot = true;
     }
 
@@ -269,12 +275,14 @@ void cls_webu_post::action_pause_on()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->user_pause = "on";
+             if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                app->cam_list[indx]->user_pause = "on";
+            }
         }
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         app->cam_list[webua->camindx]->user_pause = "on";
     }
-
 }
 
 void cls_webu_post::action_pause_off()
@@ -294,9 +302,12 @@ void cls_webu_post::action_pause_off()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->user_pause = "off";
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                app->cam_list[indx]->user_pause = "off";
+            }
         }
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         app->cam_list[webua->camindx]->user_pause = "off";
     }
 
@@ -319,9 +330,12 @@ void cls_webu_post::action_pause_schedule()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->user_pause = "schedule";
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                app->cam_list[indx]->user_pause = "schedule";
+            }
         }
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         app->cam_list[webua->camindx]->user_pause = "schedule";
     }
 
@@ -344,14 +358,17 @@ void cls_webu_post::action_restart()
     }
 
     if (webua->device_id == 0) {
-        MOTION_LOG(NTC, NO_ERRNO, _("Restarting all cameras"));
         for (indx=0; indx<app->cam_cnt; indx++) {
-            app->cam_list[indx]->handler_stop = false;
-            app->cam_list[indx]->restart = true;
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                MOTION_LOG(NTC, NO_ERRNO, _("Restarting camera %d")
+                    , app->cam_list[indx]->cfg->device_id);
+                app->cam_list[indx]->handler_stop = false;
+                app->cam_list[indx]->restart = true;
+            }
         }
-    } else {
-        MOTION_LOG(NTC, NO_ERRNO
-            , _("Restarting camera %d")
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
+        MOTION_LOG(NTC, NO_ERRNO, _("Restarting camera %d")
             , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->handler_stop = false;
         app->cam_list[webua->camindx]->restart = true;
@@ -376,17 +393,18 @@ void cls_webu_post::action_stop()
 
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
-            MOTION_LOG(NTC, NO_ERRNO
-                , _("Stopping cam %d")
-                , app->cam_list[indx]->cfg->device_id);
-            app->cam_list[indx]->restart = false;
-            app->cam_list[indx]->event_stop = true;
-            app->cam_list[indx]->event_user = false;
-            app->cam_list[indx]->handler_stop = true;
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == app->cam_list[indx]->cfg->webcontrol_port)) {
+                MOTION_LOG(NTC, NO_ERRNO, _("Stopping cam %d")
+                    , app->cam_list[indx]->cfg->device_id);
+                app->cam_list[indx]->restart = false;
+                app->cam_list[indx]->event_stop = true;
+                app->cam_list[indx]->event_user = false;
+                app->cam_list[indx]->handler_stop = true;
+            }
         }
-    } else {
-        MOTION_LOG(NTC, NO_ERRNO
-            , _("Stopping cam %d")
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
+        MOTION_LOG(NTC, NO_ERRNO, _("Stopping cam %d")
             , app->cam_list[webua->camindx]->cfg->device_id);
         app->cam_list[webua->camindx]->restart = false;
         app->cam_list[webua->camindx]->event_stop = true;
@@ -417,27 +435,29 @@ void cls_webu_post::action_user()
     if (webua->device_id == 0) {
         for (indx=0; indx<app->cam_cnt; indx++) {
             cam = app->cam_list[indx];
-            cam->action_user[0] = '\0';
-            for (indx2 = 0; indx2 < post_sz; indx2++) {
-                if (mystreq(post_info[indx2].key_nm, "user")) {
-                    tmp = std::string(post_info[indx2].key_val);
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == cam->cfg->webcontrol_port)) {
+                cam->action_user[0] = '\0';
+                for (indx2 = 0; indx2 < post_sz; indx2++) {
+                    if (mystreq(post_info[indx2].key_nm, "user")) {
+                        tmp = std::string(post_info[indx2].key_val);
+                    }
                 }
-            }
-            for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
-                if (isalnum(tmp.at((uint)indx2)) == false) {
-                    MOTION_LOG(NTC, NO_ERRNO
-                        , _("Invalid character included in action user \"%c\"")
-                        , tmp.at((uint)indx2));
-                    return;
+                for (indx2 = 0; indx2<(int)tmp.length(); indx2++) {
+                    if (isalnum(tmp.at((uint)indx2)) == false) {
+                        MOTION_LOG(NTC, NO_ERRNO
+                            , _("Invalid character included in action user \"%c\"")
+                            , tmp.at((uint)indx2));
+                        return;
+                    }
                 }
+                snprintf(cam->action_user, 40, "%s", tmp.c_str());
+                MOTION_LOG(NTC, NO_ERRNO, _("Executing user action on cam %d")
+                    , cam->cfg->device_id);
+                util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
             }
-            snprintf(cam->action_user, 40, "%s", tmp.c_str());
-            MOTION_LOG(NTC, NO_ERRNO
-                , _("Executing user action on cam %d")
-                , cam->cfg->device_id);
-            util_exec_command(cam, cam->cfg->on_action_user.c_str(), NULL);
         }
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         cam = app->cam_list[webua->camindx];
         cam->action_user[0] = '\0';
         for (indx2 = 0; indx2 < post_sz; indx2++) {
@@ -478,12 +498,12 @@ void cls_webu_post::write_config()
             }
         }
     }
-    if (webua->camindx == -1) {
+    if ((webua->device_id == 0) &&
+        (webu->portnbr == app->cfg->webcontrol_port)) {
         app->conf_src->config_write(webua->camindx);
-    } else {
+    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
         app->cam_list[webua->camindx]->conf_src->config_write(webua->camindx);
     }
-
 
 }
 
@@ -516,26 +536,40 @@ void cls_webu_post::config_set(
                 ,pcat,pnm.c_str(), pval.c_str());
             cfg_s = app->cam_list[indx]->conf_src;
         }
-        for (indx1=0;indx1<cfg_s->params.size();indx1++) {
-            prm = cfg_s->params[indx1];
-            if ((prm->params_pcat == pcat) && (pnm != "extra_options")) {
-                chgnew = true;
-                for (indx2=0;indx2<prm->params_array.size();indx2++){
-                    if (prm->params_array[indx2].param_name == pnm) {
-                        if (prm->params_array[indx2].param_type == PARM_TYP_INTLIST) {
-                            pval=pval.substr(0,pval.find("-",0));
-                        }
-                        if (prm->params_array[indx2].param_value == pval) {
-                            chgnew = false;
+        if ((webu->portnbr == app->cfg->webcontrol_port) ||
+            (webu->portnbr == cfg_s->webcontrol_port)) {
+            for (indx1=0;indx1<cfg_s->params.size();indx1++) {
+                prm = cfg_s->params[indx1];
+                if ((prm->params_pcat == pcat) && (pnm != "extra_options")) {
+                    chgnew = true;
+                    for (indx2=0;indx2<prm->params_array.size();indx2++){
+                        if (prm->params_array[indx2].param_name == pnm) {
+                            if (prm->params_array[indx2].param_type == PARM_TYP_INTLIST) {
+                                pval=pval.substr(0,pval.find("-",0));
+                            }
+                            if (prm->params_array[indx2].param_value == pval) {
+                                chgnew = false;
+                            }
                         }
                     }
-                }
-                if (chgnew == true) {
-                    MOTION_LOG(DBG, NO_ERRNO
-                        ,_("Util parms add %s:%s"), pnm.c_str(), pval.c_str());
-                    util_parms_add(prm, pnm, pval);
+                    if (chgnew == true) {
+                        MOTION_LOG(DBG, NO_ERRNO
+                            ,_("Util parms add %s:%s"), pnm.c_str(), pval.c_str());
+                        util_parms_add(prm, pnm, pval);
+                        prm->params_changed = true;
+                        if (pcat == PARM_PCAT_ACAM) {
+                            config_ra_set("allcam", indx, PARM_CHG_CODE);
+                        } else if (indx != -1) {
+                            if (app->cam_list[indx]->handler_running == true) {
+                                config_ra_set("cam", indx, PARM_CHG_CODE);
+                            }
+                        }
+                    }
+                    break;
+                } else if ((prm->params_pcat == pcat) && (pnm == "extra_options")) {
+                    util_parms_parse(prm,prm->params_desc,pval, pcat);
                     prm->params_changed = true;
-                     if (pcat == PARM_PCAT_ACAM) {
+                    if (pcat == PARM_PCAT_ACAM) {
                         config_ra_set("allcam", indx, PARM_CHG_CODE);
                     } else if (indx != -1) {
                         if (app->cam_list[indx]->handler_running == true) {
@@ -543,19 +577,7 @@ void cls_webu_post::config_set(
                         }
                     }
                 }
-                break;
-            } else if ((prm->params_pcat == pcat) && (pnm == "extra_options")) {
-                util_parms_parse(prm,prm->params_desc,pval, pcat);
-                prm->params_changed = true;
-                if (pcat == PARM_PCAT_ACAM) {
-                    config_ra_set("allcam", indx, PARM_CHG_CODE);
-                } else if (indx != -1) {
-                    if (app->cam_list[indx]->handler_running == true) {
-                        config_ra_set("cam", indx, PARM_CHG_CODE);
-                    }
-                }
             }
-
         }
     }
 }
@@ -566,47 +588,73 @@ void cls_webu_post::config_set(
     std::string pcur, ptmp;
     PARM_CHG    parm_ch;
     int indx;
+    cls_camera *cam;
+    cls_sound *snd;
 
     parm_ch = config_parms[pindx].parm_chg;
     if (config_parms[pindx].parm_type == PARM_TYP_INTLIST) {
         pval=pval.substr(0, pval.find("-",0));
     }
     if (webua->device_id == 0) {
-        app->conf_src->edit_get(pnm, pcur, pcat);
-        if (pval == pcur) {
-            return;
-        }
-        app->conf_src->edit_set(pnm, pval);
         if (pcat == PARM_CAT_00) {
-            if ((pnm == "native_language") || (pnm == "native_language_code")){
-                config_ra_set("nls",0, PARM_CHG_CODE);
+            if (webu->portnbr == app->cfg->webcontrol_port) {
+                app->conf_src->edit_set(pnm, pval);
+                if ((pnm == "native_language") || (pnm == "native_language_code")){
+                    config_ra_set("nls",0, PARM_CHG_CODE);
+                } else {
+                    config_ra_set("log",0, parm_ch);
+                }
             } else {
-                config_ra_set("log",0, parm_ch);
+                MOTION_LOG(NTC, NO_ERRNO
+                    ,_("Change not permitted on camera port %s:%s")
+                    , pnm.c_str(), pval.c_str());
             }
         } else if (pcat == PARM_CAT_13) {
-            config_ra_set("webu",0, parm_ch);
+            if (webu->portnbr == app->cfg->webcontrol_port) {
+                app->conf_src->edit_set(pnm, pval);
+                config_ra_set("webu",0, parm_ch);
+            } else {
+                MOTION_LOG(NTC, NO_ERRNO
+                    ,_("Change not permitted on camera port %s:%s")
+                    , pnm.c_str(), pval.c_str());
+            }
         } else if (pcat == PARM_CAT_15) {
-            config_ra_set("dbse",0, parm_ch);
+            if (webu->portnbr == app->cfg->webcontrol_port) {
+                app->conf_src->edit_set(pnm, pval);
+                config_ra_set("dbse",0, parm_ch);
+            } else {
+                MOTION_LOG(NTC, NO_ERRNO
+                    ,_("Change not permitted on camera port %s:%s")
+                    , pnm.c_str(), pval.c_str());
+            }
+
         } else {
-            for (indx=0;indx<app->cam_cnt;indx++){
-                app->cam_list[indx]->conf_src->edit_get(pnm, pcur, pcat);
-                if (pcur != pval) {
-                    if (app->cam_list[indx]->handler_running == true) {
-                        app->cam_list[indx]->conf_src->edit_set(pnm, pval);
-                        config_ra_set("cam",indx, parm_ch);
-                    } else {
-                        app->cam_list[indx]->conf_src->edit_set(pnm, pval);
+            if (webu->portnbr == app->cfg->webcontrol_port) {
+                app->conf_src->edit_set(pnm, pval);
+            }
+            for (indx=0;indx<app->cam_cnt;indx++) {
+                cam = app->cam_list[indx];
+                if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                    (webu->portnbr == cam->cfg->webcontrol_port)) {
+                    cam->conf_src->edit_get(pnm, pcur, pcat);
+                    if (pcur != pval) {
+                        cam->conf_src->edit_set(pnm, pval);
+                        if (cam->handler_running == true) {
+                            config_ra_set("cam",indx, parm_ch);
+                        }
                     }
                 }
             }
             for (indx=0;indx<app->snd_cnt;indx++) {
-                app->snd_list[indx]->conf_src->edit_get(pnm, pcur, pcat);
-                if (pcur != pval) {
-                    if (app->snd_list[indx]->handler_running == true) {
-                        app->snd_list[indx]->conf_src->edit_set(pnm, pval);
-                        config_ra_set("snd",indx, parm_ch);
-                    } else {
-                        app->snd_list[indx]->conf_src->edit_set(pnm, pval);
+                snd = app->snd_list[indx];
+                if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                    (webu->portnbr == snd->cfg->webcontrol_port)) {
+                    snd->conf_src->edit_get(pnm, pcur, pcat);
+                    if (pcur != pval) {
+                        snd->conf_src->edit_set(pnm, pval);
+                        if (snd->handler_running == true) {
+                            config_ra_set("snd",indx, parm_ch);
+                        }
                     }
                 }
             }
@@ -618,16 +666,21 @@ void cls_webu_post::config_set(
                 , webua->device_id, pcat, pnm.c_str(), pval.c_str());
             return;
         } else {
-            app->cam_list[webua->camindx]->conf_src->edit_get(pnm, pcur, pcat);
-            if (pcur == pval) {
-                return;
+            cam = app->cam_list[webua->camindx];
+            if ((webu->portnbr == app->cfg->webcontrol_port) ||
+                (webu->portnbr == cam->cfg->webcontrol_port)) {
+                cam->conf_src->edit_get(pnm, pcur, pcat);
+                if (pcur == pval) {
+                    return;
+                }
+                MOTION_LOG(INF, NO_ERRNO,_("Config edit set. %s:%s")
+                    ,pnm.c_str(), pval.c_str());
+                cam->conf_src->edit_set(pnm, pval);
+                if (cam->handler_running == true) {
+                    config_ra_set("cam", webua->camindx, parm_ch);
+                }
             }
-            MOTION_LOG(INF, NO_ERRNO,_("Config edit set. %s:%s")
-                ,pnm.c_str(), pval.c_str());
-            app->cam_list[webua->camindx]->conf_src->edit_set(pnm, pval);
-            if (app->cam_list[webua->camindx]->handler_running == true) {
-                config_ra_set("cam", webua->camindx, parm_ch);
-            }
+
         }
     }
 }
@@ -888,6 +941,9 @@ void cls_webu_post::ptz()
         }
     }
 
+    if (webu->portnbr != app->cam_list[webua->camindx]->cfg->webcontrol_port) {
+        return;
+    }
     cam = app->cam_list[webua->camindx];
 
     if ((post_cmd == "pan_left") &&
