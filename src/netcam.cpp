@@ -1632,33 +1632,46 @@ void cls_netcam::set_options()
     if ((service == "rtsp") ||
         (service == "rtsps") ||
         (service == "rtmp")) {
-        util_parms_add_default(params,"rtsp_transport","tcp");
-        util_parms_add_default(params,"input_format","");
+        util_parms_add_default(params,
+            {"rtsp_transport","tcp",PARM_SRC_SYS, PARM_TYP_LIST
+            , PARM_LVL_01, PARM_CHG_CODE,{"tcp","udp"},""});
 
     } else if ((service == "http") ||
                (service == "https")) {
-        util_parms_add_default(params,"input_format","mjpeg");
-        util_parms_add_default(params,"reconnect_on_network_error","1");
-        util_parms_add_default(params,"reconnect_at_eof","1");
-        util_parms_add_default(params,"reconnect","1");
-        util_parms_add_default(params,"multiple_requests","1");
-        util_parms_add_default(params,"reconnect_streamed","1");
+        util_parms_add_default(params,
+            {"input_format","mjpeg",PARM_SRC_SYS, PARM_TYP_STRING
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"reconnect_on_network_error","1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"reconnect_at_eof","1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"reconnect","1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"multiple_requests","1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"reconnect_streamed","1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
     } else if (service == "v4l2") {
-        util_parms_add_default(params,"input_format","video4linux2");
+        util_parms_add_default(params,
+            {"input_format","video4linux2",PARM_SRC_SYS, PARM_TYP_STRING
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
         tmp = std::to_string(cfg_framerate);
-        util_parms_add_default(params,"framerate", tmp);
+        util_parms_add_default(params,
+            {"framerate", tmp,PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
-        tmp = std::to_string(cfg_width) + "x" +
-            std::to_string(cfg_height);
-        util_parms_add_default(params,"video_size", tmp);
+        tmp = std::to_string(cfg_width) + "x" + std::to_string(cfg_height);
+        util_parms_add_default(params,
+            {"video_size", tmp, PARM_SRC_SYS, PARM_TYP_STRING
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
-    } else if (service == "file") {
-        util_parms_add_default(params,"input_format","");
-
-    } else {
-        util_parms_add_default(params,"input_format","");
     }
 
     for (indx=0;indx<params->params_cnt;indx++) {
@@ -1697,9 +1710,7 @@ void cls_netcam::set_options()
             }
         }
         if (chgnew == true) {
-            util_parms_add(prm_s
-                ,params->params_array[indx].param_name
-                ,params->params_array[indx].param_value);
+            util_parms_add(prm_s,params->params_array[indx]);
         }
     }
 
@@ -1810,7 +1821,10 @@ void cls_netcam::set_parms ()
         , cameratype.c_str(), camera_name.c_str());
 
     status = NETCAM_NOTCONNECTED;
-    util_parms_add_default(params,"decoder","default");
+    util_parms_add_default(params,
+        {"decoder","default",PARM_SRC_SYS, PARM_TYP_STRING
+        , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+
     img_recv =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
     img_recv->ptr =(char*) mymalloc(NETCAM_BUFFSIZE);
     img_latest =(netcam_buff_ptr) mymalloc(sizeof(netcam_buff));
@@ -2530,9 +2544,7 @@ void cls_netcam::params_update()
             }
         }
         if (chgnew == true) {
-            util_parms_add(params
-                ,prm_s->params_array[indx].param_name
-                ,prm_s->params_array[indx].param_value);
+            util_parms_add(params,prm_s->params_array[indx]);
             cam->restart = true;
         }
     }

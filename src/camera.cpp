@@ -1923,6 +1923,19 @@ void cls_camera::check_schedule()
     */
 }
 
+void cls_camera::check_config_params_copy(ctx_params *prm_s)
+{
+    int idx;
+    std::string  ptmp;
+    for (idx=0;idx<cfg->params.size();idx++) {
+        if (cfg->params[idx]->params_pcat == prm_s->params_pcat) {
+            util_parms_update(prm_s, ptmp);
+            util_parms_parse(cfg->params[idx]
+                ,prm_s->params_desc, ptmp, prm_s->params_pcat);
+        }
+    }
+}
+
 void cls_camera::check_config_params()
 {
     int indx;
@@ -1937,29 +1950,68 @@ void cls_camera::check_config_params()
             (prm->params_pcat == PARM_PCAT_CLN)) {
             init_cleandir();
         } else if ((prm->params_changed == true) &&
-            (prm->params_pcat == PARM_PCAT_V4L2) &&
-            (camera_type == CAMERA_TYPE_V4L2) &&
-            (v4l2cam != nullptr)) {
-            v4l2cam->params_update();
+            (prm->params_pcat == PARM_PCAT_V4L2)) {
+            if ((camera_type == CAMERA_TYPE_V4L2) &&
+                (v4l2cam != nullptr)) {
+                v4l2cam->params_update();
+            } else {
+                check_config_params_copy(prm);
+            }
         } else if ((prm->params_changed == true) &&
-            (prm->params_pcat == PARM_PCAT_NET) &&
-            (camera_type == CAMERA_TYPE_NETCAM) &&
-            (netcam != nullptr)) {
-            netcam->params_update();
+            (prm->params_pcat == PARM_PCAT_NET)) {
+            if ((camera_type == CAMERA_TYPE_NETCAM) &&
+                (netcam != nullptr)) {
+                netcam->params_update();
+            } else {
+                check_config_params_copy(prm);
+            }
         } else if ((prm->params_changed == true) &&
-            (prm->params_pcat == PARM_PCAT_NETH) &&
-            (camera_type == CAMERA_TYPE_NETCAM) &&
-            (netcam_high != nullptr)) {
-            netcam_high->params_update();
+            (prm->params_pcat == PARM_PCAT_NETH)){
+            if ((camera_type == CAMERA_TYPE_NETCAM) &&
+                (netcam_high != nullptr)) {
+                netcam_high->params_update();
+            } else {
+                check_config_params_copy(prm);
+            }
         } else if ((prm->params_changed == true) &&
-            (prm->params_pcat == PARM_PCAT_LIB) &&
-            (camera_type == CAMERA_TYPE_LIBCAM) &&
-            (libcam != nullptr)) {
-            libcam->params_update();
+            (prm->params_pcat == PARM_PCAT_LIB)){
+            if((camera_type == CAMERA_TYPE_LIBCAM) &&
+                (libcam != nullptr)) {
+                libcam->params_update();
+            } else {
+                check_config_params_copy(prm);
+            }
         } else if ((prm->params_changed == true) &&
-            (prm->params_pcat == PARM_PCAT_SEC) &&
-            (algsec != nullptr)) {
-            algsec->params_update();
+            (prm->params_pcat == PARM_PCAT_SEC)){
+            if (algsec != nullptr) {
+                algsec->params_update();
+            } else {
+                check_config_params_copy(prm);
+            }
+        } else if (prm->params_changed == true) {
+            MOTION_LOG(DBG, NO_ERRNO,_("Uncoded parameter change: %s")
+                ,prm->params_desc.c_str());
+            check_config_params_copy(prm);
+        }
+        prm->params_changed = false;
+    }
+}
+
+void cls_camera::check_config_main_params(PARM_PCAT pcat, std::string pval)
+{
+    int idx, idx1;
+    cls_config *pcfg;
+
+    for (idx=0;idx<2;idx++) {
+        if (idx==0){ pcfg = conf_src;
+        } else {    pcfg = cfg;
+        }
+        for (idx1=0;idx1<pcfg->params.size();idx1++) {
+            if (pcfg->params[idx1]->params_pcat == pcat) {
+                util_parms_parse(pcfg->params[idx1]
+                    ,pcfg->params[idx1]->params_desc , pval
+                    ,pcfg->params[idx1]->params_pcat);
+            }
         }
     }
 }
@@ -1981,9 +2033,6 @@ void cls_camera::check_config_main()
         if (parm_vl_cur != parm_vl_src) {
             if (parm_ch == PARM_CHG_COPY) {
                 cfg->edit_set(parm_nm, parm_vl_src);
-                MOTION_LOG(INF, NO_ERRNO
-                    , _("%s:%s applied")
-                    , parm_nm.c_str(), parm_vl_src.c_str());
             } else if (parm_ch == PARM_CHG_CODE) {
                 if (parm_nm == "schedule_params") {
                     init_schedule();
@@ -1993,46 +2042,53 @@ void cls_camera::check_config_main()
                     if ((camera_type == CAMERA_TYPE_V4L2) &&
                         (v4l2cam != nullptr)) {
                         v4l2cam->params_update();
+                    } else {
+                        check_config_main_params(PARM_PCAT_V4L2, parm_vl_src);
                     }
+                    cfg->edit_set(parm_nm, parm_vl_src);
                 } else if (parm_nm == "netcam_params") {
                     if ((camera_type == CAMERA_TYPE_NETCAM) &&
                         (netcam != nullptr)) {
                         netcam->params_update();
+                    } else {
+                        check_config_main_params(PARM_PCAT_NET, parm_vl_src);
                     }
+                    cfg->edit_set(parm_nm, parm_vl_src);
                 } else if (parm_nm == "netcam_high_params") {
                     if ((camera_type == CAMERA_TYPE_NETCAM) &&
                         (netcam_high != nullptr)) {
                         netcam_high->params_update();
+                    } else {
+                        check_config_main_params(PARM_PCAT_NETH, parm_vl_src);
                     }
+                    cfg->edit_set(parm_nm, parm_vl_src);
                 } else if (parm_nm == "libcam_params") {
                     if ((camera_type == CAMERA_TYPE_LIBCAM) &&
                         (libcam != nullptr)) {
                         libcam->params_update();
+                    } else {
+                        check_config_main_params(PARM_PCAT_LIB, parm_vl_src);
                     }
+                    cfg->edit_set(parm_nm, parm_vl_src);
                 } else if (parm_nm == "secondary_params") {
                     if (algsec != nullptr) {
                         algsec->params_update();
+                    } else {
+                        check_config_main_params(PARM_PCAT_SEC, parm_vl_src);
                     }
+                    cfg->edit_set(parm_nm, parm_vl_src);
                 } else if (parm_nm == "threshold_maximum") {
                     cfg->edit_set(parm_nm, parm_vl_src);
                     threshold_maximum = cfg->threshold_maximum;
-                    MOTION_LOG(INF, NO_ERRNO
-                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
                 } else if (parm_nm == "threshold") {
                     cfg->edit_set(parm_nm, parm_vl_src);
                     threshold = cfg->threshold;
-                    MOTION_LOG(INF, NO_ERRNO
-                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
                 } else if (parm_nm == "noise_level") {
                     cfg->edit_set(parm_nm, parm_vl_src);
                     noise = cfg->noise_level;
-                    MOTION_LOG(INF, NO_ERRNO
-                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
                 } else if (parm_nm == "text_scale") {
                     cfg->edit_set(parm_nm, parm_vl_src);
                     draw->init_scale();
-                    MOTION_LOG(INF, NO_ERRNO
-                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
                 } else if (parm_nm == "movie_passthrough") {
                     cfg->edit_set(parm_nm, parm_vl_src);
                     movie_passthrough = cfg->movie_passthrough;
@@ -2041,22 +2097,34 @@ void cls_camera::check_config_main()
                         MOTION_LOG(WRN, NO_ERRNO,_("Pass-through processing disabled."));
                         movie_passthrough = false;
                     }
-                    MOTION_LOG(INF, NO_ERRNO
-                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
                 } else if (parm_nm == "watchdog_tmo") {
                     cfg->edit_set(parm_nm, parm_vl_src);
                     watchdog = cfg->watchdog_tmo;
-                    MOTION_LOG(INF, NO_ERRNO
-                        , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
+                } else if (parm_nm == "movie_params") {
+                    check_config_main_params(PARM_PCAT_MOVIE, parm_vl_src);
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                } else if (parm_nm == "timelaspse_params") {
+                    check_config_main_params(PARM_PCAT_TLSP, parm_vl_src);
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                } else if (parm_nm == "stream_allcam_params") {
+                    check_config_main_params(PARM_PCAT_ACAM, parm_vl_src);
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                } else if (parm_nm == "stream_mpegts_params") {
+                    check_config_main_params(PARM_PCAT_MPEGTS, parm_vl_src);
+                    cfg->edit_set(parm_nm, parm_vl_src);
+                } else if (parm_nm == "stream_mpegts_params") {
+                    check_config_main_params(PARM_PCAT_MPEGTS, parm_vl_src);
+                    cfg->edit_set(parm_nm, parm_vl_src);
+
                 } else {
                     MOTION_LOG(ERR, NO_ERRNO
                         , _("Programming error for changes to parameter %s")
                         ,parm_nm.c_str());
                 }
                 cfg->edit_set(parm_nm, parm_vl_src);
-                MOTION_LOG(INF, NO_ERRNO
-                    , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
             }
+            MOTION_LOG(INF, NO_ERRNO
+                , _("%s:%s applied"), parm_nm.c_str(), parm_vl_src.c_str());
         }
         indx++;
     }

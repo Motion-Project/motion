@@ -516,24 +516,21 @@ void cls_webu_post::config_set(
     bool chgnew;
     cls_config *cfg_s;
 
-    if (webua->device_id == 0) {
+    if ((webua->device_id == 0) && (pcat != PARM_PCAT_ACAM)) {
         st = -1;
         en = app->cam_cnt;
+    } else if ((webua->device_id == 0) && (pcat == PARM_PCAT_ACAM)) {
+        /*Do not cascade stream parameter changes to all cameras*/
+        st = -1;
+        en = 0;
     } else {
         st=webua->camindx;
         en=webua->camindx+1;
     }
     for (indx=st; indx<en; indx++) {
         if (indx == -1) {
-            MOTION_LOG(INF, NO_ERRNO
-                ,_("Config default category %d edit set %s:%s")
-                ,pcat, pnm.c_str(), pval.c_str());
             cfg_s = app->conf_src;
         } else {
-            MOTION_LOG(INF, NO_ERRNO
-                ,_("Config device_id %d category %d edit set  %s:%s")
-                ,app->cam_list[indx]->cfg->device_id
-                ,pcat,pnm.c_str(), pval.c_str());
             cfg_s = app->cam_list[indx]->conf_src;
         }
         if ((webu->portnbr == app->cfg->webcontrol_port) ||
@@ -553,12 +550,10 @@ void cls_webu_post::config_set(
                         }
                     }
                     if (chgnew == true) {
-                        MOTION_LOG(DBG, NO_ERRNO
-                            ,_("Util parms add %s:%s"), pnm.c_str(), pval.c_str());
                         util_parms_add(prm, pnm, pval);
                         prm->params_changed = true;
                         if (pcat == PARM_PCAT_ACAM) {
-                            config_ra_set("allcam", indx, PARM_CHG_CODE);
+                            config_ra_set("allcam", 0, PARM_CHG_CODE);
                         } else if (indx != -1) {
                             if (app->cam_list[indx]->handler_running == true) {
                                 config_ra_set("cam", indx, PARM_CHG_CODE);
@@ -570,7 +565,7 @@ void cls_webu_post::config_set(
                     util_parms_parse(prm,prm->params_desc,pval, pcat);
                     prm->params_changed = true;
                     if (pcat == PARM_PCAT_ACAM) {
-                        config_ra_set("allcam", indx, PARM_CHG_CODE);
+                        config_ra_set("allcam", 0, PARM_CHG_CODE);
                     } else if (indx != -1) {
                         if (app->cam_list[indx]->handler_running == true) {
                             config_ra_set("cam", indx, PARM_CHG_CODE);
@@ -596,65 +591,68 @@ void cls_webu_post::config_set(
         pval=pval.substr(0, pval.find("-",0));
     }
     if (webua->device_id == 0) {
+        if (((pcat == PARM_CAT_00) || (pcat == PARM_CAT_13) ||
+             (pcat == PARM_CAT_14) || (pcat == PARM_CAT_15)) &&
+            (webu->portnbr != app->cfg->webcontrol_port)) {
+            MOTION_LOG(NTC, NO_ERRNO
+                ,_("Change not permitted on camera port %s:%s")
+                , pnm.c_str(), pval.c_str());
+            return;
+        }
         if (pcat == PARM_CAT_00) {
-            if (webu->portnbr == app->cfg->webcontrol_port) {
-                app->conf_src->edit_set(pnm, pval);
-                if ((pnm == "native_language") || (pnm == "native_language_code")){
-                    config_ra_set("nls",0, PARM_CHG_CODE);
-                } else {
-                    config_ra_set("log",0, parm_ch);
-                }
+            app->conf_src->edit_set(pnm, pval);
+            if ((pnm == "native_language") || (pnm == "native_language_code")){
+                config_ra_set("nls",0, PARM_CHG_CODE);
             } else {
-                MOTION_LOG(NTC, NO_ERRNO
-                    ,_("Change not permitted on camera port %s:%s")
-                    , pnm.c_str(), pval.c_str());
+                config_ra_set("log",0, parm_ch);
             }
         } else if (pcat == PARM_CAT_13) {
-            if (webu->portnbr == app->cfg->webcontrol_port) {
+            app->conf_src->edit_set(pnm, pval);
+            config_ra_set("webu",0, parm_ch);
+        } else if (pcat == PARM_CAT_14) {
+            /*Do not cascade to stream parameters cameras*/
+            app->cfg->edit_get(pnm, pcur, pcat);
+            if (pcur != pval) {
                 app->conf_src->edit_set(pnm, pval);
-                config_ra_set("webu",0, parm_ch);
-            } else {
-                MOTION_LOG(NTC, NO_ERRNO
-                    ,_("Change not permitted on camera port %s:%s")
-                    , pnm.c_str(), pval.c_str());
+                if (pnm == "stream_allcam_params") {
+                    config_ra_set("allcam", 0, PARM_CHG_CODE);
+                } else {
+                    app->cfg->edit_set(pnm, pval);
+                }
             }
         } else if (pcat == PARM_CAT_15) {
-            if (webu->portnbr == app->cfg->webcontrol_port) {
-                app->conf_src->edit_set(pnm, pval);
-                config_ra_set("dbse",0, parm_ch);
-            } else {
-                MOTION_LOG(NTC, NO_ERRNO
-                    ,_("Change not permitted on camera port %s:%s")
-                    , pnm.c_str(), pval.c_str());
-            }
-
+            app->conf_src->edit_set(pnm, pval);
+            config_ra_set("dbse",0, parm_ch);
         } else {
+            ptmp="";
             if (webu->portnbr == app->cfg->webcontrol_port) {
+                app->cfg->edit_get(pnm, ptmp, pcat);
                 app->conf_src->edit_set(pnm, pval);
+                app->cfg->edit_set(pnm, pval);
             }
             for (indx=0;indx<app->cam_cnt;indx++) {
                 cam = app->cam_list[indx];
-                if ((webu->portnbr == app->cfg->webcontrol_port) ||
-                    (webu->portnbr == cam->cfg->webcontrol_port)) {
-                    cam->conf_src->edit_get(pnm, pcur, pcat);
-                    if (pcur != pval) {
-                        cam->conf_src->edit_set(pnm, pval);
-                        if (cam->handler_running == true) {
-                            config_ra_set("cam",indx, parm_ch);
-                        }
+                cam->conf_src->edit_get(pnm, pcur, pcat);
+                if (((webu->portnbr == app->cfg->webcontrol_port) &&
+                     (pcur != pval) && (pcur == ptmp)) ||
+                    ((webu->portnbr == cam->cfg->webcontrol_port) &&
+                     (pcur != pval))) {
+                    cam->conf_src->edit_set(pnm, pval);
+                    if (cam->handler_running == true) {
+                        config_ra_set("cam",indx, parm_ch);
                     }
                 }
             }
             for (indx=0;indx<app->snd_cnt;indx++) {
                 snd = app->snd_list[indx];
-                if ((webu->portnbr == app->cfg->webcontrol_port) ||
-                    (webu->portnbr == snd->cfg->webcontrol_port)) {
-                    snd->conf_src->edit_get(pnm, pcur, pcat);
-                    if (pcur != pval) {
-                        snd->conf_src->edit_set(pnm, pval);
-                        if (snd->handler_running == true) {
-                            config_ra_set("snd",indx, parm_ch);
-                        }
+                snd->conf_src->edit_get(pnm, pcur, pcat);
+                if (((webu->portnbr == app->cfg->webcontrol_port) &&
+                     (pcur != pval) && (pcur == ptmp)) ||
+                    ((webu->portnbr == snd->cfg->webcontrol_port) &&
+                     (pcur != pval))) {
+                    snd->conf_src->edit_set(pnm, pval);
+                    if (snd->handler_running == true) {
+                        config_ra_set("snd",indx, parm_ch);
                     }
                 }
             }
@@ -730,8 +728,8 @@ void cls_webu_post::config_ra_reset()
     ra_list.push_back(itm_res);
 
     for (indx = 0; indx<app->cam_cnt; indx++) {
-        itm_res.comp_type ="cam";
         itm_res.comp_indx = indx;
+        itm_res.comp_type ="cam";
         ra_list.push_back(itm_res);
     }
     for (indx = 0; indx<app->snd_cnt; indx++) {
@@ -748,31 +746,36 @@ void cls_webu_post::config_ra_process()
     for (indx = 0; indx < ra_list.size(); indx++) {
         if (ra_list[indx].comp_type == "log") {
             if (ra_list[indx].restart == true) {
+                MOTION_LOG(DBG, NO_ERRNO,_("Restart request for log"));
                 motlog->restart = true;
-                MOTION_LOG(DBG, NO_ERRNO
-                    ,_("Restart request for log"));
             } else if (ra_list[indx].apply == true) {
-                motlog->conf_chg = true;
                 MOTION_LOG(DBG, NO_ERRNO,_("Apply change for log"));
+                motlog->conf_chg = true;
             }
         } else if (ra_list[indx].comp_type == "webu") {
             if (ra_list[indx].restart == true) {
                 for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
-                    app->webu_list[indx2]->restart = true;
-                    MOTION_LOG(DBG, NO_ERRNO
-                        ,_("Restart request for webcontrol on port %d")
-                        ,app->webu_list[indx2]->cfg->webcontrol_port);
+                    if (webu->portnbr == app->webu_list[indx2]->portnbr) {
+                        app->webu_list[indx2]->restart = true;
+                        MOTION_LOG(DBG, NO_ERRNO
+                            ,_("Restart request for webcontrol on port %d")
+                            ,app->webu_list[indx2]->cfg->webcontrol_port);
+                    }
                 }
             } else if (ra_list[indx].apply == true) {
                 for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
-                    app->webu_list[indx2]->conf_chg = true;
+                    if (webu->portnbr == app->webu_list[indx2]->portnbr) {
+                        app->webu_list[indx2]->conf_chg = true;
+                        MOTION_LOG(DBG, NO_ERRNO,_("Apply change for webu"));
+                    }
                 }
-                MOTION_LOG(DBG, NO_ERRNO,_("Apply change for webu"));
             }
         } else if (ra_list[indx].comp_type == "allcam") {
             if (ra_list[indx].apply == true) {
                 for (indx2 = 0; indx2 < app->webu_cnt; indx2++) {
-                    app->webu_list[indx2]->allcam->params_update();
+                    if (webu->portnbr == app->webu_list[indx2]->portnbr) {
+                        app->webu_list[indx2]->allcam->params_update();
+                    }
                 }
             }
         } else if (ra_list[indx].comp_type == "nls") {

@@ -201,11 +201,17 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
         }
         myfree(all_img);
 
-        strm_a->jpg_sz = jpgutl_put_yuv420p(
-            strm_a->jpg_data, info.dst_sz, strm_a->img_data
-            , info.dst_w, info.dst_h
-            , 70, NULL,NULL,NULL);
-
+        if (app->cfg->stream_grey == true) {
+            strm_a->jpg_sz = jpgutl_put_grey(
+                strm_a->jpg_data, info.dst_sz, strm_a->img_data
+                , info.dst_w, info.dst_h
+                , app->cfg->stream_quality, NULL,NULL,NULL);
+        } else {
+            strm_a->jpg_sz = jpgutl_put_yuv420p(
+                strm_a->jpg_data, info.dst_sz, strm_a->img_data
+                , info.dst_w, info.dst_h
+                , app->cfg->stream_quality, NULL,NULL,NULL);
+        }
         strm_a->consumed = false;
     pthread_mutex_unlock(&stream.mutex);
 
@@ -506,11 +512,21 @@ void cls_allcam::init_params()
                 params = p_cam->cfg->params[indx2];
             }
         }
-        util_parms_add_default(params,"row","-1");
-        util_parms_add_default(params,"col","-1");
-        util_parms_add_default(params,"offset_user_col","0");
-        util_parms_add_default(params,"offset_user_row","0");
-        util_parms_add_default(params,"scale","100");
+        util_parms_add_default(params,
+            {"row","-1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"col","-1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"offset_user_col","0",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"offset_user_row","0",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+        util_parms_add_default(params,
+            {"scale","100",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
         for (indx1=0;indx1<params->params_cnt;indx1++) {
             itm = &params->params_array[indx1];
@@ -534,11 +550,21 @@ void cls_allcam::init_params()
         }
 
         if (portcam != portapp) {
-            util_parms_add_default(params,"row"+portcam,"-1");
-            util_parms_add_default(params,"col"+portcam,"-1");
-            util_parms_add_default(params,"offset_user_col"+portcam,"0");
-            util_parms_add_default(params,"offset_user_row"+portcam,"0");
-            util_parms_add_default(params,"scale"+portcam,"100");
+            util_parms_add_default(params,
+                {"row"+portcam,"-1",PARM_SRC_SYS, PARM_TYP_INT
+                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+            util_parms_add_default(params,
+                {"col"+portcam,"-1",PARM_SRC_SYS, PARM_TYP_INT
+                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+            util_parms_add_default(params,
+                {"offset_user_col"+portcam,"0",PARM_SRC_SYS, PARM_TYP_INT
+                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+            util_parms_add_default(params,
+                {"offset_user_row"+portcam,"0",PARM_SRC_SYS, PARM_TYP_INT
+                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+            util_parms_add_default(params,
+                {"scale"+portcam,"100",PARM_SRC_SYS, PARM_TYP_INT
+                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
         }
         for (indx1=0;indx1<params->params_cnt;indx1++) {
             itm = &params->params_array[indx1];
@@ -570,59 +596,60 @@ void cls_allcam::init_validate()
     int row, col, mx_row, mx_col, col_chk;
     bool cfg_valid, chk;
     std::string cfg_row, cfg_col;
-    cls_camera *p_cam, *p_cam1;
+    ctx_allcam_info *p_acm, *p_acm1;
 
     mx_row = 0;
     mx_col = 0;
     for (indx=0; indx<active_cnt; indx++) {
-        p_cam = active_cam[indx].cam;
-        if (mx_col < active_cam[indx].col) {
-            mx_col = active_cam[indx].col;
+        p_acm = &active_cam[indx];
+        if (mx_col < p_acm->col) {
+            mx_col = p_acm->col;
         }
-        if (mx_row < active_cam[indx].row) {
-            mx_row = active_cam[indx].row;
+        if (mx_row < p_acm->row) {
+            mx_row = p_acm->row;
         }
     }
 
     cfg_valid = true;
 
     for (indx=0; indx<active_cnt; indx++) {
-        p_cam = active_cam[indx].cam;
-        if ((active_cam[indx].col == -1) ||
-            (active_cam[indx].row == -1)) {
+        p_acm = &active_cam[indx];
+        if ((p_acm->col == -1) ||
+            (p_acm->row == -1)) {
             cfg_valid = false;
             MOTION_LOG(NTC, NO_ERRNO
                 ,_("No stream_allcam_params for cam %d")
-                , p_cam->cfg->device_id);
+                , p_acm->cam->cfg->device_id);
         } else {
             for (indx1=0; indx1<active_cnt; indx1++) {
-                p_cam1 = active_cam[indx1].cam;
-                if ((active_cam[indx].col == active_cam[indx1].col) &&
-                    (active_cam[indx].row == active_cam[indx1].row) &&
+                p_acm1 = &active_cam[indx1];
+                if ((p_acm->col == p_acm1->col) &&
+                    (p_acm->row == p_acm1->row) &&
                     (indx != indx1)) {
-                    MOTION_LOG(NTC, NO_ERRNO
-                        ,_("Duplicate stream_allcam_params "
-                        " cam %d, cam %d row %d col %d")
-                        , p_cam->cfg->device_id
-                        , p_cam1->cfg->device_id
-                        , active_cam[indx].row
-                        , active_cam[indx].col);
                     cfg_valid = false;
                 }
             }
+            if (cfg_valid == false) {
+                MOTION_LOG(NTC, NO_ERRNO
+                    ,_("Duplicate stream_allcam_params "
+                    " cam %d, row %d col %d")
+                    , p_acm->cam->cfg->device_id
+                    , p_acm->row
+                    , p_acm->col);
+            }
         }
-        if (active_cam[indx].row == 0) {
+        if (p_acm->row == 0) {
             MOTION_LOG(NTC, NO_ERRNO
                 ,_("Invalid stream_allcam_params row cam %d, row %d")
-                , p_cam->cfg->device_id
-                , active_cam[indx].row);
+                , p_acm->cam->cfg->device_id
+                , p_acm->row);
             cfg_valid = false;
         }
-        if (active_cam[indx].col == 0) {
+        if (p_acm->col == 0) {
             MOTION_LOG(NTC, NO_ERRNO
                 ,_("Invalid stream_allcam_params col cam %d, col %d")
-                , p_cam->cfg->device_id
-                , active_cam[indx].col);
+                , p_acm->cam->cfg->device_id
+                , p_acm->col);
             cfg_valid = false;
         }
     }
@@ -630,8 +657,8 @@ void cls_allcam::init_validate()
     for (row=1; row<=mx_row; row++) {
         chk = false;
         for (indx=0; indx<active_cnt; indx++) {
-            p_cam = active_cam[indx].cam;
-            if (row == active_cam[indx].row) {
+            p_acm = &active_cam[indx];
+            if (row == p_acm->row) {
                 chk = true;
             }
         }
@@ -644,9 +671,9 @@ void cls_allcam::init_validate()
         col_chk = 0;
         for (col=1; col<=mx_col; col++) {
             for (indx=0; indx<active_cnt; indx++) {
-                p_cam = active_cam[indx].cam;
-                if ((row == active_cam[indx].row) &&
-                    (col == active_cam[indx].col)) {
+                p_acm = &active_cam[indx];
+                if ((row == p_acm->row) &&
+                    (col == p_acm->col)) {
                     if ((col_chk+1) == col) {
                         col_chk = col;
                     } else {
@@ -666,15 +693,15 @@ void cls_allcam::init_validate()
         row = 0;
         col = 0;
         for (indx=0; indx<active_cnt; indx++) {
-            p_cam = active_cam[indx].cam;
+            p_acm = &active_cam[indx];
             if (col == 1) {
                 col++;
             } else {
                 row++;
                 col = 1;
             }
-            active_cam[indx].col = col;
-            active_cam[indx].row = row;
+            p_acm->col = col;
+            p_acm->row = row;
         }
     }
 
@@ -782,47 +809,51 @@ void cls_allcam::timing()
 
 void cls_allcam::params_update()
 {
-    ctx_params  *prm_s, *prm_c;
-    int indx, indx2;
+    int indx_cam, indx2, indx3;
     bool chgnew;
+    std::string prm_hold;
     cls_config *cfg_s, *cfg_c;
+    ctx_params  *prm_s, *prm_c;
 
-    for (indx=-1;indx<active_cam.size();indx++){
-        if (indx == -1) {
+    for (indx_cam=-1;indx_cam<(int)active_cam.size();indx_cam++){
+        if (indx_cam == -1) {
             cfg_s = webu->app->conf_src;
             cfg_c = webu->app->cfg;
         } else {
-            cfg_s = active_cam[indx].cam->conf_src;
-            cfg_c = active_cam[indx].cam->cfg;
+            cfg_s = active_cam[indx_cam].cam->conf_src;
+            cfg_c = active_cam[indx_cam].cam->cfg;
         }
+
         prm_c = nullptr;
-        for (indx=0; indx<cfg_c->params.size(); indx++) {
-            if (cfg_c->params[indx]->params_pcat == PARM_PCAT_ACAM) {
-                prm_c = cfg_c->params[indx];
+        for (indx2=0; indx2<cfg_c->params.size(); indx2++) {
+            if (cfg_c->params[indx2]->params_pcat == PARM_PCAT_ACAM) {
+                prm_c = cfg_c->params[indx2];
             }
         }
         prm_s = nullptr;
-        for (indx=0;indx<cfg_s->params.size();indx++) {
-            if (cfg_s->params[indx]->params_pcat == PARM_PCAT_ACAM) {
-                prm_s = cfg_s->params[indx];
+        for (indx2=0;indx2<cfg_s->params.size();indx2++) {
+            if (cfg_s->params[indx2]->params_pcat == PARM_PCAT_ACAM) {
+                prm_s = cfg_s->params[indx2];
             }
         }
-        util_parms_parse(prm_s, "stream_allcam_params"
-            , webu->app->conf_src->stream_allcam_params
-            , PARM_PCAT_ACAM);
+        if (cfg_s->stream_allcam_params != cfg_c->stream_allcam_params) {
+            util_parms_update(prm_s, prm_hold);
+            util_parms_parse(prm_s, "stream_allcam_params"
+                , cfg_s->stream_allcam_params, PARM_PCAT_ACAM);
+            util_parms_parse(prm_s, "stream_allcam_params"
+                , prm_hold, PARM_PCAT_ACAM);
+        }
 
-        for (indx=0;indx<prm_s->params_cnt;indx++) {
+        for (indx2=0;indx2<prm_s->params_cnt;indx2++) {
             chgnew = true;
-            for (indx2=0;indx2<prm_c->params_cnt;indx2++) {
-                if ((prm_s->params_array[indx].param_name == prm_c->params_array[indx2].param_name) &&
-                    (prm_s->params_array[indx].param_value == prm_c->params_array[indx2].param_value)) {
+            for (indx3=0;indx3<prm_c->params_cnt;indx3++) {
+                if ((prm_s->params_array[indx2].param_name == prm_c->params_array[indx3].param_name) &&
+                    (prm_s->params_array[indx2].param_value == prm_c->params_array[indx3].param_value)) {
                     chgnew = false;
                 }
             }
             if (chgnew == true) {
-                util_parms_add(prm_c
-                    ,prm_s->params_array[indx].param_name
-                    ,prm_s->params_array[indx].param_value);
+                util_parms_add(prm_c, prm_s->params_array[indx2]);
             }
         }
     }

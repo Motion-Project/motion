@@ -179,10 +179,18 @@ void cls_sound::load_params()
         }
     }
 
-    util_parms_add_default(params,"source","alsa");
-    util_parms_add_default(params,"channels","1");
-    util_parms_add_default(params,"frames","2048");
-    util_parms_add_default(params,"sample_rate","44100");
+    util_parms_add_default(params,
+            {"source","alsa",PARM_SRC_SYS, PARM_TYP_STRING
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(params,
+            {"channels","1",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(params,
+            {"frames","2048",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(params,
+            {"sample_rate","44100",PARM_SRC_SYS, PARM_TYP_INT
+            , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
     for (indx=0;indx<params->params_cnt;indx++) {
         itm = &params->params_array[indx];

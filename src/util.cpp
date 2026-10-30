@@ -802,6 +802,57 @@ static void util_parms_file(ctx_params *params, std::string params_file, bool sh
 
 }
 
+void util_parms_add(ctx_params *params, ctx_params_item itm_new, bool showmsg)
+{
+    util_parms_add(params, &itm_new, showmsg);
+}
+
+void util_parms_add(ctx_params *params, ctx_params_item *itm_new, bool showmsg)
+{
+    int indx;
+    ctx_params_item parm_itm;
+
+    if (showmsg == true) {
+        MOTION_LOG(DBG, NO_ERRNO,_("%s:>%s< >%s<")
+            ,params->params_desc.c_str()
+            ,itm_new->param_name.c_str(),itm_new->param_value.c_str());
+    }
+
+    for (indx=0;indx<params->params_array.size();indx++) {
+        if (params->params_array[indx].param_name == itm_new->param_name) {
+            if ((itm_new->param_name == "params_file") &&
+                (itm_new->param_value != params->params_array[indx].param_value)) {
+                util_parms_file(params,itm_new->param_value, showmsg);
+            }
+            params->params_array[indx].param_chg = itm_new->param_chg;
+            params->params_array[indx].param_desc = itm_new->param_desc;
+            params->params_array[indx].param_lst = itm_new->param_lst;
+            params->params_array[indx].param_lvl = itm_new->param_lvl;
+            params->params_array[indx].param_source = itm_new->param_source;
+            params->params_array[indx].param_type = itm_new->param_type;
+            params->params_array[indx].param_value = itm_new->param_value;
+            return;
+        }
+    }
+
+    /* This is a new parameter*/
+    parm_itm.param_chg = itm_new->param_chg;
+    parm_itm.param_desc = itm_new->param_desc;
+    parm_itm.param_lst = itm_new->param_lst;
+    parm_itm.param_lvl = itm_new->param_lvl;
+    parm_itm.param_name = itm_new->param_name;
+    parm_itm.param_source = itm_new->param_source;
+    parm_itm.param_type = itm_new->param_type;
+    parm_itm.param_value = itm_new->param_value;
+    params->params_array.push_back(parm_itm);
+    params->params_cnt = (int)params->params_array.size();
+
+    if ((itm_new->param_name == "params_file") &&
+        (itm_new->param_value != "")) {
+        util_parms_file(params, itm_new->param_value, showmsg);
+    }
+}
+
 void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val, bool showmsg)
 {
     int indx;
@@ -1095,6 +1146,28 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string
         util_parms_add(params, parm_nm, parm_vl,showmsg);
         for (indx=0;indx<params->params_cnt;indx++) {
             if (params->params_array[indx].param_name == parm_nm) {
+                params->params_array[indx].param_source = PARM_SRC_SYS;
+            }
+        }
+    }
+}
+
+void util_parms_add_default(ctx_params *params, ctx_params_item itm_new, bool showmsg)
+{
+    bool dflt;
+    int indx;
+
+    dflt = true;
+    for (indx=0;indx<params->params_cnt;indx++) {
+        if (params->params_array[indx].param_name == itm_new.param_name) {
+            dflt = false;
+            break;
+        }
+    }
+    if (dflt == true) {
+        util_parms_add(params, itm_new, showmsg);
+        for (indx=0;indx<params->params_cnt;indx++) {
+            if (params->params_array[indx].param_name == itm_new.param_name) {
                 params->params_array[indx].param_source = PARM_SRC_SYS;
             }
         }

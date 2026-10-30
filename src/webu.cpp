@@ -387,18 +387,31 @@ void cls_webu::init_actions()
         parm_vl = "on";
     }
 
-    util_parms_add_default(wb_actions,"event",parm_vl);
-    util_parms_add_default(wb_actions,"snapshot",parm_vl);
-    util_parms_add_default(wb_actions,"pause",parm_vl);
-    util_parms_add_default(wb_actions,"restart",parm_vl);
-    util_parms_add_default(wb_actions,"stop",parm_vl);
-    util_parms_add_default(wb_actions,"config_write",parm_vl);
-    util_parms_add_default(wb_actions,"camera_add",parm_vl);
-    util_parms_add_default(wb_actions,"camera_delete",parm_vl);
-    util_parms_add_default(wb_actions,"config",parm_vl);
-    util_parms_add_default(wb_actions,"ptz",parm_vl);
-    util_parms_add_default(wb_actions,"movies","on");
-    util_parms_add_default(wb_actions,"action_user",parm_vl);
+    util_parms_add_default(wb_actions,{"event",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"snapshot",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"pause",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"restart",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"stop",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"config_write",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"camera_add",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"camera_delete",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"config",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"ptz",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"movies",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(wb_actions,{"action_user",parm_vl
+        ,PARM_SRC_SYS, PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE,{""},""});
+
 }
 
 void cls_webu::start_daemon()

@@ -267,7 +267,9 @@ class cls_camera {
         void check_schedule();
         void check_config();
         void check_config_params();
+        void check_config_params_copy(ctx_params *prm_s);
         void check_config_main();
+        void check_config_main_params(PARM_PCAT pcat, std::string pval);
         void frametiming();
 };
 

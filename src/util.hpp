@@ -113,7 +113,10 @@ struct ctx_params {
 
     void util_parms_parse(ctx_params *params, std::string pdesc, std::string confline, enum PARM_PCAT pcat);
     void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string parm_vl, bool showmsg=true);
+    void util_parms_add_default(ctx_params *params,ctx_params_item itm_new, bool showmsg=true);
     void util_parms_add(ctx_params *params, std::string parm_nm, std::string parm_val, bool showmsg=true);
+    void util_parms_add(ctx_params *params, ctx_params_item itm_new, bool showmsg=true);
+    void util_parms_add(ctx_params *params, ctx_params_item *itm_new, bool showmsg=true);
     void util_parms_update(ctx_params *params, std::string &confline);
 
 

@@ -738,7 +738,7 @@ void cls_libcam::params_update()
                 }
             }
             if (chgnew == true) {
-                util_parms_add(params,itm_s->param_name,itm_s->param_value);
+                util_parms_add(params, itm_s);
                 if ((itm_s->param_name == "pixelformat") ||
                     (itm_s->param_name == "buffer_count") ||
                     (itm_s->param_name == "Orientation")) {

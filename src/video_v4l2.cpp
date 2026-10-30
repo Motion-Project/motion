@@ -207,11 +207,15 @@ void cls_v4l2cam::ctrls_list()
         device_ctrls[indx].ctrl_stdnm = tmp;
         if (device_ctrls[indx].ctrl_menuitem == false){
             util_parms_add_default(prm_s
-                ,device_ctrls[indx].ctrl_stdnm
-                ,std::to_string(device_ctrls[indx].ctrl_currval));
-            util_parms_add_default(params
-                ,device_ctrls[indx].ctrl_stdnm
-                ,std::to_string(device_ctrls[indx].ctrl_currval),false);
+                ,{device_ctrls[indx].ctrl_stdnm
+                ,std::to_string(device_ctrls[indx].ctrl_currval)
+                ,PARM_SRC_SYS, PARM_TYP_STRING, PARM_LVL_01
+                , PARM_CHG_CODE,{""},""});
+            util_parms_add_default(params,
+                {device_ctrls[indx].ctrl_stdnm
+                ,std::to_string(device_ctrls[indx].ctrl_currval)
+                ,PARM_SRC_SYS, PARM_TYP_STRING, PARM_LVL_01
+                , PARM_CHG_CODE,{""},""},false);
         }
     }
 
@@ -677,7 +681,7 @@ void cls_v4l2cam::params_check()
     if ((spec < 0) || (spec > (int)palette.size())) {
         MOTION_LOG(WRN, NO_ERRNO
             ,_("Invalid palette.  Changing to default"));
-        util_parms_add(params,"palette","17");
+        util_parms_add(params,"palette","17-YU12");
     }
 
 }
@@ -1272,9 +1276,7 @@ void cls_v4l2cam::params_update()
                 }
             }
             if (chgnew == true) {
-                util_parms_add(params
-                    ,prm_s->params_array[indx].param_name
-                    ,prm_s->params_array[indx].param_value);
+                util_parms_add(params,prm_s->params_array[indx]);
                 if ((prm_s->params_array[indx].param_name == "palette") ||
                     (prm_s->params_array[indx].param_name == "norm") ||
                     (prm_s->params_array[indx].param_name == "frequency") ||

@@ -154,12 +154,12 @@ ctx_parm config_parms[] = {
     {"webcontrol_lock_attempts",  PARM_TYP_INT,    PARM_CAT_13, PARM_LVL_02, PARM_CHG_RESTART },
     {"webcontrol_lock_script",    PARM_TYP_STRING, PARM_CAT_13, PARM_LVL_03, PARM_CHG_RESTART },
 
-    {"stream_allcam_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_mpegts_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_grey",               PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_motion",             PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
-    {"stream_maxrate",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_RESTART },
+    {"stream_allcam_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_CODE },
+    {"stream_mpegts_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_CODE },
+    {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
+    {"stream_grey",               PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
+    {"stream_motion",             PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
+    {"stream_maxrate",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
 
     {"database_type",             PARM_TYP_LIST,   PARM_CAT_15, PARM_LVL_02, PARM_CHG_RESTART },
     {"database_dbname",           PARM_TYP_STRING, PARM_CAT_15, PARM_LVL_02, PARM_CHG_RESTART },
@@ -3271,7 +3271,7 @@ void cls_config::params_load_secondary()
         ,{""},""});
     prm->params_array.push_back(
         {"scale","",PARM_SRC_SYS
-        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
     prm->params_array.push_back(
         {"width","",PARM_SRC_SYS
@@ -3756,9 +3756,7 @@ void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCA
     }
     if (dprm != nullptr) {
         for (indx=0;indx<dprm->params_array.size();indx++) {
-            util_parms_add(prmd
-                , dprm->params_array[indx].param_name
-                , dprm->params_array[indx].param_value, false);
+            util_parms_add(prmd, dprm->params_array[indx], false);
         }
     }
 }
@@ -3769,6 +3767,23 @@ void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_para
     ctx_params_item *itm_a, *itm_d, itm_n;
     bool chknew;
     std::string ptmp;
+
+    for (ipa=0;ipa<prma->params_array.size();ipa++) {
+        itm_a = &prma->params_array[ipa];
+        chknew = true;
+        for (ipd=0;ipd<prmd->params_array.size();ipd++) {
+            itm_d = &prmd->params_array[ipd];
+            if (itm_a->param_name == itm_d->param_name) {
+                chknew = false;
+            }
+        }
+        if (chknew == true) {
+            itm_n = prma->params_array[ipa];
+            prmd->params_array.push_back(itm_n);
+        }
+    }
+
+    params_load_dpritm(cfgs, prmd, prmd->params_pcat);
 
     if (prmd->params_pcat == PARM_PCAT_SCH) {           ptmp=cfgs->schedule_params;
     } else if (prmd->params_pcat == PARM_PCAT_CLN) {    ptmp=cfgs->cleandir_params;
@@ -3786,25 +3801,9 @@ void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_para
     } else if (prmd->params_pcat == PARM_PCAT_TLSP)   { ptmp=cfgs->timelapse_params;
     } else {  return;
     }
-    params_load_dpritm(cfgs, prmd, prmd->params_pcat);
     util_parms_parse(prmd, prmd->params_desc, ptmp, prmd->params_pcat);
 
-    for (ipa=0;ipa<prma->params_array.size();ipa++) {
-        itm_a = &prma->params_array[ipa];
-        chknew = true;
-        for (ipd=0;ipd<prmd->params_array.size();ipd++) {
-            itm_d = &prmd->params_array[ipd];
-            if (itm_a->param_name == itm_d->param_name) {
-                chknew = false;
-            }
-        }
-        if (chknew == true) {
-            itm_n = prma->params_array[ipa];
-            prmd->params_array.push_back(itm_n);
-        }
-    }
     prmd->params_cnt = (int)prmd->params_array.size();
-
 }
 
 void cls_config::params_load_listcam()
@@ -5182,7 +5181,6 @@ void cls_config::config_copy(cls_config *src)
         prm->params_changed=prmsrc->params_changed;
         prm->params_pcat = prmsrc->params_pcat;
         prm->params_desc = prmsrc->params_desc;
-
         for (indx2=0;indx2<prmsrc->params_array.size();indx2++) {
             prm->params_array.push_back(prmsrc->params_array[indx2]);
         }
