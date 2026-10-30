@@ -430,7 +430,7 @@ void cls_allcam::getsizes_offset_user()
 
 void cls_allcam::getsizes_pct()
 {
-    int indx, dst_w, dst_h, dst_scale;
+    int indx, dst_w, dst_h, dst_scale, mxh;
     ctx_params  *params;
 
     if ((info.src_h == 0) || (info.src_w == 0)) {
@@ -449,7 +449,19 @@ void cls_allcam::getsizes_pct()
             (((active_cam[indx].offset_row+active_cam[indx].dst_h) * 100) /info.src_h);
     }
 
+
+    /* Set default scale to image with greatest height*/
     dst_scale = 100;
+    mxh=0;
+    for (indx=0; indx<active_cnt; indx++) {
+        if (active_cam[indx].dst_h > mxh) {
+            mxh=active_cam[indx].dst_h;
+            dst_scale = ((mxh *100) / info.src_h);
+        }
+    }
+    if (dst_scale < 10) {
+        dst_scale = 10;
+    }
 
     params = nullptr;
     for (indx=0;indx<app->cfg->params.size(); indx++) {
@@ -457,8 +469,17 @@ void cls_allcam::getsizes_pct()
             params = app->cfg->params[indx];
         }
     }
+
     for (indx=0;indx<params->params_cnt; indx++) {
-        if (params->params_array[indx].param_name == "scale") {
+        if ((webu->portnbr = app->cfg->webcontrol_port) &&
+            (params->params_array[indx].param_name == "scale") &&
+            (params->params_array[indx].param_source == PARM_SRC_USER)) {
+            dst_scale = mtoi(params->params_array[indx].param_value);
+        }
+        if ((webu->portnbr != app->cfg->webcontrol_port) &&
+            (params->params_array[indx].param_name ==
+                "scale"+std::to_string(webu->portnbr)) &&
+            (params->params_array[indx].param_source == PARM_SRC_USER)) {
             dst_scale = mtoi(params->params_array[indx].param_value);
         }
     }

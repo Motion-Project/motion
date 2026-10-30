@@ -1139,7 +1139,12 @@ void util_parms_add_default(ctx_params *params, std::string parm_nm, std::string
     dflt = true;
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_name == parm_nm) {
-            dflt = false;
+            if (params->params_array[indx].param_source == PARM_SRC_USER) {
+                dflt = false;
+            } else {
+                /*Update with new default*/
+                params->params_array[indx].param_value = parm_vl;
+            }
         }
     }
     if (dflt == true) {
