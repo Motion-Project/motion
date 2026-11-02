@@ -407,8 +407,6 @@
             void edit_snapshot_filename(std::string &parm, enum PARM_ACT pact);
             void edit_snapshot_interval(std::string &parm, enum PARM_ACT pact);
 
-            void edit_movie_all_frames(std::string &parm, enum PARM_ACT pact);
-            void edit_movie_bps(std::string &parm, enum PARM_ACT pact);
             void edit_movie_container(std::string &parm, enum PARM_ACT pact);
             void edit_movie_extpipe(std::string &parm, enum PARM_ACT pact);
             void edit_movie_extpipe_use(std::string &parm, enum PARM_ACT pact);
@@ -417,8 +415,6 @@
             void edit_movie_output(std::string &parm, enum PARM_ACT pact);
             void edit_movie_output_motion(std::string &parm, enum PARM_ACT pact);
             void edit_movie_passthrough(std::string &parm, enum PARM_ACT pact);
-            void edit_movie_quality(std::string &parm, enum PARM_ACT pact);
-            void edit_movie_retain(std::string &parm, enum PARM_ACT pact);
             void edit_movie_params(std::string &parm, enum PARM_ACT pact);
 
             void edit_timelapse_container(std::string &parm, enum PARM_ACT pact);
