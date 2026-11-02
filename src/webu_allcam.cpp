@@ -471,7 +471,7 @@ void cls_allcam::getsizes_pct()
     }
 
     for (indx=0;indx<params->params_cnt; indx++) {
-        if ((webu->portnbr = app->cfg->webcontrol_port) &&
+        if ((webu->portnbr == app->cfg->webcontrol_port) &&
             (params->params_array[indx].param_name == "scale") &&
             (params->params_array[indx].param_source == PARM_SRC_USER)) {
             dst_scale = mtoi(params->params_array[indx].param_value);
@@ -824,6 +824,7 @@ void cls_allcam::getsizes()
     if (reset == false) {
         return;
     }
+
     init_cams();
     getsizes_scale();
     getsizes_alignv();
