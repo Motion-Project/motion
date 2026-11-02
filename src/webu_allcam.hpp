@@ -68,6 +68,11 @@ class cls_allcam {
         int max_col;
         int max_row;
         int webuindx;
+        int     stream_quality;
+        bool    stream_grey;
+        bool    stream_motion;
+        int     stream_maxrate;
+
 
         struct timespec     curr_ts;
 

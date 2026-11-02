@@ -156,10 +156,7 @@ ctx_parm config_parms[] = {
 
     {"stream_allcam_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_CODE },
     {"stream_mpegts_params",      PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_CODE },
-    {"stream_quality",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
-    {"stream_grey",               PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
-    {"stream_motion",             PARM_TYP_BOOL,   PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
-    {"stream_maxrate",            PARM_TYP_INT,    PARM_CAT_14, PARM_LVL_01, PARM_CHG_COPY },
+    {"stream_params",             PARM_TYP_PARAMS, PARM_CAT_14, PARM_LVL_01, PARM_CHG_CODE },
 
     {"database_type",             PARM_TYP_LIST,   PARM_CAT_15, PARM_LVL_02, PARM_CHG_RESTART },
     {"database_dbname",           PARM_TYP_STRING, PARM_CAT_15, PARM_LVL_02, PARM_CHG_RESTART },
@@ -255,6 +252,14 @@ ctx_parm_depr config_parms_depr[] = {
         ,"\"timelapse_fps\" replaced with \"timelapse_params\" parameter \"fps\""}
     ,{"log_type", "5.0.0","removed"
         ,"\"log_type\" removed"}
+    ,{"stream_quality", "5.0.0","stream_params option"
+        ,"\"stream_quality\" replaced with \"stream_params\" parameter \"quality\""}
+    ,{"stream_grey", "5.0.0","stream_params option"
+        ,"\"stream_grey\" replaced with \"stream_params\" parameter \"grey\""}
+    ,{"stream_motion", "5.0.0","stream_params option"
+        ,"\"stream_motion\" replaced with \"stream_params\" parameter \"motion\""}
+    ,{"stream_maxrate", "5.0.0","stream_params option"
+        ,"\"stream_maxrate\" replaced with \"stream_params\" parameter \"maxrate\""}
 
     ,{ "","","",""}
 };
@@ -2025,59 +2030,14 @@ void cls_config::edit_stream_mpegts_params(std::string &parm, enum PARM_ACT pact
     }
 }
 
-void cls_config::edit_stream_quality(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        stream_quality = 50;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 1) || (parm_in > 100)) {
-            MOTION_LOG(NTC, NO_ERRNO, _("Invalid stream_quality %d"),parm_in);
-        } else {
-            stream_quality = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(stream_quality);
-    }
-}
-
-void cls_config::edit_stream_grey(std::string &parm, enum PARM_ACT pact)
+void cls_config::edit_stream_params(std::string &parm, enum PARM_ACT pact)
 {
     if (pact == PARM_ACT_DFLT) {
-        stream_grey = false;
+        stream_params = "";
     } else if (pact == PARM_ACT_SET) {
-        edit_set_bool(stream_grey, parm);
+        stream_params = parm;
     } else if (pact == PARM_ACT_GET) {
-        edit_get_bool(parm, stream_grey);
-    }
-}
-
-void cls_config::edit_stream_motion(std::string &parm, enum PARM_ACT pact)
-{
-    if (pact == PARM_ACT_DFLT) {
-        stream_motion = false;
-    } else if (pact == PARM_ACT_SET) {
-        edit_set_bool(stream_motion, parm);
-    } else if (pact == PARM_ACT_GET) {
-        edit_get_bool(parm, stream_motion);
-    }
-}
-
-void cls_config::edit_stream_maxrate(std::string &parm, enum PARM_ACT pact)
-{
-    int parm_in;
-    if (pact == PARM_ACT_DFLT) {
-        stream_maxrate = 1;
-    } else if (pact == PARM_ACT_SET) {
-        parm_in = atoi(parm.c_str());
-        if ((parm_in < 1) || (parm_in > 100)) {
-            MOTION_LOG(NTC, NO_ERRNO, _("Invalid stream_maxrate %d"),parm_in);
-        } else {
-            stream_maxrate = parm_in;
-        }
-    } else if (pact == PARM_ACT_GET) {
-        parm = std::to_string(stream_maxrate);
+        parm = stream_params;
     }
 }
 
@@ -2627,14 +2587,10 @@ void cls_config::edit_cat13(std::string parm_nm, std::string &parm_val, enum PAR
 
 void cls_config::edit_cat14(std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
 {
-    if (parm_nm == "stream_allcam_params") {    edit_stream_allcam_params(parm_val, pact);
-    } else if (parm_nm == "stream_mpegts_params") {edit_stream_mpegts_params(parm_val, pact);
-    } else if (parm_nm == "stream_quality") {   edit_stream_quality(parm_val, pact);
-    } else if (parm_nm == "stream_grey") {      edit_stream_grey(parm_val, pact);
-    } else if (parm_nm == "stream_motion") {    edit_stream_motion(parm_val, pact);
-    } else if (parm_nm == "stream_maxrate") {   edit_stream_maxrate(parm_val, pact);
+    if (parm_nm == "stream_mpegts_params")        {edit_stream_mpegts_params(parm_val, pact);
+    } else if (parm_nm == "stream_allcam_params") {edit_stream_allcam_params(parm_val, pact);
+    } else if (parm_nm == "stream_params")        {edit_stream_params(parm_val, pact);
     }
-
 }
 
 void cls_config::edit_cat15(std::string parm_nm, std::string &parm_val, enum PARM_ACT pact)
@@ -3657,6 +3613,48 @@ void cls_config::params_load_mpegts()
 
 }
 
+void cls_config::params_load_stream()
+{
+    ctx_params *prm;
+
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "stream_params";
+    prm->params_pcat = PARM_PCAT_STREAM;
+    prm->params_changed = false;
+
+    /*param_name,param_value,param_source*/
+    /*param_type,param_lvl,param_chg,param_lst,desc*/
+    prm->params_array.push_back(
+        {"params_file","",PARM_SRC_SYS
+        , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"quality","60",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"grey","false",PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"motion","false",PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_array.push_back(
+        {"maxrate","5",PARM_SRC_SYS
+        , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
+    prm->params_cnt = (int)prm->params_array.size();
+
+    params_load_dpritm(app->conf_src, prm, PARM_PCAT_STREAM);
+
+    util_parms_parse(prm,"stream_params",stream_params, PARM_PCAT_STREAM);
+
+    params.push_back(prm);
+
+}
+
 void cls_config::params_load_timelapse()
 {
     ctx_params *prm;
@@ -3798,6 +3796,7 @@ void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_para
     } else if (prmd->params_pcat == PARM_PCAT_SND) {    ptmp=cfgs->snd_params;
     } else if (prmd->params_pcat == PARM_PCAT_MOVIE) {  ptmp=cfgs->movie_params;
     } else if (prmd->params_pcat == PARM_PCAT_MPEGTS) { ptmp=cfgs->stream_mpegts_params;
+    } else if (prmd->params_pcat == PARM_PCAT_STREAM) { ptmp=cfgs->stream_params;
     } else if (prmd->params_pcat == PARM_PCAT_TLSP)   { ptmp=cfgs->timelapse_params;
     } else {  return;
     }
@@ -3889,6 +3888,7 @@ void cls_config::params_load()
     params_load_movie();
     params_load_timelapse();
     params_load_mpegts();
+    params_load_stream();
 }
 
 std::string cls_config::params_prefix(PARM_PCAT pcat) {
@@ -3910,6 +3910,7 @@ std::string cls_config::params_prefix(PARM_PCAT pcat) {
     } else if (pcat == PARM_PCAT_MOVIE) { return "pmov_";
     } else if (pcat == PARM_PCAT_TLSP)  { return "ptlp_";
     } else if (pcat == PARM_PCAT_MPEGTS){ return "pmts_";
+    } else if (pcat == PARM_PCAT_STREAM){ return "pstm_";
     } else { return "pudf_";
     }
 }
@@ -3962,6 +3963,13 @@ void cls_config::defaults_depr()
     prm->app = app;
     prm->params_desc = "timelapse_params";
     prm->params_pcat = PARM_PCAT_TLSP;
+    prm->params_cnt = 0;
+    depr_params.push_back(prm);
+
+    prm = new ctx_params;
+    prm->app = app;
+    prm->params_desc = "stream_params";
+    prm->params_pcat = PARM_PCAT_STREAM;
     prm->params_cnt = 0;
     depr_params.push_back(prm);
 
@@ -4114,6 +4122,47 @@ void cls_config::edit_depr_timelapse(std::string parm_nm, std::string parm_val)
 
 }
 
+void cls_config::edit_depr_stream(std::string parm_nm, std::string parm_val)
+{
+    std::string pnew_nm, pnew_val;
+    int indx;
+    ctx_params *prm;
+
+    prm = nullptr;
+    for (indx=0;indx<depr_params.size();indx++) {
+        if (depr_params[indx]->params_pcat == PARM_PCAT_STREAM) {
+            prm = depr_params[indx];
+        }
+    }
+    if (prm == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("Bad programming"));
+        return;
+    }
+
+    if (parm_nm == "stream_quality") {
+        pnew_nm = "quality";
+        pnew_val = parm_val;
+    } else if (parm_nm == "stream_grey") {
+        pnew_nm = "grey";
+        pnew_val = parm_val;
+    } else if (parm_nm == "stream_motion") {
+        pnew_nm = "motion";
+        pnew_val = parm_val;
+    } else if (parm_nm == "stream_maxrate") {
+        pnew_nm = "maxrate";
+        pnew_val = parm_val;
+    } else {
+        return;
+    }
+    util_parms_add(prm, pnew_nm, pnew_val, false);
+    MOTION_LOG(INF, NO_ERRNO
+        ,_("%s %s changed to stream_params option %s=%s")
+        ,parm_nm.c_str(),parm_val.c_str()
+        ,pnew_nm.c_str(),pnew_val.c_str());
+
+}
+
 int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
 {
     int indx;
@@ -4142,6 +4191,10 @@ int cls_config::edit_set_depr(std::string &parm_nm, std::string &parm_val)
 
             } else if ((parm_nm == "timelapse_fps")) {
                 edit_depr_timelapse(parm_nm, parm_val);
+
+            } else if ((parm_nm == "stream_quality") || (parm_nm == "stream_grey") ||
+                (parm_nm == "stream_motion") || (parm_nm == "stream_maxrate")) {
+                edit_depr_stream(parm_nm, parm_val);
 
             } else {
                 edit_set_active(config_parms_depr[indx].newname, parm_val);

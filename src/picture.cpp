@@ -407,7 +407,7 @@ int cls_picture::put_memory(u_char *img_dst, int image_size
     int retcd;
 
     clock_gettime(CLOCK_REALTIME, &ts1);
-    if (cam->cfg->stream_grey) {
+    if (cam->stream_grey) {
         retcd = jpgutl_put_grey(img_dst, image_size, image
             , width, height, quality, cam, &ts1, NULL);
     } else {

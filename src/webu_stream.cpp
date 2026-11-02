@@ -41,16 +41,17 @@ static ssize_t webu_mjpeg_response (void *cls, uint64_t pos, char *buf, size_t m
 void cls_webu_stream::set_fps()
 {
     if (webua->device_id == 0) {
-        stream_fps = app->cfg->stream_maxrate;
+        stream_fps = stream_maxrate;
         return;
     }
     if (webua->camindx >= webu->cam_list.size()) {
         stream_fps = 1;
+        return;
     } else if ((webua->cam->detecting_motion == false) &&
-        (webu->cam_list[webua->camindx]->cfg->stream_motion)) {
+        (webua->cam->stream_motion)) {
         stream_fps = 1;
     } else {
-        stream_fps = webu->cam_list[webua->camindx]->cfg->stream_maxrate;
+        stream_fps = webua->cam->stream_maxrate;
     }
 }
 
@@ -635,6 +636,45 @@ mhdrslt cls_webu_stream::stream_static()
     return retcd;
 }
 
+void cls_webu_stream::set_params()
+{
+    int     indx;
+    ctx_params_item *itm;
+
+    params = nullptr;
+    for (indx=0;indx<webu->cfg->params.size();indx++) {
+        if (webu->cfg->params[indx]->params_pcat == PARM_PCAT_STREAM) {
+            params = webu->cfg->params[indx];
+        }
+    }
+    if (params == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO,_("Coding error: Null stream_params"));
+        abort();
+    }
+
+    for (indx=0;indx<params->params_array.size();indx++) {
+        itm = &params->params_array[indx];
+        if (itm->param_name == "quality") {
+            stream_quality = mtoi(itm->param_value);
+        }
+        if (itm->param_name == "grey") {
+            stream_grey = mtob(itm->param_value);
+        }
+        if (itm->param_name == "motion") {
+            stream_motion = mtob(itm->param_value);
+        }
+        if (itm->param_name == "maxrate") {
+            stream_maxrate = mtoi(itm->param_value);
+        }
+    }
+    if ((stream_quality<1) ||(stream_quality>100)){
+        stream_quality = 60;
+    }
+    if ((stream_maxrate<1)||(stream_maxrate>100)){
+        stream_maxrate=5;
+    }
+}
+
 /* Entry point for answering stream*/
 void cls_webu_stream::main()
 {
@@ -645,7 +685,7 @@ void cls_webu_stream::main()
     }
 
     set_cnct_type();
-
+    set_params();
     if (webua->uri_cmd1 == "static") {
         if (webua->device_id > 0) {
             jpg_cnct();
@@ -698,6 +738,8 @@ cls_webu_stream::cls_webu_stream(cls_webu_ans *p_webua)
 
     stream_pos = 0;
     stream_fps = 1;
+
+    set_params();
 
 }
 

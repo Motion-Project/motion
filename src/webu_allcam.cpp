@@ -201,16 +201,16 @@ void cls_allcam::getimg(ctx_stream_data *strm_a, std::string imgtyp)
         }
         myfree(all_img);
 
-        if (app->cfg->stream_grey == true) {
+        if (stream_grey == true) {
             strm_a->jpg_sz = jpgutl_put_grey(
                 strm_a->jpg_data, info.dst_sz, strm_a->img_data
                 , info.dst_w, info.dst_h
-                , app->cfg->stream_quality, NULL,NULL,NULL);
+                , stream_quality, NULL,NULL,NULL);
         } else {
             strm_a->jpg_sz = jpgutl_put_yuv420p(
                 strm_a->jpg_data, info.dst_sz, strm_a->img_data
                 , info.dst_w, info.dst_h
-                , app->cfg->stream_quality, NULL,NULL,NULL);
+                , stream_quality, NULL,NULL,NULL);
         }
         strm_a->consumed = false;
     pthread_mutex_unlock(&stream.mutex);
@@ -514,18 +514,16 @@ void cls_allcam::getsizes_pct()
 void cls_allcam::init_params()
 {
     int indx, indx1, indx2;
-    std::string portcam, portapp;
+    std::string portcam;
     ctx_params  *params;
     ctx_params_item *itm;
     cls_camera *p_cam;
 
-    portcam = std::to_string(webu->cfg->webcontrol_port);
-    portapp = std::to_string(webu->app->cfg->webcontrol_port);
+    portcam = std::to_string(webu->portnbr);
 
     memset(&info, 0, sizeof(ctx_allcam_info));
 
     params = nullptr;
-
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx].cam;
         for (indx2=0;indx2<p_cam->cfg->params.size(); indx2++) {
@@ -558,35 +556,17 @@ void cls_allcam::init_params()
                 active_cam[indx].col = mtoi(itm->param_value);
             }
             if (itm->param_name == "offset_col") {
-                active_cam[indx].offset_user_col =
-                    mtoi(itm->param_value);
+                active_cam[indx].offset_user_col = mtoi(itm->param_value);
             }
             if (itm->param_name == "offset_row") {
-                active_cam[indx].offset_user_row =
-                    mtoi(itm->param_value);
+                active_cam[indx].offset_user_row = mtoi(itm->param_value);
             }
             if (itm->param_name == "scale") {
                 active_cam[indx].scale = mtoi(itm->param_value);
             }
         }
-
-        if (portcam != portapp) {
-            util_parms_add_default(params,
-                {"row"+portcam,"-1",PARM_SRC_SYS, PARM_TYP_INT
-                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
-            util_parms_add_default(params,
-                {"col"+portcam,"-1",PARM_SRC_SYS, PARM_TYP_INT
-                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
-            util_parms_add_default(params,
-                {"offset_user_col"+portcam,"0",PARM_SRC_SYS, PARM_TYP_INT
-                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
-            util_parms_add_default(params,
-                {"offset_user_row"+portcam,"0",PARM_SRC_SYS, PARM_TYP_INT
-                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
-            util_parms_add_default(params,
-                {"scale"+portcam,"100",PARM_SRC_SYS, PARM_TYP_INT
-                , PARM_LVL_01, PARM_CHG_CODE,{""},""});
-        }
+        /* Needs to be separate loop so these will overwrite any
+          options specified without a port number*/
         for (indx1=0;indx1<params->params_cnt;indx1++) {
             itm = &params->params_array[indx1];
             if (itm->param_name == "row"+portcam) {
@@ -596,18 +576,71 @@ void cls_allcam::init_params()
                 active_cam[indx].col = mtoi(itm->param_value);
             }
             if (itm->param_name == "offset_col"+portcam) {
-                active_cam[indx].offset_user_col =
-                    mtoi(itm->param_value);
+                active_cam[indx].offset_user_col = mtoi(itm->param_value);
             }
             if (itm->param_name == "offset_row"+portcam) {
-                active_cam[indx].offset_user_row =
-                    mtoi(itm->param_value);
+                active_cam[indx].offset_user_row = mtoi(itm->param_value);
             }
             if (itm->param_name == "scale"+portcam) {
-                active_cam[indx].scale =
-                    mtoi(itm->param_value);
+                active_cam[indx].scale = mtoi(itm->param_value);
             }
         }
+    }
+
+    params = nullptr;
+    for (indx=0;indx<app->cfg->params.size();indx++) {
+        if (app->cfg->params[indx]->params_pcat == PARM_PCAT_STREAM) {
+            params = app->cfg->params[indx];
+        }
+    }
+    util_parms_add_default(params,
+        {"quality","60",PARM_SRC_SYS, PARM_TYP_INT
+        , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(params,
+        {"grey","false",PARM_SRC_SYS, PARM_TYP_BOOL
+        , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(params,
+        {"motion","false",PARM_SRC_SYS, PARM_TYP_BOOL
+        , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+    util_parms_add_default(params,
+        {"maxrate","5",PARM_SRC_SYS, PARM_TYP_INT
+        , PARM_LVL_01, PARM_CHG_CODE,{""},""});
+
+    for (indx=0;indx<params->params_array.size();indx++) {
+        itm= &params->params_array[indx];
+        if (itm->param_name == "quality"){
+            stream_quality = mtoi(itm->param_value);
+        }
+        if (itm->param_name == "grey"){
+            stream_grey = mtob(itm->param_value);
+        }
+        if (itm->param_name == "motion"){
+            stream_motion = mtoi(itm->param_value);
+        }
+        if (itm->param_name == "maxrate"){
+            stream_maxrate = mtoi(itm->param_value);
+        }
+    }
+    for (indx=0;indx<params->params_array.size();indx++) {
+        itm= &params->params_array[indx];
+        if (itm->param_name == "quality"+portcam){
+            stream_quality = mtoi(itm->param_value);
+        }
+        if (itm->param_name == "grey"+portcam){
+            stream_grey = mtob(itm->param_value);
+        }
+        if (itm->param_name == "motion"+portcam){
+            stream_motion = mtoi(itm->param_value);
+        }
+        if (itm->param_name == "maxrate"+portcam){
+            stream_maxrate = mtoi(itm->param_value);
+        }
+    }
+    if ((stream_quality < 1) || (stream_quality >100)){
+        stream_quality = 60;
+    }
+    if ((stream_maxrate < 1) || (stream_maxrate >100)){
+        stream_maxrate = 5;
     }
 }
 
@@ -813,7 +846,7 @@ void cls_allcam::timing()
 
     clock_gettime(CLOCK_MONOTONIC, &ts2);
 
-    sleeptm = ((1000000L / app->cfg->stream_maxrate) -
+    sleeptm = ((1000000L / stream_maxrate) -
           (1000000L * (ts2.tv_sec - curr_ts.tv_sec)) -
           ((ts2.tv_nsec - curr_ts.tv_nsec)/1000))*1000;
 
@@ -1001,6 +1034,10 @@ cls_allcam::cls_allcam(cls_webu *p_webu, int p_indx)
     active_cnt    = 0;
     active_cam.clear();
     webuindx = p_indx;
+    stream_quality = 60;
+    stream_grey = false;
+    stream_motion = false;
+    stream_maxrate = 5;
 
     handler_startup();
 }

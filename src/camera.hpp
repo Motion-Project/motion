@@ -182,6 +182,10 @@ class cls_camera {
         bool    pause;
         std::string user_pause;
         int     missing_frame_counter;
+        int     stream_quality;
+        bool    stream_grey;
+        bool    stream_motion;
+        int     stream_maxrate;
 
         uint64_t    info_diff_tot;
         uint64_t    info_diff_cnt;
@@ -248,6 +252,7 @@ class cls_camera {
         void init_cleandir_runtime();
         void init_cleandir_default();
         void init_cleandir();
+        void init_stream();
         void cleanup();
         void init();
         void areadetect();

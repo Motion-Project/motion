@@ -188,10 +188,7 @@
             /* Live stream configuration parameters */
             std::string     stream_allcam_params;
             std::string     stream_mpegts_params;
-            int             stream_quality;
-            bool            stream_grey;
-            bool            stream_motion;
-            int             stream_maxrate;
+            std::string     stream_params;
 
             /* Database and SQL configuration parameters */
             std::string     database_type;
@@ -275,6 +272,7 @@
             void params_load_movie();
             void params_load_timelapse();
             void params_load_mpegts();
+            void params_load_stream();
 
             void config_dir_item(std::string confdir);
 
@@ -292,6 +290,7 @@
             void edit_depr_web(std::string newname, std::string &parm_val);
             void edit_depr_movie(std::string parm_nm, std::string parm_val);
             void edit_depr_timelapse(std::string parm_nm, std::string parm_val);
+            void edit_depr_stream(std::string parm_nm, std::string parm_val);
             void edit_config_dir(std::string &parm, enum PARM_ACT pact);
             void edit_get_bool(std::string &parm_dest, bool &parm_in);
             void edit_set_bool(bool &parm_dest, std::string &parm_in);
@@ -450,12 +449,9 @@
             void edit_webcontrol_port(std::string &parm, enum PARM_ACT pact);
             void edit_webcontrol_tls(std::string &parm, enum PARM_ACT pact);
 
-            void edit_stream_grey(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_maxrate(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_motion(std::string &parm, enum PARM_ACT pact);
             void edit_stream_allcam_params(std::string &parm, enum PARM_ACT pact);
             void edit_stream_mpegts_params(std::string &parm, enum PARM_ACT pact);
-            void edit_stream_quality(std::string &parm, enum PARM_ACT pact);
+            void edit_stream_params(std::string &parm, enum PARM_ACT pact);
 
             void edit_database_busy_timeout(std::string &parm, enum PARM_ACT pact);
             void edit_database_dbname(std::string &parm, enum PARM_ACT pact);

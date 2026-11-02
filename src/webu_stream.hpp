@@ -45,6 +45,11 @@
             cls_webu_mpegts *webu_mpegts;
 
             size_t          stream_pos;
+            ctx_params      *params;
+            int     stream_quality;
+            bool    stream_grey;
+            bool    stream_motion;
+            int     stream_maxrate;
 
             void mjpeg_all_img();
             void mjpeg_one_img();
@@ -57,6 +62,7 @@
             void jpg_cnct();
             void ts_cnct();
             void set_cnct_type();
+            void set_params();
     };
 
 #endif /* _INCLUDE_WEBU_STREAM_HPP_ */

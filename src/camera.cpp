@@ -304,8 +304,7 @@ void cls_camera::detected()
     detected_trigger();
 
     if (current_image->shot <= cfg->framerate) {
-        if ((cfg->stream_motion == true) &&
-            (current_image->shot != 1)) {
+        if ((stream_motion == true) && (current_image->shot != 1)) {
             webu_getimg_main(this);
         }
         picture->process_motion();
@@ -670,6 +669,44 @@ void cls_camera::init_values()
 
 }
 
+void cls_camera::init_stream()
+{
+    int indx,idx2;
+    ctx_params *prm;
+    ctx_params_item *itm;
+
+    stream_grey = false;
+    stream_motion = false;
+    stream_quality = 60;
+    stream_maxrate = 1;
+    for (indx=0;indx<cfg->params.size();indx++){
+        prm = cfg->params[indx];
+        if (prm->params_pcat == PARM_PCAT_STREAM) {
+            for (idx2=0;idx2<prm->params_array.size();idx2++) {
+                itm = &prm->params_array[idx2];
+                if (itm->param_name == "quality") {
+                    stream_quality = mtoi(itm->param_value);
+                    if ((stream_quality < 1) || (stream_quality>100)) {
+                        stream_quality = 60;
+                    }
+                }
+                if (itm->param_name == "grey") {
+                    stream_grey = mtob(itm->param_value);
+                }
+                if (itm->param_name == "motion") {
+                    stream_motion = mtob(itm->param_value);
+                }
+                if (itm->param_name == "maxrate") {
+                    stream_maxrate = mtoi(itm->param_value);
+                    if ((stream_maxrate < 1) || (stream_maxrate>100)) {
+                        stream_maxrate = 5;
+                    }
+                }
+            }
+        }
+    }
+
+}
 /* start the camera */
 void cls_camera::init_cam_start()
 {
@@ -1230,6 +1267,8 @@ void cls_camera::init()
     ring_resize();
 
     init_buffers();
+
+    init_stream();
 
     webu_getimg_init(this);
 
@@ -1859,7 +1898,7 @@ void cls_camera::loopback()
 
     vlp_putpipe(this);
 
-    if (!cfg->stream_motion || shots_mt == 0) {
+    if ((stream_motion == false) || shots_mt == 0) {
         webu_getimg_main(this);
     }
 
@@ -1988,6 +2027,11 @@ void cls_camera::check_config_params()
             } else {
                 check_config_params_copy(prm);
             }
+        } else if ((prm->params_changed == true) &&
+            (prm->params_pcat == PARM_PCAT_STREAM)){
+            check_config_params_copy(prm);
+            init_stream();
+
         } else if (prm->params_changed == true) {
             MOTION_LOG(DBG, NO_ERRNO,_("Uncoded parameter change: %s")
                 ,prm->params_desc.c_str());
@@ -2112,10 +2156,10 @@ void cls_camera::check_config_main()
                 } else if (parm_nm == "stream_mpegts_params") {
                     check_config_main_params(PARM_PCAT_MPEGTS, parm_vl_src);
                     cfg->edit_set(parm_nm, parm_vl_src);
-                } else if (parm_nm == "stream_mpegts_params") {
-                    check_config_main_params(PARM_PCAT_MPEGTS, parm_vl_src);
+                } else if (parm_nm == "stream_params") {
+                    check_config_main_params(PARM_PCAT_STREAM, parm_vl_src);
                     cfg->edit_set(parm_nm, parm_vl_src);
-
+                    init_stream();
                 } else {
                     MOTION_LOG(ERR, NO_ERRNO
                         , _("Programming error for changes to parameter %s")

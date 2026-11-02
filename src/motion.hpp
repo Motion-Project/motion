@@ -151,23 +151,24 @@ enum PARM_CAT{
     ,PARM_CAT_18    /* sound */
     ,PARM_CAT_MAX
 };
-enum PARM_PCAT {  /* The params categories*/
-    PARM_PCAT_MIN  /* Minimum params category*/
-    ,PARM_PCAT_SCH  /* schedule_params */
-    ,PARM_PCAT_CLN  /* cleandir_params */
-    ,PARM_PCAT_V4L2 /* v4l2_params */
-    ,PARM_PCAT_NET  /* netcam_params */
-    ,PARM_PCAT_NETH /* netcam_high_params */
-    ,PARM_PCAT_LIB  /* libcam_params */
-    ,PARM_PCAT_SEC  /* secondary_params */
-    ,PARM_PCAT_ACAM /* stream_allcam_params */
-    ,PARM_PCAT_ACTS /* webcontrol_actions */
-    ,PARM_PCAT_HDR  /* webcontrol_headers */
-    ,PARM_PCAT_SND  /* snd_params */
-    ,PARM_PCAT_MOVIE /* movie_params */
+enum PARM_PCAT {        /* The params categories*/
+    PARM_PCAT_MIN       /* Minimum params category*/
+    ,PARM_PCAT_SCH      /* schedule_params */
+    ,PARM_PCAT_CLN      /* cleandir_params */
+    ,PARM_PCAT_V4L2     /* v4l2_params */
+    ,PARM_PCAT_NET      /* netcam_params */
+    ,PARM_PCAT_NETH     /* netcam_high_params */
+    ,PARM_PCAT_LIB      /* libcam_params */
+    ,PARM_PCAT_SEC      /* secondary_params */
+    ,PARM_PCAT_ACAM     /* stream_allcam_params */
+    ,PARM_PCAT_ACTS     /* webcontrol_actions */
+    ,PARM_PCAT_HDR      /* webcontrol_headers */
+    ,PARM_PCAT_SND      /* snd_params */
+    ,PARM_PCAT_MOVIE    /* movie_params */
     ,PARM_PCAT_TLSP     /* timelapse_params */
     ,PARM_PCAT_MPEGTS   /* stream_mpegts_params */
-    ,PARM_PCAT_MAX  /* Maximum params category*/
+    ,PARM_PCAT_STREAM   /* stream_mpegts_params */
+    ,PARM_PCAT_MAX      /* Maximum params category*/
 };
 enum PARM_TYP{
     PARM_TYP_STRING
