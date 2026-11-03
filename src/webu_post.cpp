@@ -64,6 +64,11 @@ void cls_webu_post::cam_add()
         }
     }
 
+    if (webu->portnbr != app->cfg->webcontrol_port) {
+        MOTION_LOG(INF, NO_ERRNO,_("Config actions not permitted on camera port"));
+        return;
+    }
+
     MOTION_LOG(INF, NO_ERRNO,_("Adding camera."));
 
     maxcnt = 100;
@@ -99,6 +104,11 @@ void cls_webu_post::cam_delete()
                 break;
             }
         }
+    }
+
+    if (webu->portnbr != app->cfg->webcontrol_port) {
+        MOTION_LOG(INF, NO_ERRNO,_("Config actions not permitted on camera port"));
+        return;
     }
 
     MOTION_LOG(INF, NO_ERRNO,_("Deleting camera."));
@@ -498,10 +508,15 @@ void cls_webu_post::write_config()
             }
         }
     }
-    if ((webua->device_id == 0) &&
-        (webu->portnbr == app->cfg->webcontrol_port)) {
+
+    if (webu->portnbr != app->cfg->webcontrol_port) {
+        MOTION_LOG(INF, NO_ERRNO,_("Config actions not permitted on camera port"));
+        return;
+    }
+
+    if (webua->device_id == 0) {
         app->conf_src->config_write(webua->camindx);
-    } else if (webu->portnbr == app->cam_list[webua->camindx]->cfg->webcontrol_port) {
+    } else {
         app->cam_list[webua->camindx]->conf_src->config_write(webua->camindx);
     }
 
@@ -885,12 +900,17 @@ void cls_webu_post::config()
     for (indx=0;indx<webu->wb_actions->params_cnt;indx++) {
         if (webu->wb_actions->params_array[indx].param_name == "config") {
             if (webu->wb_actions->params_array[indx].param_value == "off") {
-                MOTION_LOG(INF, NO_ERRNO,_("Config save action disabled"));
+                MOTION_LOG(INF, NO_ERRNO,_("Config action disabled"));
                 return;
             } else {
                 break;
             }
         }
+    }
+
+    if (webu->portnbr != app->cfg->webcontrol_port) {
+        MOTION_LOG(INF, NO_ERRNO,_("Config actions not permitted on camera port"));
+        return;
     }
 
     config_ra_reset();
