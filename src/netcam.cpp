@@ -430,7 +430,7 @@ void cls_netcam::pktarray_resize()
         idnbr_first = cam->imgs.image_ring[cam->imgs.ring_in].idnbr_norm;
     }
 
-    if (!passthrough) {
+    if (passthrough == false) {
         return;
     }
 
@@ -1763,35 +1763,25 @@ void cls_netcam::set_parms ()
     cfg_height = cam->cfg->height;
     cfg_framerate = cam->cfg->framerate;
 
-    cam->imgs.width = cfg_width;
-    cam->imgs.height = cfg_height;
-    cam->imgs.size_norm = (cfg_width * cfg_height * 3) / 2;
-    cam->imgs.motionsize = cfg_width * cfg_height;
-
-    cam->imgs.width_high  = 0;
-    cam->imgs.height_high = 0;
-    cam->imgs.size_high   = 0;
-    prm_s = nullptr;
-    params = nullptr;
-
     if (high_resolution) {
+        cam->imgs.width_high  = 0;
+        cam->imgs.height_high = 0;
+        cam->imgs.size_high   = 0;
         imgsize.width = 0;
         imgsize.height = 0;
         cameratype = _("High");
         params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_NETH]];
         prm_s = cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_NETH]];
     } else {
+        cam->imgs.width = cfg_width;
+        cam->imgs.height = cfg_height;
+        cam->imgs.size_norm = (cfg_width * cfg_height * 3) / 2;
+        cam->imgs.motionsize = cfg_width * cfg_height;
         imgsize.width = cfg_width;
         imgsize.height = cfg_height;
         cameratype = _("Norm");
         params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_NET]];
         prm_s = cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_NET]];
-    }
-    if (prm_s == nullptr) {
-    MOTION_LOG(INF, NO_ERRNO
-        , _("%s:%s null prm_s pointer")
-        , cameratype.c_str(), camera_name.c_str());
-
     }
     camera_name = cam->cfg->device_name;
 
@@ -2028,6 +2018,8 @@ int cls_netcam::open_context()
     if (high_resolution) {
         imgsize.width = codec_context->width;
         imgsize.height = codec_context->height;
+        cam->imgs.width_high = imgsize.width;
+        cam->imgs.height_high = imgsize.height;
     } else if (scale == false) {
         wd = codec_context->width;
         ht = codec_context->height;
@@ -2079,6 +2071,9 @@ int cls_netcam::open_context()
             }
             passthrough = false;
         }
+    }
+    if (high_resolution && (passthrough == false)) {
+        cam->imgs.size_high = ((imgsize.width * imgsize.height * 3) / 2);
     }
 
     clock_gettime(CLOCK_MONOTONIC, &ist_tm);
@@ -2462,10 +2457,6 @@ void cls_netcam::netcam_start()
     status = NETCAM_RECONNECTING;      /* Set as reconnecting to avoid excess messages when starting */
     first_image = false;             /* Set flag that we are not processing our first image */
 
-    if (high_resolution) {
-        cam->imgs.width_high = imgsize.width;
-        cam->imgs.height_high = imgsize.height;
-    }
     cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
     handler_startup();
 
