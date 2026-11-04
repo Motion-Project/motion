@@ -475,9 +475,9 @@ void cls_webu::startup() {
 
     allcam = new cls_allcam(this, webuindx);
     wb_headers = nullptr;
-    for (indx=0;indx<app->cfg->params.size();indx++) {
-        if (app->cfg->params[indx]->params_pcat == PARM_PCAT_HDR) {
-            wb_headers =app->cfg->params[indx];
+    for (indx=0;indx<cfg->params.size();indx++) {
+        if (cfg->params[indx]->params_pcat == PARM_PCAT_HDR) {
+            wb_headers = cfg->params[indx];
         }
     }
 

@@ -35,7 +35,7 @@ void cls_webu_text::status_vars(int indx_cam)
     struct timespec curr_ts;
     cls_camera *cam;
 
-    cam = app->cam_list[indx_cam];
+    cam = webu->cam_list[indx_cam];
 
     webua->resp_page += "{";
 
@@ -88,7 +88,7 @@ void cls_webu_text::status()
 
     if (webua->device_id == 0) {
         st = 0;
-        en = app->cam_cnt;
+        en = webu->cam_cnt;
     } else {
         st = webua->camindx;
         en = webua->camindx+1;
@@ -98,12 +98,12 @@ void cls_webu_text::status()
     webua->resp_page="";
     for (indx_cam=st; indx_cam<en; indx_cam++) {
         webua->resp_page += "Camera ";
-        webua->resp_page += std::to_string(app->cam_list[indx_cam]->cfg->device_id);
+        webua->resp_page += std::to_string(webu->cam_list[indx_cam]->cfg->device_id);
         webua->resp_page += " Detection status ";
-        if (app->cam_list[indx_cam]->handler_running == false) {
+        if (webu->cam_list[indx_cam]->handler_running == false) {
             webua->resp_page += "NOT RUNNING";
         } else {
-            if (app->cam_list[indx_cam]->pause) {
+            if (webu->cam_list[indx_cam]->pause) {
                 webua->resp_page += "PAUSE";
             } else {
                 webua->resp_page += "ACTIVE";
@@ -120,7 +120,7 @@ void cls_webu_text::connection()
 
     if (webua->device_id == 0) {
         st = 0;
-        en = app->cam_cnt;
+        en = webu->cam_cnt;
     } else {
         st = webua->camindx;
         en = webua->camindx+1;
@@ -129,16 +129,16 @@ void cls_webu_text::connection()
     webua->resp_page = "";
     for (indx_cam=st; indx_cam<en; indx_cam++) {
         webua->resp_page += "Camera ";
-        webua->resp_page += std::to_string(app->cam_list[indx_cam]->cfg->device_id);
-        if (app->cam_list[indx_cam]->cfg->device_name != "") {
+        webua->resp_page += std::to_string(webu->cam_list[indx_cam]->cfg->device_id);
+        if (webu->cam_list[indx_cam]->cfg->device_name != "") {
             webua->resp_page += " -- ";
-            webua->resp_page += app->cam_list[indx_cam]->cfg->device_name;
+            webua->resp_page += webu->cam_list[indx_cam]->cfg->device_name;
             webua->resp_page += " -- ";
         }
-        if (app->cam_list[indx_cam]->handler_running == false) {
+        if (webu->cam_list[indx_cam]->handler_running == false) {
             webua->resp_page += "NOT RUNNING";
         } else {
-            if (app->cam_list[indx_cam]->lost_connection) {
+            if (webu->cam_list[indx_cam]->lost_connection) {
                 webua->resp_page += "Lost connection";
             } else {
                 webua->resp_page += "Connection OK";

@@ -773,7 +773,7 @@ void cls_allcam::init_active()
     for (indx=0;indx<webu->cam_cnt;indx++) {
         p_cam = webu->cam_list[indx];
         if (p_cam->device_status == STATUS_OPENED) {
-            p_info.cam = app->cam_list[indx];
+            p_info.cam = webu->cam_list[indx];
             active_cam.push_back(p_info);
             active_cnt++;
         }
@@ -979,23 +979,23 @@ void cls_allcam::handler_shutdown()
     if (handler_running == true) {
         handler_stop = true;
         waitcnt = 0;
-        while ((handler_running == true) && (waitcnt < app->cfg->watchdog_tmo)){
+        while ((handler_running == true) && (waitcnt < webu->cfg->watchdog_tmo)){
             SLEEP(1,0)
             waitcnt++;
         }
-        if (waitcnt == app->cfg->watchdog_tmo) {
+        if (waitcnt == webu->cfg->watchdog_tmo) {
             MOTION_LOG(ERR, NO_ERRNO
                 , _("Normal shutdown of all camera failed"));
-            if (app->cfg->watchdog_kill > 0) {
+            if (webu->cfg->watchdog_kill > 0) {
                 MOTION_LOG(ERR, NO_ERRNO
                     ,_("Waiting additional %d seconds (watchdog_kill).")
-                    ,app->cfg->watchdog_kill);
+                    ,webu->cfg->watchdog_kill);
                 waitcnt = 0;
-                while ((handler_running == true) && (waitcnt < app->cfg->watchdog_kill)){
+                while ((handler_running == true) && (waitcnt < webu->cfg->watchdog_kill)){
                     SLEEP(1,0)
                     waitcnt++;
                 }
-                if (waitcnt == app->cfg->watchdog_kill) {
+                if (waitcnt == webu->cfg->watchdog_kill) {
                     MOTION_LOG(ERR, NO_ERRNO
                         , _("No response to shutdown.  Killing it."));
                     MOTION_LOG(ERR, NO_ERRNO
@@ -1009,7 +1009,7 @@ void cls_allcam::handler_shutdown()
             }
         }
         handler_running = false;
-        watchdog = app->cfg->watchdog_tmo;
+        watchdog = webu->cfg->watchdog_tmo;
     }
 }
 
@@ -1018,7 +1018,7 @@ cls_allcam::cls_allcam(cls_webu *p_webu, int p_indx)
     webu = p_webu;
     app = p_webu->app;
 
-    watchdog = app->cfg->watchdog_tmo;
+    watchdog = webu->cfg->watchdog_tmo;
     handler_running = false;
     handler_stop = true;
     finish = false;

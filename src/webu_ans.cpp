@@ -222,10 +222,10 @@ void cls_webu_ans::parms_edit()
         }
     }
 
-    for (indx=0; indx<app->cam_cnt; indx++) {
-        if (app->cam_list[indx]->cfg->device_id == device_id) {
+    for (indx=0; indx<webu->cam_cnt; indx++) {
+        if (webu->cam_list[indx]->cfg->device_id == device_id) {
             camindx = indx;
-            cam = app->cam_list[indx];
+            cam = webu->cam_list[indx];
         }
     }
 
@@ -855,10 +855,9 @@ bool cls_webu_ans::camport_check()
         in the motion.conf file as the main application*/
         return true;
     } else {
-        for (indx=0; indx<app->cam_cnt; indx++) {
-            if (app->cam_list[indx]->cfg->device_id == device_id) {
-                if (app->cam_list[indx]->cfg->webcontrol_port ==
-                    webu->cfg->webcontrol_port) {
+        for (indx=0; indx<webu->cam_cnt; indx++) {
+            if (webu->cam_list[indx]->cfg->device_id == device_id) {
+                if (webu->cam_list[indx]->cfg->webcontrol_port == webu->portnbr) {
                     return true;
                 }
             }
@@ -967,7 +966,7 @@ void cls_webu_ans::deinit_counter()
 
     if (device_id == 0) {
         cam_min = 0;
-        cam_max = app->cam_cnt;
+        cam_max = webu->cam_cnt;
     } else if ((device_id > 0) && (camindx >= 0)) {
         cam_min = camindx;
         cam_max = cam_min +1;
@@ -977,7 +976,7 @@ void cls_webu_ans::deinit_counter()
     }
 
     for (indx=cam_min; indx<cam_max; indx++) {
-        p_cam = app->cam_list[indx];
+        p_cam = webu->cam_list[indx];
         pthread_mutex_lock(&p_cam->stream.mutex);
             if ((cnct_type == WEBUI_CNCT_JPG_FULL) ||
                 (cnct_type == WEBUI_CNCT_TS_FULL)) {

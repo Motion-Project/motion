@@ -410,8 +410,8 @@ void cls_webu_json::categories_list()
         }
         webua->resp_page += "\"" + std::to_string(indx_cat) + "\": ";
 
-        catnm_short = webua->app->cfg->cat_desc((enum PARM_CAT)indx_cat, true);
-        catnm_long = escstr(_(webua->app->cfg->cat_desc((enum PARM_CAT)indx_cat, false)));
+        catnm_short = webu->cfg->cat_desc((enum PARM_CAT)indx_cat, true);
+        catnm_long = escstr(_(webu->cfg->cat_desc((enum PARM_CAT)indx_cat, false)));
 
         webua->resp_page += "{\"name\":\"" + catnm_short + "\",\"display\":\"" + catnm_long + "\"}";
         indx_cat++;

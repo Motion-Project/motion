@@ -286,26 +286,36 @@
         a different <code>webcontrol_port</code> can be specified in the
         <code>camera.conf</code> files.  If the same port is specified in
         multiple <code>camera.conf</code> files then all of the cameras
-        with the same port will be available on that port.  Additionally,
-        the other webcontrol and stream parameters can also be specified and
-        applied so that different limits on changes to parameters or actions
-        would apply.
+        with the same port will be available on that port.
         <p></p>
         The following example illustrates having all the cameras available
         and being able to be controlled on port 8080 but on port 8081
-        the user would only be able to view the parameters and perform
-        actions since the webcontrol_access was set to zero.  </li>
+        the user would only be able to perform limited actions and see
+        camera1 and camera2.  Note that users may want to consider
+        only exposing the camera specific port (8081 in this example) externally
+        to the web since no configuration changes can be made from connections
+        to this port</li>
         <code>motion.conf</code>
           <ul>
           <li><code>webcontrol_port 8080</code></li>
-          <li><code>webcontrol_access 3</code></li>
           </ul>
         <code>camera1.conf</code>
           <ul>
           <li><code>webcontrol_port 8081</code></li>
-          <li><code>webcontrol_access 0</code></li>
           </ul>
-        <p></p>
+        <code>camera2.conf</code>
+          <ul>
+          <li><code>webcontrol_port 8081</code></li>
+          </ul>
+        <code>camera3.conf</code>
+          <ul>
+          <li><code>not specified</code></li>
+          </ul>
+        <code>camera4.conf</code>
+          <ul>
+          <li><code>not specified</code></li>
+          </ul>
+          <p></p>
         The following illustrates the availble streams
         and feeds provided by Motion.
         <p></p>
