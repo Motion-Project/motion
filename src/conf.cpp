@@ -2866,6 +2866,10 @@ void cls_config::params_load_netcam()
         {"interrupt","3",PARM_SRC_SYS
         , PARM_TYP_INT, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
+    prm->params_array.push_back(
+        {"scale","true",PARM_SRC_SYS
+        , PARM_TYP_BOOL, PARM_LVL_01, PARM_CHG_CODE
+        ,{""},""});
 
     prm->params_cnt = (int)prm->params_array.size();
 

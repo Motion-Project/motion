@@ -1680,6 +1680,7 @@ void cls_netcam::set_options()
             (itm->param_name != "capture_rate") &&
             (itm->param_name != "interrupt") &&
             (itm->param_name != "input_format") &&
+            (itm->param_name != "scale") &&
             (itm->param_name != "params_file")) {
             av_dict_set(&opts
                 , itm->param_name.c_str(), itm->param_value.c_str(), 0);
@@ -1853,6 +1854,7 @@ void cls_netcam::set_parms ()
     filelist.clear();
     filedir = "";
     cfg_idur = 3;
+    scale = true;
 
     for (indx=0;indx<params->params_cnt;indx++) {
         if (params->params_array[indx].param_name == "decoder") {
@@ -1872,6 +1874,10 @@ void cls_netcam::set_parms ()
         if (params->params_array[indx].param_name == "interrupt") {
             cfg_idur = mtoi(params->params_array[indx].param_value);
         }
+        if (params->params_array[indx].param_name == "scale") {
+            scale = mtob(params->params_array[indx].param_value);
+        }
+
     }
     if (cfg_idur < 1) {
         MOTION_LOG(ERR, NO_ERRNO, _("Invalid interrupt %d"),cfg_idur);
@@ -1934,7 +1940,7 @@ int cls_netcam::copy_stream()
 
 int cls_netcam::open_context()
 {
-    int  retcd;
+    int  retcd, wd, ht;
     char errstr[128];
 
     if (handler_stop) {
@@ -2044,6 +2050,33 @@ int cls_netcam::open_context()
     if (high_resolution) {
         imgsize.width = codec_context->width;
         imgsize.height = codec_context->height;
+    } else if (scale == false) {
+        wd = codec_context->width;
+        ht = codec_context->height;
+        if (wd % 8) {
+            wd = (wd - (wd % 8) + 8);
+        }
+        if (ht % 8) {
+            ht = (ht - (ht % 8) + 8);
+        }
+        if ((wd != codec_context->width) ||
+            (ht != codec_context->height)){
+            MOTION_LOG(INF, NO_ERRNO
+                ,_("%s: Camera image %dx%d not modulo 8.  Scaling required %dx%d")
+                , cameratype.c_str()
+                , codec_context->width, codec_context->height
+                , wd, ht);
+        }
+        if ((wd != cfg_width) || (ht != cfg_height)){
+            cfg_width = wd;
+            cfg_height = ht;
+            cam->imgs.width = wd;
+            cam->imgs.height = ht;
+            cam->imgs.size_norm = ((wd * ht * 3) / 2);
+            cam->imgs.motionsize = (wd * ht);
+            imgsize.width = wd;
+            imgsize.height = ht;
+        }
     }
 
     clock_gettime(CLOCK_MONOTONIC, &ist_tm);

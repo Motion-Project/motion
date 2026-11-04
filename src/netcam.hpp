@@ -164,6 +164,7 @@ class cls_netcam {
         std::vector<ctx_filelist_item>    filelist;
         std::string                 filedir;
         int                       filenbr;
+        bool    scale;
 
         void filelist_load();
         void check_buffsize(netcam_buff_ptr buff, size_t numbytes);

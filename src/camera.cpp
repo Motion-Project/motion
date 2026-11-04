@@ -555,6 +555,12 @@ void cls_camera::check_szimg()
             ,_("Substream not available.  Image sizes not modulo 16."));
     }
 
+    if ((imgs.width != cfg->width) || (imgs.height != cfg->height)) {
+        MOTION_LOG(INF, NO_ERRNO
+            ,_("Config: %dx%d Using camera: %dx%d")
+            ,cfg->width,cfg->height,imgs.width,imgs.height);
+    }
+
 }
 
 /** Set the items required for the area detect */
@@ -1249,7 +1255,6 @@ void cls_camera::init()
         restart = false;
     }
 
-    cfg->config_copy(conf_src);
     conf_chg = false;
 
     mythreadname_set("cl",cfg->device_id, cfg->device_name.c_str());
