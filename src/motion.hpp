@@ -47,6 +47,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <unordered_map>
 #include <iostream>
 #include <fstream>
 #include <regex.h>

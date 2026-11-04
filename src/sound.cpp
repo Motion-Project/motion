@@ -172,13 +172,7 @@ void cls_sound::load_params()
     int indx;
     ctx_params_item *itm;
 
-    params = nullptr;
-    for (indx=0;indx<cfg->params.size();indx++){
-        if (cfg->params[indx]->params_pcat == PARM_PCAT_SND){
-            params=cfg->params[indx];
-        }
-    }
-
+    params=cfg->params[cfg->pmap[PARM_PCAT_SND]];
     util_parms_add_default(params,
             {"source","alsa",PARM_SRC_SYS, PARM_TYP_STRING
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});

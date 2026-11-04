@@ -641,17 +641,7 @@ void cls_webu_stream::set_params()
     int     indx;
     ctx_params_item *itm;
 
-    params = nullptr;
-    for (indx=0;indx<webu->cfg->params.size();indx++) {
-        if (webu->cfg->params[indx]->params_pcat == PARM_PCAT_STREAM) {
-            params = webu->cfg->params[indx];
-        }
-    }
-    if (params == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO,_("Coding error: Null stream_params"));
-        abort();
-    }
-
+    params = webu->cfg->params[webu->cfg->pmap[PARM_PCAT_STREAM]];
     for (indx=0;indx<params->params_array.size();indx++) {
         itm = &params->params_array[indx];
         if (itm->param_name == "quality") {

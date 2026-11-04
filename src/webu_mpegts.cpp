@@ -574,7 +574,6 @@ mhdrslt cls_webu_mpegts::main()
 
 cls_webu_mpegts::cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus)
 {
-    int indx;
     app    = p_webua->app;
     webu   = p_webua->webu;
     webua  = p_webua;
@@ -585,16 +584,7 @@ cls_webu_mpegts::cls_webu_mpegts(cls_webu_ans *p_webua, cls_webu_stream *p_webus
     ctx_codec = nullptr;
     fmtctx = nullptr;
 
-    params = nullptr;
-    for (indx=0;indx<webu->cfg->params.size();indx++) {
-        if (webu->cfg->params[indx]->params_pcat == PARM_PCAT_MPEGTS) {
-            params = webu->cfg->params[indx];
-        }
-    }
-    if (params == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO,_("Coding error: Null stream_mpegts_params"));
-        abort();
-    }
+    params=webu->cfg->params[webu->cfg->pmap[PARM_PCAT_MPEGTS]];
 
 }
 

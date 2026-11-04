@@ -1642,7 +1642,6 @@ void cls_movie::init_container()
 
 void cls_movie::start_norm()
 {
-    int indx;
     char tmp[PATH_MAX];
 
     if (cam->cfg->movie_output == false) {
@@ -1693,17 +1692,7 @@ void cls_movie::start_norm()
 
     MOTION_LOG(DBG, NO_ERRNO,_("Movie fps %d"),fps);
 
-    params = nullptr;
-    for (indx=0;indx<cam->cfg->params.size();indx++) {
-        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_MOVIE) {
-            params = cam->cfg->params[indx];
-        }
-    }
-    if (params == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Error getting movie_params"));
-        return;
-    }
+    params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_MOVIE]];
 
     if (movie_open() < 0) {
         MOTION_LOG(ERR, NO_ERRNO
@@ -1724,7 +1713,6 @@ void cls_movie::start_norm()
 
 void cls_movie::start_motion()
 {
-    int indx;
     char tmp[PATH_MAX];
     ctx_image_data save_data;
 
@@ -1770,18 +1758,7 @@ void cls_movie::start_motion()
     passthrough = false;
     high_resolution = false;
 
-    params = nullptr;
-    for (indx=0;indx<cam->cfg->params.size();indx++) {
-        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_MOVIE) {
-            params = cam->cfg->params[indx];
-        }
-    }
-    if (params == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Error getting movie_params"));
-        return;
-    }
-
+    params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_MOVIE]];
     if (movie_open() < 0) {
         MOTION_LOG(ERR, NO_ERRNO
             ,_("Error initializing movie."));
@@ -1840,17 +1817,7 @@ void cls_movie::start_timelapse()
         container = "mkv";
     }
 
-    params = nullptr;
-    for (indx=0;indx<cam->cfg->params.size();indx++) {
-        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_TLSP) {
-            params = cam->cfg->params[indx];
-        }
-    }
-    if (params == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Error getting timelapse_params"));
-        return;
-    }
+    params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_TLSP]];
     fps = 30;
     for (indx=0;indx<params->params_array.size();indx++){
         if (params->params_array[indx].param_name == "fps"){
@@ -1878,25 +1845,13 @@ void cls_movie::start_timelapse()
 void cls_movie::start_extpipe()
 {
     char tmp[PATH_MAX];
-    int indx;
 
     if (cam->cfg->movie_extpipe_use == false) {
         is_running = false;
         return;
     }
 
-    params = nullptr;
-    for (indx=0;indx<cam->cfg->params.size();indx++) {
-        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_MOVIE) {
-            params = cam->cfg->params[indx];
-        }
-    }
-    if (params == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Error getting movie_params"));
-        return;
-    }
-
+    params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_MOVIE]];
     mystrftime(cam, tmp, sizeof(tmp), cam->cfg->movie_filename.c_str(), nullptr);
 
     file_nm = tmp;

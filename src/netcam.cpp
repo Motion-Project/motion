@@ -1778,31 +1778,14 @@ void cls_netcam::set_parms ()
         imgsize.width = 0;
         imgsize.height = 0;
         cameratype = _("High");
-        for (indx=0;indx<cam->cfg->params.size();indx++){
-            if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_NETH) {
-                params = cam->cfg->params[indx];
-            }
-        }
-        for (indx=0;indx<cam->conf_src->params.size();indx++){
-            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_NETH) {
-                prm_s = cam->conf_src->params[indx];
-            }
-        }
-
+        params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_NETH]];
+        prm_s = cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_NETH]];
     } else {
         imgsize.width = cfg_width;
         imgsize.height = cfg_height;
         cameratype = _("Norm");
-        for (indx=0;indx<cam->cfg->params.size();indx++){
-            if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_NET) {
-                params = cam->cfg->params[indx];
-            }
-        }
-        for (indx=0;indx<cam->conf_src->params.size();indx++){
-            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_NET) {
-                prm_s = cam->conf_src->params[indx];
-            }
-        }
+        params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_NET]];
+        prm_s = cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_NET]];
     }
     if (prm_s == nullptr) {
     MOTION_LOG(INF, NO_ERRNO

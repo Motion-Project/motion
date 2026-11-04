@@ -720,12 +720,7 @@ void cls_libcam::params_update()
 
         MOTION_LOG(INF, NO_ERRNO, _("Updating libcam config"));
 
-        prm_s = nullptr;
-        for (indx=0;indx<cam->conf_src->params.size();indx++) {
-            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_LIB) {
-                prm_s = cam->conf_src->params[indx];
-            }
-        }
+        prm_s = cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_LIB]];
         util_parms_parse(prm_s, "libcam_params", cam->conf_src->libcam_params,PARM_PCAT_LIB);
 
         for (indx=0;indx<prm_s->params_cnt;indx++) {
@@ -855,14 +850,8 @@ cls_libcam::cls_libcam(cls_camera *p_cam)
     cam = p_cam;
     #ifdef HAVE_LIBCAM
         MOTION_LOG(NTC, NO_ERRNO,_("Opening libcam"));
-        int indx;
         convert = nullptr;
-        params = nullptr;
-        for (indx=0;indx<cam->cfg->params.size();indx++) {
-            if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_LIB) {
-                params = cam->cfg->params[indx];
-            }
-        }
+        params = cam->cfg->params[cam->cfg->pmap[PARM_PCAT_LIB]];
         reconnect_count = 0;
         cam->watchdog = cam->cfg->watchdog_tmo * 3; /* 3 is arbitrary multiplier to give startup more time*/
         cam_mgr = std::make_unique<CameraManager>();

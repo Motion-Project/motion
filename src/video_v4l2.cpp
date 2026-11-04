@@ -185,12 +185,7 @@ void cls_v4l2cam::ctrls_list()
         MOTION_LOG(INF, NO_ERRNO, _("No Controls found for device"));
         return;
     }
-    prm_s = nullptr;
-    for (indx=0;indx<cam->conf_src->params.size();indx++){
-        if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_V4L2){
-            prm_s = cam->conf_src->params[indx];
-        }
-    }
+    prm_s=cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_V4L2]];
     for (indx=0;indx<device_ctrls.size();indx++){
         device_ctrls[indx].ctrl_stdnm = device_ctrls[indx].ctrl_name;
         mylower(device_ctrls[indx].ctrl_stdnm);
@@ -959,18 +954,11 @@ int cls_v4l2cam::capture()
 
 void cls_v4l2cam::init_vars()
 {
-    int indx;
-
     buffer_count= 0;
     pframe = -1;
     buffers = nullptr;
     convert = nullptr;
-
-    for (indx=0;indx<cam->cfg->params.size();indx++) {
-        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_V4L2) {
-            params = cam->cfg->params[indx];
-        }
-    }
+    params=cam->cfg->params[cam->cfg->pmap[PARM_PCAT_V4L2]];
 
     palette_init();
 }
@@ -1259,12 +1247,7 @@ void cls_v4l2cam::params_update()
         int indx, indx2;
         bool chgnew;
 
-        prm_s = nullptr;
-        for (indx=0;indx<cam->conf_src->params.size();indx++) {
-            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_V4L2) {
-                prm_s = cam->conf_src->params[indx];
-            }
-        }
+        prm_s=cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_V4L2]];
         util_parms_parse(prm_s, "v4l2_params", cam->conf_src->v4l2_params, PARM_PCAT_V4L2);
 
         for (indx=0;indx<prm_s->params_cnt;indx++) {

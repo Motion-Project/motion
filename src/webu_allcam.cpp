@@ -463,12 +463,7 @@ void cls_allcam::getsizes_pct()
         dst_scale = 10;
     }
 
-    params = nullptr;
-    for (indx=0;indx<app->cfg->params.size(); indx++) {
-        if (app->cfg->params[indx]->params_pcat == PARM_PCAT_ACAM) {
-            params = app->cfg->params[indx];
-        }
-    }
+    params=app->cfg->params[app->cfg->pmap[PARM_PCAT_ACAM]];
 
     for (indx=0;indx<params->params_cnt; indx++) {
         if ((webu->portnbr == app->cfg->webcontrol_port) &&
@@ -513,7 +508,7 @@ void cls_allcam::getsizes_pct()
 
 void cls_allcam::init_params()
 {
-    int indx, indx1, indx2;
+    int indx, indx1;
     std::string portcam;
     ctx_params  *params;
     ctx_params_item *itm;
@@ -523,14 +518,9 @@ void cls_allcam::init_params()
 
     memset(&info, 0, sizeof(ctx_allcam_info));
 
-    params = nullptr;
     for (indx=0; indx<active_cnt; indx++) {
         p_cam = active_cam[indx].cam;
-        for (indx2=0;indx2<p_cam->cfg->params.size(); indx2++) {
-            if (p_cam->cfg->params[indx2]->params_pcat == PARM_PCAT_ACAM) {
-                params = p_cam->cfg->params[indx2];
-            }
-        }
+        params=p_cam->cfg->params[p_cam->cfg->pmap[PARM_PCAT_ACAM]];
         util_parms_add_default(params,
             {"row","-1",PARM_SRC_SYS, PARM_TYP_INT
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
@@ -587,12 +577,7 @@ void cls_allcam::init_params()
         }
     }
 
-    params = nullptr;
-    for (indx=0;indx<app->cfg->params.size();indx++) {
-        if (app->cfg->params[indx]->params_pcat == PARM_PCAT_STREAM) {
-            params = app->cfg->params[indx];
-        }
-    }
+    params=app->cfg->params[app->cfg->pmap[PARM_PCAT_STREAM]];
     util_parms_add_default(params,
         {"quality","60",PARM_SRC_SYS, PARM_TYP_INT
         , PARM_LVL_01, PARM_CHG_CODE,{""},""});
@@ -879,18 +864,8 @@ void cls_allcam::params_update()
             cfg_c = active_cam[indx_cam].cam->cfg;
         }
 
-        prm_c = nullptr;
-        for (indx2=0; indx2<cfg_c->params.size(); indx2++) {
-            if (cfg_c->params[indx2]->params_pcat == PARM_PCAT_ACAM) {
-                prm_c = cfg_c->params[indx2];
-            }
-        }
-        prm_s = nullptr;
-        for (indx2=0;indx2<cfg_s->params.size();indx2++) {
-            if (cfg_s->params[indx2]->params_pcat == PARM_PCAT_ACAM) {
-                prm_s = cfg_s->params[indx2];
-            }
-        }
+        prm_c=cfg_c->params[cfg_c->pmap[PARM_PCAT_ACAM]];
+        prm_s=cfg_s->params[cfg_s->pmap[PARM_PCAT_ACAM]];
         if (cfg_s->stream_allcam_params != cfg_c->stream_allcam_params) {
             util_parms_update(prm_s, prm_hold);
             util_parms_parse(prm_s, "stream_allcam_params"

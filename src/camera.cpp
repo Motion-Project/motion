@@ -677,7 +677,7 @@ void cls_camera::init_values()
 
 void cls_camera::init_stream()
 {
-    int indx,idx2;
+    int idx2;
     ctx_params *prm;
     ctx_params_item *itm;
 
@@ -685,33 +685,28 @@ void cls_camera::init_stream()
     stream_motion = false;
     stream_quality = 60;
     stream_maxrate = 1;
-    for (indx=0;indx<cfg->params.size();indx++){
-        prm = cfg->params[indx];
-        if (prm->params_pcat == PARM_PCAT_STREAM) {
-            for (idx2=0;idx2<prm->params_array.size();idx2++) {
-                itm = &prm->params_array[idx2];
-                if (itm->param_name == "quality") {
-                    stream_quality = mtoi(itm->param_value);
-                    if ((stream_quality < 1) || (stream_quality>100)) {
-                        stream_quality = 60;
-                    }
-                }
-                if (itm->param_name == "grey") {
-                    stream_grey = mtob(itm->param_value);
-                }
-                if (itm->param_name == "motion") {
-                    stream_motion = mtob(itm->param_value);
-                }
-                if (itm->param_name == "maxrate") {
-                    stream_maxrate = mtoi(itm->param_value);
-                    if ((stream_maxrate < 1) || (stream_maxrate>100)) {
-                        stream_maxrate = 5;
-                    }
-                }
+    prm=cfg->params[cfg->pmap[PARM_PCAT_STREAM]];
+    for (idx2=0;idx2<prm->params_array.size();idx2++) {
+        itm = &prm->params_array[idx2];
+        if (itm->param_name == "quality") {
+            stream_quality = mtoi(itm->param_value);
+            if ((stream_quality < 1) || (stream_quality>100)) {
+                stream_quality = 60;
+            }
+        }
+        if (itm->param_name == "grey") {
+            stream_grey = mtob(itm->param_value);
+        }
+        if (itm->param_name == "motion") {
+            stream_motion = mtob(itm->param_value);
+        }
+        if (itm->param_name == "maxrate") {
+            stream_maxrate = mtoi(itm->param_value);
+            if ((stream_maxrate < 1) || (stream_maxrate>100)) {
+                stream_maxrate = 5;
             }
         }
     }
-
 }
 /* start the camera */
 void cls_camera::init_cam_start()
@@ -1000,19 +995,8 @@ void cls_camera::init_cleandir()
     std::string  pnm, pvl;
     bool chkvalid, chgnew;
 
-    prm_s = nullptr;
-    for (indx=0;indx<conf_src->params.size();indx++){
-        if (conf_src->params[indx]->params_pcat == PARM_PCAT_CLN){
-            prm_s = conf_src->params[indx];
-        }
-    }
-
-    prm_c = nullptr;
-    for (indx=0;indx<cfg->params.size();indx++){
-        if (cfg->params[indx]->params_pcat == PARM_PCAT_CLN){
-            prm_c = cfg->params[indx];
-        }
-    }
+    prm_s=conf_src->params[conf_src->pmap[PARM_PCAT_CLN]];
+    prm_c=cfg->params[cfg->pmap[PARM_PCAT_CLN]];
     util_parms_parse(prm_s, "cleandir_params", conf_src->cleandir_params, PARM_PCAT_CLN);
 
     chkvalid = false;
@@ -1087,19 +1071,8 @@ void cls_camera::init_schedule()
     ctx_schedule_data sched_itm;
     bool chgnew;
 
-    prm_s = nullptr;
-    for (indx=0;indx<conf_src->params.size();indx++){
-        if (conf_src->params[indx]->params_pcat == PARM_PCAT_SCH){
-            prm_s = conf_src->params[indx];
-        }
-    }
-
-    prm_c = nullptr;
-    for (indx=0;indx<cfg->params.size();indx++){
-        if (cfg->params[indx]->params_pcat == PARM_PCAT_SCH){
-            prm_c = cfg->params[indx];
-        }
-    }
+    prm_s=conf_src->params[conf_src->pmap[PARM_PCAT_SCH]];
+    prm_c=cfg->params[cfg->pmap[PARM_PCAT_SCH]];
     util_parms_parse(prm_s, "schedule_params", conf_src->schedule_params, PARM_PCAT_SCH);
 
     for (indx=0;indx<prm_s->params_cnt;indx++) {
@@ -1969,15 +1942,13 @@ void cls_camera::check_schedule()
 
 void cls_camera::check_config_params_copy(ctx_params *prm_s)
 {
-    int idx;
     std::string  ptmp;
-    for (idx=0;idx<cfg->params.size();idx++) {
-        if (cfg->params[idx]->params_pcat == prm_s->params_pcat) {
-            util_parms_update(prm_s, ptmp);
-            util_parms_parse(cfg->params[idx]
-                ,prm_s->params_desc, ptmp, prm_s->params_pcat);
-        }
-    }
+
+    util_parms_update(prm_s, ptmp);
+    util_parms_parse(
+        cfg->params[cfg->pmap[prm_s->params_pcat]]
+        ,prm_s->params_desc, ptmp, prm_s->params_pcat);
+
 }
 
 void cls_camera::check_config_params()
@@ -2048,21 +2019,16 @@ void cls_camera::check_config_params()
 
 void cls_camera::check_config_main_params(PARM_PCAT pcat, std::string pval)
 {
-    int idx, idx1;
-    cls_config *pcfg;
-
-    for (idx=0;idx<2;idx++) {
-        if (idx==0){ pcfg = conf_src;
-        } else {    pcfg = cfg;
-        }
-        for (idx1=0;idx1<pcfg->params.size();idx1++) {
-            if (pcfg->params[idx1]->params_pcat == pcat) {
-                util_parms_parse(pcfg->params[idx1]
-                    ,pcfg->params[idx1]->params_desc , pval
-                    ,pcfg->params[idx1]->params_pcat);
-            }
-        }
-    }
+    util_parms_parse(
+        conf_src->params[conf_src->pmap[pcat]]
+        ,conf_src->params[conf_src->pmap[pcat]]->params_desc
+        ,pval
+        ,conf_src->params[conf_src->pmap[pcat]]->params_pcat);
+    util_parms_parse(
+        cfg->params[cfg->pmap[pcat]]
+        ,cfg->params[cfg->pmap[pcat]]->params_desc
+        ,pval
+        ,cfg->params[cfg->pmap[pcat]]->params_pcat);
 }
 
 void cls_camera::check_config_main()

@@ -244,6 +244,7 @@
             void config_copy(cls_config *src, PARM_CAT p_cat);
             std::string params_prefix(PARM_PCAT pcat);
             std::vector<ctx_params *> params;
+            std::unordered_map<PARM_PCAT, int> pmap;
 
         private:
             cls_motapp *app;
@@ -252,6 +253,7 @@
             void defaults_depr();
             int get_next_devid();
             std::vector<ctx_params *> depr_params;
+            std::unordered_map<PARM_PCAT, int> depr_pmap;
 
             void params_load();
             void params_load_listcam();

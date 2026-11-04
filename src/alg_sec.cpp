@@ -545,8 +545,6 @@ void cls_algsec::params_defaults(ctx_params *prm)
 /**Load the parms from the config to algsec struct */
 void cls_algsec::params_load()
 {
-    int indx;
-
     method = cam->cfg->secondary_method;
     image_norm = nullptr;
     params = nullptr;
@@ -570,17 +568,10 @@ void cls_algsec::params_load()
 
     image_norm = (u_char*)mymalloc((size_t)cam->imgs.size_norm);
 
-    for (indx=0;indx<cam->cfg->params.size();indx++) {
-        if (cam->cfg->params[indx]->params_pcat == PARM_PCAT_SEC) {
-            params=cam->cfg->params[indx];
-            params_defaults(params);
-        }
-    }
-    for (indx=0;indx<cam->conf_src->params.size();indx++) {
-        if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_SEC) {
-            params_defaults(cam->conf_src->params[indx]);
-        }
-    }
+    params=cam->cfg->params[cam->cfg->pmap[PARM_PCAT_SEC]];
+    params_defaults(params);
+    params_defaults(cam->conf_src->params
+        [cam->conf_src->pmap[PARM_PCAT_SEC]]);
 
     params_log();
 
@@ -765,12 +756,7 @@ void cls_algsec::params_update()
         bool chgnew;
         ctx_params *prm_s;
 
-        prm_s = nullptr;
-        for (indx=0;indx<cam->conf_src->params.size();indx++) {
-            if (cam->conf_src->params[indx]->params_pcat == PARM_PCAT_SEC) {
-                prm_s =cam->conf_src->params[indx];
-            }
-        }
+        prm_s=cam->conf_src->params[cam->conf_src->pmap[PARM_PCAT_SEC]];
 
         /*copy from prm_s to params and shutdown/starup */
         for (indx=0;indx<prm_s->params_cnt;indx++) {

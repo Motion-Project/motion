@@ -2704,7 +2704,6 @@ void cls_config::params_load_schedule()
         {"action","",PARM_SRC_SYS
         , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"pause","stop"},""});
-
     prm->params_array.push_back(
         {"sun","",PARM_SRC_SYS
         , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
@@ -2738,6 +2737,7 @@ void cls_config::params_load_schedule()
 
     util_parms_parse(prm,"schedule_params",schedule_params,PARM_PCAT_SCH);
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_SCH,params.size()-1});
 }
 
 void cls_config::params_load_cleandir()
@@ -2790,7 +2790,7 @@ void cls_config::params_load_cleandir()
     util_parms_parse(prm,"cleandir_params",cleandir_params,PARM_PCAT_CLN);
 
     params.push_back(prm);
-
+    pmap.insert({PARM_PCAT_CLN,params.size()-1});
 }
 
 void cls_config::params_load_v4l2()
@@ -2835,7 +2835,7 @@ void cls_config::params_load_v4l2()
     util_parms_parse(prm,"v4l2_params",v4l2_params,PARM_PCAT_V4L2);
 
     params.push_back(prm);
-
+    pmap.insert({PARM_PCAT_V4L2, params.size()-1});
 }
 
 void cls_config::params_load_netcam()
@@ -2876,6 +2876,7 @@ void cls_config::params_load_netcam()
     util_parms_parse(prm,"netcam_params",netcam_params,PARM_PCAT_NET);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_NET,params.size()-1});
 
 }
 
@@ -2913,6 +2914,7 @@ void cls_config::params_load_netcam_high()
     util_parms_parse(prm,"netcam_high_params",netcam_high_params,PARM_PCAT_NETH);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_NETH,params.size()-1});
 
 }
 
@@ -3139,6 +3141,7 @@ void cls_config::params_load_libcamera()
 
     util_parms_parse(prm,"libcam_params",libcam_params,PARM_PCAT_LIB);
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_LIB,params.size()-1});
 }
 
 void cls_config::params_load_secondary()
@@ -3247,6 +3250,7 @@ void cls_config::params_load_secondary()
     util_parms_parse(prm,"secondary_params",secondary_params,PARM_PCAT_SEC);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_SEC,params.size()-1});
 
 }
 
@@ -3292,6 +3296,7 @@ void cls_config::params_load_allcam()
     util_parms_parse(prm,"stream_allcam_params",stream_allcam_params,PARM_PCAT_ACAM);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_ACAM,params.size()-1});
 
 }
 
@@ -3371,6 +3376,7 @@ void cls_config::params_load_actions()
     util_parms_parse(prm,"webcontrol_actions", webcontrol_actions, PARM_PCAT_ACTS);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_ACTS,params.size()-1});
 
 }
 
@@ -3395,6 +3401,7 @@ void cls_config::params_load_headers()
     util_parms_parse(prm,"webcontrol_headers",webcontrol_headers,PARM_PCAT_HDR);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_HDR,params.size()-1});
 
 }
 
@@ -3419,6 +3426,7 @@ void cls_config::params_load_sound()
     util_parms_parse(prm,"snd_params",snd_params,PARM_PCAT_SND);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_SND,params.size()-1});
 
 }
 
@@ -3514,6 +3522,7 @@ void cls_config::params_load_movie()
     util_parms_parse(prm,"movie_params",movie_params,PARM_PCAT_MOVIE);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_MOVIE,params.size()-1});
 
 }
 
@@ -3614,6 +3623,7 @@ void cls_config::params_load_mpegts()
     util_parms_parse(prm,"stream_mpegts_params",stream_mpegts_params,PARM_PCAT_MPEGTS);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_MPEGTS,params.size()-1});
 
 }
 
@@ -3656,6 +3666,7 @@ void cls_config::params_load_stream()
     util_parms_parse(prm,"stream_params",stream_params, PARM_PCAT_STREAM);
 
     params.push_back(prm);
+    pmap.insert({PARM_PCAT_STREAM,params.size()-1});
 
 }
 
@@ -3742,7 +3753,7 @@ void cls_config::params_load_timelapse()
     util_parms_parse(prm,"timelapse_params",timelapse_params,PARM_PCAT_TLSP);
 
     params.push_back(prm);
-
+    pmap.insert({PARM_PCAT_TLSP,params.size()-1});
 }
 
 void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCAT pcat)
@@ -3750,17 +3761,12 @@ void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCA
     int indx;
     ctx_params *dprm;
 
-    dprm = nullptr;
-    for (indx=0;indx<cfgs->depr_params.size();indx++){
-        if (cfgs->depr_params[indx]->params_pcat == pcat) {
-            dprm =cfgs->depr_params[indx];
-        }
+    dprm=cfgs->params[cfgs->pmap[pcat]];
+
+    for (indx=0;indx<dprm->params_array.size();indx++) {
+        util_parms_add(prmd, dprm->params_array[indx], false);
     }
-    if (dprm != nullptr) {
-        for (indx=0;indx<dprm->params_array.size();indx++) {
-            util_parms_add(prmd, dprm->params_array[indx], false);
-        }
-    }
+
 }
 
 void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_params *prmd)
@@ -3835,6 +3841,9 @@ void cls_config::params_load_listcam()
                 prm_d->params_cnt = 0;
                 prm_d->params_array.clear();
                 dev->conf_src->params.push_back(prm_d);
+                dev->conf_src->pmap.insert(
+                    {prm_d->params_pcat
+                    ,dev->conf_src->params.size()-1});
             }
             params_load_listitm(dev->conf_src, prm_a, prm_d);
         }
@@ -3869,6 +3878,10 @@ void cls_config::params_load_listsnd()
                 prm_d->params_cnt = 0;
                 prm_d->params_array.clear();
                 dev->conf_src->params.push_back(prm_d);
+                dev->conf_src->pmap.insert(
+                    {prm_d->params_pcat
+                    ,dev->conf_src->params.size()-1});
+
             }
             params_load_listitm(dev->conf_src, prm_a, prm_d);
         }
@@ -3935,6 +3948,7 @@ void cls_config::defaults()
         mydelete(params[indx]);
     }
     params.clear();
+    pmap.clear();
 
     defaults_depr();
 }
@@ -3948,6 +3962,7 @@ void cls_config::defaults_depr()
         mydelete(depr_params[indx]);
     }
     depr_params.clear();
+    depr_pmap.clear();
 
     prm = new ctx_params;
     prm->app = app;
@@ -3955,6 +3970,7 @@ void cls_config::defaults_depr()
     prm->params_pcat = PARM_PCAT_MOVIE;
     prm->params_cnt = 0;
     depr_params.push_back(prm);
+    depr_pmap.insert({PARM_PCAT_MOVIE,depr_params.size()-1});
 
     prm = new ctx_params;
     prm->app = app;
@@ -3962,6 +3978,7 @@ void cls_config::defaults_depr()
     prm->params_pcat = PARM_PCAT_V4L2;
     prm->params_cnt = 0;
     depr_params.push_back(prm);
+    depr_pmap.insert({PARM_PCAT_V4L2,depr_params.size()-1});
 
     prm = new ctx_params;
     prm->app = app;
@@ -3969,6 +3986,7 @@ void cls_config::defaults_depr()
     prm->params_pcat = PARM_PCAT_TLSP;
     prm->params_cnt = 0;
     depr_params.push_back(prm);
+    depr_pmap.insert({PARM_PCAT_TLSP,depr_params.size()-1});
 
     prm = new ctx_params;
     prm->app = app;
@@ -3976,7 +3994,7 @@ void cls_config::defaults_depr()
     prm->params_pcat = PARM_PCAT_STREAM;
     prm->params_cnt = 0;
     depr_params.push_back(prm);
-
+    depr_pmap.insert({PARM_PCAT_STREAM,depr_params.size()-1});
 }
 
 int cls_config::edit_set_active(std::string parm_nm, std::string parm_val)
@@ -4000,21 +4018,9 @@ int cls_config::edit_set_active(std::string parm_nm, std::string parm_val)
 void cls_config::edit_depr_vid(std::string parm_nm, std::string parm_val)
 {
     std::string pnew_nm, pnew_val;
-    int indx;
     ctx_params *prm;
 
-    prm = nullptr;
-    for (indx=0;indx<depr_params.size();indx++) {
-        if (depr_params[indx]->params_pcat == PARM_PCAT_V4L2) {
-            prm = depr_params[indx];
-        }
-    }
-    if (prm == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Bad programming"));
-        return;
-    }
-
+    prm = depr_params[depr_pmap[PARM_PCAT_V4L2]];
     util_parms_add(prm, parm_nm, parm_val, false);
     MOTION_LOG(INF, NO_ERRNO
         ,_("%s %s changed to v4l2_params option %s=%s")
@@ -4050,21 +4056,9 @@ void cls_config::edit_depr_tdbl(std::string newname, std::string &parm_val)
 void cls_config::edit_depr_movie(std::string parm_nm, std::string parm_val)
 {
     std::string pnew_nm, pnew_val;
-    int indx;
     ctx_params *prm;
 
-    prm = nullptr;
-    for (indx=0;indx<depr_params.size();indx++) {
-        if (depr_params[indx]->params_pcat == PARM_PCAT_MOVIE) {
-            prm = depr_params[indx];
-        }
-    }
-    if (prm == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Bad programming"));
-        return;
-    }
-
+    prm = depr_params[depr_pmap[PARM_PCAT_MOVIE]];
     if (parm_nm == "movie_quality") {
         pnew_nm = "quality";
         pnew_val = parm_val;
@@ -4097,21 +4091,9 @@ void cls_config::edit_depr_movie(std::string parm_nm, std::string parm_val)
 void cls_config::edit_depr_timelapse(std::string parm_nm, std::string parm_val)
 {
     std::string pnew_nm, pnew_val;
-    int indx;
     ctx_params *prm;
 
-    prm = nullptr;
-    for (indx=0;indx<depr_params.size();indx++) {
-        if (depr_params[indx]->params_pcat == PARM_PCAT_TLSP) {
-            prm = depr_params[indx];
-        }
-    }
-    if (prm == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Bad programming"));
-        return;
-    }
-
+    prm = depr_params[depr_pmap[PARM_PCAT_TLSP]];
     if (parm_nm == "timelapse_fps") {
         pnew_nm = "fps";
         pnew_val = parm_val;
@@ -4129,21 +4111,9 @@ void cls_config::edit_depr_timelapse(std::string parm_nm, std::string parm_val)
 void cls_config::edit_depr_stream(std::string parm_nm, std::string parm_val)
 {
     std::string pnew_nm, pnew_val;
-    int indx;
     ctx_params *prm;
 
-    prm = nullptr;
-    for (indx=0;indx<depr_params.size();indx++) {
-        if (depr_params[indx]->params_pcat == PARM_PCAT_STREAM) {
-            prm = depr_params[indx];
-        }
-    }
-    if (prm == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("Bad programming"));
-        return;
-    }
-
+    prm = depr_params[depr_pmap[PARM_PCAT_STREAM]];
     if (parm_nm == "stream_quality") {
         pnew_nm = "quality";
         pnew_val = parm_val;
@@ -4239,19 +4209,7 @@ void cls_config::edit_list(std::string parm_nm, std::string &parm_val, enum PARM
     ctx_params_item *itm;
     ctx_params  *prm;
 
-    prm = nullptr;
-    for (indx1=0;indx1<params.size();indx1++) {
-        if (pcat == params[indx1]->params_pcat) {
-            prm = params[indx1];
-            break;
-        }
-    }
-    if (prm == nullptr) {
-        MOTION_LOG(ERR, NO_ERRNO
-            ,_("coding error %d"), pcat);
-        parm_val = "[\"\"]";
-        return;
-    }
+    prm = params[pmap[pcat]];
     for (indx1=0;indx1<prm->params_cnt;indx1++) {
         itm = &prm->params_array[indx1];
         if (itm->param_name == parm_nm) {
@@ -5231,6 +5189,7 @@ void cls_config::config_copy(cls_config *src)
         mydelete (params[indx1]);
     }
     params.clear();
+    pmap.clear();
     for (indx1=0;indx1<src->params.size();indx1++) {
         prmsrc = src->params[indx1];
         prm = new ctx_params;
@@ -5243,12 +5202,14 @@ void cls_config::config_copy(cls_config *src)
         }
         prm->params_cnt = (int)prm->params_array.size();
         params.push_back(prm);
+        pmap.insert({prm->params_pcat,params.size()-1});
     }
 
     for (indx1=0;indx1<depr_params.size();indx1++) {
         mydelete (depr_params[indx1]);
     }
     depr_params.clear();
+    depr_pmap.clear();
     for (indx1=0;indx1<src->depr_params.size();indx1++) {
         prmsrc = src->depr_params[indx1];
         prm = new ctx_params;
@@ -5261,6 +5222,7 @@ void cls_config::config_copy(cls_config *src)
         }
         prm->params_cnt = (int)prm->params_array.size();
         depr_params.push_back(prm);
+        depr_pmap.insert({prm->params_pcat,depr_params.size()-1});
     }
 
 }

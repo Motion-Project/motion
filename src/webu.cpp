@@ -372,14 +372,8 @@ void cls_webu::mhd_flags()
 void cls_webu::init_actions()
 {
     std::string parm_vl;
-    int indx;
 
-    wb_actions = nullptr;
-    for (indx=0;indx<cfg->params.size();indx++) {
-        if (cfg->params[indx]->params_pcat == PARM_PCAT_ACTS) {
-            wb_actions = cfg->params[indx];
-        }
-    }
+    wb_actions = cfg->params[cfg->pmap[PARM_PCAT_ACTS]];
 
     if (cfg->webcontrol_access == 0) {
         parm_vl = "off";
@@ -474,13 +468,7 @@ void cls_webu::startup() {
         , _("Starting webcontrol on port %d"),portnbr);
 
     allcam = new cls_allcam(this, webuindx);
-    wb_headers = nullptr;
-    for (indx=0;indx<cfg->params.size();indx++) {
-        if (cfg->params[indx]->params_pcat == PARM_PCAT_HDR) {
-            wb_headers = cfg->params[indx];
-        }
-    }
-
+    wb_headers = cfg->params[cfg->pmap[PARM_PCAT_HDR]];
     init_actions();
 
     srand((unsigned int)time(NULL));

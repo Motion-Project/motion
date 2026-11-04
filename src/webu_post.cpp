@@ -541,7 +541,7 @@ void cls_webu_post::config_set(
     PARM_PCAT pcat, std::string pnm, std::string pval)
 {
     std::string pcur, ptmp;
-    int indx, indx1, indx2, st, en;
+    int indx, indx2, st, en;
     ctx_params *prm;
     bool chgnew;
     cls_config *cfg_s;
@@ -563,34 +563,21 @@ void cls_webu_post::config_set(
         } else {
             cfg_s = webu->cam_list[indx]->conf_src;
         }
-        for (indx1=0;indx1<cfg_s->params.size();indx1++) {
-            prm = cfg_s->params[indx1];
-            if ((prm->params_pcat == pcat) && (pnm != "extra_options")) {
-                chgnew = true;
-                for (indx2=0;indx2<prm->params_array.size();indx2++){
-                    if (prm->params_array[indx2].param_name == pnm) {
-                        if (prm->params_array[indx2].param_type == PARM_TYP_INTLIST) {
-                            pval=pval.substr(0,pval.find("-",0));
-                        }
-                        if (prm->params_array[indx2].param_value == pval) {
-                            chgnew = false;
-                        }
+        prm = cfg_s->params[cfg_s->pmap[pcat]];
+        if (pnm != "extra_options") {
+            chgnew = true;
+            for (indx2=0;indx2<prm->params_array.size();indx2++){
+                if (prm->params_array[indx2].param_name == pnm) {
+                    if (prm->params_array[indx2].param_type == PARM_TYP_INTLIST) {
+                        pval=pval.substr(0,pval.find("-",0));
+                    }
+                    if (prm->params_array[indx2].param_value == pval) {
+                        chgnew = false;
                     }
                 }
-                if (chgnew == true) {
-                    util_parms_add(prm, pnm, pval);
-                    prm->params_changed = true;
-                    if (pcat == PARM_PCAT_ACAM) {
-                        config_ra_set("allcam", 0, PARM_CHG_CODE);
-                    } else if (indx != -1) {
-                        if (webu->cam_list[indx]->handler_running == true) {
-                            config_ra_set("cam", indx, PARM_CHG_CODE);
-                        }
-                    }
-                }
-                break;
-            } else if ((prm->params_pcat == pcat) && (pnm == "extra_options")) {
-                util_parms_parse(prm,prm->params_desc,pval, pcat);
+            }
+            if (chgnew == true) {
+                util_parms_add(prm, pnm, pval);
                 prm->params_changed = true;
                 if (pcat == PARM_PCAT_ACAM) {
                     config_ra_set("allcam", 0, PARM_CHG_CODE);
@@ -598,6 +585,17 @@ void cls_webu_post::config_set(
                     if (webu->cam_list[indx]->handler_running == true) {
                         config_ra_set("cam", indx, PARM_CHG_CODE);
                     }
+                }
+            }
+            break;
+        } else {
+            util_parms_parse(prm,prm->params_desc,pval, pcat);
+            prm->params_changed = true;
+            if (pcat == PARM_PCAT_ACAM) {
+                config_ra_set("allcam", 0, PARM_CHG_CODE);
+            } else if (indx != -1) {
+                if (webu->cam_list[indx]->handler_running == true) {
+                    config_ra_set("cam", indx, PARM_CHG_CODE);
                 }
             }
         }
