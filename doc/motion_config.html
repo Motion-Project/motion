@@ -1520,6 +1520,16 @@
               Full path and file name for a file containing the params listed one per line.
             </ul>
           </div>
+          <i><h4>dict_*</h4></i>
+          <ul>
+            The FFMpeg options to set using av_dict_set on the format context.  Motion
+            will strip off the prefix of <code>dict_</code> and then apply the remainder
+            as the name of FFMpeg option. The defaults for Motion are
+            <code>dict_preset=superfast,dict_tune=zerolatency</code> which corresponds
+            to the FFMpeg options of <code>preset=superfast</code> and
+            <code>tune=zerolatency</code>
+          </ul>
+
          </ul>
         <p></p>
 

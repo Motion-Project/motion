@@ -1633,7 +1633,7 @@ void cls_netcam::set_options()
         (service == "rtsps") ||
         (service == "rtmp")) {
         util_parms_add_default(params,
-            {"rtsp_transport","tcp",PARM_SRC_SYS, PARM_TYP_LIST
+            {"dict_rtsp_transport","tcp",PARM_SRC_SYS, PARM_TYP_LIST
             , PARM_LVL_01, PARM_CHG_CODE,{"tcp","udp"},""});
 
     } else if ((service == "http") ||
@@ -1642,19 +1642,19 @@ void cls_netcam::set_options()
             {"input_format","mjpeg",PARM_SRC_SYS, PARM_TYP_STRING
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
         util_parms_add_default(params,
-            {"reconnect_on_network_error","1",PARM_SRC_SYS, PARM_TYP_INT
+            {"dict_reconnect_on_network_error","1",PARM_SRC_SYS, PARM_TYP_INT
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
         util_parms_add_default(params,
-            {"reconnect_at_eof","1",PARM_SRC_SYS, PARM_TYP_INT
+            {"dict_reconnect_at_eof","1",PARM_SRC_SYS, PARM_TYP_INT
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
         util_parms_add_default(params,
-            {"reconnect","1",PARM_SRC_SYS, PARM_TYP_INT
+            {"dict_reconnect","1",PARM_SRC_SYS, PARM_TYP_INT
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
         util_parms_add_default(params,
-            {"multiple_requests","1",PARM_SRC_SYS, PARM_TYP_INT
+            {"dict_multiple_requests","1",PARM_SRC_SYS, PARM_TYP_INT
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
         util_parms_add_default(params,
-            {"reconnect_streamed","1",PARM_SRC_SYS, PARM_TYP_INT
+            {"dict_reconnect_streamed","1",PARM_SRC_SYS, PARM_TYP_INT
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
     } else if (service == "v4l2") {
@@ -1664,31 +1664,26 @@ void cls_netcam::set_options()
 
         tmp = std::to_string(cfg_framerate);
         util_parms_add_default(params,
-            {"framerate", tmp,PARM_SRC_SYS, PARM_TYP_INT
+            {"dict_framerate", tmp,PARM_SRC_SYS, PARM_TYP_INT
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
         tmp = std::to_string(cfg_width) + "x" + std::to_string(cfg_height);
         util_parms_add_default(params,
-            {"video_size", tmp, PARM_SRC_SYS, PARM_TYP_STRING
+            {"dict_video_size", tmp, PARM_SRC_SYS, PARM_TYP_STRING
             , PARM_LVL_01, PARM_CHG_CODE,{""},""});
 
     }
 
     for (indx=0;indx<params->params_cnt;indx++) {
         itm = &params->params_array[indx];
-        if ((itm->param_name != "decoder") &&
-            (itm->param_name != "capture_rate") &&
-            (itm->param_name != "interrupt") &&
-            (itm->param_name != "input_format") &&
-            (itm->param_name != "scale") &&
-            (itm->param_name != "params_file")) {
+        if (itm->param_name.substr(0,5) == "dict_") {
             av_dict_set(&opts
-                , itm->param_name.c_str(), itm->param_value.c_str(), 0);
-            if (status == NETCAM_NOTCONNECTED) {
-                MOTION_LOG(INF, NO_ERRNO,_("%s:%s = %s")
-                    ,cameratype.c_str()
-                    ,itm->param_name.c_str(),itm->param_value.c_str());
-            }
+                ,itm->param_name.substr(5).c_str()
+                ,itm->param_value.c_str(), 0);
+            MOTION_LOG(DBG, NO_ERRNO
+                ,_("av_dict_set %s = %s")
+                , itm->param_name.substr(5).c_str()
+                , itm->param_value.c_str());
         } else if ((itm->param_name == "input_format") &&
             (itm->param_value != "")) {
             format_context->iformat = av_find_input_format(itm->param_value.c_str());
