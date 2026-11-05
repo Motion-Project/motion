@@ -94,6 +94,9 @@
             bool            text_changes;
             int             text_scale;
             std::string     text_event;
+            std::string     text_font;
+            int             text_font_weight;
+            std::string     text_font_dir;
 
             /* Motion detection configuration parameters */
             bool            emulate_motion;
@@ -362,6 +365,9 @@
             void edit_text_left(std::string &parm, enum PARM_ACT pact);
             void edit_text_right(std::string &parm, enum PARM_ACT pact);
             void edit_text_scale(std::string &parm, enum PARM_ACT pact);
+            void edit_text_font(std::string &parm, enum PARM_ACT pact);
+            void edit_text_font_weight(std::string &parm, enum PARM_ACT pact);
+            void edit_text_font_dir(std::string &parm, enum PARM_ACT pact);
 
             void edit_emulate_motion(std::string &parm, enum PARM_ACT pact);
             void edit_threshold(std::string &parm, enum PARM_ACT pact);

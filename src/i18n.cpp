@@ -223,6 +223,9 @@ void i18n_config_names()
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_changes",_("text_changes"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_scale",_("text_scale"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_event",_("text_event"));
+    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_font",_("text_font"));
+    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_font_weight",_("text_font_weight"));
+    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_font_dir",_("text_font_dir"));
 
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","threshold",_("threshold"));
