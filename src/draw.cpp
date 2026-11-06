@@ -1263,7 +1263,7 @@ int cls_draw::text(u_char *image
     begin = end = text;
     // First time this will load from file, otherwise if the font name is the same
     // there is no action.
-    font.load(cam->cfg->text_font);
+    font.load(cam->app->cfg->config_dir, cam->cfg->text_font);
     const int font_weight = cam->cfg->text_font_weight == 0 || cam->cfg->text_font_weight > 5 ? 1 : cam->cfg->text_font_weight;
 
     while ((end = strstr(end, NEWLINE))) {

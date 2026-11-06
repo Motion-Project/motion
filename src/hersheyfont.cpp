@@ -17,17 +17,14 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 //
 
-#include "hersheyfont.hpp"
 #include <string>
 #include <fstream>
 
-#include <assert.h>
 #include <errno.h>
 
-#ifndef HERSHEY_FONTS_DIR
-#define HERSHEY_FONTS_DIR "/home/richard/Documents/Code/hershey-fonts/hershey-fonts"
-#endif
 #include <iostream>
+
+#include "hersheyfont.hpp"
 
 #undef DEBUG
 
@@ -165,25 +162,37 @@ namespace hersheyfont
 
     //
     // Load Hershey fontname (e.g. "rowmans") into a new struct hershey_font.
-    // The associated .jhf font file will be loaded from .../share/hershey-fonts/.
+    // The associated .jhf font file will be loaded from <config-path>/fonts/.
     //
-    int cls_font::load(const std::string &fontname)
+    int cls_font::load(const std::string& config_dir, const std::string &fontname)
     {
-        if (m_font.fontname == fontname && m_loaded)
+        // If loading fails, don't try again for the same font name.
+        if (m_font.fontname == fontname && (m_loaded || m_load_failed))
         {
-            return 1;
+            return m_loaded ? 1 : 0;
         }
 
-        const char *env_dir = getenv("HERSHEY_FONTS_DIR");
-        std::string jhffile(env_dir ? env_dir : HERSHEY_FONTS_DIR);
+        std::string jhffile;
 
-        jhffile += "/" + std::string(fontname) + ".jhf";
+        // Check for environment variable override for font directory
+        const char *env_dir = getenv("HERSHEY_FONTS_DIR");
+        if (env_dir == nullptr)
+        {
+            jhffile = config_dir + "/fonts/";
+        }
+        else
+        {
+            jhffile = std::string(env_dir);
+        }
+
+        jhffile += std::string(fontname) + ".jhf";
         m_loaded = false;
         m_font = font(); // Reset the font structure
         m_font.fontname = fontname;
 
         int r = jhf_font_load(jhffile);
         m_loaded = r != 0;
+        m_load_failed = r == 0;
         return r;
     }
 

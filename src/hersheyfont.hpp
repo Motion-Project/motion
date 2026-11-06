@@ -49,6 +49,7 @@ class cls_font{
     private:
         font m_font;
         bool m_loaded = false;
+        bool m_load_failed = false;
 
     int load_glyph( glyph& hg, std::string& jhf_line ) const;
     int jhf_font_load( const std::string& jhffile );
@@ -58,7 +59,7 @@ class cls_font{
     // Load Hershey fontname (e.g. "rowmans") into a new struct hershey_font.
     // The associated .jhf font file will be loaded from .../share/hershey-fonts/.
     //
-    int load( const std::string& fontname );
+    int load(const std::string& config_dir, const std::string& fontname );
 
     const glyph& get_glyph(unsigned char c) {
         assert(m_loaded);
