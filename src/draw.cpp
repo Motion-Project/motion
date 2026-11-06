@@ -24,6 +24,7 @@
 #include "conf.hpp"
 #include "alg.hpp"
 #include "draw.hpp"
+#include "bresenhamrasterization.hpp"
 
 struct draw_char {
     u_char ascii;
@@ -1073,6 +1074,83 @@ struct draw_char draw_table[]= {
     }
 };
 
+// returns the glyph height
+int cls_draw::scale_glyphs(std::vector<hersheyfont::glyph>& glyphs, int factor) {
+    // The glyphs in the file are about equal to factor 4 at about 29 pixels high.
+    if (factor == 4) {
+        return 29;
+    }
+
+    float multiplier = (factor == 1 ? 1.2f  : static_cast<float>(factor)) / 4.0f;
+    for (auto& glyph : glyphs) {
+        for (auto& path : glyph.paths) {
+            for (auto& vert : path.verts) {
+                vert.x = (short)round(vert.x * multiplier);
+                vert.y = (short)round(vert.y * multiplier);
+            }
+        }
+        // TODO: What is best approach, recalculate width based on the scaled vertices or scale the original width?
+        glyph.width = (short)ceil(glyph.width * multiplier);
+    }
+    return factor == 1 ? 7 : (int)ceil(29 * multiplier);
+}
+
+int cls_draw::text_hf(u_char *image,
+        int startx,  int starty,  int width,
+        const char *text, int len, int factor,
+        int font_weight)
+{
+    std::vector<hersheyfont::glyph> glyphs;
+
+    // (0,0) is top left.
+    // starty is the top of the text
+    // if startx > width/2 then startx is the right edge of the text, otherwise it is the left edge of the text
+    for (int charindex=0; charindex<len;charindex++){
+        const hersheyfont::glyph& glyph = font.get_glyph(text[charindex]);
+        glyphs.push_back(glyph);
+    }
+
+    const int glyph_height = scale_glyphs(glyphs, factor);
+
+    if (startx > width / 2) {
+        int total_width = 0;
+        for (auto& glyph : glyphs) {
+            total_width += glyph.width;
+        }
+        startx -= total_width;
+    }
+
+    for (const hersheyfont::glyph& glyph : glyphs) {
+        for (hersheyfont::path p : glyph.paths) {
+            for (int vertindex = 0; vertindex <= p.verts.size() - 2; vertindex++) {
+                // outline
+                bresenhamrasterization::plotLine(
+                    startx -1 + p.verts[vertindex].x, starty -1 - p.verts[vertindex].y + glyph_height,
+                    startx -1 + p.verts[vertindex + 1].x, starty -1 - p.verts[vertindex + 1].y + glyph_height,
+                    [image, width](int x, int y) { image[y * width + x] = 128; });
+                // foreground
+                bresenhamrasterization::plotLine(
+                    startx + p.verts[vertindex].x, starty - p.verts[vertindex].y + glyph_height,
+                    startx + p.verts[vertindex + 1].x, starty - p.verts[vertindex + 1].y + glyph_height,
+                    [image, width](int x, int y) { image[y * width + x] = 255; });
+                
+                for (int i = 1; i < font_weight; i++) {
+                    bresenhamrasterization::plotLine(
+                        startx + i + p.verts[vertindex].x, starty- p.verts[vertindex].y + glyph_height,
+                        startx + i + p.verts[vertindex + 1].x, starty- p.verts[vertindex + 1].y + glyph_height,
+                        [image, width](int x, int y) { image[y * width + x] = 255; });
+                    bresenhamrasterization::plotLine(
+                        startx + p.verts[vertindex].x, starty + i- p.verts[vertindex].y + glyph_height,
+                        startx + p.verts[vertindex + 1].x, starty + i - p.verts[vertindex + 1].y + glyph_height,
+                        [image, width](int x, int y) { image[y * width + x] = 255; });
+                }
+            }
+        }
+        startx += glyph.width;
+    }
+    return 0;
+}
+
 int cls_draw::textn(u_char *image
         , int startx,  int starty,  int width
         , const char *text, int len, int factor)
@@ -1183,17 +1261,31 @@ int cls_draw::text(u_char *image
     starty -= line_space * num_nl;
 
     begin = end = text;
+    // First time this will load from file, otherwise if the font name is the same
+    // there is no action.
+    font.load(cam->app->cfg->config_dir, cam->cfg->text_font);
+    const int font_weight = cam->cfg->text_font_weight == 0 || cam->cfg->text_font_weight > 5 ? 1 : cam->cfg->text_font_weight;
 
     while ((end = strstr(end, NEWLINE))) {
         int len = (int)(end-begin);
 
-        textn(image, startx, starty, width, begin, len, factor);
+        if (font.is_loaded()){
+            text_hf(image, startx, starty, width, begin, len, factor, font_weight);
+        }
+        else {
+            textn(image, startx, starty, width, begin, len, factor);
+        }
         end += sizeof(NEWLINE)-1;
         begin = end;
         starty += line_space;
     }
 
-    textn(image, startx, starty, width, begin, (int)strlen(begin), factor);
+    if (font.is_loaded()){
+        text_hf(image, startx, starty, width, begin, (int)strlen(begin), factor, font_weight);
+    }
+    else {
+        textn(image, startx, starty, width, begin, (int)strlen(begin), factor);
+    }
 
     return 0;
 }

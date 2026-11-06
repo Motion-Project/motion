@@ -70,6 +70,9 @@ ctx_parm config_parms[] = {
     {"text_changes",              PARM_TYP_BOOL,   PARM_CAT_04, PARM_LVL_01, PARM_CHG_COPY },
     {"text_scale",                PARM_TYP_LIST,   PARM_CAT_04, PARM_LVL_01, PARM_CHG_CODE },
     {"text_event",                PARM_TYP_STRING, PARM_CAT_04, PARM_LVL_01, PARM_CHG_COPY },
+    {"text_font",                 PARM_TYP_STRING, PARM_CAT_04, PARM_LVL_01, PARM_CHG_COPY },
+    {"text_font_weight",          PARM_TYP_LIST, PARM_CAT_04, PARM_LVL_01, PARM_CHG_COPY },
+    {"text_font_dir",             PARM_TYP_STRING, PARM_CAT_04, PARM_LVL_01, PARM_CHG_COPY },
 
     {"emulate_motion",            PARM_TYP_BOOL,   PARM_CAT_05, PARM_LVL_01, PARM_CHG_COPY },
     {"threshold",                 PARM_TYP_INT,    PARM_CAT_05, PARM_LVL_01, PARM_CHG_CODE },
@@ -913,6 +916,49 @@ void cls_config::edit_text_event(std::string &parm, enum PARM_ACT pact)
         text_event = parm;
     } else if (pact == PARM_ACT_GET) {
         parm = text_event;
+    }
+}
+
+void cls_config::edit_text_font(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        text_font = "";
+    } else if (pact == PARM_ACT_SET) {
+        text_font = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = text_font;
+    }
+}
+
+void cls_config::edit_text_font_weight(std::string &parm, enum PARM_ACT pact)
+{
+    int parm_in;
+    if (pact == PARM_ACT_DFLT) {
+        text_font_weight = 1;
+    } else if (pact == PARM_ACT_SET) {
+        parm_in = atoi(parm.c_str());
+        if ((parm_in < 1) || (parm_in > 10)) {
+            MOTION_LOG(NTC, NO_ERRNO, _("Invalid text_font_weight %d"),parm_in);
+        } else {
+            text_font_weight = parm_in;
+        }
+    } else if (pact == PARM_ACT_GET) {
+        parm = std::to_string(text_font_weight);
+    } else if (pact == PARM_ACT_LIST) {
+        parm = "[";
+        parm = parm + "\"1\",\"2\",\"3\",\"4\",\"5\"";
+        parm = parm + "]";
+    }
+}
+
+void cls_config::edit_text_font_dir(std::string &parm, enum PARM_ACT pact)
+{
+    if (pact == PARM_ACT_DFLT) {
+        text_font_dir = "";
+    } else if (pact == PARM_ACT_SET) {
+        text_font_dir = parm;
+    } else if (pact == PARM_ACT_GET) {
+        parm = text_font_dir;
     }
 }
 
@@ -2453,6 +2499,9 @@ void cls_config::edit_cat04(std::string parm_nm, std::string &parm_val, enum PAR
     } else if (parm_nm == "text_changes") {            edit_text_changes(parm_val, pact);
     } else if (parm_nm == "text_scale") {              edit_text_scale(parm_val, pact);
     } else if (parm_nm == "text_event") {              edit_text_event(parm_val, pact);
+    } else if (parm_nm == "text_font") {               edit_text_font(parm_val, pact);
+    } else if (parm_nm == "text_font_weight") {        edit_text_font_weight(parm_val, pact);
+    } else if (parm_nm == "text_font_dir") {           edit_text_font_dir(parm_val, pact);
     }
 
 }
@@ -3763,9 +3812,9 @@ void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCA
 
     dprm=cfgs->params[cfgs->pmap[pcat]];
 
-    for (indx=0;indx<dprm->params_array.size();indx++) {
+        for (indx=0;indx<dprm->params_array.size();indx++) {
         util_parms_add(prmd, dprm->params_array[indx], false);
-    }
+        }
 
 }
 
