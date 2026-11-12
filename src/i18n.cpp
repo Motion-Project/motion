@@ -45,7 +45,7 @@ void i18n_locale_chg(std::string langcd)
         } else if (langcd == "no")  {lclcd = "no_NO.utf8";
         } else if (langcd == "pt")  {lclcd = "pt_PT.utf8";
         } else if (langcd == "sv")  {lclcd = "sv_SE.utf8";
-        } else if (langcd == "zh")  {lclcd = "zh_CN.utf8";
+        } else if (langcd == "zh")  {lclcd = "zh_TW.utf8";
         } else if (langcd == "")    {lclcd = "";
         } else {
             MOTION_LOG(NTC, NO_ERRNO
@@ -220,8 +220,7 @@ void i18n_config_names()
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","locate_motion_style",_("locate_motion_style"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_left",_("text_left"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_right",_("text_right"));
-    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_changes",_("text_changes"));
-    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_scale",_("text_scale"));
+    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_params",_("text_params"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","text_event",_("text_event"));
 
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","emulate_motion",_("emulate_motion"));
