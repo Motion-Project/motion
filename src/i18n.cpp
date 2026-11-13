@@ -184,7 +184,6 @@ void i18n_config_names()
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","log_file",_("log_file"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","log_level",_("log_level"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","log_fflevel",_("log_fflevel"));
-    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","log_type",_("log_type"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","native_language",_("native_language"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","native_language_code",_("native_language_code"));
 
@@ -307,10 +306,7 @@ void i18n_config_names()
 
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","stream_allcam_params",_("stream_allcam_params"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","stream_mpegts_params",_("stream_mpegts_params"));
-    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","stream_quality",_("stream_quality"));
-    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","stream_grey",_("stream_grey"));
-    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","stream_motion",_("stream_motion"));
-    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","stream_maxrate",_("stream_maxrate"));
+    MOTION_SHT(DBG, NO_ERRNO,"%s:%s","stream_params",_("stream_params"));
 
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","database_type",_("database_type"));
     MOTION_SHT(DBG, NO_ERRNO,"%s:%s","database_dbname",_("database_dbname"));
