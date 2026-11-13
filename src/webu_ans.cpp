@@ -481,20 +481,29 @@ mhdrslt cls_webu_ans::mhd_digest()
     MHD_free(username);
 
     if (chkuser == "") {
+        failauth_log(true);
         return mhd_digest_fail(MHD_NO);
     } else if (auth_admin_name == chkuser) {
-        retcd = MHD_digest_auth_check(connection
-            , auth_realm
-            , auth_admin_name.c_str()
-            , auth_admin_pass.c_str()
-            , 300);
+        if (auth_admin_pass == "") {
+            retcd = MHD_NO;
+        } else {
+            retcd = MHD_digest_auth_check(connection
+                , auth_realm
+                , auth_admin_name.c_str()
+                , auth_admin_pass.c_str()
+                , 300);
+        }
         is_admin = true;
     } else if (auth_user_name == chkuser) {
-        retcd = MHD_digest_auth_check(connection
-            , auth_realm
-            , auth_user_name.c_str()
-            , auth_user_pass.c_str()
-            , 300);
+        if (auth_user_pass == "") {
+            retcd = MHD_NO;
+        } else {
+            retcd = MHD_digest_auth_check(connection
+                , auth_realm
+                , auth_user_name.c_str()
+                , auth_user_pass.c_str()
+                , 300);
+        }
         is_admin = false;
     } else {
         failauth_log(true);
@@ -561,7 +570,15 @@ mhdrslt cls_webu_ans::mhd_basic()
     myfree(user);
     myfree(pass);
 
-    if ((chkuser == auth_admin_name) &&
+    if (chkuser == "") {
+        failauth_log(true);
+        return mhd_basic_fail();
+    } else if ((chkpass == "") &&
+        (chkuser != auth_admin_name) &&
+        (chkuser != auth_user_name)) {
+        failauth_log(true);
+        return mhd_basic_fail();
+    } else if ((chkuser == auth_admin_name) &&
         (chkpass == auth_admin_pass)) {
         authenticated = true;
         is_admin = true;
@@ -621,12 +638,8 @@ mhdrslt cls_webu_ans::mhd_auth()
 
     snprintf(auth_realm, WEBUI_LEN_PARM, "%s","Motion");
 
-    if ((webu->cfg->webcontrol_auth_admin == "") &&
-        (webu->cfg->webcontrol_auth_user == "")) {
+    if (webu->cfg->webcontrol_auth_method == "none") {
         authenticated = true;
-        if (webu->cfg->webcontrol_auth_method != "none") {
-            MOTION_LOG(NTC, NO_ERRNO ,_("No webcontrol user:pass provided"));
-        }
         return MHD_YES;
     }
 
@@ -639,7 +652,6 @@ mhdrslt cls_webu_ans::mhd_auth()
     } else if (webu->cfg->webcontrol_auth_method == "digest") {
         return mhd_digest();
     }
-
 
     authenticated = true;
     return MHD_YES;
