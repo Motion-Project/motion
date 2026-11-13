@@ -3753,7 +3753,7 @@ void cls_config::params_load_text()
         , PARM_TYP_STRING, PARM_LVL_01, PARM_CHG_CODE
         ,{""},""});
     prm->params_array.push_back(
-        {"method","freetype",PARM_SRC_SYS
+        {"method","legacy",PARM_SRC_SYS
         , PARM_TYP_LIST, PARM_LVL_01, PARM_CHG_CODE
         ,{"freetype","legacy"},""});
     prm->params_array.push_back(
