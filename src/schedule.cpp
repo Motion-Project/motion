@@ -58,9 +58,11 @@ void cls_schedule::schedule_cam(cls_camera *p_cam)
     for (indx=0; indx<p_cam->schedule[cur_dy].size(); indx++) {
         if ((p_cam->schedule[cur_dy][indx].action == "stop") &&
             (c_tm.tm_hour >= p_cam->schedule[cur_dy][indx].st_hr) &&
-            (c_tm.tm_min  >= p_cam->schedule[cur_dy][indx].st_min) &&
+            ((c_tm.tm_hour > p_cam->schedule[cur_dy][indx].st_hr) ||
+             (c_tm.tm_min >= p_cam->schedule[cur_dy][indx].st_min)) &&
             (c_tm.tm_hour <= p_cam->schedule[cur_dy][indx].en_hr) &&
-            (c_tm.tm_min  <= p_cam->schedule[cur_dy][indx].en_min) ) {
+            ((c_tm.tm_hour < p_cam->schedule[cur_dy][indx].en_hr) ||
+             (c_tm.tm_min <= p_cam->schedule[cur_dy][indx].en_min)) ) {
             if (p_cam->schedule[cur_dy][indx].detect) {
                 stopcam = false;
             } else {

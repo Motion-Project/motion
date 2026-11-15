@@ -1165,7 +1165,7 @@ void cls_camera::init_schedule()
             if ((schedule[indx][indx1].action == "stop") &&
                 (schedule[indx][indx1].detect == false)) {
                 action = "stopped";
-            } else if (sched_day[indx1].detect == false) {
+            } else if (schedule[indx][indx1].detect == false) {
                action = "paused";
             } else {
                 action = "active";
@@ -1173,10 +1173,10 @@ void cls_camera::init_schedule()
             MOTION_LOG(INF, NO_ERRNO
                 ,_("Schedule: %s %02d:%02d to %02d:%02d %s")
                 ,tst.c_str()
-                ,sched_day[indx1].st_hr
-                ,sched_day[indx1].st_min
-                ,sched_day[indx1].en_hr
-                ,sched_day[indx1].en_min
+                ,schedule[indx][indx1].st_hr
+                ,schedule[indx][indx1].st_min
+                ,schedule[indx][indx1].en_hr
+                ,schedule[indx][indx1].en_min
                 ,action.c_str()
                 );
         }
@@ -1829,9 +1829,11 @@ void cls_camera::check_schedule()
     for (indx=0; indx<schedule[cur_dy].size(); indx++) {
         if ((schedule[cur_dy][indx].action == "pause") &&
             (c_tm.tm_hour >= schedule[cur_dy][indx].st_hr) &&
-            (c_tm.tm_min  >= schedule[cur_dy][indx].st_min) &&
+            ((c_tm.tm_hour > schedule[cur_dy][indx].st_hr) ||
+             (c_tm.tm_min >= schedule[cur_dy][indx].st_min)) &&
             (c_tm.tm_hour <= schedule[cur_dy][indx].en_hr) &&
-            (c_tm.tm_min  <= schedule[cur_dy][indx].en_min) ) {
+            ((c_tm.tm_hour < schedule[cur_dy][indx].en_hr) ||
+             (c_tm.tm_min <= schedule[cur_dy][indx].en_min)) ) {
             if (schedule[cur_dy][indx].detect) {
                 pause_detection = false;
             } else {
