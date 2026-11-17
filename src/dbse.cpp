@@ -1107,7 +1107,7 @@ void cls_dbse::filelist_add(cls_camera *cam, timespec *ts1, std::string ftyp
         bsz = 0;
     }
     localtime_r(&ts1->tv_sec, &timestamp_tm);
-    strftime(dtl, 11, "%G%m%d"   , &timestamp_tm);
+    strftime(dtl, 11, "%Y%m%d"   , &timestamp_tm);
     strftime(tmc, 11, "%I:%M%p"  , &timestamp_tm);
     strftime(tml, 11, "%H:%M:%S" , &timestamp_tm);
 
