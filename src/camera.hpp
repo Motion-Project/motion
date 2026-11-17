@@ -109,10 +109,8 @@ struct ctx_images {
 };
 
 struct ctx_schedule_data {
-    int         st_hr;
-    int         st_min;
-    int         en_hr;
-    int         en_min;
+    int         st_hrmin;
+    int         en_hrmin;
     bool        detect;
     std::string action;
 };

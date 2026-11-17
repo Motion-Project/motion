@@ -35,7 +35,7 @@ static void *schedule_handler(void *arg)
 
 void cls_schedule::schedule_cam(cls_camera *p_cam)
 {
-    int indx, cur_dy;
+    int indx, cur_dy, c_hrmin;
     struct tm c_tm;
     struct timespec curr_ts;
     bool stopcam;
@@ -53,16 +53,13 @@ void cls_schedule::schedule_cam(cls_camera *p_cam)
     clock_gettime(CLOCK_REALTIME, &curr_ts);
     localtime_r(&curr_ts.tv_sec, &c_tm);
     cur_dy = c_tm.tm_wday;
+    c_hrmin = (c_tm.tm_hour * 100) + c_tm.tm_min;
 
     stopcam = false;
     for (indx=0; indx<p_cam->schedule[cur_dy].size(); indx++) {
         if ((p_cam->schedule[cur_dy][indx].action == "stop") &&
-            (c_tm.tm_hour >= p_cam->schedule[cur_dy][indx].st_hr) &&
-            ((c_tm.tm_hour > p_cam->schedule[cur_dy][indx].st_hr) ||
-             (c_tm.tm_min >= p_cam->schedule[cur_dy][indx].st_min)) &&
-            (c_tm.tm_hour <= p_cam->schedule[cur_dy][indx].en_hr) &&
-            ((c_tm.tm_hour < p_cam->schedule[cur_dy][indx].en_hr) ||
-             (c_tm.tm_min <= p_cam->schedule[cur_dy][indx].en_min)) ) {
+            (c_hrmin >= p_cam->schedule[cur_dy][indx].st_hrmin) &&
+            (c_hrmin <= p_cam->schedule[cur_dy][indx].en_hrmin)) {
             if (p_cam->schedule[cur_dy][indx].detect) {
                 stopcam = false;
             } else {
