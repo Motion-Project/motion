@@ -3795,12 +3795,12 @@ void cls_config::params_load_dpritm(cls_config *cfgs, ctx_params *prmd, PARM_PCA
     int indx;
     ctx_params *dprm;
 
-    dprm=cfgs->params[cfgs->pmap[pcat]];
-
-    for (indx=0;indx<dprm->params_array.size();indx++) {
-        util_parms_add(prmd, dprm->params_array[indx], false);
+    dprm=cfgs->depr_params[cfgs->depr_pmap[pcat]];
+    if (dprm->params_pcat == pcat) {
+        for (indx=0;indx<dprm->params_array.size();indx++) {
+            util_parms_add(prmd, dprm->params_array[indx], false);
+        }
     }
-
 }
 
 void cls_config::params_load_listitm(cls_config *cfgs, ctx_params *prma,ctx_params *prmd)
