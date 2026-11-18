@@ -1038,7 +1038,7 @@ void cls_camera::init_schedule()
     std::string  pnm, pvl, tst, action;
     std::vector<ctx_schedule_data> sched_day;
     ctx_schedule_data sched_itm;
-    bool chgnew;
+    bool chgnew, chkfmt;
 
     prm_s=conf_src->params[conf_src->pmap[PARM_PCAT_SCH]];
     prm_c=cfg->params[cfg->pmap[PARM_PCAT_SCH]];
@@ -1098,18 +1098,14 @@ void cls_camera::init_schedule()
     for (indx=0; indx<7; indx++) {
         sched_day.clear();
 
-        sched_itm.st_hr = 0;
-        sched_itm.st_min = 0;
-        sched_itm.en_hr = 23;
-        sched_itm.en_min = 59;
+        sched_itm.st_hrmin = 0;
+        sched_itm.en_hrmin = 2359;
         sched_itm.action = action;
         sched_itm.detect = dflt_detect;
         sched_day.push_back(sched_itm);
 
-        sched_itm.st_hr = -1;
-        sched_itm.st_min = -1;
-        sched_itm.en_hr = -1;
-        sched_itm.en_min = -1;
+        sched_itm.st_hrmin = -1;
+        sched_itm.en_hrmin = -1;
         sched_itm.action = action;
         sched_itm.detect = rev_detect;
 
@@ -1129,18 +1125,29 @@ void cls_camera::init_schedule()
                 (pnm == "sun-sat") ||
                 ((pnm == "mon-fri") && (indx>=1) && (indx<=5)))) {
                 //example:  mon 0902-1430
-                sched_itm.st_hr = mtoi(pvl.substr(0,2));
-                sched_itm.st_min = mtoi(pvl.substr(2,2));
-                sched_itm.en_hr = mtoi(pvl.substr(5,2));
-                sched_itm.en_min = mtoi(pvl.substr(7,2));
+                chkfmt = (pvl.length() == 9);
+                for (indx2=0; (chkfmt == true) && (indx2<9); indx2++) {
+                    if ((indx2 != 4) &&
+                        ((pvl[indx2] < '0') || (pvl[indx2] > '9'))) {
+                        chkfmt = false;
+                    }
+                }
+                if (chkfmt == true) {
+                    sched_itm.st_hrmin = mtoi(pvl.substr(0,4));
+                    sched_itm.en_hrmin = mtoi(pvl.substr(5,4));
+                } else {
+                    sched_itm.st_hrmin = -1;
+                    sched_itm.en_hrmin = -1;
+                }
                 sched_itm.action = action;
                 sched_itm.detect = rev_detect;
-                if ((sched_itm.st_hr  < 0) || (sched_itm.st_hr  > 23) ||
-                    (sched_itm.st_min < 0) || (sched_itm.st_min > 59) ||
-                    (sched_itm.en_hr  < 0) || (sched_itm.en_hr  > 23) ||
-                    (sched_itm.en_min < 0) || (sched_itm.en_min > 59) ||
-                    (sched_itm.st_hr  > sched_itm.en_hr) ||
-                    (pvl.length() != 9)) {
+                if ((sched_itm.st_hrmin < 0) ||
+                    (sched_itm.st_hrmin / 100 > 23) ||
+                    (sched_itm.st_hrmin % 100 > 59) ||
+                    (sched_itm.en_hrmin < 0) ||
+                    (sched_itm.en_hrmin / 100 > 23) ||
+                    (sched_itm.en_hrmin % 100 > 59) ||
+                    (sched_itm.st_hrmin > sched_itm.en_hrmin)) {
                     MOTION_LOG(ERR, NO_ERRNO
                         ,_("Invalid schedule parameter: %s %s")
                         , pnm.c_str(), pvl.c_str());
@@ -1165,18 +1172,16 @@ void cls_camera::init_schedule()
             if ((schedule[indx][indx1].action == "stop") &&
                 (schedule[indx][indx1].detect == false)) {
                 action = "stopped";
-            } else if (sched_day[indx1].detect == false) {
+            } else if (schedule[indx][indx1].detect == false) {
                action = "paused";
             } else {
                 action = "active";
             }
             MOTION_LOG(INF, NO_ERRNO
-                ,_("Schedule: %s %02d:%02d to %02d:%02d %s")
+                ,_("Schedule: %s %04d to %04d %s")
                 ,tst.c_str()
-                ,sched_day[indx1].st_hr
-                ,sched_day[indx1].st_min
-                ,sched_day[indx1].en_hr
-                ,sched_day[indx1].en_min
+                ,schedule[indx][indx1].st_hrmin
+                ,schedule[indx][indx1].en_hrmin
                 ,action.c_str()
                 );
         }
@@ -1802,7 +1807,7 @@ void cls_camera::loopback()
 void cls_camera::check_schedule()
 {
     struct tm c_tm;
-    int indx, cur_dy;
+    int indx, cur_dy, c_hrmin;
     bool prev;
 
     if ((restart == true) || (handler_stop == true)) {
@@ -1824,14 +1829,13 @@ void cls_camera::check_schedule()
 
     localtime_r(&current_image->imgts.tv_sec, &c_tm);
     cur_dy = c_tm.tm_wday;
+    c_hrmin = (c_tm.tm_hour * 100) + c_tm.tm_min;
     prev = pause_detection;
 
     for (indx=0; indx<schedule[cur_dy].size(); indx++) {
         if ((schedule[cur_dy][indx].action == "pause") &&
-            (c_tm.tm_hour >= schedule[cur_dy][indx].st_hr) &&
-            (c_tm.tm_min  >= schedule[cur_dy][indx].st_min) &&
-            (c_tm.tm_hour <= schedule[cur_dy][indx].en_hr) &&
-            (c_tm.tm_min  <= schedule[cur_dy][indx].en_min) ) {
+            (c_hrmin >= schedule[cur_dy][indx].st_hrmin) &&
+            (c_hrmin <= schedule[cur_dy][indx].en_hrmin)) {
             if (schedule[cur_dy][indx].detect) {
                 pause_detection = false;
             } else {
@@ -1847,11 +1851,9 @@ void cls_camera::check_schedule()
 
     /*
     MOTION_LOG(NTC, NO_ERRNO
-    , "Motion %02d:%02d %02d:%02d detection %d %d"
-    ,schedule[cur_dy][indx].st_hr
-    ,schedule[cur_dy][indx].st_min
-    ,schedule[cur_dy][indx].en_hr
-    ,schedule[cur_dy][indx].en_min
+    , "Motion %04d %04d detection %d %d"
+    ,schedule[cur_dy][indx].st_hrmin
+    ,schedule[cur_dy][indx].en_hrmin
     ,schedule[cur_dy][indx].detect
     ,pause_detection);
     */
