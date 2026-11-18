@@ -2037,7 +2037,7 @@ void cls_camera::check_config_main()
                 } else if (parm_nm == "movie_params") {
                     check_config_main_params(PARM_PCAT_MOVIE, parm_vl_src);
                     cfg->edit_set(parm_nm, parm_vl_src);
-                } else if (parm_nm == "timelaspse_params") {
+                } else if (parm_nm == "timelapse_params") {
                     check_config_main_params(PARM_PCAT_TLSP, parm_vl_src);
                     cfg->edit_set(parm_nm, parm_vl_src);
                 } else if (parm_nm == "stream_allcam_params") {
