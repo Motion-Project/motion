@@ -1262,6 +1262,18 @@ void cls_draw::init_params()
         }
     }
 
+    #if (MYFFVER <= 61007)
+        if (uselegacy == false) {
+            MOTION_LOG(NTC, NO_ERRNO
+                ,_("Freetype text overlay is not supported with older FFMpeg versions"));
+            MOTION_LOG(NTC, NO_ERRNO
+                ,_("FFMpeg version 8.0+ with "
+                "--enable-libfreetype --enable-libharfbuzz "
+                "--enable-libfontconfig required"));
+        }
+        uselegacy = true;
+    #endif
+
     if (uselegacy == true) {
         if ((scalefactor < 1) || (scalefactor >10)) {
             scalefactor = 1;
@@ -1300,6 +1312,7 @@ void cls_draw::init_ft()
 {
     size_t pos;
     int retcd;
+    char errstr[128];
     std::string atxt, dtxt_tl, dtxt_tr, dtxt_bl, dtxt_br;
 
     ft_textl = cam->cfg->text_left;
@@ -1360,62 +1373,115 @@ void cls_draw::init_ft()
     retcd = avfilter_graph_create_filter(
         &fltctx_src, fltsrc, "in", atxt.c_str(), nullptr, fltgr);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("create filter buffer failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("create filter buffer failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
     }
 
     fltdraw_tl = avfilter_get_by_name("drawtext");
+    if (fltdraw_tl == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("fltdraw_tl allocation failed"));
+        uselegacy = true;
+        avfilter_graph_free(&fltgr);
+        return;
+    }
+
     retcd = avfilter_graph_create_filter(
         &fltctx_draw_tl, fltdraw_tl, "textflt_tl"
         ,dtxt_tl.c_str(), nullptr, fltgr);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("create filter fltdraw failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("create filter fltdraw tl failed %s"),errstr);
+        abort();
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
     }
 
     fltdraw_tr = avfilter_get_by_name("drawtext");
+    if (fltdraw_tr == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("fltdraw_tr allocation failed"));
+        uselegacy = true;
+        avfilter_graph_free(&fltgr);
+        return;
+    }
+
     retcd = avfilter_graph_create_filter(
         &fltctx_draw_tr, fltdraw_tr, "textflt_tr"
         ,dtxt_tr.c_str(), nullptr, fltgr);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("create filter fltdraw failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("create filter fltdraw tr failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
     }
 
     fltdraw_bl = avfilter_get_by_name("drawtext");
+    if (fltdraw_bl == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("fltdraw_bl allocation failed"));
+        uselegacy = true;
+        avfilter_graph_free(&fltgr);
+        return;
+    }
+
     retcd = avfilter_graph_create_filter(
         &fltctx_draw_bl, fltdraw_bl, "textflt_bl"
         ,dtxt_bl.c_str(), nullptr, fltgr);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("create filter fltdraw failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("create filter fltdraw bl failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
     }
 
     fltdraw_br = avfilter_get_by_name("drawtext");
+    if (fltdraw_br == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("fltdraw_br allocation failed"));
+        uselegacy = true;
+        avfilter_graph_free(&fltgr);
+        return;
+    }
+
     retcd = avfilter_graph_create_filter(
         &fltctx_draw_br, fltdraw_br, "textflt_br"
         ,dtxt_br.c_str(), nullptr, fltgr);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("create filter fltdraw failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("create filter fltdraw br failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
     }
 
     fltsink = avfilter_get_by_name("buffersink");
+    if (fltsink == nullptr) {
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("fltsink allocation failed"));
+        uselegacy = true;
+        avfilter_graph_free(&fltgr);
+        return;
+    }
+
     retcd = avfilter_graph_create_filter(
         &fltctx_sink, fltsink, "out"
         ,nullptr, nullptr, fltgr);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("create filter fltsink failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("create filter fltsink failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
@@ -1427,7 +1493,9 @@ void cls_draw::init_ft()
     if (retcd >= 0) {retcd = avfilter_link(fltctx_draw_bl, 0, fltctx_draw_br, 0);}
     if (retcd >= 0) {retcd = avfilter_link(fltctx_draw_br, 0, fltctx_sink, 0);}
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("create filter link fltsrc->draw->fltsink failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO
+            ,_("create filter link fltsrc->draw->fltsink failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
@@ -1435,7 +1503,8 @@ void cls_draw::init_ft()
 
     retcd = avfilter_graph_config(fltgr, nullptr);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("graph config failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO,_("graph config failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         return;
@@ -1455,7 +1524,8 @@ void cls_draw::init_ft()
 
     retcd = av_frame_get_buffer(frm_in, 32);
     if (retcd < 0) {
-        MOTION_LOG(ERR, NO_ERRNO,_("frm_in buffer failed"));
+        av_strerror(retcd, errstr, sizeof(errstr));
+        MOTION_LOG(ERR, NO_ERRNO,_("frm_in buffer failed: %s"), errstr);
         uselegacy = true;
         avfilter_graph_free(&fltgr);
         av_frame_free(&frm_in);
